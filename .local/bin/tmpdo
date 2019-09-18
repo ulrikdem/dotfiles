@@ -1,0 +1,15 @@
+#!/bin/bash
+if [[ ! -d ~tmpuser ]]; then
+    pactl load-module module-native-protocol-unix socket=/tmp/pulse-socket auth-group=tmpuser &>/dev/null
+    sudo -u tmpuser bash <<EOF
+        mkdir -p ~tmpuser/.config/pulse
+        echo default-server = unix:/tmp/pulse-socket >~tmpuser/.config/pulse/client.conf
+        touch ~tmpuser/.zshrc
+EOF
+fi
+cat ~/.Xauthority | sudo -u tmpuser tee ~tmpuser/.Xauthority >/dev/null
+if (($#)); then
+    XAUTHORITY=~tmpuser/.Xauthority exec sudo -u tmpuser -- "$@"
+else
+    XAUTHORITY=~tmpuser/.Xauthority exec sudo -iu tmpuser
+fi

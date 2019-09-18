@@ -1,0 +1,4 @@
+#!/bin/bash
+ip link set dev "$dev" up netns vpn
+ip netns exec vpn ip address add dev "$dev" "$ifconfig_local/30"
+ip netns exec vpn ip route add default via "$route_vpn_gateway"

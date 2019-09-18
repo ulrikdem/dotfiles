@@ -1,0 +1,10 @@
+[Unit]
+Description=VPN Network Namespace
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/ip netns add vpn
+ExecStart=/bin/ip netns exec vpn ip link set dev lo up
+ExecStop=/bin/ip netns delete vpn

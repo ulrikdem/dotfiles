@@ -1,0 +1,8 @@
+$include /etc/inputrc
+set colored-completion-prefix on
+set colored-stats on
+set completion-ignore-case on
+set mark-symlinked-directories on
+set revert-all-at-newline on
+C-p: history-search-backward
+C-n: history-search-forward

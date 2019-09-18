@@ -1,0 +1,10 @@
+[include]
+	path = user
+[diff]
+	tool = nvimdiff
+[difftool "nvimdiff"]
+	cmd = nvim -d $LOCAL $REMOTE
+[merge]
+	tool = fugitive
+[mergetool "fugitive"]
+	cmd = nvim -c Gdiff $MERGED

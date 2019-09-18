@@ -1,0 +1,7 @@
+#!/bin/bash
+UNITS=transmission.service
+if [[ $WPA_ID_STR = wlan0-home ]]; then
+    systemctl --no-block start $UNITS
+else
+    systemctl --no-block stop $UNITS
+fi

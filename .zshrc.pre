@@ -1,0 +1,2 @@
+NOCOR=1
+zstyle ':grml:chpwd:dirstack' enable false

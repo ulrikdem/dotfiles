@@ -1,0 +1,9 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = xmonad
+
+[Action]
+When = PostTransaction
+Exec = /usr/bin/sudo -u ulrikdem xmonad --recompile

@@ -1,0 +1,6 @@
+#!/bin/bash
+for x in /tmp/.X11-unix/X*; do
+    DISPLAY=:${x#/tmp/.X11-unix/X} i3lock -nc 000000 && killall i3lock &
+done
+sleep 1
+xset dpms force off
