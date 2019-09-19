@@ -1,10 +1,14 @@
 [include]
-	path = user
+path = user
+
 [diff]
-	tool = nvimdiff
+tool = nvimdiff
+
 [difftool "nvimdiff"]
-	cmd = nvim -d $LOCAL $REMOTE
+cmd = nvim -d $LOCAL $REMOTE
+
 [merge]
-	tool = fugitive
+tool = fugitive
+
 [mergetool "fugitive"]
-	cmd = nvim -c Gdiff $MERGED
+cmd = nvim -c Gdiff $MERGED
