@@ -1,0 +1,9 @@
+[database]
+path = .mail
+
+[new]
+ignore = /^[.]/
+tags =
+
+[search]
+exclude_tags = trash;spam

@@ -1,0 +1,44 @@
+initial_command = search tag:inbox
+msg_summary_hides_threadwide_tags = False
+editor_cmd = nvim +normal}
+user_agent =
+theme = mutt
+
+bufferlist_statusbar = {buffer_no}:[bufferlist], {input_queue}
+taglist_statusbar = {buffer_no}:[taglist], {input_queue}
+search_statusbar = {buffer_no}:[search] for "{querystring}" ({result_count} message{result_count_positive}), {input_queue}
+thread_statusbar = {buffer_no}:[thread] {subject} ({message_count} messages), {input_queue}
+envelope_statusbar = {buffer_no}:[envelope] to: {to}, {input_queue}
+
+[bindings]
+    I = search tag:inbox
+    A = search *
+
+    [[search]]
+        & =
+        ! =
+
+    [[thread]]
+        a = toggletags inbox
+        l = retagprompt
+        p =
+        P =
+
+    [[envelope]]
+        P =
+        S =
+        g f =
+
+[accounts]
+    [[default]]
+        realname = $NAME
+        address = $EMAIL
+        sendmail_command = msmtp -t
+        replied_tags =
+        passed_tags =
+
+        [[[abook]]]
+            type = shellcommand
+            command = notmuch address --format=json date:1Y..
+            shellcommand_external_filtering = False
+            regexp = '\[?{"name": "(?P<name>.*)", "address": "(?P<email>.+)", "name-addr": ".*"}[,\]]'

@@ -1,0 +1,1 @@
+text/html; w3m -T '%t' -I '%{charset}' -cols 100 -o display_link_number=1; copiousoutput
