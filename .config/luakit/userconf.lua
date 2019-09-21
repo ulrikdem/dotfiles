@@ -4,6 +4,7 @@ local cmdhist = require "cmdhist"
 local downloads = require "downloads"
 local editor = require "editor"
 local follow = require "follow"
+local history = require "history"
 local lousy = require "lousy"
 local modes = require "modes"
 local newtab_chrome = require "newtab_chrome"
@@ -41,19 +42,6 @@ settings.webview.enable_webaudio = true
 settings.webview.enable_mediasource = true
 
 editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
-
-webview.add_signal("init", function(view)
-    view.uri = settings.window.new_tab_page
-    view:add_signal("new-window-decision", function(_, uri)
-        view.uri = uri
-        return false
-    end)
-    view:add_signal("navigation-request", function(_, uri)
-        if uri:match("^https://.+%.m%.wikipedia%.org/") then
-            view.uri = uri:gsub("^https://(.+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
-        end
-    end)
-end)
 -- }}}
 
 -- Bindings {{{
@@ -136,6 +124,34 @@ modes.add_binds("normal", {
         invert_colors(win.view)
     end},
 })
+-- }}}
+
+-- Signals {{{
+webview.add_signal("init", function(view)
+    view.uri = settings.window.new_tab_page
+
+    view:add_signal("new-window-decision", function(_, uri)
+        view.uri = uri
+        return false
+    end)
+
+    view:add_signal("navigation-request", function(_, uri)
+        if uri:match("^https://.+%.m%.wikipedia%.org/") then
+            view.uri = uri:gsub("^https://(.+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
+            return false
+        elseif uri:match("^mailto:") then
+            luakit.spawn(string.format("termite -e 'alot compose %q'", uri))
+            return false
+        end
+        view.default_charset = uri:match("^file:") and "utf-8" or settings.webview.default_charset
+    end)
+end)
+
+history.add_signal("add", function(uri)
+    if uri:match("^file:") then
+        return false
+    end
+end)
 -- }}}
 
 -- Downloads {{{
