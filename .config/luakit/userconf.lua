@@ -173,7 +173,7 @@ downloads.remove_signals("download::status")
 downloads.remove_signals("open-file")
 
 downloads.add_signal("download::status", function(dl)
-    if dl.status == "finished" and dl.destination:match("^/tmp/tmp%.") then
+    if dl.status == "finished" and dl.destination:match("^/tmp/luakit%.") then
         downloads.do_open(dl)
     end
 end)

@@ -5,7 +5,7 @@ while true; do
     ((!${#result[@]})) && exit
     case ${result[1]} in
         ctrl-o)
-            mktemp --suffix ".$1"
+            mktemp -t "luakit.XXXXXXXX.$1"
             exit;;
         tab)
             [[ -n ${result[2]} ]] && cd -- "${result[2]}" || cd -- "${result[0]}";;
@@ -15,4 +15,4 @@ while true; do
             [[ -n ${result[0]} ]] && echo "${PWD%/}/${result[0]}" || echo "${PWD%/}/$1"
             exit;;
     esac
-done >"$2"
+done >$2
