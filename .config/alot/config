@@ -21,6 +21,7 @@ envelope_statusbar = {buffer_no}:[envelope] to: {to}, {input_queue}
     [[thread]]
         a = toggletags inbox
         l = retagprompt
+        ctrl b = call hooks.open_browser(ui)
         p =
         P =
 

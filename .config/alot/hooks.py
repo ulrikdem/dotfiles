@@ -1,8 +1,9 @@
-from alot.settings.const import settings
 from alot.settings.manager import SettingsManager
 from asyncio import create_subprocess_exec
-from asyncio.subprocess import DEVNULL
+from email.contentmanager import raw_data_manager
 from email.utils import make_msgid
+from subprocess import DEVNULL, Popen
+from tempfile import NamedTemporaryFile
 
 def get_theming_attribute(self, mode, name, part=None):
     remap = {
@@ -14,6 +15,16 @@ def get_theming_attribute(self, mode, name, part=None):
 
 SettingsManager.get_theming_attribute_old = SettingsManager.get_theming_attribute
 SettingsManager.get_theming_attribute = get_theming_attribute
+
+def open_browser(ui):
+    body = ui.current_buffer.get_selected_message().get_email().get_body(('html',))
+    if not body:
+        ui.notify('no html part', priority='error')
+        return
+    with NamedTemporaryFile('w', prefix='alot.', suffix='.html', delete=False) as file:
+        file.write(raw_data_manager.get_content(body))
+        url = 'file://' + file.name
+    Popen(['luakit', url], stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
 
 def store_focus(buf):
     if buf.modename == 'search':
@@ -38,13 +49,8 @@ def post_buffer_focus(ui, dbm, buf, success):
 
 async def pre_search_refresh(ui, dbm, cmd):
     msg = ui.notify('syncing...', timeout=-1)
-    proc = await create_subprocess_exec(
-        'gmi', 'sync',
-        cwd=dbm.path,
-        stdin=DEVNULL,
-        stdout=DEVNULL,
-        stderr=DEVNULL,
-    )
+    proc = await create_subprocess_exec('gmi', 'sync', cwd=dbm.path,
+        stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
     status = await proc.wait()
     ui.clear_notify([msg])
     if status:
