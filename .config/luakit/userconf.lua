@@ -73,8 +73,8 @@ select.label_maker = function()
     return trim(sort(reverse(charset("asdfghjkl"))))
 end
 
-modes.add_binds({"normal", "insert", "passthrough"}, {
-    {"<control-v>", "Send the next keypress directly to the webpage.", function(win)
+modes.add_binds({"normal", "insert"}, {
+    {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
         function win.hit(_, mods, key)
             win.hit = nil
             win.view:send_key(key, mods)
