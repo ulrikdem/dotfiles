@@ -513,7 +513,7 @@ set inccommand=nosplit
 set ignorecase smartcase
 Plug 'pgdouyon/vim-evanesco'
 
-set wildignorecase wildmode=longest:full,full wildoptions=pum
+set wildignorecase wildmode=longest:full,full
 cnoremap <expr> <C-N> pumvisible() ? "\<C-N>" : "\<Down>"
 cnoremap <expr> <C-P> pumvisible() ? "\<C-P>" : "\<Up>"
 
