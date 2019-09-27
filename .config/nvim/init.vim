@@ -857,9 +857,7 @@ endfunction
 if executable('gdb')
     packadd termdebug
     let g:termdebug_wide = 1
-    autocmd vimrc ColorScheme srcery execute 'highlight debugPC'
-        \ 'ctermbg='.synIDattr(hlID('SrceryXgray2'), 'fg', 'cterm')
-        \ 'guibg='.synIDattr(hlID('SrceryXgray2'), 'fg', 'gui')
+    autocmd vimrc ColorScheme srcery highlight link debugPC DiffChange
     autocmd vimrc ColorScheme srcery highlight link debugBreakpoint SrceryRedBold
     nnoremap <Leader>gb <Cmd>Break<CR>
     nnoremap <Leader>gB <Cmd>Clear<CR>
