@@ -48,13 +48,13 @@ def post_buffer_focus(ui, dbm, buf, success):
     restore_focus(buf)
 
 async def pre_search_refresh(ui, dbm, cmd):
-    msg = ui.notify('syncing...', timeout=-1)
+    msg = ui.notify('syncing..', timeout=-1)
     proc = await create_subprocess_exec('gmi', 'sync', cwd=dbm.path,
         stdin=DEVNULL, stdout=DEVNULL, stderr=DEVNULL)
     status = await proc.wait()
     ui.clear_notify([msg])
     if status:
-        ui.notify('sync failed', priority='error')
+        ui.notify('failed to sync', priority='error')
     store_focus(ui.current_buffer)
 
 async def post_search_refresh(ui, dbm, cmd):
