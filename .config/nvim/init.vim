@@ -551,7 +551,7 @@ if executable('curl') && executable('node')
     function! Download_coc(options) abort
         let l:dir = (g:plugs['coc.nvim'].dir).'/build'
         call mkdir(l:dir, 'p')
-        execute '!curl --fail https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
+        execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
             \ "| sed -E '".
             \ 's/invalidInsertCharacters = \[/&" ", "\/", ">", "\\"", ":", /;'.
             \ 's/cFirst \!= word\[0\]/\!string_1.equalsIgnoreCase(cFirst, word[0])/;'.
