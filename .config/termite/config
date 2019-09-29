@@ -1,7 +1,7 @@
 [options]
 clickable_url = false
 cursor_blink = off
-font = monospace 11
+font = monospace 10
 
 [colors]
 background = #1c1b19
