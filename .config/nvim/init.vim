@@ -779,7 +779,6 @@ Plug 'sheerun/vim-polyglot'
 let g:polyglot_disabled = ['latex']
 let g:jsx_ext_required = 1
 let g:python_highlight_space_errors = 0
-autocmd vimrc User Plug_vim_polyglot autocmd vimrc FileType rust set textwidth=0
 
 autocmd vimrc FileType c,cpp set commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>eh <Cmd>edit %:r.h<CR>
@@ -796,6 +795,7 @@ if executable('cargo')
 endif
 
 autocmd vimrc FileType gitcommit,mail,markdown,tex setlocal spell
+autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail set formatoptions-=t
 
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
