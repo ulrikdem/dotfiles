@@ -775,6 +775,12 @@ endfor
 " }}}
 
 " Filetypes {{{
+Plug 'sheerun/vim-polyglot'
+let g:polyglot_disabled = ['latex']
+let g:jsx_ext_required = 1
+let g:python_highlight_space_errors = 0
+autocmd vimrc User Plug_vim_polyglot autocmd vimrc FileType rust set textwidth=0
+
 autocmd vimrc FileType c,cpp set commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>eh <Cmd>edit %:r.h<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>eH <Cmd>edit %:r.hpp<CR>
@@ -789,45 +795,7 @@ if executable('cargo')
         \ nnoremap <buffer> <Leader>mr <Cmd>silent update \| Make build --release<CR>
 endif
 
-autocmd vimrc BufNewFile,BufRead *.gv set filetype=dot
-autocmd vimrc FileType dot set commentstring=//%s
-if executable('dot')
-    autocmd vimrc FileType dot
-        \ let &l:makeprg = 'dot -T$* -o'.expand('%:p:r:S').'.$* '.expand('%:p:S')
-    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType dot
-        \ nnoremap <buffer> <Leader>mm <Cmd>silent update \| Make png<CR>
-    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType dot
-        \ nnoremap <buffer> <Leader>ms <Cmd>silent update \| Make svg<CR>
-endif
-if executable('xdg-open')
-    autocmd vimrc FileType dot,plantuml
-        \ nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
-endif
-
-Plug 'sheerun/vim-polyglot'
-let g:polyglot_disabled = ['latex']
-let g:jsx_ext_required = 1
-let g:python_highlight_space_errors = 0
-autocmd vimrc User Plug_vim_polyglot autocmd vimrc FileType rust set textwidth=0
-
-Plug 'iamcco/markdown-preview.nvim', {'do': {-> mkdp#util#install()}}
-let g:mkdp_page_title = '${name}'
-let g:mkdp_auto_close = 0
-autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
-    \ nnoremap <buffer> <Leader>mv <Cmd>MarkdownPreview<CR>
-
-Plug 'Elzair/ifm-vim'
-autocmd vimrc FileType ifm set commentstring=#%s
-if executable('ifm')
-    autocmd vimrc FileType ifm let &l:makeprg =
-        \ 'ifm -m -o '.expand('%:p:r:S').'.ps '.expand('%:p:S')
-    autocmd vimrc FileType ifm setlocal errorformat=ifm:\ error:\ %f\\,\ line\ %l:\ %m
-endif
-if executable('xdg-open')
-    autocmd vimrc FileType ifm nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.ps &<CR>
-endif
-
-autocmd vimrc FileType mail,markdown,tex,gitcommit setlocal spell
+autocmd vimrc FileType gitcommit,mail,markdown,tex setlocal spell
 
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
@@ -851,6 +819,38 @@ function! s:init_vimtex_buffer() abort
     nmap <buffer> <Leader>mv <Plug>(vimtex-view)
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
 endfunction
+
+Plug 'iamcco/markdown-preview.nvim', {'do': {-> mkdp#util#install()}}
+let g:mkdp_page_title = '${name}'
+let g:mkdp_auto_close = 0
+autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
+    \ nnoremap <buffer> <Leader>mv <Cmd>MarkdownPreview<CR>
+
+autocmd vimrc BufNewFile,BufRead *.gv set filetype=dot
+autocmd vimrc FileType dot set commentstring=//%s
+if executable('dot')
+    autocmd vimrc FileType dot
+        \ let &l:makeprg = 'dot -T$* -o'.expand('%:p:r:S').'.$* '.expand('%:p:S')
+    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType dot
+        \ nnoremap <buffer> <Leader>mm <Cmd>silent update \| Make png<CR>
+    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType dot
+        \ nnoremap <buffer> <Leader>ms <Cmd>silent update \| Make svg<CR>
+endif
+if executable('xdg-open')
+    autocmd vimrc FileType dot,plantuml
+        \ nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
+endif
+
+Plug 'Elzair/ifm-vim'
+autocmd vimrc FileType ifm set commentstring=#%s
+if executable('ifm')
+    autocmd vimrc FileType ifm let &l:makeprg =
+        \ 'ifm -m -o '.expand('%:p:r:S').'.ps '.expand('%:p:S')
+    autocmd vimrc FileType ifm setlocal errorformat=ifm:\ error:\ %f\\,\ line\ %l:\ %m
+endif
+if executable('xdg-open')
+    autocmd vimrc FileType ifm nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.ps &<CR>
+endif
 " }}}
 
 " Debugging {{{
