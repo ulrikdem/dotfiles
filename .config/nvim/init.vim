@@ -552,13 +552,7 @@ if executable('curl') && executable('node')
         let l:dir = (g:plugs['coc.nvim'].dir).'/build'
         call mkdir(l:dir, 'p')
         execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
-            \ "| sed -E '".
-            \ 's/invalidInsertCharacters = \[/&" ", "\/", ">", "\\"", ":", /;'.
-            \ 's/cFirst \!= word\[0\]/\!string_1.equalsIgnoreCase(cFirst, word[0])/;'.
-            \ 's/let sa = a.sortText/'.
-                \ 'if (a.priority \!= b.priority) return b.priority - a.priority;\n            &/;'.
-            \ 's/feedkeys\("\\\\<C-g>u", "n"\)/0/;'.
-            \ "' >".fnameescape(l:dir.'/index.js')
+            \ '| sed ''s/\\\\<C-g>u//'' >'.fnameescape(l:dir.'/index.js')
     endfunction
     Plug 'neoclide/coc.nvim', {'do': function('Download_coc')}
 else
@@ -577,17 +571,20 @@ let g:coc_user_config = {
         \ 'source': {
             \ 'around': {
                 \ 'priority': 2,
+                \ 'firstMatch': v:false,
+            \ },
+            \ 'buffer': {
+                \ 'firstMatch': v:false,
             \ },
         \ },
     \ },
     \ 'suggest': {
         \ 'maxCompleteItemCount': 1000,
+        \ 'invalidInsertCharacters': split(' "(/:<>', '\zs'),
         \ 'snippetIndicator': '',
         \ 'detailField': 'preview',
-        \ 'maxPreviewWidth': 80,
     \ },
     \ 'signature': {
-        \ 'maxWindowHeight': 10,
         \ 'preferShownAbove': v:false,
         \ 'hideOnTextChange': v:true,
     \ },
@@ -596,7 +593,6 @@ let g:coc_user_config = {
         \ 'warningSign': '⚠',
         \ 'infoSign': 'ℹ',
         \ 'hintSign': '➤',
-        \ 'maxWindowHeight': 10,
         \ 'locationlist': v:false,
     \ },
 \ }
@@ -620,6 +616,7 @@ function! s:init_lsp_buffer() abort
     nnoremap <buffer> <Leader>gc
         \ <Cmd>call CocActionAsync('getCurrentFunctionSymbol', function('<SID>echo_result'))<CR>
     nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDefinition')<CR>
+    nnoremap <buffer> <Leader>gD <Cmd>call CocActionAsync('jumpDeclaration')<CR>
     nnoremap <buffer> <Leader>gt <Cmd>call CocActionAsync('jumpTypeDefinition')<CR>
     nnoremap <buffer> <Leader>gi <Cmd>call CocActionAsync('jumpImplementation')<CR>
     nnoremap <buffer> <Leader>gr <Cmd>call CocActionAsync('jumpReferences')<CR>
