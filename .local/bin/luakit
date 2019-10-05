@@ -1,0 +1,2 @@
+#!/bin/bash
+GTK_THEME= exec /usr/bin/luakit "$@"
