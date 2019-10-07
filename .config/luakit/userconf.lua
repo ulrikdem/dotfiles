@@ -5,6 +5,7 @@ local downloads = require "downloads"
 local editor = require "editor"
 local follow = require "follow"
 local history = require "history"
+local log_chrome = require "log_chrome"
 local lousy = require "lousy"
 local modes = require "modes"
 local newtab_chrome = require "newtab_chrome"
@@ -31,6 +32,7 @@ unique_instance.open_links_in_new_window = true
 
 lousy.widget.hist.back_indicator = "&lt;"
 lousy.widget.hist.forward_indicator = "&gt;"
+log_chrome.widget_format = ""
 
 settings.webview.enable_plugins = false
 settings.webview.enable_java = false
