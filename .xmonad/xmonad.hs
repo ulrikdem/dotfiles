@@ -9,6 +9,7 @@ import XMonad.Hooks.DynamicBars
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.Place
 import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Renamed
@@ -41,6 +42,7 @@ main = xmonad . ewmh . docks $ def
     , manageHook = let r = W.RationalRect 0.25 0.25 0.5 0.5 in composeAll
         [ scratchpadManageHook r
         , appName =? "download-prompt" --> customFloating r
+        , placeHook $ fixed (0.5, 0.5)
         , className =? "Gxmessage" --> doFloat
         ]
     }
@@ -71,6 +73,7 @@ inskeys XConfig {modMask = mod, terminal = term} =
     , ((mod .|. shiftMask, xK_m), sendMessage $ JumpToLayout "Mirror Spacing Tall")
     , ((mod, xK_f), sendMessage $ JumpToLayout "StateFull")
     , ((mod .|. shiftMask, xK_f), sendMessage $ JumpToLayout "NoBar StateFull")
+    , ((mod, xK_c), placeFocused $ fixed (0.5, 0.5))
     , ((mod, xK_p), shellPrompt . promptconf "" =<< initMatches)
     , ((mod .|. shiftMask, xK_p), shellPrompt . promptconf (term ++ " -e ") =<< initMatches)
     , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
