@@ -1,2 +1,2 @@
 #!/bin/bash
-GTK_THEME= exec /usr/bin/luakit "$@"
+XDG_CONFIG_DIRS= exec /usr/bin/luakit "$@"
