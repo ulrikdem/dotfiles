@@ -41,6 +41,7 @@ main = xmonad . ewmh . docks $ def
     , manageHook = let r = W.RationalRect 0.25 0.25 0.5 0.5 in composeAll
         [ scratchpadManageHook r
         , appName =? "download-prompt" --> customFloating r
+        , className =? "Gxmessage" --> doFloat
         ]
     }
 

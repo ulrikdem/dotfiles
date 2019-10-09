@@ -1,6 +1,6 @@
 #!/bin/bash
 if command -v gxmessage &>/dev/null; then
-    exec gxmessage -font monospace "$@"
+    exec gxmessage -center -font monospace "$@"
 else
     exec /usr/bin/xmessage "$@"
 fi
