@@ -34,6 +34,11 @@ lousy.widget.hist.back_indicator = "&lt;"
 lousy.widget.hist.forward_indicator = "&gt;"
 log_chrome.widget_format = ""
 
+follow.pattern_maker = follow.pattern_styles.match_label
+select.label_maker = function()
+    return trim(sort(reverse(charset("asdfghjkl"))))
+end
+
 settings.webview.enable_plugins = false
 settings.webview.enable_java = false
 
@@ -42,8 +47,6 @@ settings.webview.enable_accelerated_2d_canvas = true
 settings.webview.enable_webgl = true
 settings.webview.enable_webaudio = true
 settings.webview.enable_mediasource = true
-
-editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
 -- }}}
 
 -- Bindings {{{
@@ -67,14 +70,6 @@ modes.add_binds("normal", {
     end},
 })
 
-cmdhist.history_prev = "<control-p>"
-cmdhist.history_next = "<control-n>"
-
-follow.pattern_maker = follow.pattern_styles.match_label
-select.label_maker = function()
-    return trim(sort(reverse(charset("asdfghjkl"))))
-end
-
 modes.add_binds({"normal", "insert"}, {
     {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
         function win.hit(_, mods, key)
@@ -85,6 +80,14 @@ modes.add_binds({"normal", "insert"}, {
     end},
 })
 settings.window.act_on_synthetic_keys = true
+
+editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
+modes.remap_binds("insert", {
+    {"<mod1-e>", "<control-e>"},
+})
+
+cmdhist.history_prev = "<control-p>"
+cmdhist.history_next = "<control-n>"
 -- }}}
 
 -- Colors {{{
