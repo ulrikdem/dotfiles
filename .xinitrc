@@ -9,5 +9,6 @@ feh --no-fehbg --bg-fill ~/.config/wallpaper.jpg
 xmodmap -e 'remove Lock = Caps_Lock' -e 'keysym Caps_Lock = Control_L' -e 'add Control = Control_L'
 numlockx
 export XDG_CONFIG_DIRS=~/.config/gtk-dark:${XDG_CONFIG_DIRS:-/etc/xdg}
+export QT_STYLE_OVERRIDE=kvantum
 export _JAVA_AWT_WM_NONREPARENTING=1
 exec xmonad
