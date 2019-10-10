@@ -8,7 +8,6 @@ local history = require("history")
 local log_chrome = require("log_chrome")
 local lousy = require("lousy")
 local modes = require("modes")
-local newtab_chrome = require("newtab_chrome")
 local select = require("select")
 local settings = require("settings")
 local styles = require("styles")
@@ -105,8 +104,6 @@ for _, key in ipairs{
 } do
     theme[key] = nil
 end
-
-newtab_chrome.new_tab_src = "<title>New Tab</title>"
 
 local dark_style = stylesheet{
     source = [[
