@@ -108,25 +108,31 @@ end
 
 newtab_chrome.new_tab_src = "<title>New Tab</title>"
 
-local invert_filter = stylesheet{
+local dark_style = stylesheet{
     source = [[
-        :root, :-webkit-full-screen, iframe, frame {
+        :root:not(.luakit-already-dark), iframe, frame {
             filter: invert(1) hue-rotate(180deg);
         }
     ]],
 }
 
-local inverted = setmetatable({}, {__mode = "k"})
-local function invert_colors(view)
-    inverted[view] = not inverted[view]
-    view.stylesheets[invert_filter] = inverted[view]
-end
+webview.add_signal("init", function(view)
+    view.stylesheets[dark_style] = true
+end)
 
-webview.add_signal("init", invert_colors)
+local check_dark_wm = require_web_module("check_dark_wm")
 
 modes.add_binds("normal", {
-    {"<control-r>", "Invert colors in the current tab.", function(win)
-        invert_colors(win.view)
+    {"cc", "Use normal colors in the current tab.", function(win)
+        win.view.stylesheets[dark_style] = false
+    end},
+    {"cd", "Use dark colors by inverting light pages.", function(win)
+        win.view.stylesheets[dark_style] = true
+        check_dark_wm:emit_signal(win.view, "check")
+    end},
+    {"cf", "Force all pages to be inverted.", function(win)
+        win.view.stylesheets[dark_style] = true
+        check_dark_wm:emit_signal(win.view, "ignore")
     end},
 })
 -- }}}
