@@ -1,21 +1,21 @@
 -- Imports {{{
-local adblock = require "adblock"
-local cmdhist = require "cmdhist"
-local downloads = require "downloads"
-local editor = require "editor"
-local follow = require "follow"
-local history = require "history"
-local log_chrome = require "log_chrome"
-local lousy = require "lousy"
-local modes = require "modes"
-local newtab_chrome = require "newtab_chrome"
-local select = require "select"
-local settings = require "settings"
-local styles = require "styles"
-local tablist = require "lousy.widget.tablist"
-local unique_instance = require "unique_instance"
-local webview = require "webview"
-local window = require "window"
+local adblock = require("adblock")
+local cmdhist = require("cmdhist")
+local downloads = require("downloads")
+local editor = require("editor")
+local follow = require("follow")
+local history = require("history")
+local log_chrome = require("log_chrome")
+local lousy = require("lousy")
+local modes = require("modes")
+local newtab_chrome = require("newtab_chrome")
+local select = require("select")
+local settings = require("settings")
+local styles = require("styles")
+local tablist = require("lousy.widget.tablist")
+local unique_instance = require("unique_instance")
+local webview = require("webview")
+local window = require("window")
 -- }}}
 
 -- Settings {{{
@@ -97,12 +97,12 @@ theme.notif_bg = theme.ok.bg
 theme.warning_bg = theme.ok.bg
 theme.menu_selected_bg = theme.ok.bg
 
-for _, key in ipairs({
+for _, key in ipairs{
     "notif_fg", "ibar_fg",
     "menu_title_bg", "menu_fg", "menu_bg", "menu_selected_fg",
     "menu_active_bg", "menu_enabled_fg", "menu_enabled_bg", "menu_disabled_bg",
     "proxy_active_menu_fg", "proxy_active_menu_bg", "proxy_inactive_menu_bg",
-}) do
+} do
     theme[key] = nil
 end
 
