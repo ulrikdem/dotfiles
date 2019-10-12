@@ -36,6 +36,7 @@ set list listchars=tab:→\ ,trail:␣
 set mouse=a
 set scrolloff=4
 set shortmess+=IA
+set splitbelow splitright
 set title titlestring=%F\ -\ nvim titlelen=0
 set updatetime=100
 
@@ -479,8 +480,8 @@ autocmd vimrc User Plug_vim_fugitive autocmd vimrc FileType gitcommit wincmd K
 nnoremap <Leader>td <Cmd>call <SID>toggle_diff()<CR>
 function! s:toggle_diff() abort
     if !&diff
-        if exists(':Gdiff')
-            Gdiff
+        if exists(':Gdiffsplit')
+            Gdiffsplit!
         endif
         return
     endif
