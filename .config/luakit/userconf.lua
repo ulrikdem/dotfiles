@@ -25,7 +25,6 @@ settings.window.check_filepath = false
 settings.completion.history.order = "last_visit"
 
 settings.window.max_title_len = math.huge
-settings.tablist.always_visible = true
 settings.window.close_with_last_tab = true
 unique_instance.open_links_in_new_window = true
 
@@ -55,12 +54,6 @@ modes.remap_binds({"all", "passthrough"}, {
 modes.remove_binds("passthrough", {"<Escape>"})
 
 modes.add_binds("normal", {
-    {"v", "Open one or more URLs in a new private window.", function(win)
-        win:enter_cmd(":priv-tabopen ")
-    end},
-    {"V", "Open one or more URLs based on current location in a new private window.", function(win)
-        win:enter_cmd(":priv-tabopen "..(win.view.uri or ""))
-    end},
     {"gs", "Change protocol to HTTPS.", function(win)
         win.view.uri = win.view.uri:gsub("^http:", "https:")
     end},
@@ -132,6 +125,43 @@ modes.add_binds("normal", {
         check_dark_wm:emit_signal(win.view, "ignore")
     end},
 })
+-- }}}
+
+-- Private windows {{{
+theme.private_sbar_bg = theme.private_tab_bg
+theme.private_tab_bg = theme.tab_bg
+theme.selected_private_tab_bg = theme.tab_selected_bg
+
+local new_window = window.new
+function window.new(args)
+    local private = false
+    args = lousy.util.table.filter_array(args, function(_, arg)
+        private = private or arg.private or arg == "--private"
+        return arg ~= "--private"
+    end)
+    local function set_private(win)
+        if private then
+            win.private = true
+            win.sbar.ebox.bg = theme.private_sbar_bg
+            win.sbar.l.ebox.bg = theme.private_sbar_bg
+            win.sbar.sep.bg = theme.private_sbar_bg
+            win.sbar.r.ebox.bg = theme.private_sbar_bg
+        end
+    end
+    window.add_signal("init", set_private)
+    win = new_window(args)
+    window.remove_signal("init", set_private)
+    return win
+end
+
+local new_tab = window.methods.new_tab
+function window.methods.new_tab(win, arg, opts)
+    opts = opts or {}
+    opts.private = win.private
+    return new_tab(win, arg, opts)
+end
+
+modes.remove_binds("command", {":priv-t[abopen]"})
 -- }}}
 
 -- Signals {{{

@@ -78,6 +78,7 @@ inskeys XConfig {modMask = mod, terminal = term} =
     , ((mod .|. shiftMask, xK_p), shellPrompt . promptconf (term ++ " -e ") =<< initMatches)
     , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
     , ((mod, xK_b), spawn "luakit")
+    , ((mod .|. shiftMask, xK_b), spawn "luakit --private")
     , ((mod, xK_z), spawn "lock")
     , ((0, xF86XK_AudioMute), spawn "amixer set Master toggle")
     , ((0, xF86XK_AudioLowerVolume), spawn "amixer set Master 5%-")
