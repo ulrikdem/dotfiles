@@ -14,6 +14,8 @@ local styles = require("styles")
 local unique_instance = require("unique_instance")
 local webview = require("webview")
 local window = require("window")
+
+local theme = lousy.theme.get()
 -- }}}
 
 -- Settings {{{
@@ -77,6 +79,7 @@ lousy.widget.tab.label_format = "{index} {title}"
 window.add_signal("init", function(win)
     win.sbar.l.layout.children[2]:destroy()
     win.sbar.r.layout.children[6]:destroy()
+    win.sbar.r.layout.children[5]:destroy()
     win.sbar.r.layout.children[3]:destroy()
 end)
 
@@ -88,10 +91,37 @@ follow.pattern_maker = follow.pattern_styles.match_label
 function select.label_maker()
     return trim(sort(reverse(charset("asdfghjkl"))))
 end
+
+webview.add_signal("init", function(view)
+    luakit.idle_add(function()
+        local function update_uri()
+            local win = webview.window(view)
+            local widget = win.sbar.l.layout.children[1]
+            if widget.text:match("^<span color=") then
+                return
+            end
+            local protocol = widget.text:match("^[^:]+:") or ""
+            local color = protocol == "Link:" and "gray"
+                or win.view:ssl_trusted() and theme.trust_fg
+                or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_fg
+                or "gray"
+            widget.text = string.format("<span color=%q>%s</span>%s", color,
+                lousy.util.escape(protocol), lousy.util.escape(widget.text:sub(#protocol + 1)))
+        end
+        view:add_signal("property::uri", update_uri)
+        view:add_signal("switched-page", update_uri)
+        view:add_signal("link-hover", update_uri)
+        view:add_signal("link-unhover", update_uri)
+        view:add_signal("load-status", function(_, status)
+            if status == "committed" then
+                view:emit_signal("link-unhover")
+            end
+        end)
+    end)
+end)
 -- }}}
 
 -- Theme {{{
-local theme = lousy.theme.get()
 theme.ok = {fg = "white", bg = "gray"}
 theme.notif_bg = theme.ok.bg
 theme.warning_bg = theme.ok.bg
@@ -184,8 +214,8 @@ webview.add_signal("init", function(view)
     end)
 
     view:add_signal("navigation-request", function(_, uri)
-        if uri:match("^https://.+%.m%.wikipedia%.org/") then
-            view.uri = uri:gsub("^https://(.+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
+        if uri:match("^https://[^/]+%.m%.wikipedia%.org/") then
+            view.uri = uri:gsub("^https://([^/]+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
             return false
         elseif uri:match("^mailto:") then
             luakit.spawn(string.format("termite -e 'alot compose %q'", uri))
@@ -210,7 +240,7 @@ function downloads.add(uri, opts)
     dl:remove_signals("finished")
 end
 
-function luakit.save_file(title, win, dir, file)
+function luakit.save_file(_, _, _, file)
     local cmd = string.format("%q %q", luakit.config_dir.."/download-prompt.sh", file)
     local status, file = luakit.spawn_sync(cmd)
     return status == 0 and file
