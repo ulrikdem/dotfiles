@@ -72,15 +72,12 @@ cmdhist.history_next = "<control-n>"
 -- }}}
 
 -- Widgets {{{
-lousy.widget.tab.label_format = "<span color='{index_fg}'>{index}</span> {title}"
-
-log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
-log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
-log_chrome.widget_format = "{errors}{warnings}"
+lousy.widget.tab.label_format = "{index} {title}"
 
 window.add_signal("init", function(win)
     win.sbar.l.layout.children[2]:destroy()
     win.sbar.r.layout.children[6]:destroy()
+    win.sbar.r.layout.children[3]:destroy()
 end)
 
 function window.methods.update_win_title(win)
