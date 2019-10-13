@@ -11,7 +11,6 @@ local modes = require("modes")
 local select = require("select")
 local settings = require("settings")
 local styles = require("styles")
-local tablist = require("lousy.widget.tablist")
 local unique_instance = require("unique_instance")
 local webview = require("webview")
 local window = require("window")
@@ -22,29 +21,19 @@ settings.window.home_page = settings.window.new_tab_page
 settings.window.search_engines = {[""] = "https://duckduckgo.com/?q=%s"}
 settings.window.default_search_engine = ""
 settings.window.check_filepath = false
-settings.completion.history.order = "last_visit"
-
-settings.window.max_title_len = math.huge
 settings.window.close_with_last_tab = true
+
 unique_instance.open_links_in_new_window = true
 
-lousy.widget.hist.back_indicator = "&lt;"
-lousy.widget.hist.forward_indicator = "&gt;"
-log_chrome.widget_format = ""
-
-follow.pattern_maker = follow.pattern_styles.match_label
-select.label_maker = function()
-    return trim(sort(reverse(charset("asdfghjkl"))))
-end
-
-settings.webview.enable_plugins = false
-settings.webview.enable_java = false
+settings.completion.history.order = "last_visit"
 
 settings.webview.hardware_acceleration_policy = "always"
 settings.webview.enable_accelerated_2d_canvas = true
 settings.webview.enable_webgl = true
 settings.webview.enable_webaudio = true
 settings.webview.enable_mediasource = true
+settings.webview.enable_plugins = false
+settings.webview.enable_java = false
 -- }}}
 
 -- Bindings {{{
@@ -82,7 +71,29 @@ cmdhist.history_prev = "<control-p>"
 cmdhist.history_next = "<control-n>"
 -- }}}
 
--- Colors {{{
+-- Widgets {{{
+lousy.widget.tab.label_format = "<span color='{index_fg}'>{index}</span> {title}"
+
+log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
+log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
+log_chrome.widget_format = "{errors}{warnings}"
+
+window.add_signal("init", function(win)
+    win.sbar.l.layout.children[2]:destroy()
+    win.sbar.r.layout.children[6]:destroy()
+end)
+
+function window.methods.update_win_title(win)
+    win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
+end
+
+follow.pattern_maker = follow.pattern_styles.match_label
+function select.label_maker()
+    return trim(sort(reverse(charset("asdfghjkl"))))
+end
+-- }}}
+
+-- Theme {{{
 local theme = lousy.theme.get()
 theme.ok = {fg = "white", bg = "gray"}
 theme.notif_bg = theme.ok.bg
@@ -97,7 +108,9 @@ for _, key in ipairs{
 } do
     theme[key] = nil
 end
+-- }}}
 
+-- Dark mode {{{
 local dark_style = stylesheet{
     source = [[
         :root:not(.luakit-already-dark), iframe, frame {
@@ -127,7 +140,7 @@ modes.add_binds("normal", {
 })
 -- }}}
 
--- Private windows {{{
+-- Private mode {{{
 theme.private_sbar_bg = theme.private_tab_bg
 theme.private_tab_bg = theme.tab_bg
 theme.selected_private_tab_bg = theme.tab_selected_bg
