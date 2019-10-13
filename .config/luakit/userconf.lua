@@ -230,6 +230,11 @@ history.add_signal("add", function(uri)
         return false
     end
 end)
+
+local is_uri = lousy.uri.is_uri
+function lousy.uri.is_uri(s)
+    return s:match("[%./]") and lfs.attributes(s) or is_uri(s)
+end
 -- }}}
 
 -- Downloads {{{
