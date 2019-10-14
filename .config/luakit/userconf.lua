@@ -76,20 +76,18 @@ cmdhist.history_next = "<control-n>"
 -- Widgets {{{
 lousy.widget.tab.label_format = "{index}: {title}"
 
+log_chrome.widget_format = "{errors}{warnings}"
+log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
+log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
+
 window.add_signal("init", function(win)
     win.sbar.l.layout.children[2]:destroy()
     win.sbar.r.layout.children[6]:destroy()
     win.sbar.r.layout.children[5]:destroy()
-    win.sbar.r.layout.children[3]:destroy()
 end)
 
 function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
-end
-
-follow.pattern_maker = follow.pattern_styles.match_label
-function select.label_maker()
-    return trim(sort(reverse(charset("asdfghjkl"))))
 end
 
 webview.add_signal("init", function(view)
@@ -119,6 +117,36 @@ webview.add_signal("init", function(view)
         end)
     end)
 end)
+
+local function fix_favicons(view)
+    local ignore_private = false
+    local index = getmetatable(view).__index
+    getmetatable(view).__index = function(view, key)
+        if key == "private" and ignore_private then
+            return false
+        elseif key == "eval_js" then
+            return function(view, js, opts)
+                if opts.callback then
+                    local cb = opts.callback
+                    function opts.callback(...)
+                        ignore_private = true
+                        pcall(cb, ...)
+                        ignore_private = false
+                    end
+                end
+                index(view, "eval_js")(view, js, opts)
+            end
+        end
+        return index(view, key)
+    end
+    webview.remove_signal("init", fix_favicons)
+end
+webview.add_signal("init", fix_favicons)
+
+follow.pattern_maker = follow.pattern_styles.match_label
+function select.label_maker()
+    return trim(sort(reverse(charset("asdfghjkl"))))
+end
 -- }}}
 
 -- Theme {{{
