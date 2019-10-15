@@ -233,8 +233,19 @@ modes.remove_binds("command", {":priv-t[abopen]"})
 -- }}}
 
 -- Signals {{{
+local preserve_uri = false
 webview.add_signal("init", function(view)
-    view.uri = settings.window.new_tab_page
+    if preserve_uri then
+        preserve_uri = false
+    else
+        view.uri = settings.window.new_tab_page
+    end
+
+    view:remove_signals("create-web-view")
+    view:add_signal("create-web-view", function()
+        preserve_uri = true
+        return webview.window(view):new_tab()
+    end)
 
     view:add_signal("new-window-decision", function(_, uri)
         view.uri = uri
