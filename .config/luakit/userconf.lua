@@ -106,14 +106,11 @@ webview.add_signal("init", function(view)
             widget.text = string.format("<span color=%q>%s</span>%s", color,
                 lousy.util.escape(protocol), lousy.util.escape(widget.text:sub(#protocol + 1)))
         end
-        view:add_signal("property::uri", update_uri)
-        view:add_signal("switched-page", update_uri)
-        view:add_signal("link-hover", update_uri)
-        view:add_signal("link-unhover", update_uri)
-        view:add_signal("load-status", function(_, status)
-            if status == "committed" then
-                view:emit_signal("link-unhover")
-            end
+        for _, signal in ipairs{"property::uri", "switched-page", "link-hover", "link-unhover"} do
+            view:add_signal(signal, update_uri)
+        end
+        view:add_signal("load-status", function()
+            view:emit_signal("link-unhover")
         end)
     end)
 end)
