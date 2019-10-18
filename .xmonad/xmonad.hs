@@ -8,6 +8,7 @@ import XMonad.Actions.SwapWorkspaces
 import XMonad.Hooks.DynamicBars
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
+import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
 import XMonad.Layout.LayoutCombinators
@@ -25,14 +26,12 @@ import XMonad.Util.Run
 import XMonad.Util.Scratchpad
 
 main = xmonad . ewmh . docks $ def
-    { startupHook = composeAll
-        [ setDefaultCursor xC_left_ptr
-        , dynStatusBarStartup bar $ return ()
+    { startupHook = dynStatusBarStartup bar (return ()) <+> setDefaultCursor xC_left_ptr
+    , handleEventHook = dynStatusBarEventHook bar (return ()) <+> fadeWindowsEventHook
+    , logHook = composeAll
+        [ fadeWindowsLogHook $ opaque <+> (className =? "Termite" <&&> isFloating --> opacity 0.9)
+        , multiPP pp {ppCurrent = xmobarColor "green" ""} pp {ppCurrent = xmobarColor "yellow" ""}
         ]
-    , handleEventHook = dynStatusBarEventHook bar $ return ()
-    , logHook = multiPP
-        pp {ppCurrent = xmobarColor "green" ""}
-        pp {ppCurrent = xmobarColor "yellow" ""}
     , normalBorderColor = "black"
     , focusedBorderColor = "gray"
     , layoutHook = layout
