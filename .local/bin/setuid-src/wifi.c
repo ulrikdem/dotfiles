@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     if (argc == 1) {
         args[0] = "/bin/sh";
         args[1] = "-c";
-        args[2] = "wpa_cli scan_results | tail -n +3 | awk '{print $3,$5,\"\t\",$4}' | sort -nr";
+        args[2] = "/usr/bin/wpa_cli scan_results | /usr/bin/tail -n +3 | /usr/bin/awk '{print $3,$5,\"\t\",$4}' | /usr/bin/sort -nr";
     } else if (!strcmp(argv[1], "start") || !strcmp(argv[1], "stop")
             || !strcmp(argv[1], "restart") || !strcmp(argv[1], "status")) {
         args[0] = "/bin/systemctl";

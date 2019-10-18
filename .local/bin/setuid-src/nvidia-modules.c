@@ -6,9 +6,9 @@
 int main(int argc, char **argv) {
     setuid(0);
     if (argc == 2 && !strcmp(argv[1], "load")) {
-        return system("insmod /usr/lib/modules/extramodules-ARCH/nvidia.ko.gz && modprobe nvidia-drm");
+        return system("/sbin/insmod /usr/lib/modules/extramodules-ARCH/nvidia.ko.gz && /sbin/modprobe nvidia-drm");
     } else if (argc == 2 && !strcmp(argv[1], "unload")) {
-        return system("modprobe -r nvidia-drm");
+        return system("/sbin/modprobe -r nvidia-drm");
     } else {
         fputs("nvidia-modules load|unload\n", stderr);
         return 1;

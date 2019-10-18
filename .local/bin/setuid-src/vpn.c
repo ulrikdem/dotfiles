@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
     args[1] = "netns";
     args[2] = "exec";
     args[3] = "vpn";
-    args[4] = "sudo";
+    args[4] = "/usr/bin/sudo";
     args[5] = "-u";
     args[6] = uid;
     args[7] = "--";
