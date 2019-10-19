@@ -1,9 +1,9 @@
 #!/bin/bash
 xrandr --auto
 if xrandr --listproviders | grep -q NVIDIA; then
-    xprop -root -f gpu 8s -set gpu ' '
+    xprop -root -f GPU_ICON 8u -set GPU_ICON ' '
 else
-    xprop -root -f gpu 8s -set gpu ''
+    xprop -root -f GPU_ICON 8u -set GPU_ICON ''
 fi
 feh --no-fehbg --bg-fill ~/.config/wallpaper.jpg
 compton -b
