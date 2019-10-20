@@ -8,7 +8,6 @@ import XMonad.Actions.SwapWorkspaces
 import XMonad.Hooks.DynamicBars
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
-import XMonad.Hooks.FadeWindows
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
 import XMonad.Layout.LayoutCombinators
@@ -26,17 +25,15 @@ import XMonad.Util.Run
 import XMonad.Util.Scratchpad
 
 main = xmonad . ewmh . docks $ def
-    { startupHook = dynStatusBarStartup bar (return ()) <+> setDefaultCursor xC_left_ptr
-    , handleEventHook = dynStatusBarEventHook bar (return ()) <+> fadeWindowsEventHook
-    , logHook = composeAll
-        [ fadeWindowsLogHook $ opaque <+> (className =? "Termite" <&&> isFloating --> opacity 0.9)
-        , multiPP pp {ppCurrent = xmobarColor "green" ""} pp {ppCurrent = xmobarColor "yellow" ""}
-        ]
+    { startupHook = dynStatusBarStartup spawnBar (return ()) <+> setDefaultCursor xC_left_ptr
+    , handleEventHook = dynStatusBarEventHook spawnBar (return ())
+    , logHook = setFloating
+        <+> multiPP pp {ppCurrent = xmobarColor "green" ""} pp {ppCurrent = xmobarColor "yellow" ""}
     , normalBorderColor = "black"
     , focusedBorderColor = "gray"
     , layoutHook = layout
     , modMask = mod4Mask
-    , keys = customKeys delkeys inskeys
+    , keys = customKeys delKeys insKeys
     , terminal = "termite"
     , manageHook = let r = W.RationalRect 0.25 0.25 0.5 0.5 in composeAll
         [ scratchpadManageHook r
@@ -46,7 +43,13 @@ main = xmonad . ewmh . docks $ def
         ]
     }
 
-bar (S i) = spawnPipe $ "xmobar -x " ++ show i
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
+
+setFloating = withDisplay $ \d -> withWindowSet $ \s -> do
+    p <- getAtom "FLOATING"
+    t <- getAtom "CARDINAL"
+    let f w = changeProperty8 d w p t propModeReplace [if M.member w $ W.floating s then 1 else 0]
+    io . mapM_ f $ W.allWindows s
 
 pp = namedScratchpadFilterOutWorkspacePP def
     { ppVisible = id
@@ -61,20 +64,20 @@ layout = avoidStruts (tall ||| Mirror tall ||| full) ||| renamed [PrependWords "
     tall = let b = Border 6 6 6 6 in spacingRaw False b True b True $ Tall 1 0.1 0.5
     full = noBorders StateFull
 
-delkeys XConfig {modMask = mod} =
+delKeys XConfig {modMask = mod} =
     [ (mod, xK_question)
     , (mod .|. shiftMask, xK_slash)
     ]
 
-inskeys XConfig {modMask = mod, terminal = term} =
+insKeys XConfig {modMask = mod, terminal = term} =
     [ ((mod, xK_Return), promote)
     , ((mod, xK_space), sendMessage $ JumpToLayout "Spacing Tall")
     , ((mod .|. shiftMask, xK_m), sendMessage $ JumpToLayout "Mirror Spacing Tall")
     , ((mod, xK_f), sendMessage $ JumpToLayout "StateFull")
     , ((mod .|. shiftMask, xK_f), sendMessage $ JumpToLayout "NoBar StateFull")
     , ((mod, xK_c), placeFocused $ fixed (0.5, 0.5))
-    , ((mod, xK_p), shellPrompt . promptconf "" =<< initMatches)
-    , ((mod .|. shiftMask, xK_p), shellPrompt . promptconf (term ++ " -e ") =<< initMatches)
+    , ((mod, xK_p), shellPrompt . promptConf "" =<< initMatches)
+    , ((mod .|. shiftMask, xK_p), shellPrompt . promptConf (term ++ " -e ") =<< initMatches)
     , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
     , ((mod, xK_b), spawn "luakit")
     , ((mod .|. shiftMask, xK_b), spawn "luakit --private")
@@ -96,7 +99,7 @@ inskeys XConfig {modMask = mod, terminal = term} =
     , (k, i) <- zip [xK_w, xK_e, xK_r] [0..]
     ]
 
-promptconf text matches = def
+promptConf text matches = def
     { promptBorderWidth = 0
     , font = "xft:monospace:pixelsize=14"
     , defaultText = text
