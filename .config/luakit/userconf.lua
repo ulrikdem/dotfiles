@@ -29,6 +29,7 @@ unique_instance.open_links_in_new_window = true
 
 settings.completion.history.order = "last_visit"
 
+settings.webview.default_charset = "utf-8"
 settings.webview.hardware_acceleration_policy = "always"
 settings.webview.enable_accelerated_2d_canvas = true
 settings.webview.enable_webgl = true
@@ -257,7 +258,6 @@ webview.add_signal("init", function(view)
             luakit.spawn(string.format("termite -e 'alot compose %q'", uri))
             return false
         end
-        view.default_charset = uri:match("^file:") and "utf-8" or settings.webview.default_charset
     end)
 end)
 
