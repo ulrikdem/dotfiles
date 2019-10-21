@@ -367,7 +367,7 @@ modes.add_binds("ex-follow", {
 -- }}}
 
 -- Adblock {{{
-luakit.spawn(luakit.data_dir.."/adblock/update.sh", function()
+luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.data_dir), function()
     adblock.load(true)
 end)
 -- }}}
