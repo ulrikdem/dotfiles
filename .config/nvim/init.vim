@@ -810,12 +810,15 @@ endif
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:init_vimtex_buffer()
 function! s:init_vimtex_buffer() abort
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
-    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR>
-        \<Cmd>call delete(expand('%:r').'.bbl')<CR><Cmd>call delete(expand('%:r').'.synctex.gz')<CR>
-    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR>
-        \<Cmd>call delete(expand('%:r').'.bbl')<CR><Cmd>call delete(expand('%:r').'.synctex.gz')<CR>
+    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>clean_tex_files()<CR>
+    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>clean_tex_files()<CR>
     nmap <buffer> <Leader>mv <Plug>(vimtex-view)
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
+endfunction
+function! s:clean_tex_files() abort
+    for l:ext in ['.synctex.gz', '.bbl', '.nav', '.snm']
+        call delete(expand('%:r').l:ext)
+    endfor
 endfunction
 
 Plug 'iamcco/markdown-preview.nvim', {'do': {-> mkdp#util#install()}}
