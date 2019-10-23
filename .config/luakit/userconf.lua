@@ -9,8 +9,10 @@ local log_chrome = require("log_chrome")
 local lousy = require("lousy")
 local modes = require("modes")
 local select = require("select")
+local session = require("session")
 local settings = require("settings")
 local styles = require("styles")
+local undoclose = require("undoclose")
 local unique_instance = require("unique_instance")
 local webview = require("webview")
 local window = require("window")
@@ -228,6 +230,28 @@ function window.methods.new_tab(win, arg, opts)
 end
 
 modes.remove_binds("command", {":priv-t[abopen]"})
+
+luakit.idle_add(function()
+    undoclose.remove_signals("save")
+    undoclose.add_signal("save", function(view)
+        if (view.uri == "about:blank" or view.uri:match("^luakit://newtab/?"))
+                and #view.history.items == 1 then
+            return false
+        end
+    end)
+end)
+
+settings.session.recovery_save_interval = 1
+
+local save_session = session.save
+function session.save(...)
+    local wins = window.bywidget
+    window.bywidget = lousy.util.table.filter_array(lousy.util.table.values(wins), function(_, win)
+        return not win.private
+    end)
+    save_session(...)
+    window.bywidget = wins
+end
 -- }}}
 
 -- Signals {{{
