@@ -1,0 +1,12 @@
+#!/bin/bash
+text=()
+for file; do
+    if [[ $(file -bi -- "$file") =~ ^text/ ]]; then
+        text+=("$file")
+    else
+        xdg-open "$file" &>/dev/null &
+    fi
+done
+if ((${#text[@]})); then
+    exec nvim -- "${text[@]}"
+fi
