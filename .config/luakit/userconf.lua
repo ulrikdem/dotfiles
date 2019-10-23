@@ -286,8 +286,12 @@ end
 local add_download = downloads.add
 function downloads.add(uri, opts)
     local dl = type(uri) == "string" and download{uri = uri} or uri
-    add_download(dl, opts)
-    dl:remove_signals("finished")
+    if dl.uri:match("file:") then
+        dl:cancel()
+    else
+        add_download(dl, opts)
+        dl:remove_signals("finished")
+    end
 end
 
 function luakit.save_file(_, _, _, file)
