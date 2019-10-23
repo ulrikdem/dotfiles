@@ -274,6 +274,15 @@ end
 -- }}}
 
 -- Downloads {{{
+local close_tab = window.methods.close_tab
+function window.methods.close_tab(win, view, ...)
+    if view and view.uri == "about:blank" and #view.history.items == 1 and win.tabs:count() == 1 then
+        view.uri = settings.window.new_tab_page
+    else
+        close_tab(win, view, ...)
+    end
+end
+
 local add_download = downloads.add
 function downloads.add(uri, opts)
     local dl = type(uri) == "string" and download{uri = uri} or uri
