@@ -47,15 +47,6 @@ modes.remap_binds({"all", "passthrough"}, {
 })
 modes.remove_binds("passthrough", {"<Escape>"})
 
-modes.add_binds("normal", {
-    {"gs", "Change protocol to HTTPS.", function(win)
-        win.view.uri = win.view.uri:gsub("^http:", "https:")
-    end},
-    {"<control-C>", "Copy the selected text.", function()
-        luakit.selection.clipboard = luakit.selection.primary
-    end},
-})
-
 modes.add_binds({"normal", "insert"}, {
     {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
         function win.hit(_, mods, key)
@@ -67,56 +58,30 @@ modes.add_binds({"normal", "insert"}, {
 })
 settings.window.act_on_synthetic_keys = true
 
-editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
+modes.add_binds("normal", {
+    {"gs", "Change protocol to HTTPS.", function(win)
+        win.view.uri = win.view.uri:gsub("^http:", "https:")
+    end},
+    {"<control-C>", "Copy the selected text.", function()
+        luakit.selection.clipboard = luakit.selection.primary
+    end},
+})
+
 modes.remap_binds("insert", {
     {"<mod1-e>", "<control-e>"},
 })
+editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
 
 cmdhist.history_prev = "<control-p>"
 cmdhist.history_next = "<control-n>"
 -- }}}
 
 -- Widgets {{{
-lousy.widget.tab.label_format = "{index}: {title}"
-
-log_chrome.widget_format = "{errors}{warnings}"
-log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
-log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
-
-window.add_signal("init", function(win)
-    win.sbar.l.layout.children[2]:destroy()
-    win.sbar.r.layout.children[6]:destroy()
-    win.sbar.r.layout.children[5]:destroy()
-end)
-
 function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
 end
 
-webview.add_signal("init", function(view)
-    luakit.idle_add(function()
-        local function update_uri()
-            local win = webview.window(view)
-            local widget = win.sbar.l.layout.children[1]
-            if widget.text:match("^<span color=") then
-                return
-            end
-            local protocol = widget.text:match("^[^:]+:") or ""
-            local color = protocol == "Link:" and "gray"
-                or win.view:ssl_trusted() and theme.trust_fg
-                or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_fg
-                or "gray"
-            widget.text = string.format("<span color=%q>%s</span>%s", color,
-                lousy.util.escape(protocol), lousy.util.escape(widget.text:sub(#protocol + 1)))
-        end
-        for _, signal in ipairs{"property::uri", "switched-page", "link-hover", "link-unhover"} do
-            view:add_signal(signal, update_uri)
-        end
-        view:add_signal("load-status", function()
-            view:emit_signal("link-unhover")
-        end)
-    end)
-end)
+lousy.widget.tab.label_format = "{index}: {title}"
 
 local function fix_favicons(view)
     local ignore_private = false
@@ -143,10 +108,45 @@ local function fix_favicons(view)
 end
 webview.add_signal("init", fix_favicons)
 
-follow.pattern_maker = follow.pattern_styles.match_label
+window.add_signal("init", function(win)
+    win.sbar.l.layout.children[2]:destroy()
+    win.sbar.r.layout.children[6]:destroy()
+    win.sbar.r.layout.children[5]:destroy()
+end)
+
+webview.add_signal("init", function(view)
+    luakit.idle_add(function()
+        local function update_uri()
+            local win = webview.window(view)
+            local widget = win.sbar.l.layout.children[1]
+            if widget.text:match("^<span color=") then
+                return
+            end
+            local protocol = widget.text:match("^[^:]+:") or ""
+            local color = protocol == "Link:" and "gray"
+                or win.view:ssl_trusted() and theme.trust_fg
+                or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_fg
+                or "gray"
+            widget.text = string.format("<span color=%q>%s</span>%s", color,
+                lousy.util.escape(protocol), lousy.util.escape(widget.text:sub(#protocol + 1)))
+        end
+        for _, signal in ipairs{"property::uri", "switched-page", "link-hover", "link-unhover"} do
+            view:add_signal(signal, update_uri)
+        end
+        view:add_signal("load-status", function()
+            view:emit_signal("link-unhover")
+        end)
+    end)
+end)
+
+log_chrome.widget_format = "{errors}{warnings}"
+log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
+log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
+
 function select.label_maker()
     return trim(sort(reverse(charset("asdfghjkl"))))
 end
+follow.pattern_maker = follow.pattern_styles.match_label
 -- }}}
 
 -- Theme {{{
@@ -231,18 +231,6 @@ end
 
 modes.remove_binds("command", {":priv-t[abopen]"})
 
-luakit.idle_add(function()
-    undoclose.remove_signals("save")
-    undoclose.add_signal("save", function(view)
-        if (view.uri == "about:blank" or view.uri:match("^luakit://newtab/?"))
-                and #view.history.items == 1 then
-            return false
-        end
-    end)
-end)
-
-settings.session.recovery_save_interval = 1
-
 local save_session = session.save
 function session.save(...)
     local wins = window.bywidget
@@ -252,6 +240,16 @@ function session.save(...)
     save_session(...)
     window.bywidget = wins
 end
+
+luakit.idle_add(function()
+    undoclose.remove_signals("save")
+    undoclose.add_signal("save", function(view)
+        if (view.uri == "about:blank" or view.uri == settings.window.new_tab_page)
+                and #view.history.items == 1 then
+            return false
+        end
+    end)
+end)
 -- }}}
 
 -- Signals {{{
@@ -290,23 +288,9 @@ history.add_signal("add", function(uri)
         return false
     end
 end)
-
-local is_uri = lousy.uri.is_uri
-function lousy.uri.is_uri(s)
-    return s:match("[%./]") and lfs.attributes(s) or is_uri(s)
-end
 -- }}}
 
 -- Downloads {{{
-local close_tab = window.methods.close_tab
-function window.methods.close_tab(win, view, ...)
-    if view and view.uri == "about:blank" and #view.history.items == 1 and win.tabs:count() == 1 then
-        view.uri = settings.window.new_tab_page
-    else
-        close_tab(win, view, ...)
-    end
-end
-
 local add_download = downloads.add
 function downloads.add(uri, opts)
     local dl = type(uri) == "string" and download{uri = uri} or uri
@@ -363,6 +347,15 @@ webview.add_signal("init", function(view)
         end
     end)
 end)
+
+local close_tab = window.methods.close_tab
+function window.methods.close_tab(win, view, ...)
+    if view and view.uri == "about:blank" and #view.history.items == 1 and win.tabs:count() == 1 then
+        view.uri = settings.window.new_tab_page
+    else
+        close_tab(win, view, ...)
+    end
+end
 -- }}}
 
 -- Videos {{{
@@ -378,8 +371,6 @@ local function play_video(uris, referrer, win)
         end
     end)
 end
-
-follow.selectors.video = "video"
 
 modes.add_binds("ex-follow", {
     {"v", "Hint all videos and play it with `mpv`.", function(win)
@@ -401,12 +392,22 @@ modes.add_binds("ex-follow", {
         })
     end},
 })
+follow.selectors.video = "video"
 -- }}}
 
--- Adblock {{{
+-- Miscellaneous {{{
 luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.data_dir), function()
     adblock.load(true)
 end)
--- }}}
+
+local is_uri = lousy.uri.is_uri
+function lousy.uri.is_uri(s)
+    return s:match("[%./]") and os.exists(s) or is_uri(s)
+end
+
+if os.exists(luakit.config_dir.."/userconf_local.lua") then
+    require("userconf_local")
+end
 
 -- vim: foldmethod=marker foldcolumn=1
+-- }}}
