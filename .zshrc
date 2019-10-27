@@ -7,7 +7,7 @@ alias pumount='udevil umount'
 alias rmcdir-r='cd ..; rm -r $OLDPWD'
 alias ssh='TERM=xterm-256color ssh'
 alias vim=nvim
-abk[LC]='--color=always |& less -r'
+[[ -v abk ]] && abk[LC]='--color=always |& less -r'
 
 bindkey '^N' history-beginning-search-forward-end
 bindkey '^P' history-beginning-search-backward-end
