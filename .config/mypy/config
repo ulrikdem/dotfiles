@@ -1,0 +1,3 @@
+[mypy]
+cache_dir = /tmp/mypy
+ignore_missing_imports = True
