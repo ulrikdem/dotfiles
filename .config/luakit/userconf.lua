@@ -405,6 +405,10 @@ function lousy.uri.is_uri(s)
     return s:match("[%./]") and os.exists(s) or is_uri(s)
 end
 
+function lousy.uri.split(s)
+    return {s}
+end
+
 if os.exists(luakit.config_dir.."/userconf_local.lua") then
     require("userconf_local")
 end
