@@ -118,6 +118,9 @@ webview.add_signal("init", function(view)
     luakit.idle_add(function()
         local function update_uri()
             local win = webview.window(view)
+            if not win then
+                return
+            end
             local widget = win.sbar.l.layout.children[1]
             if widget.text:match("^<span color=") then
                 return
