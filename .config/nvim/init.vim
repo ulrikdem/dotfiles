@@ -804,7 +804,6 @@ Plug 'neoclide/coc-vimtex'
 let g:tex_flavor = 'latex'
 let g:vimtex_indent_on_ampersands = 0
 let g:vimtex_indent_bib_enabled = 0
-let g:vimtex_quickfix_autojump = 1
 if executable('nvr')
     let g:vimtex_compiler_progname = 'nvr'
 endif
