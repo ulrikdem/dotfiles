@@ -553,7 +553,11 @@ if executable('curl') && executable('node')
         let l:dir = (g:plugs['coc.nvim'].dir).'/build'
         call mkdir(l:dir, 'p')
         execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
-            \ '| sed ''s/\\\\<C-g>u//'' >'.fnameescape(l:dir.'/index.js')
+            \ "| sed -E '".
+            \ 's/( *)let sa = a\.sortText;/'.
+                \ '\1if (a.priority \!= b.priority) return b.priority - a.priority;\n&/;'.
+            \ 's/\\\\<C-g>u//;'.
+            \ "' >".fnameescape(l:dir.'/index.js')
     endfunction
     Plug 'neoclide/coc.nvim', {'do': function('Download_coc')}
 else
