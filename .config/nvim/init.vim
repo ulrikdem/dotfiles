@@ -1,4 +1,5 @@
-" Setup {{{
+" Setup {{{1
+
 " vim: foldmethod=marker foldcolumn=1
 
 augroup vimrc
@@ -25,9 +26,9 @@ catch
     function! s:init_plugins() abort
     endfunction
 endtry
-" }}}
 
-" Misc settings {{{
+" Misc settings {{{1
+
 set clipboard=unnamed
 set cursorline
 set hidden
@@ -42,9 +43,9 @@ set updatetime=100
 
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
 autocmd vimrc VimResized * wincmd =
-" }}}
 
-" Misc mappings {{{
+" Misc mappings {{{1
+
 nnoremap <C-S> <Cmd>update<CR>
 nnoremap ZT <Cmd>silent only \| quit<CR>
 
@@ -76,9 +77,9 @@ let g:wordmotion_mappings = {
     \ 'aw': 'a<M-w>',
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
-" }}}
 
-" Formatting {{{
+" Formatting {{{1
+
 set expandtab tabstop=4 shiftwidth=0
 Plug 'tpope/vim-sleuth'
 
@@ -96,9 +97,9 @@ if has('python3') && filereadable('/usr/share/clang/clang-format.py')
 endif
 
 Plug 'godlygeek/tabular'
-" }}}
 
-" Colorscheme {{{
+" Colorscheme {{{1
+
 set termguicolors
 
 Plug 'srcery-colors/srcery-vim'
@@ -147,9 +148,9 @@ function! s:get_srcery_colors(fg, bg) abort
         \ synIDattr(hlID('Srcery'.a:bg), 'fg', 'cterm'),
     \ ]
 endfunction
-" }}}
 
-" Statusline {{{
+" Statusline {{{1
+
 Plug 'itchyny/lightline.vim'
 let g:lightline = {
     \ 'active': {
@@ -237,9 +238,9 @@ function! s:update_lightline_colors() abort
     call lightline#colorscheme()
     call lightline#update()
 endfunction
-" }}}
 
-" Command execution {{{
+" Command execution {{{1
+
 if executable('rg')
     set grepprg=rg\ --vimgrep grepformat=%f:%l:%c:%m
 endif
@@ -260,9 +261,9 @@ autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
 autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
 
 Plug 'tpope/vim-eunuch'
-" }}}
 
-" File navigation {{{
+" File navigation {{{1
+
 Plug 'justinmk/vim-dirvish'
 set suffixes-=.h
 autocmd vimrc FileType dirvish nnoremap <buffer> C <Cmd>cd % \| pwd<CR>
@@ -311,9 +312,9 @@ function! s:jump_forward() abort
         execute 'normal' (l:i - l:current)."\<C-I>"
     endif
 endfunction
-" }}}
 
-" Quickfix {{{
+" Quickfix {{{1
+
 autocmd vimrc QuickFixCmdPost [^l]* call s:open_quickfix('window')
 function! s:open_quickfix(cmd) abort
     let l:win = win_getid()
@@ -417,9 +418,9 @@ function! s:set_quickfix(items) abort
     call s:open_quickfix('window')
     cfirst
 endfunction
-" }}}
 
-" Terminal {{{
+" Terminal {{{1
+
 autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc BufEnter * if &buftype ==# 'terminal' | startinsert | endif
@@ -448,9 +449,9 @@ function! s:toggle_terminal(cwd) abort
         let s:terminal_buffer = bufnr()
     endif
 endfunction
-" }}}
 
-" Git {{{
+" Git {{{1
+
 Plug 'tpope/vim-fugitive'
 
 autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>toggle_git_status()<CR>
@@ -507,9 +508,9 @@ function! Git_statusline() abort
         return substitute(l:status, '\[Git(\(.*\))\]', l:prefix.'\1', '')
     endif
 endfunction
-" }}}
 
-" Search and completion {{{
+" Search and completion {{{1
+
 set inccommand=nosplit
 set ignorecase smartcase
 Plug 'pgdouyon/vim-evanesco'
@@ -545,9 +546,9 @@ function! s:completion_fallback() abort
     endif
     inoremap <expr> <CR> pumvisible() ? "\<C-Y>\<CR>" : "\<CR>"
 endfunction
-" }}}
 
-" Language client {{{
+" Language client {{{1
+
 if executable('curl') && executable('node')
     function! Download_coc(options) abort
         let l:dir = (g:plugs['coc.nvim'].dir).'/build'
@@ -717,9 +718,9 @@ function! Coc_warning_count() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
     return l:count ? l:count.g:coc_user_config.diagnostic.warningSign : ''
 endfunction
-" }}}
 
-" Language server {{{
+" Language server {{{1
+
 let g:coc_user_config.languageserver = {}
 
 if executable('ccls')
@@ -774,9 +775,9 @@ let s:lsp_filetypes = []
 for s:ls in values(g:coc_user_config.languageserver)
     call extend(s:lsp_filetypes, s:ls.filetypes)
 endfor
-" }}}
 
-" Filetypes {{{
+" Filetypes {{{1
+
 Plug 'sheerun/vim-polyglot'
 let g:polyglot_disabled = ['latex']
 let g:jsx_ext_required = 1
@@ -855,9 +856,9 @@ endif
 if executable('xdg-open')
     autocmd vimrc FileType ifm nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.ps &<CR>
 endif
-" }}}
 
-" Debugging {{{
+" Debugging {{{1
+
 if executable('gdb')
     packadd termdebug
     let g:termdebug_wide = 1
@@ -884,6 +885,7 @@ if executable('cfr')
         setlocal undolevels=-123456 filetype=java buftype=nowrite
     endfunction
 endif
+
 " }}}
 
 call s:init_plugins()

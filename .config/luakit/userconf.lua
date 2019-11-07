@@ -1,4 +1,5 @@
--- Imports {{{
+-- Imports {{{1
+
 local adblock = require("adblock")
 local cmdhist = require("cmdhist")
 local downloads = require("downloads")
@@ -18,9 +19,9 @@ local webview = require("webview")
 local window = require("window")
 
 local theme = lousy.theme.get()
--- }}}
 
--- Settings {{{
+-- Settings {{{1
+
 settings.window.home_page = settings.window.new_tab_page
 settings.window.search_engines = {[""] = "https://duckduckgo.com/?q=%s"}
 settings.window.default_search_engine = ""
@@ -39,9 +40,9 @@ settings.webview.enable_webaudio = true
 settings.webview.enable_mediasource = true
 settings.webview.enable_plugins = false
 settings.webview.enable_java = false
--- }}}
 
--- Bindings {{{
+-- Bindings {{{1
+
 modes.remap_binds({"all", "passthrough"}, {
     {"<control-[>", "<Escape>", true},
 })
@@ -74,9 +75,9 @@ editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
 
 cmdhist.history_prev = "<control-p>"
 cmdhist.history_next = "<control-n>"
--- }}}
 
--- Widgets {{{
+-- Widgets {{{1
+
 function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
 end
@@ -150,9 +151,9 @@ function select.label_maker()
     return trim(sort(reverse(charset("asdfghjkl"))))
 end
 follow.pattern_maker = follow.pattern_styles.match_label
--- }}}
 
--- Theme {{{
+-- Theme {{{1
+
 theme.ok = {fg = "white", bg = "gray"}
 theme.notif_bg = theme.ok.bg
 theme.warning_bg = theme.ok.bg
@@ -166,9 +167,9 @@ for _, key in ipairs{
 } do
     theme[key] = nil
 end
--- }}}
 
--- Dark mode {{{
+-- Dark mode {{{1
+
 local dark_style = stylesheet{
     source = [[
         :root:not(.luakit-already-dark), iframe, frame {
@@ -196,9 +197,9 @@ modes.add_binds("normal", {
         check_dark_wm:emit_signal(win.view, "ignore")
     end},
 })
--- }}}
 
--- Private mode {{{
+-- Private mode {{{1
+
 theme.private_sbar_bg = theme.private_tab_bg
 theme.private_tab_bg = theme.tab_bg
 theme.selected_private_tab_bg = theme.tab_selected_bg
@@ -253,9 +254,9 @@ luakit.idle_add(function()
         end
     end)
 end)
--- }}}
 
--- Signals {{{
+-- Signals {{{1
+
 local preserve_uri = false
 webview.add_signal("init", function(view)
     if preserve_uri then
@@ -291,9 +292,9 @@ history.add_signal("add", function(uri)
         return false
     end
 end)
--- }}}
 
--- Downloads {{{
+-- Downloads {{{1
+
 local add_download = downloads.add
 function downloads.add(uri, opts)
     local dl = type(uri) == "string" and download{uri = uri} or uri
@@ -359,9 +360,9 @@ function window.methods.close_tab(win, view, ...)
         close_tab(win, view, ...)
     end
 end
--- }}}
 
--- Videos {{{
+-- Videos {{{1
+
 local function play_video(uris, referrer, win)
     if #uris == 0 then
         win:error("Could not play video")
@@ -396,9 +397,9 @@ modes.add_binds("ex-follow", {
     end},
 })
 follow.selectors.video = "video"
--- }}}
 
--- Miscellaneous {{{
+-- Miscellaneous {{{1
+
 luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.data_dir), function()
     adblock.load(true)
 end)
@@ -417,4 +418,3 @@ if os.exists(luakit.config_dir.."/userconf_local.lua") then
 end
 
 -- vim: foldmethod=marker foldcolumn=1
--- }}}
