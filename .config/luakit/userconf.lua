@@ -76,6 +76,29 @@ editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
 cmdhist.history_prev = "<control-p>"
 cmdhist.history_next = "<control-n>"
 
+local detach_target = nil
+modes.add_cmds{
+    {":tabde[tach]", "Move the current tab into a new window.", function(win)
+        local close = win.tabs:count() == 1
+        settings.window.close_with_last_tab = false
+        if detach_target and detach_target.private == win.private then
+            view = win.view
+            win:detach_tab(view)
+            detach_target:attach_tab(view)
+            detach_target = nil
+        else
+            window.new{win.view}
+        end
+        settings.window.close_with_last_tab = true
+        if close then
+            win:close_win()
+        end
+    end},
+    {":taba[ttach]", "Set the current window as the target for the next `:tabdetach`.", function(win)
+        detach_target = win
+    end},
+}
+
 -- Widgets {{{1
 
 function window.methods.update_win_title(win)
@@ -114,6 +137,9 @@ window.add_signal("init", function(win)
     win.sbar.r.layout.children[6]:destroy()
     win.sbar.r.layout.children[5]:destroy()
 end)
+function lousy.widget.tabi()
+    return widget{type = "label"}
+end
 
 webview.add_signal("init", function(view)
     luakit.idle_add(function()
