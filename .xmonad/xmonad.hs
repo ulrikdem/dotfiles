@@ -61,7 +61,7 @@ pp = namedScratchpadFilterOutWorkspacePP def
     }
 
 layout = avoidStruts (tall ||| Mirror tall ||| full) ||| renamed [PrependWords "NoBar"] full where
-    tall = let b = Border 6 6 6 6 in spacingRaw False b True b True $ Tall 1 0.1 0.5
+    tall = spacingWithEdge 6 $ Tall 1 0.1 0.5
     full = noBorders StateFull
 
 delKeys XConfig {modMask = mod} =
