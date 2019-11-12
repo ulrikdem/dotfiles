@@ -811,8 +811,14 @@ endif
 if executable('zathura')
     let g:vimtex_view_method = 'zathura'
 endif
+let g:vimtex_fold_enabled = 1
+let g:vimtex_fold_types = {}
+for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
+    let g:vimtex_fold_types[s:key] = {'enabled': 0}
+endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:init_vimtex_buffer()
 function! s:init_vimtex_buffer() abort
+    setlocal foldcolumn=4
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
     nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>clean_tex_files()<CR>
     nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>clean_tex_files()<CR>
