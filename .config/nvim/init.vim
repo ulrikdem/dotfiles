@@ -628,7 +628,7 @@ function! s:init_lsp_buffer() abort
     nnoremap <buffer> <Leader>gr <Cmd>call CocActionAsync('jumpReferences')<CR>
     nnoremap <buffer> <Leader>gR <Cmd>call CocActionAsync('rename')<CR>
     nnoremap <buffer> <Leader>ga <Cmd>call CocActionAsync('codeAction')<CR>
-    xnoremap <buffer> <Leader>ga <Esc><Cmd>call CocActionAsync('codeAction', visualmode())<CR>
+    xnoremap <buffer> ga <Esc><Cmd>call CocActionAsync('codeAction', visualmode())<CR>
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
     nnoremap <buffer> <Leader>gf <Cmd>call coc#util#float_jump()<CR>
     if isdirectory(g:plugs.fzf.dir)
