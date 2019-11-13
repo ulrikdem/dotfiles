@@ -270,6 +270,13 @@ autocmd vimrc FileType dirvish nnoremap <buffer> C <Cmd>cd % \| pwd<CR>
 
 Plug 'junegunn/fzf', {'do': './install --bin'}
 let g:fzf_layout = {'down': 15}
+let g:fzf_action = {
+    \ '': 'edit',
+    \ 'ctrl-x': 'split',
+    \ 'ctrl-v': 'vsplit',
+    \ 'ctrl-t': 'tab split',
+    \ 'ctrl-z': 'bdelete',
+\ }
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
 autocmd vimrc User Plug_fzf nnoremap <Leader>fr <Cmd>call fzf#run(fzf#wrap({
@@ -280,8 +287,8 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fr <Cmd>call fzf#run(fzf#wrap({
     \ ],
 \ }))<CR>
 autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call fzf#run(fzf#wrap({
-    \ 'source': map(getbufinfo({'buflisted': 1}),
-        \ {i, b -> empty(b.name) ? '[No Name]' : fnamemodify(b.name, ':~:.')}),
+    \ 'source': map(filter(getbufinfo({'buflisted': 1}),
+        \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')}),
     \ 'options': [
         \ '--prompt='.pathshorten(substitute(fnamemodify(getcwd(), ':~'), '/$', '', '')).'/',
         \ '--multi',
@@ -329,6 +336,14 @@ function! s:toggle_quickfix() abort
     else
         cclose
     endif
+endfunction
+
+let g:fzf_action['ctrl-q'] = {l -> s:set_quickfix(map(l, {i, l -> {'filename': l, 'valid': 1}}))}
+
+function! s:set_quickfix(items) abort
+    call setqflist(a:items)
+    call s:open_quickfix('window')
+    cfirst
 endfunction
 
 autocmd vimrc User Plug_fzf
@@ -386,12 +401,7 @@ function! s:fzf_from_quickfix(options, ...) abort
                 if empty(l:key) && fnamemodify(l:file, ':p') ==# expand('%:p')
                     normal! m'
                 else
-                    execute {
-                        \ '': 'edit',
-                        \ 'ctrl-x': 'split',
-                        \ 'ctrl-v': 'vsplit',
-                        \ 'ctrl-t': 'tab split',
-                    \ }[l:key] fnameescape(l:file)
+                    execute g:fzf_action[l:key] fnameescape(l:file)
                 endif
                 call cursor(l:item.lnum, get(l:item, 'col', 1))
             endfor
@@ -411,12 +421,6 @@ function! s:fzf_from_quickfix(options, ...) abort
         \ ], a:options),
     \ }))
     return l:Return
-endfunction
-
-function! s:set_quickfix(items) abort
-    call setqflist(a:items)
-    call s:open_quickfix('window')
-    cfirst
 endfunction
 
 " Terminal {{{1
