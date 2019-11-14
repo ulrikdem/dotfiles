@@ -275,7 +275,7 @@ let g:fzf_action = {
     \ 'ctrl-x': 'split',
     \ 'ctrl-v': 'vsplit',
     \ 'ctrl-t': 'tab split',
-    \ 'ctrl-z': 'bdelete',
+    \ 'ctrl-z': 'silent! bdelete',
 \ }
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
