@@ -822,7 +822,7 @@ for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi'
 endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:init_vimtex_buffer()
 function! s:init_vimtex_buffer() abort
-    setlocal foldcolumn=4
+    setlocal foldcolumn=2
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
     nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>clean_tex_files()<CR>
     nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>clean_tex_files()<CR>
