@@ -443,4 +443,4 @@ if os.exists(luakit.config_dir.."/userconf_local.lua") then
     require("userconf_local")
 end
 
--- vim: foldmethod=marker foldcolumn=1
+-- vim: foldmethod=marker foldcolumn=2
