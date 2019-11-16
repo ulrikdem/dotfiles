@@ -99,6 +99,8 @@ modes.add_cmds{
     end},
 }
 
+modes.get_mode("command").reset_on_navigation = false
+
 -- Widgets {{{1
 
 function window.methods.update_win_title(win)
