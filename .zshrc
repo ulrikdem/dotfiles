@@ -19,6 +19,8 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' menu select
 zstyle ':prompt:grml:right:setup' use-rprompt false
 
+setopt NO_CHECK_JOBS
+
 [[ -r /etc/profile.d/vte.sh ]] && . /etc/profile.d/vte.sh
 [[ -r /usr/share/fzf/key-bindings.zsh ]] && . /usr/share/fzf/key-bindings.zsh
 
