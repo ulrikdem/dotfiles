@@ -6,7 +6,7 @@ else
     xprop -root -f GPU_ICON 8u -set GPU_ICON ''
 fi
 feh --no-fehbg --bg-fill ~/.config/wallpaper.jpg
-compton -b
+picom -b
 xmodmap -e 'remove Lock = Caps_Lock' -e 'keysym Caps_Lock = Control_L' -e 'add Control = Control_L'
 numlockx
 export QT_STYLE_OVERRIDE=kvantum
