@@ -3,6 +3,7 @@ Operation = Install
 Operation = Upgrade
 Type = Package
 Target = xmonad
+Target = xmonad-contrib
 
 [Action]
 When = PostTransaction
