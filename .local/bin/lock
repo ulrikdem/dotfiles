@@ -1,6 +1,4 @@
 #!/bin/bash
-for x in /tmp/.X11-unix/X*; do
-    DISPLAY=:${x#/tmp/.X11-unix/X} i3lock -nc 000000 && killall i3lock &
-done
+loginctl lock-session $(loginctl --no-legend list-sessions | grep "^[0-9]\+ $UID " | cut -d' ' -f1)
 sleep 1
 xset dpms force off
