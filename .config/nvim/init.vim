@@ -802,7 +802,7 @@ if executable('cargo')
 endif
 
 autocmd vimrc FileType gitcommit,mail,markdown,tex setlocal spell
-autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail set formatoptions-=t
+autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail set formatoptions-=tc
 
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
