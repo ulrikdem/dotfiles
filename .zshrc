@@ -1,12 +1,12 @@
-alias diff='diff --color=auto'
-alias dotfiles-git='git --git-dir $HOME/.dotfiles.git --work-tree $HOME -c status.showUntrackedFiles=no'
-alias gcc='gcc -Wall -Wextra'
-alias g++='g++ -Wall -Wextra'
-alias pmount='udevil mount'
-alias pumount='udevil umount'
 alias rmcdir-r='cd ..; rm -r $OLDPWD'
-alias ssh='TERM=xterm-256color ssh'
-alias vim=nvim
+type diff >/dev/null && alias diff='diff --color=auto'
+type gcc >/dev/null && alias gcc='gcc -Wall -Wextra'
+type g++ >/dev/null && alias g++='g++ -Wall -Wextra'
+type git >/dev/null && alias dotfiles-git='git --git-dir $HOME/.dotfiles.git --work-tree $HOME -c status.showUntrackedFiles=no'
+type nvim >/dev/null && alias vim=nvim
+type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
+type udevil >/dev/null && alias pmount='udevil mount'
+type udevil >/dev/null && alias pumount='udevil umount'
 [[ -v abk ]] && abk[LC]='--color=always |& less -r'
 
 bindkey '^N' history-beginning-search-forward-end
@@ -22,38 +22,43 @@ zstyle ':prompt:grml:right:setup' use-rprompt false
 setopt NO_CHECK_JOBS
 
 [[ -r /etc/profile.d/vte.sh ]] && . /etc/profile.d/vte.sh
-[[ -r /usr/share/fzf/key-bindings.zsh ]] && . /usr/share/fzf/key-bindings.zsh
 
-fzf-file-widget-helper() {
-    local query=${1##*/}
-    local dir=${1:0:${#1}-${#query}}
-    while [[ -n $dir && ! -d $dir ]]; do
-        dir=${dir%/}
-        query=${dir##*/}/$query
-        dir=${1:0:${#1}-${#query}}
-    done
-    cd "$dir"
-    unset REPORTTIME
-    local item
-    fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 | while read -rd $'\0' item; do
-        echo -n "$dir${(q)item} "
-    done
-    REPORTTIME=5
-}
+if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
+    . /usr/share/fzf/key-bindings.zsh
 
-fzf-file-widget() {
-    local tokens=(${(z)LBUFFER})
-    [[ ${LBUFFER[-1]} =~ '\s' ]] && tokens+=
-    local results=$(fzf-file-widget-helper ${tokens[-1]})
-    if [[ -n $results ]]; then
-        LBUFFER=${LBUFFER:0:${#LBUFFER}-${#tokens[-1]}}$results
+    if type fd >/dev/null; then
+        fzf-file-widget-helper() {
+            local query=${1##*/}
+            local dir=${1:0:${#1}-${#query}}
+            while [[ -n $dir && ! -d $dir ]]; do
+                dir=${dir%/}
+                query=${dir##*/}/$query
+                dir=${1:0:${#1}-${#query}}
+            done
+            cd "$dir"
+            unset REPORTTIME
+            local item
+            fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 | while read -rd $'\0' item; do
+                echo -n "$dir${(q)item} "
+            done
+            REPORTTIME=5
+        }
+
+        fzf-file-widget() {
+            local tokens=(${(z)LBUFFER})
+            [[ ${LBUFFER[-1]} =~ '\s' ]] && tokens+=
+            local results=$(fzf-file-widget-helper ${tokens[-1]})
+            if [[ -n $results ]]; then
+                LBUFFER=${LBUFFER:0:${#LBUFFER}-${#tokens[-1]}}$results
+            fi
+            zle reset-prompt
+        }
+
+        fzf-cd-widget() {
+            unset REPORTTIME
+            cd "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
+            REPORTTIME=5
+            zle reset-prompt
+        }
     fi
-    zle reset-prompt
-}
-
-fzf-cd-widget() {
-    unset REPORTTIME
-    cd "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
-    REPORTTIME=5
-    zle reset-prompt
-}
+fi
