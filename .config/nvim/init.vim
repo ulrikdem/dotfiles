@@ -537,7 +537,7 @@ function! s:completion_fallback() abort
         Plug 'ncm2/ncm2'
         Plug 'ncm2/ncm2-path'
         Plug 'ncm2/ncm2-bufword'
-        Plug 'fgrsnau/ncm2-otherbuf', {'branch': 'ncm2'}
+        Plug 'fgrsnau/ncm2-otherbuf'
         let g:ncm2#complete_length = 2
         autocmd vimrc User Plug_ncm2 autocmd BufEnter * call ncm2#enable_for_buffer()
     else
