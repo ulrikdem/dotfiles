@@ -149,7 +149,7 @@ webview.add_signal("init", function(view)
             if widget.text:match("^<span color=") then
                 return
             end
-            local protocol = widget.text:match("^[^:]+:") or ""
+            local protocol = widget.text:match("^%a[%a%d+%-.]*:") or ""
             local color = protocol == "Link:" and theme.proto_fg
                 or win.view:ssl_trusted() and theme.trust_proto_fg
                 or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_proto_fg
@@ -400,13 +400,23 @@ function select.label_maker()
 end
 follow.pattern_maker = follow.pattern_styles.match_label
 
+function lousy.uri.split(s)
+    return {s}
+end
+
 local is_uri = lousy.uri.is_uri
 function lousy.uri.is_uri(s)
     return s:match("[%./]") and os.exists(s) or is_uri(s)
 end
 
-function lousy.uri.split(s)
-    return {s}
+local search_open = window.methods.search_open
+function window.methods.search_open(...)
+    local uri = search_open(...)
+    if uri:match("^%a[%a%d+%-.]*:") or os.exists(uri) then
+        return uri
+    else
+        return "https://"..uri
+    end
 end
 
 -- Initialization {{{1
