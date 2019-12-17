@@ -1,24 +1,43 @@
--- Imports {{{1
+-- Modules {{{1
+
+local unique_instance = require("unique_instance")
+
+local lousy = require("lousy")
+lousy.theme.init(lousy.util.find_config("theme.lua"))
+local theme = lousy.theme.get()
 
 local adblock = require("adblock")
+local adblock_chrome = require("adblock_chrome")
+local binds_chrome = require("binds_chrome")
 local cmdhist = require("cmdhist")
+local completion = require("completion")
 local downloads = require("downloads")
+local downloads_chrome = require("downloads_chrome")
 local editor = require("editor")
 local follow = require("follow")
+local follow_selected = require("follow_selected")
+local go_input = require("go_input")
+local go_next_prev = require("go_next_prev")
+local go_up = require("go_up")
+local help_chrome = require("help_chrome")
 local history = require("history")
+local history_chrome = require("history_chrome")
 local log_chrome = require("log_chrome")
-local lousy = require("lousy")
 local modes = require("modes")
+local newtab_chrome = require("newtab_chrome")
+local open_editor = require("open_editor")
+local referer_control_wm = require_web_module("referer_control_wm")
+local search = require("search")
 local select = require("select")
 local session = require("session")
 local settings = require("settings")
-local styles = require("styles")
+local settings_chrome = require("settings_chrome")
+local tabhistory = require("tabhistory")
 local undoclose = require("undoclose")
-local unique_instance = require("unique_instance")
+local view_source = require("view_source")
+local webinspector = require("webinspector")
 local webview = require("webview")
 local window = require("window")
-
-local theme = lousy.theme.get()
 
 -- Settings {{{1
 
@@ -32,6 +51,8 @@ unique_instance.open_links_in_new_window = true
 
 settings.completion.history.order = "last_visit"
 
+luakit.enable_spell_checking = true
+
 settings.webview.default_charset = "utf-8"
 settings.webview.hardware_acceleration_policy = "always"
 settings.webview.enable_accelerated_2d_canvas = true
@@ -41,23 +62,14 @@ settings.webview.enable_mediasource = true
 settings.webview.enable_plugins = false
 settings.webview.enable_java = false
 
+soup.cookies_storage = luakit.data_dir.."/cookies.db"
+
 -- Bindings {{{1
 
 modes.remap_binds({"all", "passthrough"}, {
     {"<control-[>", "<Escape>", true},
 })
 modes.remove_binds("passthrough", {"<Escape>"})
-
-modes.add_binds({"normal", "insert"}, {
-    {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
-        function win.hit(_, mods, key)
-            win.hit = nil
-            win.view:send_key(key, mods)
-            return true
-        end
-    end},
-})
-settings.window.act_on_synthetic_keys = true
 
 modes.add_binds("normal", {
     {"gs", "Change protocol to HTTPS.", function(win)
@@ -68,13 +80,26 @@ modes.add_binds("normal", {
     end},
 })
 
+settings.window.act_on_synthetic_keys = true
+modes.add_binds({"normal", "insert"}, {
+    {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
+        function win.hit(_, mods, key)
+            win.hit = nil
+            win.view:send_key(key, mods)
+            return true
+        end
+    end},
+})
+
+editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
 modes.remap_binds("insert", {
     {"<mod1-e>", "<control-e>"},
 })
-editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
 
 cmdhist.history_prev = "<control-p>"
 cmdhist.history_next = "<control-n>"
+
+modes.get_mode("command").reset_on_navigation = false
 
 local detach_target = nil
 modes.add_cmds{
@@ -99,49 +124,19 @@ modes.add_cmds{
     end},
 }
 
-modes.get_mode("command").reset_on_navigation = false
-
 -- Widgets {{{1
 
-function window.methods.update_win_title(win)
-    win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
-end
-
-lousy.widget.tab.label_format = "{index}: {title}"
-
-local function fix_favicons(view)
-    local ignore_private = false
-    local index = getmetatable(view).__index
-    getmetatable(view).__index = function(view, key)
-        if key == "private" and ignore_private then
-            return false
-        elseif key == "eval_js" then
-            return function(view, js, opts)
-                if opts.callback then
-                    local cb = opts.callback
-                    function opts.callback(...)
-                        ignore_private = true
-                        pcall(cb, ...)
-                        ignore_private = false
-                    end
-                end
-                index(view, "eval_js")(view, js, opts)
-            end
-        end
-        return index(view, key)
-    end
-    webview.remove_signal("init", fix_favicons)
-end
-webview.add_signal("init", fix_favicons)
-
-window.add_signal("init", function(win)
-    win.sbar.l.layout.children[2]:destroy()
-    win.sbar.r.layout.children[6]:destroy()
-    win.sbar.r.layout.children[5]:destroy()
+window.add_signal("build", function(win)
+    win.sbar.l.layout:pack(lousy.widget.uri())
+    win.sbar.l.layout:pack(lousy.widget.progress())
+    win.sbar.r.layout:pack(lousy.widget.buf())
+    win.sbar.r.layout:pack(log_chrome.widget())
+    win.sbar.r.layout:pack(lousy.widget.scroll())
 end)
-function lousy.widget.tabi()
-    return widget{type = "label"}
-end
+
+log_chrome.widget_format = "{errors}{warnings}"
+log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
+log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
 
 webview.add_signal("init", function(view)
     luakit.idle_add(function()
@@ -155,10 +150,10 @@ webview.add_signal("init", function(view)
                 return
             end
             local protocol = widget.text:match("^[^:]+:") or ""
-            local color = protocol == "Link:" and "gray"
-                or win.view:ssl_trusted() and theme.trust_fg
-                or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_fg
-                or "gray"
+            local color = protocol == "Link:" and theme.proto_fg
+                or win.view:ssl_trusted() and theme.trust_proto_fg
+                or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_proto_fg
+                or theme.proto_fg
             widget.text = string.format("<span color=%q>%s</span>%s", color,
                 lousy.util.escape(protocol), lousy.util.escape(widget.text:sub(#protocol + 1)))
         end
@@ -171,66 +166,11 @@ webview.add_signal("init", function(view)
     end)
 end)
 
-log_chrome.widget_format = "{errors}{warnings}"
-log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
-log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
-
-function select.label_maker()
-    return trim(sort(reverse(charset("asdfghjkl"))))
+function window.methods.update_win_title(win)
+    win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
 end
-follow.pattern_maker = follow.pattern_styles.match_label
-
--- Theme {{{1
-
-theme.ok = {fg = "white", bg = "gray"}
-theme.notif_bg = theme.ok.bg
-theme.warning_bg = theme.ok.bg
-theme.menu_selected_bg = theme.ok.bg
-
-for _, key in ipairs{
-    "notif_fg", "ibar_fg",
-    "menu_title_bg", "menu_fg", "menu_bg", "menu_selected_fg",
-    "menu_active_bg", "menu_enabled_fg", "menu_enabled_bg", "menu_disabled_bg",
-    "proxy_active_menu_fg", "proxy_active_menu_bg", "proxy_inactive_menu_bg",
-} do
-    theme[key] = nil
-end
-
--- Dark mode {{{1
-
-local dark_style = stylesheet{
-    source = [[
-        :root:not(.luakit-already-dark), iframe, frame {
-            filter: invert(1) hue-rotate(180deg);
-        }
-    ]],
-}
-
-webview.add_signal("init", function(view)
-    view.stylesheets[dark_style] = true
-end)
-
-local check_dark_wm = require_web_module("check_dark_wm")
-
-modes.add_binds("normal", {
-    {"cc", "Use normal colors in the current tab.", function(win)
-        win.view.stylesheets[dark_style] = false
-    end},
-    {"cd", "Use dark colors by inverting light pages.", function(win)
-        win.view.stylesheets[dark_style] = true
-        check_dark_wm:emit_signal(win.view, "check")
-    end},
-    {"cf", "Force all pages to be inverted.", function(win)
-        win.view.stylesheets[dark_style] = true
-        check_dark_wm:emit_signal(win.view, "ignore")
-    end},
-})
 
 -- Private mode {{{1
-
-theme.private_sbar_bg = theme.private_tab_bg
-theme.private_tab_bg = theme.tab_bg
-theme.selected_private_tab_bg = theme.tab_selected_bg
 
 local new_window = window.new
 function window.new(args)
@@ -263,6 +203,16 @@ end
 
 modes.remove_binds("command", {":priv-t[abopen]"})
 
+luakit.idle_add(function()
+    undoclose.remove_signals("save")
+    undoclose.add_signal("save", function(view)
+        if (view.uri == "about:blank" or view.uri == settings.window.new_tab_page)
+                and #view.history.items == 1 then
+            return false
+        end
+    end)
+end)
+
 local save_session = session.save
 function session.save(...)
     local wins = window.bywidget
@@ -273,15 +223,35 @@ function session.save(...)
     window.bywidget = wins
 end
 
-luakit.idle_add(function()
-    undoclose.remove_signals("save")
-    undoclose.add_signal("save", function(view)
-        if (view.uri == "about:blank" or view.uri == settings.window.new_tab_page)
-                and #view.history.items == 1 then
-            return false
-        end
-    end)
+-- Dark mode {{{1
+
+local dark_style = stylesheet{
+    source = [[
+        :root:not(.luakit-already-dark), iframe, frame {
+            filter: invert(1) hue-rotate(180deg);
+        }
+    ]],
+}
+
+webview.add_signal("init", function(view)
+    view.stylesheets[dark_style] = true
 end)
+
+local check_dark_wm = require_web_module("check_dark_wm")
+
+modes.add_binds("normal", {
+    {"cc", "Use normal colors in the current tab.", function(win)
+        win.view.stylesheets[dark_style] = false
+    end},
+    {"cd", "Use dark colors by inverting light pages.", function(win)
+        win.view.stylesheets[dark_style] = true
+        check_dark_wm:emit_signal(win.view, "check")
+    end},
+    {"cf", "Force all pages to be inverted.", function(win)
+        win.view.stylesheets[dark_style] = true
+        check_dark_wm:emit_signal(win.view, "ignore")
+    end},
+})
 
 -- Signals {{{1
 
@@ -340,10 +310,6 @@ function luakit.save_file(_, _, _, file)
     return status == 0 and file
 end
 
-downloads.remove_signals("download-location")
-downloads.remove_signals("download::status")
-downloads.remove_signals("open-file")
-
 downloads.add_signal("download::status", function(dl)
     if dl.status == "finished" and dl.destination:match("^/tmp/luakit%.") then
         downloads.do_open(dl)
@@ -363,7 +329,8 @@ local function add_torrent(torrent, win)
 end
 
 downloads.add_signal("open-file", function(file, mime)
-    if mime == "application/x-bittorrent" then
+    if mime == "application/x-bittorrent"
+            or mime == "application/octet-stream" and file:match("%.torrent$") then
         add_torrent(file)
     else
         luakit.spawn(string.format("xdg-open %q", file))
@@ -428,9 +395,10 @@ follow.selectors.video = "video"
 
 -- Miscellaneous {{{1
 
-luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.data_dir), function()
-    adblock.load(true)
-end)
+function select.label_maker()
+    return trim(sort(reverse(charset("asdfghjkl"))))
+end
+follow.pattern_maker = follow.pattern_styles.match_label
 
 local is_uri = lousy.uri.is_uri
 function lousy.uri.is_uri(s)
@@ -441,8 +409,23 @@ function lousy.uri.split(s)
     return {s}
 end
 
-if os.exists(luakit.config_dir.."/userconf_local.lua") then
-    require("userconf_local")
+-- Initialization {{{1
+
+luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.data_dir), function()
+    adblock.load(true)
+end)
+
+if pcall(function() lousy.util.find_config("userconf.lua") end) then
+    require("userconf")
+end
+
+local win = not luakit.nounique and session.restore()
+if win then
+    for i, uri in ipairs(uris) do
+        win:new_tab(uri, {switch = i == 1})
+    end
+else
+    window.new(uris)
 end
 
 -- vim: foldmethod=marker foldcolumn=2
