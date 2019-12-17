@@ -419,6 +419,27 @@ function window.methods.search_open(...)
     end
 end
 
+local function pcal_eval_js_callback(view)
+    local index = getmetatable(view).__index
+    getmetatable(view).__index = function(view, key)
+        local value = index(view, key)
+        if key == "eval_js" then
+            return function(view, js, opts)
+                if opts.callback then
+                    local cb = opts.callback
+                    function opts.callback(...)
+                        pcall(cb, ...)
+                    end
+                end
+                value(view, js, opts)
+            end
+        end
+        return value
+    end
+    webview.remove_signal("init", pcal_eval_js_callback)
+end
+webview.add_signal("init", pcal_eval_js_callback)
+
 -- Initialization {{{1
 
 luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.data_dir), function()
