@@ -17,16 +17,16 @@ return {
     title_fg = "#f00",
 
     tab_fg = "#888",
-    hover_bg = "#444",
-    ntheme = "#888",
+    tab_hover_bg = "#444",
+    tab_ntheme = "#888",
     selected_ntheme = "#fff",
-    loading_fg = "#0ff",
+    tab_loading_fg = "#0ff",
 
     loaded_fg = "#0ff",
 
-    proto_fg = "#888",
-    trust_proto_fg = "#0f0",
-    notrust_proto_fg = "#f00",
+    scheme_fg = "#888",
+    trust_scheme_fg = "#0f0",
+    notrust_scheme_fg = "#f00",
 
     private_sbar_bg = "#004",
 }

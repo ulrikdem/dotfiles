@@ -145,13 +145,13 @@ webview.add_signal("init", function(view)
             if widget.text:match("^<span color=") then
                 return
             end
-            local protocol = widget.text:match("^%a[%a%d+%-.]*:") or ""
-            local color = protocol == "Link:" and theme.proto_fg
-                or win.view:ssl_trusted() and theme.trust_proto_fg
-                or (win.view:ssl_trusted() == false or protocol == "http:") and theme.notrust_proto_fg
-                or theme.proto_fg
+            local scheme = widget.text:match("^%a[%a%d+%-.]*:") or ""
+            local color = scheme == "Link:" and theme.scheme_fg
+                or win.view:ssl_trusted() and theme.trust_scheme_fg
+                or (win.view:ssl_trusted() == false or scheme == "http:") and theme.notrust_scheme_fg
+                or theme.scheme_fg
             widget.text = string.format("<span color=%q>%s</span>%s", color,
-                lousy.util.escape(protocol), lousy.util.escape(widget.text:sub(#protocol + 1)))
+                lousy.util.escape(scheme), lousy.util.escape(widget.text:sub(#scheme + 1)))
         end
         for _, signal in ipairs{"property::uri", "switched-page", "link-hover", "link-unhover"} do
             view:add_signal(signal, update_uri)
