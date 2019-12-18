@@ -29,4 +29,9 @@ return {
     notrust_scheme_fg = "#f00",
 
     private_sbar_bg = "#004",
+
+    hint_font = "9px monospace",
+    hint_bg = "#00f",
+    hint_overlay_bg = "rgba(0,255,255,0.5)",
+    hint_overlay_selected_bg = "rgba(0,0,255,0.5)",
 }
