@@ -134,10 +134,6 @@ window.add_signal("build", function(win)
     win.sbar.r.layout:pack(lousy.widget.scroll())
 end)
 
-log_chrome.widget_format = "{errors}{warnings}"
-log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
-log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
-
 webview.add_signal("init", function(view)
     luakit.idle_add(function()
         local function update_uri()
@@ -165,6 +161,12 @@ webview.add_signal("init", function(view)
         end)
     end)
 end)
+
+log_chrome.widget_format = "{errors}{warnings}"
+log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
+log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
+
+lousy.widget.tab.label_format = "<span foreground='{index_fg}'>{index}</span>: {title}"
 
 function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
