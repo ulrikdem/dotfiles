@@ -6,10 +6,12 @@ return {
     notif_bg = "#444",
     warning_fg = "#f00",
     warning_bg = "#444",
-    error_bg = "#f00",
+    error_fg = "#f00",
+    error_bg = "#444",
 
     ok = {fg = "#fff", bg = "#444"},
-    ibar_bg = "rgba(0,0,0,0)",
+    error = {fg = "#f00", bg = "#444"},
+    ibar_bg = "#666",
 
     menu_selected_bg = "#444",
     title_fg = "#f00",
