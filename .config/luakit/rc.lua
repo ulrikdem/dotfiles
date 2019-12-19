@@ -64,6 +64,11 @@ settings.webview.enable_java = false
 
 soup.cookies_storage = luakit.data_dir.."/cookies.db"
 
+function select.label_maker()
+    return trim(sort(reverse(charset("asdfghjkl"))))
+end
+follow.pattern_maker = follow.pattern_styles.match_label
+
 -- Bindings {{{1
 
 modes.remap_binds({"all", "passthrough"}, {
@@ -75,7 +80,7 @@ modes.add_binds("normal", {
     {"gs", "Change protocol to HTTPS.", function(win)
         win.view.uri = win.view.uri:gsub("^http:", "https:")
     end},
-    {"<control-C>", "Copy the selected text.", function()
+    {"<control-shift-c>", "Copy the selected text.", function()
         luakit.selection.clipboard = luakit.selection.primary
     end},
 })
@@ -395,12 +400,7 @@ modes.add_binds("ex-follow", {
 })
 follow.selectors.video = "video"
 
--- Miscellaneous {{{1
-
-function select.label_maker()
-    return trim(sort(reverse(charset("asdfghjkl"))))
-end
-follow.pattern_maker = follow.pattern_styles.match_label
+-- URIs {{{1
 
 function lousy.uri.split(s)
     return {s}
@@ -420,27 +420,6 @@ function window.methods.search_open(...)
         return "https://"..uri
     end
 end
-
-local function pcal_eval_js_callback(view)
-    local index = getmetatable(view).__index
-    getmetatable(view).__index = function(view, key)
-        local value = index(view, key)
-        if key == "eval_js" then
-            return function(view, js, opts)
-                if opts.callback then
-                    local cb = opts.callback
-                    function opts.callback(...)
-                        pcall(cb, ...)
-                    end
-                end
-                value(view, js, opts)
-            end
-        end
-        return value
-    end
-    webview.remove_signal("init", pcal_eval_js_callback)
-end
-webview.add_signal("init", pcal_eval_js_callback)
 
 -- Initialization {{{1
 
