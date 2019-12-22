@@ -181,6 +181,27 @@ function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
 end
 
+local function fix_scroll_widget_error(view)
+    local index = getmetatable(view).__index
+    getmetatable(view).__index = function(view, key)
+        local value = index(view, key)
+        if key == "eval_js" then
+            return function(view, js, opts)
+                if opts.callback then
+                    local cb = opts.callback
+                    function opts.callback(...)
+                        pcall(cb, ...)
+                    end
+                end
+                value(view, js, opts)
+            end
+        end
+        return value
+    end
+    webview.remove_signal("init", fix_scroll_widget_error)
+end
+webview.add_signal("init", fix_scroll_widget_error)
+
 -- Private mode {{{1
 
 local new_window = window.new
