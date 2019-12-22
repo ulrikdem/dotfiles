@@ -2,6 +2,7 @@
 
 import Control.Monad
 import Data.Bool
+import Data.Char
 import Data.List
 import qualified Data.Map.Strict as M
 import Data.Maybe
@@ -145,6 +146,7 @@ promptConf text matches = def
         , ((controlMask, xK_n), historyDownMatching matches)
         , ((controlMask, xK_u), killBefore)
         , ((controlMask, xK_w), killWord Prev)
+        , ((mod1Mask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
         ]) emacsLikeXPKeymap
     }
 
