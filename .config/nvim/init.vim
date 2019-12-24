@@ -9,7 +9,7 @@ augroup END
 try
     call plug#begin('~/.local/share/nvim/plugged')
 
-    function! s:init_plugins() abort
+    function! s:InitPlugins() abort
         call plug#end()
         for l:plug in get(g:, 'plugs_order', [])
             if isdirectory(g:plugs[l:plug].dir)
@@ -23,7 +23,7 @@ try
 catch
     command! -nargs=+ Plug
 
-    function! s:init_plugins() abort
+    function! s:InitPlugins() abort
     endfunction
 endtry
 
@@ -87,10 +87,10 @@ set nojoinspaces
 
 if has('python3') && filereadable('/usr/share/clang/clang-format.py')
     autocmd vimrc FileType c,cpp,java,javascript,typescript
-        \ nnoremap <buffer> <Leader>gq <Cmd>call Clang_format('all')<CR>
+        \ nnoremap <buffer> <Leader>gq <Cmd>call ClangFormat('all')<CR>
     autocmd vimrc FileType c,cpp,java,javascript,typescript
-        \ set formatexpr=Clang_format((v:lnum).':'.(v:lnum+v:count-1))
-    function! Clang_format(lines) abort
+        \ set formatexpr=ClangFormat((v:lnum).':'.(v:lnum+v:count-1))
+    function! ClangFormat(lines) abort
         let l:lines = a:lines
         py3file /usr/share/clang/clang-format.py
     endfunction
@@ -108,8 +108,8 @@ let g:srcery_inverse = 0
 let g:srcery_italic = 1
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
-autocmd vimrc ColorScheme srcery call s:update_colorscheme()
-function! s:update_colorscheme() abort
+autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
+function! s:UpdateColorScheme() abort
     highlight! link NonText SrceryXgray5
     highlight! link SpecialKey SrceryWhite
     highlight! link SpellBad ALEError
@@ -140,7 +140,7 @@ function! s:update_colorscheme() abort
     endfor
 endfunction
 
-function! s:get_srcery_colors(fg, bg) abort
+function! s:GetSrceryColors(fg, bg) abort
     return [
         \ synIDattr(hlID('Srcery'.a:fg), 'fg', 'gui'),
         \ synIDattr(hlID('Srcery'.a:bg), 'fg', 'gui'),
@@ -169,11 +169,11 @@ let g:lightline = {
         \ 'ruler': '%p%% %l:%v%<',
     \ },
     \ 'component_function': {
-        \ 'git': 'Git_statusline',
+        \ 'git': 'GitStatusline',
     \ },
     \ 'component_expand': {
-        \ 'errors': 'Coc_error_count',
-        \ 'warnings': 'Coc_warning_count',
+        \ 'errors': 'CocErrorCount',
+        \ 'warnings': 'CocWarningCount',
     \ },
     \ 'component_type': {
         \ 'errors': 'error',
@@ -201,16 +201,16 @@ autocmd vimrc User Plug_lightline_vim set noshowmode
 autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery
-    \ call s:update_lightline_colors()
-function! s:update_lightline_colors() abort
-    let l:common = s:get_srcery_colors('BrightWhite', 'Xgray5')
+    \ call s:UpdateLightlineColors()
+function! s:UpdateLightlineColors() abort
+    let l:common = s:GetSrceryColors('BrightWhite', 'Xgray5')
     execute 'highlight StatusLine cterm=NONE ctermbg='.l:common[3].' gui=NONE guibg='.l:common[1]
     execute 'highlight StatusLineNC cterm=NONE ctermbg='.l:common[3].' gui=NONE guibg='.l:common[1]
     let l:palette = {
         \ 'normal': {
-            \ 'middle': [s:get_srcery_colors('BrightWhite', 'Xgray3')],
-            \ 'error': [s:get_srcery_colors('Black', 'Red')],
-            \ 'warning': [s:get_srcery_colors('Black', 'BrightOrange')],
+            \ 'middle': [s:GetSrceryColors('BrightWhite', 'Xgray3')],
+            \ 'error': [s:GetSrceryColors('Black', 'Red')],
+            \ 'warning': [s:GetSrceryColors('Black', 'BrightOrange')],
         \ },
         \ 'inactive': {
             \ 'left': [l:common],
@@ -218,7 +218,7 @@ function! s:update_lightline_colors() abort
         \ },
         \ 'tabline': {
             \ 'left': [l:common],
-            \ 'tabsel': [s:get_srcery_colors('Black', 'Blue')],
+            \ 'tabsel': [s:GetSrceryColors('Black', 'Blue')],
         \ },
     \ }
     for [l:mode, l:color] in [
@@ -229,7 +229,7 @@ function! s:update_lightline_colors() abort
         \ ['command', 'Orange'],
     \ ]
         let l:palette[l:mode] = get(l:palette, l:mode, {})
-        let l:palette[l:mode].left = [s:get_srcery_colors('Black', l:color), l:common]
+        let l:palette[l:mode].left = [s:GetSrceryColors('Black', l:color), l:common]
         let l:palette[l:mode].right = l:palette[l:mode].left
     endfor
     let g:lightline#colorscheme#custom#palette = l:palette
@@ -295,8 +295,8 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call fzf#run(fzf#wrap({
     \ ],
 \ }))<CR>
 
-nnoremap <M-o> <Cmd>call <SID>jump_backward()<CR>
-function! s:jump_backward() abort
+nnoremap <M-o> <Cmd>call <SID>JumpBackward()<CR>
+function! s:JumpBackward() abort
     let [l:jumps, l:current] = getjumplist()
     let l:i = l:current - 1
     while l:i >= 0 && l:jumps[l:i].bufnr == bufnr()
@@ -307,8 +307,8 @@ function! s:jump_backward() abort
     endif
 endfunction
 
-nnoremap <M-i> <Cmd>call <SID>jump_forward()<CR>
-function! s:jump_forward() abort
+nnoremap <M-i> <Cmd>call <SID>JumpForward()<CR>
+function! s:JumpForward() abort
     let [l:jumps, l:current] = getjumplist()
     let l:i = l:current + 1
     while l:i < len(l:jumps) && l:jumps[l:i].bufnr == bufnr() ||
@@ -322,36 +322,36 @@ endfunction
 
 " Quickfix {{{1
 
-autocmd vimrc QuickFixCmdPost [^l]* call s:open_quickfix('window')
-function! s:open_quickfix(cmd) abort
+autocmd vimrc QuickFixCmdPost [^l]* call s:OpenQuickfix('window')
+function! s:OpenQuickfix(cmd) abort
     let l:win = win_getid()
     execute 'botright c'.a:cmd
     call win_gotoid(l:win)
 endfunction
 
-nnoremap <Leader>tq <Cmd>call <SID>toggle_quickfix()<CR>
-function! s:toggle_quickfix() abort
+nnoremap <Leader>tq <Cmd>call <SID>ToggleQuickfix()<CR>
+function! s:ToggleQuickfix() abort
     if empty(filter(getwininfo(), {i, w -> w.quickfix && !w.loclist && w.tabnr == tabpagenr()}))
-        call s:open_quickfix('open')
+        call s:OpenQuickfix('open')
     else
         cclose
     endif
 endfunction
 
-let g:fzf_action['ctrl-q'] = {l -> s:set_quickfix(map(l, {i, l -> {'filename': l, 'valid': 1}}))}
+let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> {'filename': l, 'valid': 1}}))}
 
-function! s:set_quickfix(items) abort
+function! s:SetQuickfix(items) abort
     call setqflist(a:items)
-    call s:open_quickfix('window')
+    call s:OpenQuickfix('window')
     cfirst
 endfunction
 
 autocmd vimrc User Plug_fzf
-    \ nnoremap <Leader>fq <Cmd>cclose \| call <SID>fzf_from_quickfix([], getqflist())<CR>
-function! s:fzf_from_quickfix(options, ...) abort
+    \ nnoremap <Leader>fq <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
+function! s:FzfFromQuickfix(options, ...) abort
     let l:all_items = []
     let l:seen = {}
-    function! s:process_items(items) abort closure
+    function! s:ProcessItems(items) abort closure
         let l:lines = []
         for l:item in a:items
             let l:string = string(l:item)
@@ -379,21 +379,21 @@ function! s:fzf_from_quickfix(options, ...) abort
         return l:lines
     endfunction
     if a:0
-        let l:source = s:process_items(a:1)
+        let l:source = s:ProcessItems(a:1)
         let l:Return = 0
     else
         let l:source_file = tempname()
         call writefile([], l:source_file)
         let l:source = 'tail -f '.shellescape(l:source_file)
-        let l:Return = {i -> writefile(s:process_items(i), l:source_file, 'a')}
+        let l:Return = {i -> writefile(s:ProcessItems(i), l:source_file, 'a')}
     endif
-    function! s:fzf_sink(lines) abort closure
+    function! s:FzfSink(lines) abort closure
         if exists('l:source_file')
             call delete(l:source_file)
         endif
         let l:key = remove(a:lines, 0)
         if l:key ==# 'ctrl-q'
-            call s:set_quickfix(map(a:lines, {i, l -> l:all_items[split(l)[0]]}))
+            call s:SetQuickfix(map(a:lines, {i, l -> l:all_items[split(l)[0]]}))
         else
             for l:line in a:lines
                 let l:item = l:all_items[split(l:line)[0]]
@@ -409,7 +409,7 @@ function! s:fzf_from_quickfix(options, ...) abort
     endfunction
     call fzf#run(fzf#wrap({
         \ 'source': l:source,
-        \ 'sink*': funcref("\<SID>fzf_sink"),
+        \ 'sink*': funcref("\<SID>FzfSink"),
         \ 'options': extend([
             \ '--with-nth=2..',
             \ '--delimiter= ',
@@ -434,11 +434,11 @@ tnoremap <M-j> <C-\><C-N><C-W>j
 tnoremap <M-k> <C-\><C-N><C-W>k
 tnoremap <M-l> <C-\><C-N><C-W>l
 
-nnoremap <Leader>tt <Cmd>call <SID>toggle_terminal(getcwd())<CR>
-nnoremap <Leader>tT <Cmd>call <SID>toggle_terminal(expand('%:p:h'))<CR>
+nnoremap <Leader>tt <Cmd>call <SID>ToggleTerminal(getcwd())<CR>
+nnoremap <Leader>tT <Cmd>call <SID>ToggleTerminal(expand('%:p:h'))<CR>
 
 let s:terminal_buffer = -1
-function! s:toggle_terminal(cwd) abort
+function! s:ToggleTerminal(cwd) abort
     if bufwinnr(s:terminal_buffer) != -1
         execute bufwinnr(s:terminal_buffer) 'hide'
         return
@@ -458,8 +458,8 @@ endfunction
 
 Plug 'tpope/vim-fugitive'
 
-autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>toggle_git_status()<CR>
-function! s:toggle_git_status() abort
+autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
+function! s:ToggleGitStatus() abort
     let l:buf = filter(getbufinfo(), {i, b -> get(b.variables, 'fugitive_type', '') ==# 'index'})
     if !empty(l:buf)
         execute 'bdelete' l:buf[0].bufnr
@@ -469,21 +469,21 @@ function! s:toggle_git_status() abort
     endif
     Gstatus
     wincmd H
-    call s:resize_to_fit()
+    call s:ResizeToFit()
     set winfixwidth
     wincmd =
-    autocmd TextChanged <buffer> call s:resize_to_fit()
+    autocmd TextChanged <buffer> call s:ResizeToFit()
 endfunction
 
-function! s:resize_to_fit() abort
+function! s:ResizeToFit() abort
     execute 'vertical resize'
         \ max(add(map(getbufline('%', 1, '$'), {i, l -> strdisplaywidth(l)}), 20))
 endfunction
 
 autocmd vimrc User Plug_vim_fugitive autocmd vimrc FileType gitcommit wincmd K
 
-nnoremap <Leader>td <Cmd>call <SID>toggle_diff()<CR>
-function! s:toggle_diff() abort
+nnoremap <Leader>td <Cmd>call <SID>ToggleDiff()<CR>
+function! s:ToggleDiff() abort
     if !&diff
         if exists(':Gdiffsplit')
             Gdiffsplit!
@@ -500,7 +500,7 @@ endfunction
 
 set diffopt+=vertical,foldcolumn:1,hiddenoff
 
-function! Git_statusline() abort
+function! GitStatusline() abort
     if !exists('*FugitiveStatusline')
         return ''
     endif
@@ -523,7 +523,7 @@ set wildignorecase wildmode=longest:full,full
 cnoremap <expr> <C-N> pumvisible() ? "\<C-N>" : "\<Down>"
 cnoremap <expr> <C-P> pumvisible() ? "\<C-P>" : "\<Up>"
 
-autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>fzf_from_quickfix([],
+autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
     \ map(getbufline('%', 1, '$'), {i, l -> {'bufnr': bufnr(), 'lnum': i + 1, 'text': l}}))<CR>
 
 set dictionary=/usr/share/dict/words
@@ -531,7 +531,7 @@ set completeopt=menuone,noselect,noinsert shortmess+=c
 inoremap <expr> <Tab> pumvisible() ? "\<C-N>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-P>" : "\<S-Tab>"
 
-function! s:completion_fallback() abort
+function! s:CompletionFallback() abort
     if has('python3')
         Plug 'roxma/nvim-yarp'
         Plug 'ncm2/ncm2'
@@ -554,7 +554,7 @@ endfunction
 " Language client {{{1
 
 if executable('curl') && executable('node')
-    function! Download_coc(options) abort
+    function! DownloadCoc(options) abort
         let l:dir = (g:plugs['coc.nvim'].dir).'/build'
         call mkdir(l:dir, 'p')
         execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
@@ -564,9 +564,9 @@ if executable('curl') && executable('node')
             \ 's/\\\\<C-g>u//;'.
             \ "' >".fnameescape(l:dir.'/index.js')
     endfunction
-    Plug 'neoclide/coc.nvim', {'do': function('Download_coc')}
+    Plug 'neoclide/coc.nvim', {'do': function('DownloadCoc')}
 else
-    call s:completion_fallback()
+    call s:CompletionFallback()
 endif
 
 autocmd vimrc User Plug_coc_nvim inoremap <silent> <expr> <Tab> pumvisible() ? "\<C-N>" :
@@ -607,8 +607,8 @@ let g:coc_user_config = {
     \ },
 \ }
 
-autocmd vimrc User Plug_coc_nvim autocmd vimrc FileType * call s:init_lsp_buffer()
-function! s:init_lsp_buffer() abort
+autocmd vimrc User Plug_coc_nvim autocmd vimrc FileType * call s:InitLspBuffer()
+function! s:InitLspBuffer() abort
     if index(s:lsp_filetypes, &filetype) == -1 || @% =~# '^fugitive:'
         return
     endif
@@ -616,7 +616,7 @@ function! s:init_lsp_buffer() abort
     nnoremap <buffer> ]g <Cmd>call CocActionAsync('diagnosticNext')<CR>
     nnoremap <buffer> [g <Cmd>call CocActionAsync('diagnosticPrevious')<CR>
     nnoremap <buffer> <Leader>ge
-        \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>set_quickfix(map(d, {i, d -> {
+        \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>SetQuickfix(map(d, {i, d -> {
             \ 'filename': fnamemodify(d.file, ':p:~:.'),
             \ 'lnum': d.lnum,
             \ 'col': d.col,
@@ -624,7 +624,7 @@ function! s:init_lsp_buffer() abort
             \ 'text': d.message,
         \ }}))})<CR>
     nnoremap <buffer> <Leader>gc
-        \ <Cmd>call CocActionAsync('getCurrentFunctionSymbol', function('<SID>echo_result'))<CR>
+        \ <Cmd>call CocActionAsync('getCurrentFunctionSymbol', function('<SID>EchoResult'))<CR>
     nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDefinition')<CR>
     nnoremap <buffer> <Leader>gD <Cmd>call CocActionAsync('jumpDeclaration')<CR>
     nnoremap <buffer> <Leader>gt <Cmd>call CocActionAsync('jumpTypeDefinition')<CR>
@@ -637,9 +637,9 @@ function! s:init_lsp_buffer() abort
     nnoremap <buffer> <Leader>gf <Cmd>call coc#util#float_jump()<CR>
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
-            \ {e, s -> <SID>fzf_from_quickfix([], <SID>map_symbols(s))})<CR>
+            \ {e, s -> <SID>FzfFromQuickfix([], <SID>MapSymbols(s))})<CR>
         if executable('nvr')
-            nnoremap <buffer> <Leader>gS <Cmd>call <SID>fzf_from_workspace_symbols()<CR>
+            nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
         endif
     endif
     if &filetype !~# 'javascript\|typescript'
@@ -648,27 +648,27 @@ function! s:init_lsp_buffer() abort
         autocmd CursorHold <buffer> call CocActionAsync('highlight')
     endif
 endfunction
-function! s:echo_result(err, result) abort
+function! s:EchoResult(err, result) abort
     echo a:result
 endfunction
 
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
-    \ call s:fzf_from_quickfix([], g:coc_jump_locations)
+    \ call s:FzfFromQuickfix([], g:coc_jump_locations)
 
-function! s:fzf_from_workspace_symbols() abort
+function! s:FzfFromWorkspaceSymbols() abort
     let l:ls = filter(keys(g:coc_user_config.languageserver),
         \ {i, l -> index(g:coc_user_config.languageserver[l].filetypes, &filetype) != -1})[0]
-    let l:Add_items = s:fzf_from_quickfix(['--bind=change:top+execute-silent:'.
-        \ 'nvr -c "call Workspace_symbol_query(''$(echo {q} | sed "s/''/''''/g")'')" &'])
-    function! Workspace_symbol_query(query) abort closure
+    let l:AddItems = s:FzfFromQuickfix(['--bind=change:top+execute-silent:'.
+        \ 'nvr -c "call WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" &'])
+    function! WorkspaceSymbolQuery(query) abort closure
         for l:word in split(a:query)
             let l:word = substitute(substitute(l:word, '^[''^]', '', ''), '[$\\]$', '', '')
             if empty(l:word) || l:word[0] ==# '!' || l:word ==# '|'
                 continue
             endif
             call CocRequestAsync(l:ls, 'workspace/symbol', {'query': l:word},
-                \ {e, s -> l:Add_items(s:map_symbols(map(s, {i, s -> {
+                \ {e, s -> l:AddItems(s:MapSymbols(map(s, {i, s -> {
                     \ 'filepath': iconv(substitute(substitute(s.location.uri, '^file://', '', ''),
                         \ '%\(\x\x\)', {m -> nr2char('0x'.m[1])}, 'g'), 'utf-8', 'latin1'),
                     \ 'lnum': s.location.range.start.line + 1,
@@ -684,7 +684,7 @@ function! s:fzf_from_workspace_symbols() abort
         endfor
     endfunction
 endfunction
-function! s:map_symbols(symbols) abort
+function! s:MapSymbols(symbols) abort
     return map(a:symbols, {i, s -> {
         \ 'filename': get(s, 'filepath', @%),
         \ 'lnum': s.lnum,
@@ -714,11 +714,11 @@ highlight link CocInfoHighlight ALEInfo
 highlight link CocHintHighlight ALEInfo
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
-function! Coc_error_count() abort
+function! CocErrorCount() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
     return l:count ? l:count.g:coc_user_config.diagnostic.errorSign : ''
 endfunction
-function! Coc_warning_count() abort
+function! CocWarningCount() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
     return l:count ? l:count.g:coc_user_config.diagnostic.warningSign : ''
 endfunction
@@ -820,16 +820,16 @@ let g:vimtex_fold_types = {}
 for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
     let g:vimtex_fold_types[s:key] = {'enabled': 0}
 endfor
-autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:init_vimtex_buffer()
-function! s:init_vimtex_buffer() abort
+autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:InitVimtexBuffer()
+function! s:InitVimtexBuffer() abort
     setlocal foldcolumn=2
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
-    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>clean_tex_files()<CR>
-    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>clean_tex_files()<CR>
+    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>CleanTexFiles()<CR>
+    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>CleanTexFiles()<CR>
     nmap <buffer> <Leader>mv <Plug>(vimtex-view)
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
 endfunction
-function! s:clean_tex_files() abort
+function! s:CleanTexFiles() abort
     for l:ext in ['.synctex.gz', '.bbl', '.nav', '.snm']
         call delete(expand('%:r').l:ext)
     endfor
@@ -887,8 +887,8 @@ if executable('gdb')
 endif
 
 if executable('cfr')
-    autocmd vimrc BufReadCmd *.class call s:decompile_java_class()
-    function! s:decompile_java_class() abort
+    autocmd vimrc BufReadCmd *.class call s:DecompileJavaClass()
+    function! s:DecompileJavaClass() abort
         setlocal undolevels=-1
         read !cfr %
         1 delete _
@@ -898,4 +898,4 @@ endif
 
 " }}}
 
-call s:init_plugins()
+call s:InitPlugins()
