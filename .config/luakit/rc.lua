@@ -285,43 +285,42 @@ modes.add_binds("normal", {
     end},
 })
 
--- Signals {{{1
+-- Videos {{{1
 
-local preserve_uri = false
-webview.add_signal("init", function(view)
-    if preserve_uri then
-        preserve_uri = false
-    else
-        view.uri = settings.window.new_tab_page
+local function play_video(uris, referrer, win)
+    if #uris == 0 then
+        win:error("Could not play video")
+        return
     end
-
-    view:remove_signals("create-web-view")
-    view:add_signal("create-web-view", function()
-        preserve_uri = true
-        return webview.window(view):new_tab()
-    end)
-
-    view:add_signal("new-window-decision", function(_, uri)
-        view.uri = uri
-        return false
-    end)
-
-    view:add_signal("navigation-request", function(_, uri)
-        if uri:match("^https://[^/]+%.m%.wikipedia%.org/") then
-            view.uri = uri:gsub("^https://([^/]+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
-            return false
-        elseif uri:match("^mailto:") then
-            luakit.spawn(string.format("termite -e 'alot compose %q'", uri))
-            return false
+    local uri = table.remove(uris, 1)
+    luakit.spawn(string.format("mpv --referrer %q -- %q", referrer, uri), function(_, status)
+        if status ~= 0 then
+            play_video(uris, referrer, win)
         end
     end)
-end)
+end
 
-history.add_signal("add", function(uri)
-    if uri:match("^file:") then
-        return false
-    end
-end)
+modes.add_binds("ex-follow", {
+    {"v", "Hint all videos and play it with `mpv`.", function(win)
+        win:set_mode("follow", {
+            prompt = "mpv",
+            selector = "video",
+            evaluator = function(element)
+                local uris = {element.attr.src}
+                for _, source in ipairs(element:query("source")) do
+                    table.insert(uris, source.attr.src)
+                end
+                element:remove()
+                return uris
+            end,
+            func = function(uris)
+                table.insert(uris, win.view.uri)
+                play_video(uris, win.view.uri, win)
+            end,
+        })
+    end},
+})
+follow.selectors.video = "video"
 
 -- Downloads {{{1
 
@@ -370,15 +369,6 @@ downloads.add_signal("open-file", function(file, mime)
     return true
 end)
 
-webview.add_signal("init", function(view)
-    view:add_signal("navigation-request", function(_, uri)
-        if uri:match("^magnet:") then
-            add_torrent(uri, webview.window(view))
-            return false
-        end
-    end)
-end)
-
 local close_tab = window.methods.close_tab
 function window.methods.close_tab(win, view, ...)
     if view and view.uri == "about:blank" and #view.history.items == 1 and win.tabs:count() == 1 then
@@ -387,43 +377,6 @@ function window.methods.close_tab(win, view, ...)
         close_tab(win, view, ...)
     end
 end
-
--- Videos {{{1
-
-local function play_video(uris, referrer, win)
-    if #uris == 0 then
-        win:error("Could not play video")
-        return
-    end
-    local uri = table.remove(uris, 1)
-    luakit.spawn(string.format("mpv --referrer %q -- %q", referrer, uri), function(_, status)
-        if status ~= 0 then
-            play_video(uris, referrer, win)
-        end
-    end)
-end
-
-modes.add_binds("ex-follow", {
-    {"v", "Hint all videos and play it with `mpv`.", function(win)
-        win:set_mode("follow", {
-            prompt = "mpv",
-            selector = "video",
-            evaluator = function(element)
-                local uris = {element.attr.src}
-                for _, source in ipairs(element:query("source")) do
-                    table.insert(uris, source.attr.src)
-                end
-                element:remove()
-                return uris
-            end,
-            func = function(uris)
-                table.insert(uris, win.view.uri)
-                play_video(uris, win.view.uri, win)
-            end,
-        })
-    end},
-})
-follow.selectors.video = "video"
 
 -- URIs {{{1
 
@@ -445,6 +398,45 @@ function window.methods.search_open(...)
         return "https://"..uri
     end
 end
+
+local preserve_uri = false
+webview.add_signal("init", function(view)
+    if preserve_uri then
+        preserve_uri = false
+    else
+        view.uri = settings.window.new_tab_page
+    end
+
+    view:remove_signals("create-web-view")
+    view:add_signal("create-web-view", function()
+        preserve_uri = true
+        return webview.window(view):new_tab()
+    end)
+
+    view:add_signal("new-window-decision", function(_, uri)
+        view.uri = uri
+        return false
+    end)
+
+    view:add_signal("navigation-request", function(_, uri)
+        if uri:match("^https://[^/]+%.m%.wikipedia%.org/") then
+            view.uri = uri:gsub("^https://([^/]+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
+            return false
+        elseif uri:match("^magnet:") then
+            add_torrent(uri, webview.window(view))
+            return false
+        elseif uri:match("^mailto:") then
+            luakit.spawn(string.format("termite -e 'alot compose %q'", uri))
+            return false
+        end
+    end)
+end)
+
+history.add_signal("add", function(uri)
+    if uri:match("^file:") then
+        return false
+    end
+end)
 
 -- Initialization {{{1
 
