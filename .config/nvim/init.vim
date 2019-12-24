@@ -807,6 +807,8 @@ autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail set formatoptions-
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
 let g:tex_flavor = 'latex'
+let g:tex_conceal = 'agm'
+autocmd vimrc FileType tex setlocal conceallevel=2
 let g:vimtex_indent_on_ampersands = 0
 let g:vimtex_indent_bib_enabled = 0
 if executable('nvr')
