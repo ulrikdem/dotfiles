@@ -448,12 +448,7 @@ if pcall(function() lousy.util.find_config("userconf.lua") end) then
     require("userconf")
 end
 
-local win = not luakit.nounique and session.restore()
-if win then
-    for i, uri in ipairs(uris) do
-        win:new_tab(uri, {switch = i == 1})
-    end
-else
+if not session.restore() or #uris ~= 0 then
     window.new(uris)
 end
 
