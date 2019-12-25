@@ -1,6 +1,19 @@
--- Modules {{{1
+-- Unique instance {{{1
+
+if luakit.unique then
+    local new = luakit.unique.new
+    function luakit.unique.new(id)
+        local display = os.getenv("DISPLAY")
+        if display then
+            id = id.."."..display:gsub("[^%w_]", "_")
+        end
+        new(id)
+    end
+end
 
 local unique_instance = require("unique_instance")
+
+-- Modules {{{1
 
 local lousy = require("lousy")
 lousy.theme.init(lousy.util.find_config("theme.lua"))
