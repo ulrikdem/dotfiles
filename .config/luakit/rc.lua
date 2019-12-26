@@ -272,7 +272,8 @@ end
 
 local dark_style = stylesheet{
     source = [[
-        :root:not(.luakit-already-dark), iframe, frame {
+        :root:not(.luakit-already-dark), iframe, frame,
+        :root:not(.luakit-already-dark) span.hint_label {
             filter: invert(1) hue-rotate(180deg);
         }
     ]],

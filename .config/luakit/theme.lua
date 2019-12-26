@@ -31,8 +31,10 @@ return {
     private_sbar_bg = "#004",
 
     hint_font = "10px monospace",
-    hint_bg = "#00f",
     hint_border = "none",
-    hint_overlay_bg = "rgba(0,255,255,0.5)",
-    hint_overlay_selected_bg = "rgba(0,0,255,0.5)",
+    hint_bg = "rgb(252,96,72)",
+    hint_overlay_selected_border = "1px dotted rgb(252,96,72)",
+    hint_overlay_selected_bg = "rgba(252,96,72,0.5)",
+    hint_overlay_border = "1px dotted rgb(130,126,135)",
+    hint_overlay_bg = "rgba(130,126,135,0.5)",
 }
