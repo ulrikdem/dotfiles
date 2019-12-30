@@ -36,6 +36,7 @@ local go_up = require("go_up")
 local help_chrome = require("help_chrome")
 local history = require("history")
 local history_chrome = require("history_chrome")
+local image_css = require("image_css")
 local log_chrome = require("log_chrome")
 local modes = require("modes")
 local newtab_chrome = require("newtab_chrome")
@@ -82,6 +83,16 @@ function select.label_maker()
     return trim(sort(reverse(charset("asdfghjkl"))))
 end
 follow.pattern_maker = follow.pattern_styles.match_label
+
+image_css.stylesheet.source = [[
+    @media screen {
+        body {
+            background-color: black;
+            height: 100%;
+            display: grid;
+        }
+    }
+]]
 
 -- Bindings {{{1
 
