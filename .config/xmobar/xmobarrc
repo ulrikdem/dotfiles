@@ -1,5 +1,5 @@
 Config
-    { template = "%GPU_ICON%%StdinReader%}{    %ip%%dynnetwork%%wlan0wi% <fc=gray32>│</fc> %cpu% <fc=gray32>│</fc> %memory% <fc=gray32>│</fc> %bright% <fc=gray32>│</fc> %volume% <fc=gray32>│</fc> %battery-icon% %battery% <fc=gray32>│</fc> %date%"
+    { template = "%GPU_ICON%%StdinReader%}{    %ip%%dynnetwork%%wlan0wi% <fc=gray32>│</fc> %cpu% <fc=gray32>│</fc> %memory% <fc=gray32>│</fc> %bright% <fc=gray32>│</fc> %volume% <fc=gray32>│</fc> %battery% <fc=gray32>│</fc> %date%"
     , commands =
         [ Run XPropertyLog "GPU_ICON"
         , Run StdinReader
@@ -46,14 +46,17 @@ Config
         , Run Com "sh"
             [ "-c", "amixer get Master | sed -nE 's/\\[on\\]/ /;s/\\[off\\]/ /;s/.*\\[(.*)%\\] (.*)/\\2<fc=green>\\1<\\/fc>%/p;T;q'"
             ] "volume" 10
-        , Run Com "battery-icon" [] "battery-icon" 10
         , Run Battery
-            [ "-t", "<left>% <timeleft>"
+            [ "-t", "<acstatus> <left>% <timeleft>"
             , "-h", "green"
             , "-n", "yellow"
             , "-l", "red"
             , "-H", "50"
             , "-L", "25"
+            , "--"
+            , "-o", "<fc=gray></fc>"
+            , "-O", "<fc=gray></fc>"
+            , "-i", "<fc=gray></fc>"
             ] 10
         , Run Date "%F %T" "date" 10
         ]

@@ -1,9 +1,0 @@
-#!/bin/bash
-case $(</sys/class/power_supply/BAT0/status) in
-    Charging) ((i = $(date +%s) % 5));;
-    Discharging) ((i = 4 - $(date +%s) % 5));;
-    *) ((i = 4));;
-esac
-
-icons=(    )
-echo ${icons[$i]}
