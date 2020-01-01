@@ -190,8 +190,7 @@ instance LayoutClass CustomLayout Window where
         let wins = W.integrate stack
         collapsed <- mapM (isCollapsed stack) wins
 
-        let
-            cols = case layout of
+        let cols = case layout of
                 CustomLayout c _ -> W.integrate c
                 EmptyLayout c -> c
             cumLimits = scanl (+) 0 $ map limit $ init cols
@@ -209,7 +208,8 @@ instance LayoutClass CustomLayout Window where
 
             collapsedWins = M.fromList $ zip (map fst $ filter snd $ zip wins collapsed) $ repeat Nothing
             layoutCol col rect wins = zip wins $ split rect
-                $ map (flip (M.findWithDefault $ Just 1) $ M.union collapsedWins' winWeights') wins where
+                $ map (flip (M.findWithDefault $ Just 1) $ M.union collapsedWins' winWeights') wins
+                where
                     collapsedWins' = if all (flip M.member collapsedWins) wins then M.empty else collapsedWins
                     winWeights' = M.map Just $ M.mapKeys (wins !!) $ M.takeWhileAntitone (< length wins) $ winWeights col
 
