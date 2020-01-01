@@ -409,19 +409,16 @@ function lousy.uri.split(s)
     return {s}
 end
 
-local is_uri = lousy.uri.is_uri
-function lousy.uri.is_uri(s)
-    return s:match("[%./]") and os.exists(s) or is_uri(s)
-end
-
 local search_open = window.methods.search_open
-function window.methods.search_open(...)
-    local uri = search_open(...)
-    if uri:match("^%a[%a%d+%-.]*:") or os.exists(uri) then
-        return uri
-    else
-        return "https://"..uri
+function window.methods.search_open(win, s)
+    if s:match("[%./]") and os.exists(s) then
+        return s
     end
+    local uri = search_open(win, uri)
+    if not uri:match("^%a[%a%d+%-.]*:") then
+        uri = "https://"..uri
+    end
+    return uri
 end
 
 local preserve_uri = false
