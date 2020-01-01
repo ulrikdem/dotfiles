@@ -155,7 +155,7 @@ moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
 moveRight win stack = stack {W.down = b, W.up = reverse a ++ W.up stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.down stack) $ W.down stack
 
-weightFactor = 1.5
+weightFactor = 1.26
 
 layout = decoration shrinkText theme CollapseDeco $ spacingWithEdge gapWidth
     $ configurableNavigation noNavigateBorders $ EmptyLayout [def, def {limit = maxBound}]
