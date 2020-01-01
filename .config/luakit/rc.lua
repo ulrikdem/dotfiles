@@ -414,7 +414,7 @@ function window.methods.search_open(win, s)
     if s:match("[%./]") and os.exists(s) then
         return s
     end
-    local uri = search_open(win, uri)
+    local uri = search_open(win, s)
     if not uri:match("^%a[%a%d+%-.]*:") then
         uri = "https://"..uri
     end
