@@ -61,6 +61,7 @@ cnoremap <M-b> <S-Left>
 cnoremap <M-f> <S-Right>
 
 let g:mapleader = ' '
+set notimeout
 
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
