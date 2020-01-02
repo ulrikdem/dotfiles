@@ -38,11 +38,14 @@ import XMonad.Util.Scratchpad
 main = xmonad $ ewmh $ docks def
     { startupHook = dynStatusBarStartup spawnBar (return ()) <+> setDefaultCursor xC_left_ptr
     , handleEventHook = dynStatusBarEventHook spawnBar (return ())
-    , logHook = multiPP pp {ppCurrent = xmobarColor "green" ""} pp {ppCurrent = xmobarColor "yellow" ""}
-        <+> withWindowSet (\s -> mapM_ (\w ->
+    , logHook = composeAll
+        [ multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . pad}
+            pp {ppCurrent = xmobarColor "black" "gray50" . pad}
+        , withWindowSet (\s -> mapM_ (\w ->
             (if M.member w $ W.floating s then addTag else delTag) "floating" w) $ W.allWindows s)
+        ]
     , normalBorderColor = "black"
-    , focusedBorderColor = "gray"
+    , focusedBorderColor = "gray50"
     , modMask = mod4Mask
     , keys = customKeys delKeys insKeys
     , terminal = "termite"
@@ -65,16 +68,17 @@ theme = def
     }
 
 spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
-    ++ " -p 'TopSize C 100 " ++ show (decoHeight theme)
-    ++ "' -f '" ++ fontName theme ++ ",Font Awesome 5 Free Solid:pixelsize=14'"
+    ++ " -f '" ++ fontName theme ++ ",Font Awesome 5 Free Solid:pixelsize=15'"
 
 pp = namedScratchpadFilterOutWorkspacePP def
-    { ppVisible = id
-    , ppVisibleNoWindows = Just $ xmobarColor "gray32" ""
-    , ppHiddenNoWindows = xmobarColor "gray32" ""
+    { ppVisible = pad
+    , ppHidden = pad
+    , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . pad
+    , ppHiddenNoWindows = xmobarColor "gray25" "" . pad
     , ppTitle = id
     , ppOrder = \[w, l, t] -> [w, t]
-    , ppSep = " <fc=gray32>│</fc> "
+    , ppSep = "<fc=gray25>│</fc> "
+    , ppWsSep = ""
     }
 
 delKeys XConfig {modMask = mod} =

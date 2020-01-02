@@ -1,5 +1,6 @@
 Config
-    { template = "%GPU_ICON%%StdinReader%}{    %ip%%dynnetwork%%wlan0wi% <fc=gray32>│</fc> %cpu% <fc=gray32>│</fc> %memory% <fc=gray32>│</fc> %bright% <fc=gray32>│</fc> %volume% <fc=gray32>│</fc> %battery% <fc=gray32>│</fc> %date%"
+    { fgColor = "gray50"
+    , template = "%GPU_ICON%%StdinReader%}{    %ip%%dynnetwork%%wlan0wi% <fc=gray25>│</fc> %cpu% <fc=gray25>│</fc> %memory% <fc=gray25>│</fc> %bright% <fc=gray25>│</fc> %volume% <fc=gray25>│</fc> %battery% <fc=gray25>│</fc> %date% "
     , commands =
         [ Run XPropertyLog "GPU_ICON"
         , Run StdinReader
@@ -7,56 +8,56 @@ Config
             [ "-c", "ip address | sed -nE 's/.*inet (.*)\\/.* scope global.*/\\1 /p'"
             ] "ip" 10
         , Run DynNetwork
-            [ "-t", "<rx>K <tx>K <dev> <fc=gray32>│</fc> "
-            , "-h", "green"
-            , "-l", "yellow"
+            [ "-t", "<rx>K <tx>K <dev> <fc=gray25>│</fc> "
+            , "-h", "green4"
+            , "-l", "orange3"
             , "-H", "0"
             , "-L", "0"
             ] 10
         , Run Wireless "wlan0"
             [ "-t", "<essid>  <quality>%"
             , "-x", ""
-            , "-h", "green"
-            , "-n", "yellow"
-            , "-l", "red"
+            , "-h", "green4"
+            , "-n", "orange3"
+            , "-l", "red3"
             , "-H", "50"
             , "-L", "25"
             ] 10
         , Run Cpu
             [ "-t", " <total>%"
-            , "-h", "red"
-            , "-n", "yellow"
-            , "-l", "green"
+            , "-h", "red3"
+            , "-n", "orange3"
+            , "-l", "green4"
             , "-H", "75"
             , "-L", "50"
             ] 10
         , Run Memory
             [ "-t", " <usedratio>%"
-            , "-h", "red"
-            , "-n", "yellow"
-            , "-l", "green"
+            , "-h", "red3"
+            , "-n", "orange3"
+            , "-l", "green4"
             , "-H", "75"
             , "-L", "50"
             ] 10
         , Run Brightness
-            [ "-t", " <fc=green><percent></fc>%"
+            [ "-t", " <fc=green4><percent></fc>%"
             , "--"
             , "-D", "intel_backlight"
             ] 10
         , Run Com "sh"
-            [ "-c", "amixer get Master | sed -nE 's/\\[on\\]/ /;s/\\[off\\]/ /;s/.*\\[(.*)%\\] (.*)/\\2<fc=green>\\1<\\/fc>%/p;T;q'"
+            [ "-c", "amixer get Master | sed -nE 's/\\[on\\]/ /;s/\\[off\\]/ /;s/.*\\[(.*)%\\] (.*)/\\2<fc=green4>\\1<\\/fc>%/p;T;q'"
             ] "volume" 10
         , Run Battery
             [ "-t", "<acstatus> <left>% <timeleft>"
-            , "-h", "green"
-            , "-n", "yellow"
-            , "-l", "red"
+            , "-h", "green4"
+            , "-n", "orange3"
+            , "-l", "red3"
             , "-H", "50"
             , "-L", "25"
             , "--"
-            , "-o", "<fc=gray></fc>"
-            , "-O", "<fc=gray></fc>"
-            , "-i", "<fc=gray></fc>"
+            , "-o", "<fc=gray50></fc>"
+            , "-O", "<fc=gray50></fc>"
+            , "-i", "<fc=gray50></fc>"
             ] 10
         , Run Date "%F %T" "date" 10
         ]
