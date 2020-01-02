@@ -1,15 +1,21 @@
 #!/bin/bash
+
 if [[ ! -d ~tmpuser ]]; then
     pactl load-module module-native-protocol-unix socket=/tmp/pulse-socket auth-group=tmpuser &>/dev/null
     sudo -u tmpuser bash <<EOF
         mkdir -p ~tmpuser/.config/pulse
         echo default-server = unix:/tmp/pulse-socket >~tmpuser/.config/pulse/client.conf
-        touch ~tmpuser/.zshrc
 EOF
+
+    git --git-dir ~/.dotfiles.git archive HEAD | sudo -u tmpuser tar -xC ~tmpuser
+    tar -cC ~ .local/share/nvim/plugged | sudo -u tmpuser tar -xC ~tmpuser
 fi
+
 cat ~/.Xauthority | sudo -u tmpuser tee ~tmpuser/.Xauthority >/dev/null
+export XAUTHORITY=~tmpuser/.Xauthority
+
 if (($#)); then
-    XAUTHORITY=~tmpuser/.Xauthority exec sudo -u tmpuser -- "$@"
+    exec sudo -u tmpuser -- "$@"
 else
-    XAUTHORITY=~tmpuser/.Xauthority exec sudo -iu tmpuser
+    exec sudo -iu tmpuser
 fi
