@@ -43,10 +43,10 @@ Config
             [ "-t", " <fc=green4><percent></fc>%"
             , "--"
             , "-D", "intel_backlight"
-            ] 10
+            ] 1
         , Run Com "sh"
             [ "-c", "amixer get Master | sed -nE 's/\\[on\\]/ /;s/\\[off\\]/ /;s/.*\\[(.*)%\\] (.*)/\\2<fc=green4>\\1<\\/fc>%/p;T;q'"
-            ] "volume" 10
+            ] "volume" 1
         , Run Battery
             [ "-t", "<acstatus> <left>% <timeleft>"
             , "-h", "green4"
