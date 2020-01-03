@@ -45,7 +45,7 @@ Config
             , "-D", "intel_backlight"
             ] 1
         , Run Com "sh"
-            [ "-c", "amixer get Master | sed -nE 's/\\[on\\]/ /;s/\\[off\\]/ /;s/.*\\[(.*)%\\] (.*)/\\2<fc=green4>\\1<\\/fc>%/p;T;q'"
+            [ "-c", "amixer get Master | sed -nE 's/.*\\[(.+)%\\] \\[(.+)\\]/\\2 <fc=green4>\\1<\\/fc>%/;T;s/on//;s/off//;p;q'"
             ] "volume" 1
         , Run Battery
             [ "-t", "<acstatus> <left>% <timeleft>"
