@@ -1,9 +1,9 @@
 Config
     { fgColor = "gray50"
-    , template = "%GPU_ICON%%StdinReader%}{    %ip%%dynnetwork%%wlan0wi% <fc=gray25>│</fc> %cpu% <fc=gray25>│</fc> %memory% <fc=gray25>│</fc> %bright% <fc=gray25>│</fc> %volume% <fc=gray25>│</fc> %battery% <fc=gray25>│</fc> %date% "
+    , template = "%GPU_ICON%%UnsafeStdinReader%}{    %ip%%dynnetwork%%wlan0wi% <fc=gray25>│</fc> %cpu% <fc=gray25>│</fc> %memory% <fc=gray25>│</fc> %bright% <fc=gray25>│</fc> %volume% <fc=gray25>│</fc> %battery% <fc=gray25>│</fc> %date% "
     , commands =
         [ Run XPropertyLog "GPU_ICON"
-        , Run StdinReader
+        , Run UnsafeStdinReader
         , Run Com "sh"
             [ "-c", "ip address show up scope global | sed -nE 's/.*inet ([0-9.]+).*/\\1 /p'"
             ] "ip" 10

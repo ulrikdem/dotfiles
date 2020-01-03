@@ -39,8 +39,8 @@ main = xmonad $ ewmh $ docks def
     { startupHook = dynStatusBarStartup spawnBar (return ()) <+> setDefaultCursor xC_left_ptr
     , handleEventHook = dynStatusBarEventHook spawnBar (return ())
     , logHook = composeAll
-        [ multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . pad}
-            pp {ppCurrent = xmobarColor "black" "gray50" . pad}
+        [ multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . wrapWorkspace}
+            pp {ppCurrent = xmobarColor "black" "gray50" . wrapWorkspace}
         , withWindowSet (\s -> mapM_ (\w ->
             (if M.member w $ W.floating s then addTag else delTag) "floating" w) $ W.allWindows s)
         ]
@@ -71,15 +71,18 @@ spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
     ++ " -f '" ++ fontName theme ++ ",Font Awesome 5 Free Solid:pixelsize=15'"
 
 pp = namedScratchpadFilterOutWorkspacePP def
-    { ppVisible = pad
-    , ppHidden = pad
-    , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . pad
-    , ppHiddenNoWindows = xmobarColor "gray25" "" . pad
+    { ppVisible = wrapWorkspace
+    , ppHidden = wrapWorkspace
+    , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . wrapWorkspace
+    , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
     , ppTitle = id
+    , ppTitleSanitize = xmobarRaw
     , ppOrder = \[w, l, t] -> [w, t]
     , ppSep = "<fc=gray25>│</fc> "
     , ppWsSep = ""
     }
+
+wrapWorkspace s = xmobarAction ("xdotool set_desktop " ++ show (read s - 1)) "1" $ pad s
 
 delKeys XConfig {modMask = mod} =
     [ (mod, xK_question)
