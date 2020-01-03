@@ -16,7 +16,7 @@ Config
             ] 10
         , Run Wireless "wlan0"
             [ "-t", "<essid>  <quality>%"
-            , "-x", ""
+            , "-x", "<fn=0></fn>"
             , "-h", "green4"
             , "-n", "orange3"
             , "-l", "red3"
