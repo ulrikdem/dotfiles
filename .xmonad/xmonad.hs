@@ -75,8 +75,8 @@ pp = namedScratchpadFilterOutWorkspacePP def
     , ppHidden = wrapWorkspace
     , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . wrapWorkspace
     , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
-    , ppTitle = id
-    , ppTitleSanitize = xmobarRaw
+    , ppTitle = xmobarRaw . shorten 80
+    , ppTitleSanitize = id
     , ppOrder = \[w, l, t] -> [w, t]
     , ppSep = "<fc=gray25>│</fc> "
     , ppWsSep = ""
