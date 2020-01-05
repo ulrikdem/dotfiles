@@ -2,7 +2,7 @@ alias rmcdir-r='cd ..; rm -r $OLDPWD'
 type diff >/dev/null && alias diff='diff --color=auto'
 type gcc >/dev/null && alias gcc='gcc -Wall -Wextra'
 type g++ >/dev/null && alias g++='g++ -Wall -Wextra'
-type git >/dev/null && alias dotfiles-git='git --git-dir $HOME/.dotfiles.git --work-tree $HOME -c status.showUntrackedFiles=no'
+type git >/dev/null && [[ -d ~/.dotfiles.git ]] && alias dotfiles-git='git --git-dir $HOME/.dotfiles.git --work-tree $HOME -c status.showUntrackedFiles=no'
 type nvim >/dev/null && alias vim=nvim
 type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
 type udevil >/dev/null && alias pmount='udevil mount'
