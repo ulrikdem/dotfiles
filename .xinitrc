@@ -14,6 +14,5 @@ xss-lock -- sh -c '/usr/bin/i3lock -nc 000000 && killall -q i3lock' &
 feh --no-fehbg --bg-fill ~/.config/wallpaper.jpg
 picom -b
 
-export QT_STYLE_OVERRIDE=kvantum
 export _JAVA_AWT_WM_NONREPARENTING=1
 exec xmonad

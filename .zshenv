@@ -10,4 +10,6 @@ export FZF_DEFAULT_OPTS='--color 16 --bind tab:toggle-out,shift-tab:toggle-in,ct
 export HIGHLIGHT_OPTIONS="-D $HOME/.config/highlight -O truecolor -t 4"
 [[ -r ~/.config/highlight/themes/vim.theme ]] && HIGHLIGHT_OPTIONS="$HIGHLIGHT_OPTIONS -s vim"
 
+export QT_STYLE_OVERRIDE=kvantum
+
 export WINEDLLOVERRIDES=winemenubuilder.exe=d
