@@ -15,7 +15,7 @@ cat ~/.Xauthority | sudo -u tmpuser tee ~tmpuser/.Xauthority >/dev/null
 export XAUTHORITY=~tmpuser/.Xauthority
 
 if (($#)); then
-    exec sudo -u tmpuser -- "$@"
+    exec sudo -su tmpuser -- "$@"
 else
     exec sudo -iu tmpuser
 fi
