@@ -7,7 +7,7 @@ path=(~/.local/bin $path)
 type -p fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L'
 export FZF_DEFAULT_OPTS='--color 16 --bind tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all,change:top'
 
-export HIGHLIGHT_OPTIONS="-D $HOME/.config/highlight -O truecolor -t 4"
+export HIGHLIGHT_OPTIONS="-D $HOME/.config/highlight -t 4 -O xterm256"
 [[ -r ~/.config/highlight/themes/vim.theme ]] && HIGHLIGHT_OPTIONS="$HIGHLIGHT_OPTIONS -s vim"
 
 export QT_STYLE_OVERRIDE=kvantum
