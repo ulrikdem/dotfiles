@@ -101,8 +101,6 @@ Plug 'godlygeek/tabular'
 
 " Colorscheme {{{1
 
-set termguicolors
-
 Plug 'srcery-colors/srcery-vim'
 let g:srcery_transparent_background = 1
 let g:srcery_inverse = 0
