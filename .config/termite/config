@@ -1,4 +1,5 @@
 [options]
+bold_is_bright = false
 clickable_url = false
 cursor_blink = off
 font = monospace 10
