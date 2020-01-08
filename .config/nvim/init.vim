@@ -523,6 +523,8 @@ Plug 'pgdouyon/vim-evanesco'
 set wildignorecase wildmode=longest:full,full
 cnoremap <expr> <C-N> pumvisible() ? "\<C-N>" : "\<Down>"
 cnoremap <expr> <C-P> pumvisible() ? "\<C-P>" : "\<Up>"
+cnoremap <expr> /
+    \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? " \<BS>" : '/'
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
     \ map(getbufline('%', 1, '$'), {i, l -> {'bufnr': bufnr(), 'lnum': i + 1, 'text': l}}))<CR>
