@@ -19,6 +19,14 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' menu select
 zstyle ':prompt:grml:right:setup' use-rprompt false
 
+if [[ -v grml_vcs_coloured_formats ]]; then
+    for key in format actionformat; do
+        grml_vcs_coloured_formats[$key]="%F{magenta}[${grml_vcs_coloured_formats[$key]#*\[}"
+    done
+    unset key
+    grml_vcs_info_set_formats coloured
+fi
+
 setopt NO_CHECK_JOBS
 
 [[ -r /etc/profile.d/vte.sh ]] && . /etc/profile.d/vte.sh
