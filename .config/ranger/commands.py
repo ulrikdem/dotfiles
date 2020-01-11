@@ -1,6 +1,9 @@
 from os.path import abspath
 from ranger.api.commands import Command
+from ranger.gui import color
 from subprocess import PIPE
+
+color.BRIGHT = 0
 
 class fzf_cd(Command):
     def execute(self):
