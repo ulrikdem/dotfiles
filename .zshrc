@@ -14,7 +14,7 @@ bindkey '^P' history-beginning-search-backward-end
 
 stty -ixon
 
-LS_COLORS=${LS_COLORS/ow=34;42/ow=01;34}
+type dircolors >/dev/null && eval "$(dircolors ~/.config/dir_colors)"
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 zstyle ':completion:*' menu select
 zstyle ':prompt:grml:right:setup' use-rprompt false
@@ -43,7 +43,7 @@ if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
                 query=${dir##*/}/$query
                 dir=${1:0:${#1}-${#query}}
             done
-            cd "$dir"
+            cd -- "$dir"
             unset REPORTTIME
             local item
             fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 | while read -rd $'\0' item; do
@@ -64,7 +64,7 @@ if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
 
         fzf-cd-widget() {
             unset REPORTTIME
-            cd "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
+            cd -- "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
             REPORTTIME=5
             zle reset-prompt
         }
