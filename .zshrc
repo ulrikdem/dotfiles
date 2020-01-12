@@ -1,38 +1,56 @@
-alias rmcdir-r='cd ..; rm -r $OLDPWD'
+setopt chase_links
+setopt no_bg_nice
+setopt no_check_jobs
+setopt rc_quotes
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*:manuals.*' insert-sections false
+
+type dircolors >/dev/null && eval "$(dircolors ~/.config/dir_colors)"
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+setopt list_packed no_list_types
+
+if typeset -f isgrml >/dev/null; then
+    zstyle :prompt:grml:left:setup items user at host static-time path vcs rc newline arrow
+    zstyle :prompt:grml:right:setup use-rprompt false
+
+    grml_theme_add_token static-time -f static-time
+    static-time() {
+        REPLY="%F{white}${(%):-%*}%f "
+    }
+
+    zstyle ':vcs_info:*' formats '%F{white}[%F{green}%b%F{white}]%f '
+    zstyle ':vcs_info:*' actionformats '%F{white}[%F{green}%b%F{white}:%F{red}%a%F{white}]%f '
+
+    grml_theme_add_token arrow ' %F{blue}↪%f '
+    PS2=' %F{white}%_ %F{blue}↪%f '
+
+    bindkey '^P' history-beginning-search-backward-end
+    bindkey '^N' history-beginning-search-forward-end
+
+    bindkey -s '^S' '^X.' # TODO
+    abk[LC]='--color=always |& less -r'
+fi
+
+alias rmcdir-r='cd ..; rm -r $OLDPWD || cd $OLDPWD'
+alias rmcdir-rf='cd ..; rm -rf $OLDPWD || cd $OLDPWD'
+
 type diff >/dev/null && alias diff='diff --color=auto'
 type gcc >/dev/null && alias gcc='gcc -Wall -Wextra'
 type g++ >/dev/null && alias g++='g++ -Wall -Wextra'
-type git >/dev/null && [[ -d ~/.dotfiles.git ]] && alias dotfiles-git='git --git-dir $HOME/.dotfiles.git --work-tree $HOME -c status.showUntrackedFiles=no'
+type git >/dev/null && [[ -d ~/.dotfiles.git ]] &&
+    alias dotfiles-git='git --git-dir $HOME/.dotfiles.git --work-tree $HOME -c status.showUntrackedFiles=no'
 type nvim >/dev/null && alias vim=nvim
 type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
 type udevil >/dev/null && alias pmount='udevil mount'
 type udevil >/dev/null && alias pumount='udevil umount'
-[[ -v abk ]] && abk[LC]='--color=always |& less -r'
-
-bindkey '^N' history-beginning-search-forward-end
-bindkey '^P' history-beginning-search-backward-end
 
 stty -ixon
 
-type dircolors >/dev/null && eval "$(dircolors ~/.config/dir_colors)"
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-zstyle ':completion:*' menu select
-zstyle ':prompt:grml:right:setup' use-rprompt false
-
-if [[ -v grml_vcs_coloured_formats ]]; then
-    for key in format actionformat; do
-        grml_vcs_coloured_formats[$key]="%F{magenta}[${grml_vcs_coloured_formats[$key]#*\[}"
-    done
-    unset key
-    grml_vcs_info_set_formats coloured
-fi
-
-setopt NO_CHECK_JOBS
-
-[[ -r /etc/profile.d/vte.sh ]] && . /etc/profile.d/vte.sh
+[[ -r /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
 
 if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
-    . /usr/share/fzf/key-bindings.zsh
+    source /usr/share/fzf/key-bindings.zsh
 
     if type fd >/dev/null; then
         fzf-file-widget-helper() {
@@ -46,9 +64,10 @@ if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
             cd -- "$dir"
             unset REPORTTIME
             local item
-            fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 | while read -rd $'\0' item; do
-                echo -n "$dir${(q)item} "
-            done
+            fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 |
+                while read -rd $'\0' item; do
+                    echo -n "$dir${(q)item} "
+                done
             REPORTTIME=5
         }
 
@@ -56,9 +75,7 @@ if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
             local tokens=(${(z)LBUFFER})
             [[ ${LBUFFER[-1]} =~ '\s' ]] && tokens+=
             local results=$(fzf-file-widget-helper ${tokens[-1]})
-            if [[ -n $results ]]; then
-                LBUFFER=${LBUFFER:0:${#LBUFFER}-${#tokens[-1]}}$results
-            fi
+            [[ -n $results ]] && LBUFFER=${LBUFFER:0:${#LBUFFER}-${#tokens[-1]}}$results
             zle reset-prompt
         }
 
