@@ -1,6 +1,6 @@
 Config
     { fgColor = "gray50"
-    , template = "%GPU_ICON%%UnsafeStdinReader% }{ %ip%%dynnetwork%%wlan0wi% <fc=gray25>│</fc> %cpu% <fc=gray25>│</fc> %memory% <fc=gray25>│</fc> %bright% <fc=gray25>│</fc> %alsa:default:Master% <fc=gray25>│</fc> %battery% <fc=gray25>│</fc> %date% "
+    , template = "%GPU_ICON%%UnsafeStdinReader%}{%ip%%dynnetwork%%wlan0wi%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =
         [ Run XPropertyLog "GPU_ICON"
         , Run UnsafeStdinReader
@@ -15,7 +15,7 @@ Config
             , "-L", "0"
             ] 10
         , Run Wireless "wlan0"
-            [ "-t", "<essid>  <quality>%"
+            [ "-t", "<essid>  <quality>% <fc=gray25>│</fc> "
             , "-x", "<fn=0></fn>"
             , "-h", "green4"
             , "-n", "orange3"
@@ -24,7 +24,7 @@ Config
             , "-L", "25"
             ] 10
         , Run Cpu
-            [ "-t", " <total>%"
+            [ "-t", " <total>% <fc=gray25>│</fc> "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -32,7 +32,7 @@ Config
             , "-L", "50"
             ] 10
         , Run Memory
-            [ "-t", " <usedratio>%"
+            [ "-t", " <usedratio>% <fc=gray25>│</fc> "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -40,18 +40,18 @@ Config
             , "-L", "50"
             ] 10
         , Run Brightness
-            [ "-t", " <fc=green4><percent></fc>%"
+            [ "-t", " <fc=green4><percent></fc>% <fc=gray25>│</fc> "
             , "--"
             , "-D", "intel_backlight"
             ] 1
         , Run Alsa "default" "Master"
-            [ "-t", "<status> <fc=green4><volume></fc>%"
+            [ "-t", "<status> <fc=green4><volume></fc>% <fc=gray25>│</fc> "
             , "--"
             , "-O", "<fc=gray50></fc>"
             , "-o", "<fc=gray50></fc>"
             ]
         , Run Battery
-            [ "-t", "<acstatus> <left>% <timeleft>"
+            [ "-t", "<acstatus> <left>% <timeleft> <fc=gray25>│</fc> "
             , "-h", "green4"
             , "-n", "orange3"
             , "-l", "red3"
@@ -62,7 +62,7 @@ Config
             , "-O", "<fc=gray50></fc>"
             , "-o", "<fc=gray50></fc>"
             ] 10
-        , Run Date "%F %T" "date" 10
+        , Run Date "%F %T " "date" 10
         ]
     }
 
