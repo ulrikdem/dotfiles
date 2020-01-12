@@ -1,6 +1,6 @@
 Config
     { fgColor = "gray50"
-    , template = "%GPU_ICON%%UnsafeStdinReader% }{ %ip%%dynnetwork%%wlan0wi% <fc=gray25>│</fc> %cpu% <fc=gray25>│</fc> %memory% <fc=gray25>│</fc> %bright% <fc=gray25>│</fc> %volume% <fc=gray25>│</fc> %battery% <fc=gray25>│</fc> %date% "
+    , template = "%GPU_ICON%%UnsafeStdinReader% }{ %ip%%dynnetwork%%wlan0wi% <fc=gray25>│</fc> %cpu% <fc=gray25>│</fc> %memory% <fc=gray25>│</fc> %bright% <fc=gray25>│</fc> %alsa:default:Master% <fc=gray25>│</fc> %battery% <fc=gray25>│</fc> %date% "
     , commands =
         [ Run XPropertyLog "GPU_ICON"
         , Run UnsafeStdinReader
@@ -44,9 +44,12 @@ Config
             , "--"
             , "-D", "intel_backlight"
             ] 1
-        , Run Com "sh"
-            [ "-c", "amixer get Master | sed -nE 's/.*\\[(.+)%\\] \\[(.+)\\]/\\2 <fc=green4>\\1<\\/fc>%/;T;s/on//;s/off//;p;q'"
-            ] "volume" 1
+        , Run Alsa "default" "Master"
+            [ "-t", "<status> <fc=green4><volume></fc>%"
+            , "--"
+            , "-O", "<fc=gray50></fc>"
+            , "-o", "<fc=gray50></fc>"
+            ]
         , Run Battery
             [ "-t", "<acstatus> <left>% <timeleft>"
             , "-h", "green4"
@@ -55,9 +58,9 @@ Config
             , "-H", "50"
             , "-L", "25"
             , "--"
-            , "-o", "<fc=gray50></fc>"
-            , "-O", "<fc=gray50></fc>"
             , "-i", "<fc=gray50></fc>"
+            , "-O", "<fc=gray50></fc>"
+            , "-o", "<fc=gray50></fc>"
             ] 10
         , Run Date "%F %T" "date" 10
         ]
