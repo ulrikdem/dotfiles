@@ -11,13 +11,10 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 setopt list_packed no_list_types
 
 if typeset -f isgrml >/dev/null; then
-    zstyle :prompt:grml:left:setup items user at host static-time path vcs rc newline arrow
+    zstyle :prompt:grml:left:setup items user at host time path vcs rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
-    grml_theme_add_token static-time -f static-time
-    static-time() {
-        REPLY="%F{white}${(%):-%*}%f "
-    }
+    grml_prompt_token_default[time]='%F{white}%D{%H:%M} '
 
     zstyle ':vcs_info:*' formats '%F{white}[%F{green}%b%F{white}]%f '
     zstyle ':vcs_info:*' actionformats '%F{white}[%F{green}%b%F{white}:%F{red}%a%F{white}]%f '
