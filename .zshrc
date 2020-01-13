@@ -16,8 +16,11 @@ if typeset -f isgrml >/dev/null; then
 
     grml_prompt_token_default[time]='%F{white}%D{%H:%M} '
 
-    zstyle ':vcs_info:*' formats '%F{white}[%F{green}%b%F{white}] %f'
-    zstyle ':vcs_info:*' actionformats '%F{white}[%F{green}%b%F{white}:%F{red}%a%F{white}] %f'
+    zstyle ':vcs_info:*' formats '%F{white}[%F{blue}%b%c%u%F{white}] %f'
+    zstyle ':vcs_info:*' actionformats '%F{white}[%F{blue}%b%F{white}:%F{cyan}%a%c%u%F{white}] %f'
+    zstyle ':vcs_info:*' stagedstr %F{white}:%F{green}S
+    zstyle ':vcs_info:*' unstagedstr %F{white}:%F{red}U
+    zstyle ':vcs_info:*' check-for-changes true
 
     grml_theme_add_token arrow '%F{blue}» %f'
     PS2='%F{white}%_%F{blue} » %f'
