@@ -16,8 +16,8 @@ if typeset -f isgrml >/dev/null; then
 
     grml_prompt_token_default[time]='%F{white}%D{%H:%M} '
 
-    zstyle ':vcs_info:*' formats '%F{white}[%F{green}%b%F{white}]%f '
-    zstyle ':vcs_info:*' actionformats '%F{white}[%F{green}%b%F{white}:%F{red}%a%F{white}]%f '
+    zstyle ':vcs_info:*' formats '%F{white}[%F{green}%b%F{white}] %f'
+    zstyle ':vcs_info:*' actionformats '%F{white}[%F{green}%b%F{white}:%F{red}%a%F{white}] %f'
 
     grml_theme_add_token arrow '%F{blue}» %f'
     PS2='%F{white}%_%F{blue} » %f'
@@ -80,6 +80,7 @@ if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
             unset REPORTTIME
             cd -- "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
             REPORTTIME=5
+            prompt_grml_precmd 2>/dev/null
             zle reset-prompt
         }
     fi
