@@ -603,7 +603,7 @@ let g:coc_user_config = {
         \ 'errorSign': '✕',
         \ 'warningSign': '⚠',
         \ 'infoSign': 'ℹ',
-        \ 'hintSign': '➤',
+        \ 'hintSign': 'ℹ',
         \ 'locationlist': v:false,
     \ },
 \ }
