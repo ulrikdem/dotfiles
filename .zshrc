@@ -6,7 +6,7 @@ setopt rc_quotes
 zstyle ':completion:*' menu select
 zstyle ':completion:*:manuals.*' insert-sections false
 
-type dircolors >/dev/null && eval "$(dircolors ~/.config/dir_colors)"
+type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 setopt list_packed no_list_types
 
@@ -22,8 +22,8 @@ if typeset -f isgrml >/dev/null; then
     zstyle ':vcs_info:*' formats '%F{white}[%F{green}%b%F{white}]%f '
     zstyle ':vcs_info:*' actionformats '%F{white}[%F{green}%b%F{white}:%F{red}%a%F{white}]%f '
 
-    grml_theme_add_token arrow ' %F{blue}↪%f '
-    PS2=' %F{white}%_ %F{blue}↪%f '
+    grml_theme_add_token arrow '%F{blue}» %f'
+    PS2='%F{white}%_%F{blue} » %f'
 
     bindkey '^P' history-beginning-search-backward-end
     bindkey '^N' history-beginning-search-forward-end
@@ -32,8 +32,8 @@ if typeset -f isgrml >/dev/null; then
     abk[LC]='--color=always |& less -r'
 fi
 
-alias rmcdir-r='cd ..; rm -r $OLDPWD || cd $OLDPWD'
-alias rmcdir-rf='cd ..; rm -rf $OLDPWD || cd $OLDPWD'
+alias rmcdir-r='cd ..; rm -r -- $OLDPWD || cd -- $OLDPWD'
+alias rmcdir-rf='cd ..; rm -rf -- $OLDPWD || cd -- $OLDPWD'
 
 type diff >/dev/null && alias diff='diff --color=auto'
 type gcc >/dev/null && alias gcc='gcc -Wall -Wextra'
