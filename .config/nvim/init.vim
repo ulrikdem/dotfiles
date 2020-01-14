@@ -294,28 +294,23 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call fzf#run(fzf#wrap({
     \ ],
 \ }))<CR>
 
-nnoremap <M-o> <Cmd>call <SID>JumpBackward()<CR>
-function! s:JumpBackward() abort
+nnoremap <M-o> <Cmd>call <SID>BufferJump(-1, "\<C-O>")<CR>
+nnoremap <M-i> <Cmd>call <SID>BufferJump(1, "\<C-I>")<CR>
+function! s:BufferJump(dir, key) abort
     let [l:jumps, l:current] = getjumplist()
-    let l:i = l:current - 1
-    while l:i >= 0 && l:jumps[l:i].bufnr == bufnr()
-        let l:i -= 1
-    endwhile
-    if l:i >= 0
-        execute 'normal' (l:current - l:i)."\<C-O>"
-    endif
-endfunction
-
-nnoremap <M-i> <Cmd>call <SID>JumpForward()<CR>
-function! s:JumpForward() abort
-    let [l:jumps, l:current] = getjumplist()
-    let l:i = l:current + 1
-    while l:i < len(l:jumps) && l:jumps[l:i].bufnr == bufnr() ||
-        \ l:i + 1 < len(l:jumps) && l:jumps[l:i + 1].bufnr == l:jumps[l:i].bufnr
+    let l:i = l:current + a:dir
+    let l:buf = bufnr()
+    for l:j in range(v:count1)
+        while get(l:jumps, l:i, {'bufnr': -1}).bufnr == l:buf
+            let l:i += a:dir
+        endwhile
+        let l:buf = get(l:jumps, l:i, {'bufnr': -2}).bufnr
+    endfor
+    while get(l:jumps, l:i + 1, {'bufnr': -1}).bufnr == l:buf
         let l:i += 1
     endwhile
-    if l:i < len(l:jumps)
-        execute 'normal' (l:i - l:current)."\<C-I>"
+    if l:i >= 0 && l:i < len(l:jumps)
+        execute 'normal' ((l:i - l:current) * a:dir).a:key
     endif
 endfunction
 
