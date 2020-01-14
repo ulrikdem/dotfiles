@@ -79,6 +79,15 @@ let g:wordmotion_mappings = {
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
 
+nnoremap <M-[><Esc> <Nop>
+nnoremap <M-]><Esc> <Nop>
+nmap <expr> <M-[> <SID>RepeatBracket('[', "\<M-[>")
+nmap <expr> <M-]> <SID>RepeatBracket(']', "\<M-]>")
+function! s:RepeatBracket(bracket, map) abort
+    let l:char = getchar()
+    return a:bracket.(type(l:char) == v:t_number ? nr2char(l:char) : l:char).a:map
+endfunction
+
 " Formatting {{{1
 
 set expandtab tabstop=4 shiftwidth=0
