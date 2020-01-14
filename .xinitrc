@@ -4,7 +4,7 @@ xrandr --auto
 xrandr --listproviders | grep -q NVIDIA && gpu_icon=' '
 xprop -root -f GPU_ICON 8u -set GPU_ICON "$gpu_icon"
 
-xmodmap -e 'remove Lock = Caps_Lock' -e 'keysym Caps_Lock = Control_L' -e 'add Control = Control_L'
+setxkbmap -option ctrl:nocaps -option shift:both_capslock
 numlockx
 
 xset s off
