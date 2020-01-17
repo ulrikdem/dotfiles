@@ -1,7 +1,7 @@
 #!/bin/bash
 text=()
 for file; do
-    if [[ $(file -bi -- "$file") =~ ^text/ ]]; then
+    if [[ $(file -b --mime-type -- "$file") =~ (^text/|^inode/x-empty$) ]]; then
         text+=("$file")
     else
         xdg-open "$file" &>/dev/null &
