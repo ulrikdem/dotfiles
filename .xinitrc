@@ -1,7 +1,7 @@
 #!/bin/bash
 
 xrandr --auto
-xrandr --listproviders | grep -q NVIDIA && gpu_icon=' '
+xrandr --listproviders | grep -q NVIDIA && gpu_icon=' ﯎ <fc=gray25>│</fc>'
 xprop -root -f GPU_ICON 8u -set GPU_ICON "$gpu_icon"
 
 setxkbmap -option ctrl:nocaps -option shift:both_capslock

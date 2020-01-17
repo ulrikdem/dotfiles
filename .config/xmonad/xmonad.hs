@@ -68,7 +68,7 @@ theme = def
     }
 
 spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
-    ++ " -f '" ++ fontName theme ++ ",Font Awesome 5 Free Solid:pixelsize=15'"
+    ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:pixelsize=18'"
 
 pp = namedScratchpadFilterOutWorkspacePP def
     { ppVisible = wrapWorkspace

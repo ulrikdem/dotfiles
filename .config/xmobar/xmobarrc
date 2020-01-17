@@ -8,14 +8,14 @@ Config
             [ "-c", "ip address show up scope global | sed -nE 's/.*inet ([0-9.]+).*/\\1 /p'"
             ] "ip" 10
         , Run DynNetwork
-            [ "-t", "<rx>K <tx>K <dev> <fc=gray25>│</fc> "
+            [ "-t", "<rx>K <tx>K <dev> <fc=gray25>│</fc> "
             , "-h", "green4"
             , "-l", "orange3"
             , "-H", "0"
             , "-L", "0"
             ] 10
         , Run Wireless "wlan0"
-            [ "-t", "<essid>  <quality>% <fc=gray25>│</fc> "
+            [ "-t", "<essid> 直 <quality>% <fc=gray25>│</fc> "
             , "-x", "<fn=0></fn>"
             , "-h", "green4"
             , "-n", "orange3"
@@ -24,7 +24,7 @@ Config
             , "-L", "25"
             ] 10
         , Run Cpu
-            [ "-t", " <total>% <fc=gray25>│</fc> "
+            [ "-t", "﬙ <total>% <fc=gray25>│</fc> "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -32,7 +32,7 @@ Config
             , "-L", "50"
             ] 10
         , Run Memory
-            [ "-t", " <usedratio>% <fc=gray25>│</fc> "
+            [ "-t", " <usedratio>% <fc=gray25>│</fc> "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -40,15 +40,15 @@ Config
             , "-L", "50"
             ] 10
         , Run Brightness
-            [ "-t", " <fc=green4><percent></fc>% <fc=gray25>│</fc> "
+            [ "-t", " <fc=green4><percent></fc>% <fc=gray25>│</fc> "
             , "--"
             , "-D", "intel_backlight"
             ] 1
         , Run Alsa "default" "Master"
             [ "-t", "<status> <fc=green4><volume></fc>% <fc=gray25>│</fc> "
             , "--"
-            , "-O", "<fc=gray50></fc>"
-            , "-o", "<fc=gray50></fc>"
+            , "-O", "<fc=gray50>墳</fc>"
+            , "-o", "<fc=gray50>ﱝ</fc>"
             ]
         , Run Battery
             [ "-t", "<acstatus> <left>% <timeleft> <fc=gray25>│</fc> "
@@ -58,9 +58,9 @@ Config
             , "-H", "50"
             , "-L", "25"
             , "--"
-            , "-i", "<fc=gray50></fc>"
-            , "-O", "<fc=gray50></fc>"
-            , "-o", "<fc=gray50></fc>"
+            , "-i", "<fc=gray50></fc>"
+            , "-O", "<fc=gray50></fc>"
+            , "-o", "<fc=gray50></fc>"
             ] 10
         , Run Date "%F %T " "date" 10
         ]
