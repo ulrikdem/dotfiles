@@ -162,19 +162,36 @@ endfunction
 Plug 'itchyny/lightline.vim'
 let g:lightline = {
     \ 'active': {
-        \ 'left': [['mode'], ['git', 'filename']],
-        \ 'right': [['ruler'], ['filetype'], ['warnings', 'errors', 'asyncdo']],
+        \ 'left': [
+            \ ['mode'],
+            \ ['git', 'filename'],
+        \ ],
+        \ 'right': [
+            \ ['ruler'],
+            \ ['fileformat', 'fileencoding', 'filetype'],
+            \ ['warnings', 'errors', 'asyncdo'],
+        \ ],
     \ },
     \ 'inactive': {
-        \ 'left': [['git', 'filename']],
-        \ 'right': [['ruler']],
+        \ 'left': [
+            \ ['git', 'filename'],
+        \ ],
+        \ 'right': [
+            \ ['ruler'],
+        \ ],
     \ },
     \ 'component': {
         \ 'filename': '
             \%{substitute(expand("%:p:~"), "\\v^(/)$|^(\\~)/$|.*/([^/]+)/$|.*", "\\1\\2\\3", "")}%t
             \%{&modified ? " •" : ""}',
-        \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'ruler': '%p%% %l:%v%<',
+        \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
+        \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
+        \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
+    \ },
+    \ 'component_visible_condition': {
+        \ 'fileformat': '&fileformat !=# "unix"',
+        \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
     \ },
     \ 'component_function': {
         \ 'git': 'GitStatusline',
@@ -188,7 +205,9 @@ let g:lightline = {
         \ 'warnings': 'warning',
     \ },
     \ 'tabline': {
-        \ 'left': [['tabs']],
+        \ 'left': [
+            \ ['tabs'],
+        \ ],
         \ 'right': [],
     \ },
     \ 'tab': {
