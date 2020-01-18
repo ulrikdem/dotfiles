@@ -1,6 +1,6 @@
 #!/bin/bash
 
-xrandr --auto
+xrandr --auto --dpi 96
 xrandr --listproviders | grep -q NVIDIA && gpu_icon=' ﯎ <fc=gray25>│</fc>'
 xprop -root -f GPU_ICON 8u -set GPU_ICON "$gpu_icon"
 
