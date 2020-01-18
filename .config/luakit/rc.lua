@@ -1,13 +1,12 @@
 -- Unique instance {{{1
 
+local display = os.getenv("DISPLAY")
+local instance_suffix = display and "."..display:gsub("[^%w_]", "_") or ""
+
 if luakit.unique then
     local new = luakit.unique.new
     function luakit.unique.new(id)
-        local display = os.getenv("DISPLAY")
-        if display then
-            id = id.."."..display:gsub("[^%w_]", "_")
-        end
-        new(id)
+        new(id..instance_suffix)
     end
 end
 
@@ -78,6 +77,8 @@ settings.webview.enable_plugins = false
 settings.webview.enable_java = false
 
 soup.cookies_storage = luakit.data_dir.."/cookies.db"
+
+session.recovery_file = luakit.data_dir.."/recovery"..instance_suffix
 
 function select.label_maker()
     return trim(sort(reverse(charset("asdfghjkl"))))
