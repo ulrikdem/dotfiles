@@ -291,6 +291,20 @@ autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
 
 Plug 'tpope/vim-eunuch'
 
+" Terminal {{{1
+
+autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
+autocmd vimrc TermOpen * startinsert
+autocmd vimrc BufEnter * if &buftype ==# 'terminal' | startinsert | endif
+
+tnoremap <M-h> <C-\><C-N><C-W>h
+tnoremap <M-j> <C-\><C-N><C-W>j
+tnoremap <M-k> <C-\><C-N><C-W>k
+tnoremap <M-l> <C-\><C-N><C-W>l
+
+nnoremap <Leader>ot <Cmd>terminal<CR>
+nnoremap <expr> <Leader>oT "\<Cmd>edit ".fnameescape('term://'.expand('%:p:h').'//'.&shell)."\<CR>"
+
 " File navigation {{{1
 
 Plug 'justinmk/vim-dirvish'
@@ -445,37 +459,6 @@ function! s:FzfFromQuickfix(options, ...) abort
         \ ], a:options),
     \ }))
     return l:Return
-endfunction
-
-" Terminal {{{1
-
-autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
-autocmd vimrc TermOpen * startinsert
-autocmd vimrc BufEnter * if &buftype ==# 'terminal' | startinsert | endif
-
-tnoremap <M-h> <C-\><C-N><C-W>h
-tnoremap <M-j> <C-\><C-N><C-W>j
-tnoremap <M-k> <C-\><C-N><C-W>k
-tnoremap <M-l> <C-\><C-N><C-W>l
-
-nnoremap <Leader>tt <Cmd>call <SID>ToggleTerminal(getcwd())<CR>
-nnoremap <Leader>tT <Cmd>call <SID>ToggleTerminal(expand('%:p:h'))<CR>
-
-let s:terminal_buffer = -1
-function! s:ToggleTerminal(cwd) abort
-    if bufwinnr(s:terminal_buffer) != -1
-        execute bufwinnr(s:terminal_buffer) 'hide'
-        return
-    endif
-    botright 15 split
-    set winfixheight
-    if bufexists(s:terminal_buffer)
-        execute 'buffer' s:terminal_buffer
-    else
-        execute 'edit' fnameescape('term://'.a:cwd.'//'.&shell)
-        set nobuflisted
-        let s:terminal_buffer = bufnr()
-    endif
 endfunction
 
 " Git {{{1
