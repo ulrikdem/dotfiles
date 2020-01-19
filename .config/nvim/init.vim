@@ -164,7 +164,7 @@ let g:lightline = {
     \ 'active': {
         \ 'left': [
             \ ['mode'],
-            \ ['git', 'filename'],
+            \ ['git', 'filename', 'termtitle'],
         \ ],
         \ 'right': [
             \ ['ruler'],
@@ -174,7 +174,7 @@ let g:lightline = {
     \ },
     \ 'inactive': {
         \ 'left': [
-            \ ['git', 'filename'],
+            \ ['git', 'filename', 'termtitle'],
         \ ],
         \ 'right': [
             \ ['ruler'],
@@ -184,12 +184,14 @@ let g:lightline = {
         \ 'filename': '
             \%{substitute(expand("%:p:~"), "\\v^(/)$|^(\\~)/$|.*/([^/]+)/$|.*", "\\1\\2\\3", "")}%t
             \%{&modified ? " •" : ""}',
-        \ 'ruler': '%p%% %l:%v%<',
+        \ 'termtitle': '%{exists("b:term_title") && b:term_title !~# "^term://" ? b:term_title : ""}',
         \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
         \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
+        \ 'ruler': '%p%% %l:%v%<',
     \ },
     \ 'component_visible_condition': {
+        \ 'termtitle': 'exists("b:term_title") && b:term_title !~# "^term://"',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
     \ },
@@ -394,7 +396,7 @@ function! s:FzfFromQuickfix(options, ...) abort
             if !empty(get(l:item, 'type', ''))
                 let l:left = "\e[31m".(l:item.type).":\e[m ".l:left
             endif
-            let l:pad = &columns - 3 - strwidth(substitute(l:left.l:right, '\e\[[^m]*m', '', 'g'))
+            let l:pad = &columns - 3 - strwidth(substitute(l:left.l:right, '\e\[.\{-}m', '', 'g'))
             call add(l:lines, len(l:all_items).' '.l:left.repeat(' ', max([l:pad, 1])).l:right)
             call add(l:all_items, l:item)
         endfor
