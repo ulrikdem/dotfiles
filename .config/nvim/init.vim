@@ -814,10 +814,10 @@ let g:jsx_ext_required = 1
 let g:python_highlight_space_errors = 0
 
 autocmd vimrc FileType c,cpp set commentstring=//%s
-autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>eh <Cmd>edit %:r.h<CR>
-autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>eH <Cmd>edit %:r.hpp<CR>
-autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>ec <Cmd>edit %:r.c<CR>
-autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>eC <Cmd>edit %:r.cpp<CR>
+autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
+autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oH <Cmd>edit %:r.hpp<CR>
+autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oc <Cmd>edit %:r.c<CR>
+autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oC <Cmd>edit %:r.cpp<CR>
 
 if executable('cargo')
     autocmd vimrc FileType rust compiler cargo
