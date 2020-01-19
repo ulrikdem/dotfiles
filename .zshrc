@@ -35,6 +35,7 @@ fi
 alias rmcdir-r='cd ..; rm -r -- $OLDPWD || cd -- $OLDPWD'
 alias rmcdir-rf='cd ..; rm -rf -- $OLDPWD || cd -- $OLDPWD'
 
+type abduco >/dev/null && alias abduco="abduco -e '^_'"
 type diff >/dev/null && alias diff='diff --color=auto'
 type gcc >/dev/null && alias gcc='gcc -Wall -Wextra'
 type g++ >/dev/null && alias g++='g++ -Wall -Wextra'
