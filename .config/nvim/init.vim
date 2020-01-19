@@ -188,12 +188,14 @@ let g:lightline = {
         \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
         \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
+        \ 'filetype': '%{&filetype}',
         \ 'ruler': '%p%% %l:%v%<',
     \ },
     \ 'component_visible_condition': {
         \ 'termtitle': 'exists("b:term_title") && b:term_title !~# "^term://"',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
+        \ 'filetype': 'empty(&filetype)',
     \ },
     \ 'component_function': {
         \ 'git': 'GitStatusline',
