@@ -528,7 +528,7 @@ set inccommand=nosplit
 set ignorecase smartcase
 Plug 'pgdouyon/vim-evanesco'
 
-set wildignorecase wildmode=longest:full,full
+set wildignorecase wildmode=longest:full,full wildcharm=<Tab>
 cnoremap <expr> <C-N> pumvisible() ? "\<C-N>" : "\<Down>"
 cnoremap <expr> <C-P> pumvisible() ? "\<C-P>" : "\<Up>"
 cnoremap <expr> /
@@ -541,6 +541,8 @@ set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
 inoremap <expr> <Tab> pumvisible() ? "\<C-N>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-P>" : "\<S-Tab>"
+
+autocmd vimrc CompleteChanged * if !empty(reg_recording()) | call feedkeys("\<C-E>", 'in') | endif
 
 function! s:CompletionFallback() abort
     if has('python3')
