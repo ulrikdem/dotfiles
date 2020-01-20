@@ -388,55 +388,44 @@ endfunction
 
 autocmd vimrc User Plug_fzf
     \ nnoremap <Leader>fq <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
-function! s:FzfFromQuickfix(options, ...) abort
-    let l:all_items = []
-    let l:seen = {}
+function! s:FzfFromQuickfix(options, items) abort
+    let l:valid_items = []
     function! s:ProcessItems(items) abort closure
+        let l:valid_items = []
         let l:lines = []
         for l:item in a:items
-            let l:string = string(l:item)
-            if !get(l:item, 'valid', 1) || has_key(l:seen, l:string)
+            if !get(l:item, 'valid', 1)
                 continue
             endif
-            let l:seen[l:string] = 1
             let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
             let l:right = "\e[37m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[m"
             let l:left = substitute(l:item.text, "\t", ' ', 'g')
             if has_key(l:item, 'range')
                 let l:start = l:item.range.start.character
                 let l:end = l:item.range.end.character
-                let l:left = (l:start ? l:left[:(l:start - 1)] : '')."\e[31m".
-                    \ l:left[(l:start):(l:end - 1)]."\e[m".l:left[(l:end):]
+                let l:left = (l:start ? l:left[:(l:start - 1)] : '').
+                    \ "\e[31m".l:left[(l:start):(l:end - 1)]."\e[m".l:left[(l:end):]
             endif
             let l:left = trim(l:left, ' ')
             if !empty(get(l:item, 'type', ''))
                 let l:left = "\e[31m".(l:item.type).":\e[m ".l:left
             endif
             let l:pad = &columns - 3 - strwidth(substitute(l:left.l:right, '\e\[.\{-}m', '', 'g'))
-            call add(l:lines, len(l:all_items).' '.l:left.repeat(' ', max([l:pad, 1])).l:right)
-            call add(l:all_items, l:item)
+            call add(l:lines, len(l:valid_items).' '.l:left.repeat(' ', max([l:pad, 1])).l:right)
+            call add(l:valid_items, l:item)
         endfor
         return l:lines
     endfunction
-    if a:0
-        let l:source = s:ProcessItems(a:1)
-        let l:Return = 0
-    else
-        let l:source_file = tempname()
-        call writefile([], l:source_file)
-        let l:source = 'tail -f '.shellescape(l:source_file)
-        let l:Return = {i -> writefile(s:ProcessItems(i), l:source_file, 'a')}
-    endif
     function! s:FzfSink(lines) abort closure
-        if exists('l:source_file')
-            call delete(l:source_file)
-        endif
         let l:key = remove(a:lines, 0)
         if l:key ==# 'ctrl-q'
-            call s:SetQuickfix(map(a:lines, {i, l -> l:all_items[split(l)[0]]}))
+            call s:SetQuickfix(map(a:lines, {i, l -> l:valid_items[split(l)[0]]}))
         else
             for l:line in a:lines
-                let l:item = l:all_items[split(l:line)[0]]
+                if empty(l:line)
+                    continue
+                endif
+                let l:item = l:valid_items[split(l:line)[0]]
                 let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
                 if empty(l:key) && fnamemodify(l:file, ':p') ==# expand('%:p')
                     normal! m'
@@ -448,7 +437,7 @@ function! s:FzfFromQuickfix(options, ...) abort
         endif
     endfunction
     call fzf#run(fzf#wrap({
-        \ 'source': l:source,
+        \ 'source': s:ProcessItems(a:items),
         \ 'sink*': funcref("\<SID>FzfSink"),
         \ 'options': extend([
             \ '--with-nth=2..',
@@ -460,7 +449,7 @@ function! s:FzfFromQuickfix(options, ...) abort
             \ '--expect=ctrl-x,ctrl-v,ctrl-t,ctrl-q',
         \ ], a:options),
     \ }))
-    return l:Return
+    return funcref("\<SID>ProcessItems")
 endfunction
 
 " Git {{{1
@@ -672,29 +661,23 @@ autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ls = filter(keys(g:coc_user_config.languageserver),
         \ {i, l -> index(g:coc_user_config.languageserver[l].filetypes, &filetype) != -1})[0]
-    let l:AddItems = s:FzfFromQuickfix(['--bind=change:top+execute-silent:'.
-        \ 'nvr -c "call WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" &'])
+    let l:ProcessItems = s:FzfFromQuickfix(['--no-extended', '--bind=change:top+reload:'.
+        \ 'nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')"'], [])
     function! WorkspaceSymbolQuery(query) abort closure
-        for l:word in split(a:query)
-            let l:word = substitute(substitute(l:word, '^[''^]', '', ''), '[$\\]$', '', '')
-            if empty(l:word) || l:word[0] ==# '!' || l:word ==# '|'
-                continue
-            endif
-            call CocRequestAsync(l:ls, 'workspace/symbol', {'query': l:word},
-                \ {e, s -> l:AddItems(s:MapSymbols(map(s, {i, s -> {
-                    \ 'filepath': iconv(substitute(substitute(s.location.uri, '^file://', '', ''),
-                        \ '%\(\x\x\)', {m -> nr2char('0x'.m[1])}, 'g'), 'utf-8', 'latin1'),
-                    \ 'lnum': s.location.range.start.line + 1,
-                    \ 'col': s.location.range.start.character + 1,
-                    \ 'text': s.name,
-                    \ 'kind': s.kind > 26 ? 'Unknown' : [
-                        \ 'File', 'Module', 'Namespace', 'Package', 'Class', 'Method', 'Property',
-                        \ 'Field', 'Constructor', 'Enum', 'Interface', 'Function', 'Variable',
-                        \ 'Constant', 'String', 'Number', 'Boolean', 'Array', 'Object', 'Key',
-                        \ 'Null', 'EnumMember', 'Struct', 'Event', 'Operator', 'TypeParameter',
-                    \ ][s.kind - 1],
-                \ }})))})
-        endfor
+        let l:symbols = map(CocRequest(l:ls, 'workspace/symbol', {'query': a:query}), {i, s -> {
+            \ 'filepath': iconv(substitute(substitute(s.location.uri, '^file://', '', ''),
+                \ '%\(\x\x\)', {m -> nr2char('0x'.m[1])}, 'g'), 'utf-8', 'latin1'),
+            \ 'lnum': s.location.range.start.line + 1,
+            \ 'col': s.location.range.start.character + 1,
+            \ 'text': s.name,
+            \ 'kind': s.kind > 26 ? 'Unknown' : [
+                \ 'File', 'Module', 'Namespace', 'Package', 'Class', 'Method', 'Property',
+                \ 'Field', 'Constructor', 'Enum', 'Interface', 'Function', 'Variable',
+                \ 'Constant', 'String', 'Number', 'Boolean', 'Array', 'Object', 'Key',
+                \ 'Null', 'EnumMember', 'Struct', 'Event', 'Operator', 'TypeParameter',
+            \ ][s.kind - 1],
+        \ }})
+        return join(l:ProcessItems(s:MapSymbols(l:symbols)), "\n")
     endfunction
 endfunction
 function! s:MapSymbols(symbols) abort
@@ -729,11 +712,11 @@ highlight link CocHintHighlight ALEInfo
 autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
 function! CocErrorCount() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
-    return l:count ? l:count.g:coc_user_config.diagnostic.errorSign : ''
+    return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
 endfunction
 function! CocWarningCount() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
-    return l:count ? l:count.g:coc_user_config.diagnostic.warningSign : ''
+    return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
 endfunction
 
 " Language server {{{1
