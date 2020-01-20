@@ -320,7 +320,6 @@ let g:fzf_action = {
     \ 'ctrl-x': 'split',
     \ 'ctrl-v': 'vsplit',
     \ 'ctrl-t': 'tab split',
-    \ 'ctrl-z': 'silent! bdelete',
 \ }
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
@@ -332,13 +331,23 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fr <Cmd>call fzf#run(fzf#wrap({
     \ ],
 \ }))<CR>
 autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call fzf#run(fzf#wrap({
-    \ 'source': map(filter(getbufinfo({'buflisted': 1}),
-        \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')}),
+    \ 'source': <SID>ListBuffers(),
     \ 'options': [
         \ '--prompt='.pathshorten(substitute(fnamemodify(getcwd(), ':~'), '/$', '', '')).'/',
         \ '--multi',
+        \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
     \ ],
 \ }))<CR>
+function! s:ListBuffers() abort
+    return map(filter(getbufinfo({'buflisted': 1}),
+        \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
+endfunction
+function! DeleteBuffer(name) abort
+    if bufwinnr(a:name) == -1
+        silent! execute 'bdelete' fnameescape(a:name)
+    endif
+    return join(s:ListBuffers(), "\n")
+endfunction
 
 nnoremap <M-o> <Cmd>call <SID>BufferJump(-1, "\<C-O>")<CR>
 nnoremap <M-i> <Cmd>call <SID>BufferJump(1, "\<C-I>")<CR>
