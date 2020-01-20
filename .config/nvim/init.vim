@@ -332,11 +332,12 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fr <Cmd>call fzf#run(fzf#wrap({
 \ }))<CR>
 autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call fzf#run(fzf#wrap({
     \ 'source': <SID>ListBuffers(),
-    \ 'options': [
+    \ 'options': extend([
         \ '--prompt='.pathshorten(substitute(fnamemodify(getcwd(), ':~'), '/$', '', '')).'/',
         \ '--multi',
+    \ ], executable('nvr') ? [
         \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
-    \ ],
+    \ ] : []),
 \ }))<CR>
 function! s:ListBuffers() abort
     return map(filter(getbufinfo({'buflisted': 1}),
