@@ -195,7 +195,7 @@ let g:lightline = {
         \ 'termtitle': 'exists("b:term_title") && b:term_title !~# "^term://"',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
-        \ 'filetype': 'empty(&filetype)',
+        \ 'filetype': '!empty(&filetype)',
     \ },
     \ 'component_function': {
         \ 'git': 'GitStatusline',
