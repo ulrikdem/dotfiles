@@ -52,40 +52,43 @@ stty -ixon
 
 if [[ -r /usr/share/fzf/key-bindings.zsh ]]; then
     source /usr/share/fzf/key-bindings.zsh
+elif [[ -r ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
+    source ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh
+    path=(~/.local/share/nvim/plugged/fzf/bin $path)
+fi
 
-    if type fd >/dev/null; then
-        fzf-file-widget-helper() {
-            local query=${1##*/}
-            local dir=${1:0:${#1}-${#query}}
-            while [[ -n $dir && ! -d $dir ]]; do
-                dir=${dir%/}
-                query=${dir##*/}/$query
-                dir=${1:0:${#1}-${#query}}
+if type fzf >/dev/null && type fd >/dev/null; then
+    fzf-file-widget-helper() {
+        local query=${1##*/}
+        local dir=${1:0:${#1}-${#query}}
+        while [[ -n $dir && ! -d $dir ]]; do
+            dir=${dir%/}
+            query=${dir##*/}/$query
+            dir=${1:0:${#1}-${#query}}
+        done
+        cd -- "$dir"
+        unset REPORTTIME
+        local item
+        fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 |
+            while read -rd $'\0' item; do
+                echo -n "$dir${(q)item} "
             done
-            cd -- "$dir"
-            unset REPORTTIME
-            local item
-            fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 |
-                while read -rd $'\0' item; do
-                    echo -n "$dir${(q)item} "
-                done
-            REPORTTIME=5
-        }
+        REPORTTIME=5
+    }
 
-        fzf-file-widget() {
-            local tokens=(${(z)LBUFFER})
-            [[ ${LBUFFER[-1]} =~ '\s' ]] && tokens+=
-            local results=$(fzf-file-widget-helper ${tokens[-1]})
-            [[ -n $results ]] && LBUFFER=${LBUFFER:0:${#LBUFFER}-${#tokens[-1]}}$results
-            zle reset-prompt
-        }
+    fzf-file-widget() {
+        local tokens=(${(z)LBUFFER})
+        [[ ${LBUFFER[-1]} =~ '\s' ]] && tokens+=
+        local results=$(fzf-file-widget-helper ${tokens[-1]})
+        [[ -n $results ]] && LBUFFER=${LBUFFER:0:${#LBUFFER}-${#tokens[-1]}}$results
+        zle reset-prompt
+    }
 
-        fzf-cd-widget() {
-            unset REPORTTIME
-            cd -- "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
-            REPORTTIME=5
-            prompt_grml_precmd 2>/dev/null
-            zle reset-prompt
-        }
-    fi
+    fzf-cd-widget() {
+        unset REPORTTIME
+        cd -- "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
+        REPORTTIME=5
+        prompt_grml_precmd 2>/dev/null
+        zle reset-prompt
+    }
 fi
