@@ -193,6 +193,7 @@ let g:lightline = {
     \ },
     \ 'component_visible_condition': {
         \ 'termtitle': 'exists("b:term_title") && b:term_title !~# "^term://"',
+        \ 'asyncdo': 'exists("g:asyncdo")',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
         \ 'filetype': '!empty(&filetype)',
