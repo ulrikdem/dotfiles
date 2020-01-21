@@ -164,7 +164,7 @@ let g:lightline = {
     \ 'active': {
         \ 'left': [
             \ ['mode'],
-            \ ['git', 'filename', 'termtitle'],
+            \ ['git', 'filename'],
         \ ],
         \ 'right': [
             \ ['ruler'],
@@ -184,7 +184,6 @@ let g:lightline = {
         \ 'filename': '
             \%{substitute(expand("%:p:~"), "\\v^(/)$|^(\\~)/$|.*/([^/]+)/$|.*", "\\1\\2\\3", "")}%t
             \%{&modified ? " •" : ""}',
-        \ 'termtitle': '%{exists("b:term_title") && b:term_title !~# "^term://" ? b:term_title : ""}',
         \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
         \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
@@ -192,7 +191,6 @@ let g:lightline = {
         \ 'ruler': '%p%% %l:%v%<',
     \ },
     \ 'component_visible_condition': {
-        \ 'termtitle': 'exists("b:term_title") && b:term_title !~# "^term://"',
         \ 'asyncdo': 'exists("g:asyncdo")',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
