@@ -118,8 +118,8 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
-    highlight! link NonText SrceryXgray5
-    highlight! link SpecialKey SrceryWhite
+    highlight! link NonText SrceryXgray6
+    highlight! link SpecialKey SrceryBrightBlack
     highlight! link SpellBad ALEError
     highlight! link SpellLocal ALEWarning
     highlight! link SpellRare ALEInfo
@@ -127,8 +127,8 @@ function! s:UpdateColorScheme() abort
     highlight link QuickFixLine Visual
     highlight link PmenuSbar Pmenu
     execute 'highlight PmenuThumb'
-        \ 'ctermbg='.synIDattr(hlID('SrceryXgray3'), 'fg', 'cterm')
-        \ 'guibg='.synIDattr(hlID('SrceryXgray3'), 'fg', 'gui')
+        \ 'ctermbg='.synIDattr(hlID('SrceryXgray5'), 'fg', 'cterm')
+        \ 'guibg='.synIDattr(hlID('SrceryXgray5'), 'fg', 'gui')
     execute 'highlight CursorLineNr'
         \ 'ctermbg='.synIDattr(hlID('CursorLine'), 'bg', 'cterm')
         \ 'guibg='.synIDattr(hlID('CursorLine'), 'bg', 'gui')
@@ -408,7 +408,7 @@ function! s:FzfFromQuickfix(options, items) abort
                 continue
             endif
             let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
-            let l:right = "\e[37m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[m"
+            let l:right = "\e[90m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[m"
             let l:left = substitute(l:item.text, "\t", ' ', 'g')
             if has_key(l:item, 'range')
                 let l:start = l:item.range.start.character
