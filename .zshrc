@@ -14,16 +14,18 @@ if typeset -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host time path vcs rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
-    grml_prompt_token_default[time]='%F{white}%D{%H:%M} '
+    zstyle :prompt:grml:left:items:at pre %8F
+    zstyle :prompt:grml:left:items:host pre %F{blue}%B
+    grml_prompt_token_default[time]='%b%8F%T '
 
-    zstyle ':vcs_info:*' formats '%F{white}[%F{blue}%b%c%u%F{white}] %f'
-    zstyle ':vcs_info:*' actionformats '%F{white}[%F{blue}%b%F{white}:%F{cyan}%a%c%u%F{white}] %f'
-    zstyle ':vcs_info:*' stagedstr %F{white}:%F{green}S
-    zstyle ':vcs_info:*' unstagedstr %F{white}:%F{red}U
+    zstyle ':vcs_info:*' formats '%8F[%F{blue}%b%c%u%8F] '
+    zstyle ':vcs_info:*' actionformats '%8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F] '
+    zstyle ':vcs_info:*' stagedstr %8F:%F{green}S
+    zstyle ':vcs_info:*' unstagedstr %8F:%F{red}U
     zstyle ':vcs_info:*' check-for-changes true
 
     grml_theme_add_token arrow '%F{blue}» %f'
-    PS2='%F{white}%_%F{blue} » %f'
+    PS2='%8F%_%F{blue} » %f'
 
     bindkey '^P' history-beginning-search-backward-end
     bindkey '^N' history-beginning-search-forward-end
