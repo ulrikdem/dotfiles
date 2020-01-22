@@ -670,10 +670,20 @@ autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ls = filter(keys(g:coc_user_config.languageserver),
         \ {i, l -> index(g:coc_user_config.languageserver[l].filetypes, &filetype) != -1})[0]
-    let l:ProcessItems = s:FzfFromQuickfix(['--no-extended', '--bind=change:top+reload:'.
-        \ 'nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')"'], [])
+    let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:'.
+        \ 'nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" | '.
+        \ 'tail -c +2'], [])
+    let l:last_query = ''
+    let l:results = ''
     function! WorkspaceSymbolQuery(query) abort closure
-        let l:symbols = map(CocRequest(l:ls, 'workspace/symbol', {'query': a:query}), {i, s -> {
+        let l:words = split(a:query)
+        if empty(l:words)
+            return ''
+        endif
+        if l:words[0] ==# l:last_query
+            return l:results
+        endif
+        let l:symbols = map(CocRequest(l:ls, 'workspace/symbol', {'query': l:words[0]}), {i, s -> {
             \ 'filepath': iconv(substitute(substitute(s.location.uri, '^file://', '', ''),
                 \ '%\(\x\x\)', {m -> nr2char('0x'.m[1])}, 'g'), 'utf-8', 'latin1'),
             \ 'lnum': s.location.range.start.line + 1,
@@ -686,7 +696,9 @@ function! s:FzfFromWorkspaceSymbols() abort
                 \ 'Null', 'EnumMember', 'Struct', 'Event', 'Operator', 'TypeParameter',
             \ ][s.kind - 1],
         \ }})
-        return join(l:ProcessItems(s:MapSymbols(l:symbols)), "\n")
+        let l:last_query = l:words[0]
+        let l:results = "\n".join(l:ProcessItems(s:MapSymbols(l:symbols)), "\n")."\n"
+        return l:results
     endfunction
 endfunction
 function! s:MapSymbols(symbols) abort
