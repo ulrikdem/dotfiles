@@ -1,7 +1,9 @@
 #!/bin/bash
+
 if (($# != 1)); then
     echo 'xdg-mime-default <application>' >&2
     exit 1
+
 elif [[ -f $1 ]]; then
     app=$1
 elif [[ -f ~/.local/share/applications/$1 ]]; then
@@ -14,6 +16,7 @@ else
     echo "could not find $1" >&2
     exit 1
 fi
+
 for mime in $(sed -nE 's/;/ /g;s/^MimeType\s*=//p' "$app"); do
     xdg-mime default "$1" $mime
 done

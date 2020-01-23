@@ -1,4 +1,5 @@
 #!/bin/bash
+
 text=()
 for file; do
     if [[ $(file -b --mime-type -- "$file") =~ (^text/|^inode/x-empty$) ]]; then
@@ -7,6 +8,7 @@ for file; do
         xdg-open "$file" &>/dev/null &
     fi
 done
+
 if ((${#text[@]})); then
     exec nvim -- "${text[@]}"
 fi
