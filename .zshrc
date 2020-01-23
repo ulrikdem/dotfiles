@@ -11,15 +11,16 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 setopt list_packed no_list_types
 
 if typeset -f isgrml >/dev/null; then
-    zstyle :prompt:grml:left:setup items user at host time path vcs rc newline arrow
+    zstyle :prompt:grml:left:setup items user at host path vcs rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
     zstyle :prompt:grml:left:items:at pre %8F
-    zstyle :prompt:grml:left:items:host pre %F{blue}%B
-    grml_prompt_token_default[time]='%b%8F%T '
+    zstyle :prompt:grml:left:items:at post %f
+    zstyle :prompt:grml:left:items:host pre %B%F{blue}
+    zstyle :prompt:grml:left:items:host post %f%b
 
-    zstyle ':vcs_info:*' formats '%8F[%F{blue}%b%c%u%8F] '
-    zstyle ':vcs_info:*' actionformats '%8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F] '
+    zstyle ':vcs_info:*' formats '%8F[%F{blue}%b%c%u%8F] %f'
+    zstyle ':vcs_info:*' actionformats '%8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F] %f'
     zstyle ':vcs_info:*' stagedstr %8F:%F{green}S
     zstyle ':vcs_info:*' unstagedstr %8F:%F{red}U
     zstyle ':vcs_info:*' check-for-changes true
