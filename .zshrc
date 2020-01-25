@@ -14,7 +14,7 @@ if typeset -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host path vcs rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
-    zstyle :prompt:grml:left:items:at pre %8F
+    zstyle :prompt:grml:left:items:at pre %F{white}
     zstyle :prompt:grml:left:items:at post %f
     zstyle :prompt:grml:left:items:host pre %B%F{blue}
     zstyle :prompt:grml:left:items:host post %f%b
