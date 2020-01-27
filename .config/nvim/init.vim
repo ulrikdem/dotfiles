@@ -298,6 +298,7 @@ autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc BufEnter * if &buftype ==# 'terminal' | startinsert | endif
 
+tnoremap <C-\><C-\> <C-\><C-N>
 tnoremap <M-h> <C-\><C-N><C-W>h
 tnoremap <M-j> <C-\><C-N><C-W>j
 tnoremap <M-k> <C-\><C-N><C-W>k
