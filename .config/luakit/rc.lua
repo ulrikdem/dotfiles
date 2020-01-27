@@ -319,7 +319,7 @@ local function play_video(uris, referrer, win)
         return
     end
     local uri = table.remove(uris, 1)
-    luakit.spawn(string.format("mpv --referrer %q -- %q", referrer, uri), function(_, status)
+    luakit.spawn(string.format("mpv --referrer=%q -- %q", referrer, uri), function(_, status)
         if status ~= 0 then
             play_video(uris, referrer, win)
         end
