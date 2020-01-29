@@ -506,7 +506,7 @@ function! s:ToggleDiff() abort
     endfor
 endfunction
 
-set diffopt+=vertical,foldcolumn:1,hiddenoff
+set diffopt+=vertical,foldcolumn:1,algorithm:histogram,hiddenoff
 
 function! GitStatusline() abort
     if !exists('*FugitiveStatusline')

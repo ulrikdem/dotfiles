@@ -2,6 +2,7 @@
 path = user
 
 [diff]
+algorithm = histogram
 tool = nvimdiff
 
 [difftool "nvimdiff"]
