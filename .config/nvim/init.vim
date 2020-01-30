@@ -79,6 +79,15 @@ let g:wordmotion_mappings = {
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
 
+map <expr> <M-r> <SID>ShowRelativeNumber()
+function! s:ShowRelativeNumber() abort
+    setlocal relativenumber
+    redraw
+    let l:char = getchar()
+    setlocal norelativenumber
+    return type(l:char) == v:t_number ? nr2char(l:char) : l:char
+endfunction
+
 nnoremap <M-[><Esc> <Nop>
 nnoremap <M-]><Esc> <Nop>
 nmap <expr> <M-[> <SID>RepeatBracket('[', "\<M-[>")
