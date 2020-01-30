@@ -659,6 +659,9 @@ function! s:InitLspBuffer() abort
         set formatexpr=CocActionAsync('formatSelected')
         autocmd CursorHold <buffer> call CocActionAsync('highlight')
     endif
+    nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
+    nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
+    nnoremap <buffer> <C-RightMouse> <C-O>
 endfunction
 function! s:EchoResult(err, result) abort
     echo a:result
