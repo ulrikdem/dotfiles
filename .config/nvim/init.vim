@@ -304,6 +304,7 @@ Plug 'tpope/vim-eunuch'
 " Terminal {{{1
 
 autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
+autocmd vimrc TermOpen * setlocal nocursorline
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc BufEnter * if &buftype ==# 'terminal' | startinsert | endif
 
