@@ -910,42 +910,88 @@ if executable('gdb')
     autocmd vimrc ColorScheme srcery highlight link debugBreakpoint SrceryRedBold
     autocmd vimrc OptionSet signcolumn setglobal signcolumn&
 
-    command! -nargs=* -complete=file Debug call s:Debug('gdb', 'Termdebug '.<q-args>)
-    command! -nargs=+ -complete=file DebugCmd call s:Debug('gdb', 'TermdebugCommand '.<q-args>)
+    command! -nargs=* -complete=file Debug call s:Debug('gdb', <q-args>)
     if executable('rust-gdb')
-        command! -nargs=* -complete=file DebugRust call s:Debug('rust-gdb', 'Termdebug '.<q-args>)
-        command! -nargs=+ -complete=file DebugRustCmd
-            \ call s:Debug('rust-gdb', 'TermdebugCommand '.<q-args>)
+        command! -nargs=* -complete=file DebugRust call s:Debug('rust-gdb', <q-args>)
     endif
 
-    function! s:Debug(gdb, cmd) abort
+    let s:gdb_buf = 0
+    function! s:Debug(gdb, args) abort
+        if s:gdb_buf
+            return
+        endif
+
         let g:termdebugger = a:gdb
-        execute a:cmd
+        execute (empty(a:args) ? 'Termdebug' : 'TermdebugCommand') a:args
+        let s:gdb_buf = bufnr()
+        autocmd WinEnter <buffer> call feedkeys("\<M-0>\<C-L>", 'in')
+
+        function! s:ToggleDebugWindow() abort closure
+            let l:win = bufwinnr(s:gdb_buf)
+            if l:win != -1
+                execute l:win 'close'
+                return
+            endif
+            Source
+            15 split
+            set winfixheight
+            execute 'buffer' s:gdb_buf
+            startinsert
+        endfunction
+
+        let l:maps = [
+            \ ['<M-g>', '<Cmd>call <SID>ToggleDebugWindow()<CR>', 'nt'],
+            \ ['<M-Q>', '<Cmd>call TermDebugSendCommand("quit\ny")<CR>', 'nt'],
+            \ ['<M-b>', '<Cmd>Break<CR>', 'n'],
+            \ ['<M-B>', '<Cmd>Clear<CR>', 'n'],
+            \ ['<M-C-B>', '<Cmd>call TermDebugSendCommand("delete\ny")<CR>', 'nt'],
+            \ ['<M-R>', '<Cmd>Run<CR>', 'nt'],
+            \ ['<M-c>', '<Cmd>Continue<CR>', 'nt'],
+            \ ['<M-C-C>', '<Cmd>Stop<CR>', 'nt'],
+            \ ['<M-n>', '<Cmd>Over<CR>', 'nt'],
+            \ ['<M-s>', '<Cmd>Step<CR>', 'nt'],
+            \ ['<M-f>', '<Cmd>Finish<CR>', 'nt'],
+            \ ['<M-u>', '<Cmd>call TermDebugSendCommand("up")<CR>', 'nt'],
+            \ ['<M-d>', '<Cmd>call TermDebugSendCommand("down")<CR>', 'nt'],
+            \ ['<M-e>', ':Evaluate<CR>', 'nx'],
+        \ ]
 
         if filereadable('/usr/share/gdb-dashboard/.gdbinit') &&
             \ filereadable(expand('~/.config/gdb-dashboard'))
-            wincmd J
-            15 wincmd _
-            set winfixheight
-            Program
-            wincmd L
-            new
-            let l:dashboard = bufnr()
+            enew
+            let l:dashboard_buf = bufnr()
             let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null')).pty
             call TermDebugSendCommand('source ~/.config/gdb-dashboard')
             call TermDebugSendCommand('dashboard -output '.l:pty)
+            call extend(l:maps, [
+                \ ['<M-w>', '<Cmd>call <SID>WatchExpression("watch")<CR>', 'nx'],
+                \ ['<M-W>', '<Cmd>call <SID>WatchExpression("unwatch")<CR>', 'nx'],
+                \ ['<M-C-W>', '<Cmd>call TermDebugSendCommand("dashboard expression clear")<CR>',
+                    \ 'nt'],
+            \ ])
         endif
 
-        nnoremap <Leader>gb <Cmd>Break<CR>
-        nnoremap <Leader>gB <Cmd>Clear<CR>
-        xnoremap K :Evaluate<CR>
+        for [l:lhs, l:rhs, l:modes] in l:maps
+            for l:mode in split(l:modes, '\zs')
+                execute l:mode.'noremap <silent>' l:lhs l:rhs
+            endfor
+        endfor
 
         function! s:OnDebugExit(...) abort closure
-            nunmap <Leader>gb
-            nunmap <Leader>gB
-            xunmap K
-            if exists('l:dashboard')
-                execute 'bwipeout!' l:dashboard
+            for [l:lhs, l:rhs, l:modes] in l:maps
+                for l:mode in split(l:modes, '\zs')
+                    execute l:mode.'unmap' l:lhs
+                endfor
+            endfor
+            if exists('g:loaded_wordmotion')
+                unlet g:loaded_wordmotion
+                runtime plugin/wordmotion.vim
+            endif
+
+            execute 'bwipeout!' s:gdb_buf
+            let s:gdb_buf = 0
+            if exists('l:dashboard_buf')
+                execute 'bwipeout!' l:dashboard_buf
             endif
         endfunction
 
@@ -957,8 +1003,21 @@ if executable('gdb')
         \ })).pty
         call TermDebugSendCommand('tty '.l:pty)
 
-        Gdb
-        call feedkeys("\<C-L>", 'in')
+        Source
+        stopinsert
+    endfunction
+
+    function! s:WatchExpression(action) abort
+        if mode()[0] ==# 'n'
+            let l:expr = expand('<cexpr>')
+        else
+            let l:reg = getreg('v', 1, 1)
+            let l:type = getregtype('v')
+            normal! "vy
+            let l:expr = @v
+            call setreg('v', l:reg, l:type)
+        endif
+        call TermDebugSendCommand('dashboard expression '.a:action.' '.l:expr)
     endfunction
 
     function! s:OnDebugStdout(id, lines, event) abort

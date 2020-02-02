@@ -1,6 +1,6 @@
 source /usr/share/gdb-dashboard/.gdbinit
 
-dashboard -style prompt_not_running '\[\e[1;90m\]>>>\[\e[0m\]'
+dashboard -style prompt '(gdb)'
 dashboard -style style_low 90
 dashboard -style divider_fill_style_secondary 90
 dashboard -style divider_label_style_off_secondary 37
