@@ -306,7 +306,7 @@ Plug 'tpope/vim-eunuch'
 autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
 autocmd vimrc TermOpen * setlocal nocursorline
 autocmd vimrc TermOpen * startinsert
-autocmd vimrc BufEnter * if &buftype ==# 'terminal' | startinsert | endif
+autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
 tnoremap <C-\><C-\> <C-\><C-N>
 tnoremap <M-h> <C-\><C-N><C-W>h
