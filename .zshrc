@@ -26,7 +26,7 @@ if typeset -f isgrml >/dev/null; then
     zstyle ':vcs_info:*' check-for-changes true
 
     grml_theme_add_token arrow '%F{blue}» %f'
-    PS2='%8F%_%F{blue} » %f'
+    PS2='%8F%_ %F{blue}» %f'
 
     bindkey '^P' history-beginning-search-backward-end
     bindkey '^N' history-beginning-search-forward-end
