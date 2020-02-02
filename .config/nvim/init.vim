@@ -910,16 +910,65 @@ if executable('gdb')
     autocmd vimrc ColorScheme srcery highlight link debugBreakpoint SrceryRedBold
     autocmd vimrc OptionSet signcolumn setglobal signcolumn&
 
-    nnoremap <Leader>gb <Cmd>Break<CR>
-    nnoremap <Leader>gB <Cmd>Clear<CR>
-    xnoremap K :Evaluate<CR>
-
+    command! -nargs=* -complete=file Debug call s:Debug('gdb', 'Termdebug '.<q-args>)
+    command! -nargs=+ -complete=file DebugCmd call s:Debug('gdb', 'TermdebugCommand '.<q-args>)
     if executable('rust-gdb')
-        command! -bang -nargs=* -complete=file TermdebugRust
-            \ let g:termdebugger = 'rust-gdb' | Termdebug<bang> <args> | let g:termdebugger = 'gdb'
-        command! -bang -nargs=+ -complete=file TermdebugRustCommand
-            \ let g:termdebugger = 'rust-gdb' | TermdebugCommand<bang> <args> | let g:termdebugger = 'gdb'
+        command! -nargs=* -complete=file DebugRust call s:Debug('rust-gdb', 'Termdebug '.<q-args>)
+        command! -nargs=+ -complete=file DebugRustCmd
+            \ call s:Debug('rust-gdb', 'TermdebugCommand '.<q-args>)
     endif
+
+    function! s:Debug(gdb, cmd) abort
+        let g:termdebugger = a:gdb
+        execute a:cmd
+
+        if filereadable('/usr/share/gdb-dashboard/.gdbinit') &&
+            \ filereadable(expand('~/.config/gdb-dashboard'))
+            wincmd J
+            15 wincmd _
+            set winfixheight
+            Program
+            wincmd L
+            new
+            let l:dashboard = bufnr()
+            let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null')).pty
+            call TermDebugSendCommand('source ~/.config/gdb-dashboard')
+            call TermDebugSendCommand('dashboard -output '.l:pty)
+        endif
+
+        nnoremap <Leader>gb <Cmd>Break<CR>
+        nnoremap <Leader>gB <Cmd>Clear<CR>
+        xnoremap K :Evaluate<CR>
+
+        function! s:OnDebugExit(...) abort closure
+            nunmap <Leader>gb
+            nunmap <Leader>gB
+            xunmap K
+            if exists('l:dashboard')
+                execute 'bwipeout!' l:dashboard
+            endif
+        endfunction
+
+        Program
+        set nomodified
+        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null', {
+            \ 'on_stdout': function("\<SID>OnDebugStdout"),
+            \ 'on_exit': funcref("\<SID>OnDebugExit"),
+        \ })).pty
+        call TermDebugSendCommand('tty '.l:pty)
+
+        Gdb
+        call feedkeys("\<C-L>", 'in')
+    endfunction
+
+    function! s:OnDebugStdout(id, lines, event) abort
+        if a:lines[-2:] ==# [
+            \ "warning: GDB: Failed to set controlling terminal: Operation not permitted\r",
+            \ '',
+        \ ]
+            silent execute "!clear >".(nvim_get_chan_info(a:id).pty)
+        endif
+    endfunction
 endif
 
 if executable('cfr')
