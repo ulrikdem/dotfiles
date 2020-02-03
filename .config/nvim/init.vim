@@ -382,6 +382,8 @@ endfunction
 
 " Quickfix {{{1
 
+autocmd vimrc FileType qf setlocal nolist
+
 autocmd vimrc QuickFixCmdPost [^l]* call s:OpenQuickfix('window')
 function! s:OpenQuickfix(cmd) abort
     let l:win = win_getid()
@@ -475,7 +477,9 @@ endfunction
 " Git {{{1
 
 Plug 'tpope/vim-fugitive'
+
 Plug 'junegunn/gv.vim'
+autocmd vimrc FileType GV setlocal nolist
 
 autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
 function! s:ToggleGitStatus() abort
