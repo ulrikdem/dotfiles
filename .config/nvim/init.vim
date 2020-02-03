@@ -475,6 +475,7 @@ endfunction
 " Git {{{1
 
 Plug 'tpope/vim-fugitive'
+Plug 'junegunn/gv.vim'
 
 autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
 function! s:ToggleGitStatus() abort
