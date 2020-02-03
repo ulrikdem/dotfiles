@@ -11,13 +11,14 @@ zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 setopt list_packed no_list_types
 
 if typeset -f isgrml >/dev/null; then
-    zstyle :prompt:grml:left:setup items user at host path vcs rc newline arrow
+    zstyle :prompt:grml:left:setup items user at host fullpath vcs rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
     zstyle :prompt:grml:left:items:at pre %F{white}
     zstyle :prompt:grml:left:items:at post %f
     zstyle :prompt:grml:left:items:host pre %B%F{blue}
     zstyle :prompt:grml:left:items:host post %f%b
+    grml_theme_add_token fullpath '%~ ' %B %b
 
     zstyle ':vcs_info:*' formats '%8F[%F{blue}%b%c%u%8F] %f'
     zstyle ':vcs_info:*' actionformats '%8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F] %f'
