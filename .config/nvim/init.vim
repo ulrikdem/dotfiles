@@ -595,9 +595,9 @@ if executable('curl') && executable('node')
         call mkdir(l:dir, 'p')
         execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
             \ "| sed -E '".
+            \ '/helps to fix undo issue/,+2d;'.
             \ 's/( *)let sa = a\.sortText;/'.
                 \ '\1if (a.priority \!= b.priority) return b.priority - a.priority;\n&/;'.
-            \ 's/\\\\<C-g>u//;'.
             \ "' >".fnameescape(l:dir.'/index.js')
     endfunction
     Plug 'neoclide/coc.nvim', {'do': function('DownloadCoc')}
@@ -607,7 +607,6 @@ endif
 
 autocmd vimrc User Plug_coc_nvim inoremap <silent> <expr> <Tab> pumvisible() ? "\<C-N>" :
     \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~# '\s' ? "\<Tab>" : coc#refresh()
-autocmd vimrc User Plug_coc_nvim inoremap <CR> <C-G>u<CR>
 
 let g:coc_user_config = {
     \ 'coc': {
