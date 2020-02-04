@@ -224,8 +224,11 @@ let g:lightline = {
         \ 'right': [],
     \ },
     \ 'tab': {
-        \ 'active': ['tabnum', 'filename'],
-        \ 'inactive': ['tabnum', 'filename'],
+        \ 'active': ['tabnum', 'filename', 'wincount'],
+        \ 'inactive': ['tabnum', 'filename', 'wincount'],
+    \ },
+    \ 'tab_component_function': {
+        \ 'wincount': 'TabWindowCount',
     \ },
     \ 'separator': {
         \ 'left': '',
@@ -239,6 +242,11 @@ let g:lightline = {
 
 autocmd vimrc User Plug_lightline_vim set noshowmode
 autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
+
+function! TabWindowCount(tab) abort
+    let l:count = len(tabpagebuflist(a:tab))
+    return l:count > 1 ? '(+'.(l:count - 1).')' : ''
+endfunction
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery
     \ call s:UpdateLightlineColors()
