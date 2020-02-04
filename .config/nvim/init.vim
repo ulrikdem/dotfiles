@@ -108,7 +108,7 @@ if has('python3') && filereadable('/usr/share/clang/clang-format.py')
     autocmd vimrc FileType c,cpp,java,javascript,typescript
         \ nnoremap <buffer> <Leader>gq <Cmd>call ClangFormat('all')<CR>
     autocmd vimrc FileType c,cpp,java,javascript,typescript
-        \ set formatexpr=ClangFormat((v:lnum).':'.(v:lnum+v:count-1))
+        \ setlocal formatexpr=ClangFormat((v:lnum).':'.(v:lnum+v:count-1))
     function! ClangFormat(lines) abort
         let l:lines = a:lines
         py3file /usr/share/clang/clang-format.py
@@ -671,7 +671,7 @@ function! s:InitLspBuffer() abort
     endif
     if &filetype !~# 'javascript\|typescript'
         nnoremap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
-        set formatexpr=CocActionAsync('formatSelected')
+        setlocal formatexpr=CocActionAsync('formatSelected')
         autocmd CursorHold <buffer> call CocActionAsync('highlight')
     endif
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
@@ -823,7 +823,7 @@ let g:polyglot_disabled = ['latex']
 let g:jsx_ext_required = 1
 let g:python_highlight_space_errors = 0
 
-autocmd vimrc FileType c,cpp set commentstring=//%s
+autocmd vimrc FileType c,cpp setlocal commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oH <Cmd>edit %:r.hpp<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oc <Cmd>edit %:r.c<CR>
@@ -838,7 +838,7 @@ if executable('cargo')
 endif
 
 autocmd vimrc FileType gitcommit,mail,markdown,tex setlocal spell
-autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail set formatoptions-=tc
+autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail setlocal formatoptions-=tc
 
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
@@ -880,7 +880,7 @@ autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
     \ nnoremap <buffer> <Leader>mv <Cmd>MarkdownPreview<CR>
 
 autocmd vimrc BufNewFile,BufRead *.gv set filetype=dot
-autocmd vimrc FileType dot set commentstring=//%s
+autocmd vimrc FileType dot setlocal commentstring=//%s
 if executable('dot')
     autocmd vimrc FileType dot
         \ let &l:makeprg = 'dot -T$* -o'.expand('%:p:r:S').'.$* '.expand('%:p:S')
@@ -895,7 +895,7 @@ if executable('xdg-open')
 endif
 
 Plug 'Elzair/ifm-vim'
-autocmd vimrc FileType ifm set commentstring=#%s
+autocmd vimrc FileType ifm setlocal commentstring=#%s
 if executable('ifm')
     autocmd vimrc FileType ifm let &l:makeprg =
         \ 'ifm -m -o '.expand('%:p:r:S').'.ps '.expand('%:p:S')
