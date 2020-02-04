@@ -1,5 +1,5 @@
 typeset -U path
-path=(~/.local/bin $path)
+path=(~/.local/bin ~/.local/share/nvim/plugged/fzf/bin $path)
 
 [[ -x /usr/bin/luakit ]] && export BROWSER=luakit
 [[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim ABDUCO_CMD=nvim
