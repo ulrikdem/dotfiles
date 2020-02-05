@@ -756,6 +756,7 @@ highlight link CocErrorHighlight ALEError
 highlight link CocWarningHighlight ALEWarning
 highlight link CocInfoHighlight ALEInfo
 highlight link CocHintHighlight ALEInfo
+highlight link CocHoverRange NONE
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
 function! CocErrorCount() abort
