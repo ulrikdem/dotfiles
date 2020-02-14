@@ -326,6 +326,7 @@ local function play_video(uris, referrer, win)
     end)
 end
 
+follow.selectors.video = "video"
 modes.add_binds("ex-follow", {
     {"v", "Hint all videos and play it with `mpv`.", function(win)
         win:set_mode("follow", {
@@ -345,8 +346,22 @@ modes.add_binds("ex-follow", {
             end,
         })
     end},
+
+    {"V", "Hint all links and play it with `mpv`.", function(win)
+        win:set_mode("follow", {
+            prompt = "mpv",
+            selector = "uri",
+            evaluator = "uri",
+            func = function(uri)
+                luakit.spawn(string.format("mpv -- %q", uri), function(_, status)
+                    if status ~= 0 then
+                        win:error("Could not play video")
+                    end
+                end)
+            end,
+        })
+    end},
 })
-follow.selectors.video = "video"
 
 -- Downloads {{{1
 
