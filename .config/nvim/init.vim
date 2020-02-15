@@ -828,6 +828,9 @@ endfor
 
 " Filetypes {{{1
 
+Plug 'Shougo/neco-vim'
+Plug 'neoclide/coc-neco'
+
 Plug 'sheerun/vim-polyglot'
 let g:polyglot_disabled = ['latex']
 let g:jsx_ext_required = 1
