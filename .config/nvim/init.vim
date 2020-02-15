@@ -626,7 +626,7 @@ let g:coc_user_config = {
     \ },
     \ 'suggest': {
         \ 'maxCompleteItemCount': 1000,
-        \ 'invalidInsertCharacters': split(' "(/:<>', '\zs'),
+        \ 'invalidInsertCharacters': split(' /">:', '\zs'),
         \ 'snippetIndicator': '',
         \ 'detailField': 'preview',
     \ },
@@ -784,6 +784,9 @@ if executable('ccls')
             \ },
             \ 'clang': {
                 \ 'extraArgs': ['-std=c++17', '-Wall', '-Wextra'],
+            \ },
+            \ 'client': {
+                \ 'snippetSupport': v:false,
             \ },
             \ 'completion': {
                 \ 'detailedLabel': v:false,
