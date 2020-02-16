@@ -91,8 +91,8 @@ delKeys XConfig {modMask = mod} =
     ]
 
 insKeys XConfig {modMask = mod, terminal = term} =
-    [ ((mod, xK_p), shellPrompt . promptConf "" =<< initMatches)
-    , ((mod .|. shiftMask, xK_p), shellPrompt . promptConf (term ++ " -e ") =<< initMatches)
+    [ ((mod, xK_p), shellPrompt . promptConf =<< initMatches)
+    , ((mod .|. shiftMask, xK_p), termPrompt term . promptConf =<< initMatches)
 
     , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
     , ((mod, xK_b), spawn "luakit")
@@ -142,11 +142,10 @@ insKeys XConfig {modMask = mod, terminal = term} =
     , (k, i) <- zip [xK_w, xK_e, xK_r] [0..]
     ]
 
-promptConf text matches = def
+promptConf matches = def
     { promptBorderWidth = 0
     , height = decoHeight theme
     , font = fontName theme
-    , defaultText = text
     , historyFilter = deleteAllDuplicates
     , promptKeymap = M.union (M.fromList
         [ ((controlMask, xK_p), historyUpMatching matches)
@@ -156,6 +155,16 @@ promptConf text matches = def
         , ((mod1Mask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
         ]) emacsLikeXPKeymap
     }
+
+termPrompt term conf = do
+    cmds <- io getCommands
+    mkXPrompt TermPrompt conf (getShellCompl cmds $ searchPredicate conf) $ \c -> safeSpawn term ["-e", c]
+
+data TermPrompt = TermPrompt
+
+instance XPrompt TermPrompt where
+    showXPrompt _ = "Run in terminal: "
+    completionToCommand _ = completionToCommand Shell
 
 moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
