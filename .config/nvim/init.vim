@@ -596,6 +596,7 @@ if executable('curl') && executable('node')
         execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
             \ "| sed -E '".
             \ '/helps to fix undo issue/,+2d;'.
+            \ 's/(snippetSupport: )true/\1false/;'.
             \ 's/( *)let sa = a\.sortText;/'.
                 \ '\1if (a.priority \!= b.priority) return b.priority - a.priority;\n&/;'.
             \ "' >".fnameescape(l:dir.'/index.js')
@@ -627,7 +628,6 @@ let g:coc_user_config = {
     \ 'suggest': {
         \ 'maxCompleteItemCount': 1000,
         \ 'invalidInsertCharacters': split(' /">:', '\zs'),
-        \ 'snippetIndicator': '',
         \ 'detailField': 'preview',
     \ },
     \ 'signature': {
@@ -784,9 +784,6 @@ if executable('ccls')
             \ },
             \ 'clang': {
                 \ 'extraArgs': ['-std=c++17', '-Wall', '-Wextra'],
-            \ },
-            \ 'client': {
-                \ 'snippetSupport': v:false,
             \ },
             \ 'completion': {
                 \ 'detailedLabel': v:false,
