@@ -1,3 +1,5 @@
+-- Imports {{{1
+
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 
 import Control.Monad
@@ -35,15 +37,13 @@ import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad
 
+-- Main {{{1
+
 main = xmonad $ ewmh $ docks def
-    { startupHook = dynStatusBarStartup spawnBar (return ()) <+> setDefaultCursor xC_left_ptr
-    , handleEventHook = dynStatusBarEventHook spawnBar (return ())
-    , logHook = composeAll
-        [ multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . wrapWorkspace}
-            pp {ppCurrent = xmobarColor "black" "gray50" . wrapWorkspace}
-        , withWindowSet (\s -> mapM_ (\w ->
-            (if M.member w $ W.floating s then addTag else delTag) "floating" w) $ W.allWindows s)
-        ]
+    { startupHook = barStartupHook <+> setDefaultCursor xC_left_ptr
+    , handleEventHook = barEventHook
+    , logHook = barLogHook <+> withWindowSet (\s -> mapM_ (\w ->
+        (if M.member w $ W.floating s then addTag else delTag) "floating" w) $ W.allWindows s)
     , normalBorderColor = "black"
     , focusedBorderColor = "gray50"
     , modMask = mod4Mask
@@ -60,6 +60,8 @@ main = xmonad $ ewmh $ docks def
         ||| named "fullscreen" (noBorders StateFull)
     }
 
+-- Theme {{{1
+
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
@@ -67,8 +69,15 @@ theme = def
     , fontName = "xft:monospace:pixelsize=14"
     }
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
-    ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:pixelsize=18'"
+-- Bar {{{1
+
+barStartupHook = dynStatusBarStartup spawnBar $ return ()
+barEventHook = dynStatusBarEventHook spawnBar $ return ()
+
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:pixelsize=18'"
+
+barLogHook = multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . wrapWorkspace}
+    pp {ppCurrent = xmobarColor "black" "gray50" . wrapWorkspace}
 
 pp = namedScratchpadFilterOutWorkspacePP def
     { ppVisible = wrapWorkspace
@@ -83,6 +92,8 @@ pp = namedScratchpadFilterOutWorkspacePP def
     }
 
 wrapWorkspace s = xmobarAction ("xdotool set_desktop " ++ show (read s - 1)) "1" $ pad s
+
+-- Keys {{{1
 
 delKeys XConfig {modMask = mod} =
     [ (mod, xK_question)
@@ -142,6 +153,15 @@ insKeys XConfig {modMask = mod, terminal = term} =
     , (k, i) <- zip [xK_w, xK_e, xK_r] [0..]
     ]
 
+moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
+    (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
+moveRight win stack = stack {W.down = b, W.up = reverse a ++ W.up stack} where
+    (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.down stack) $ W.down stack
+
+weightFactor = 1.26
+
+-- Prompt {{{1
+
 promptConf matches = def
     { promptBorderWidth = 0
     , height = decoHeight theme
@@ -166,12 +186,7 @@ instance XPrompt TermPrompt where
     showXPrompt _ = "Run in terminal: "
     completionToCommand _ = completionToCommand Shell
 
-moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
-    (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
-moveRight win stack = stack {W.down = b, W.up = reverse a ++ W.up stack} where
-    (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.down stack) $ W.down stack
-
-weightFactor = 1.26
+-- Layout {{{1
 
 layout = decoration shrinkText theme CollapseDeco $ spacingWithEdge gapWidth
     $ configurableNavigation noNavigateBorders $ EmptyLayout [def, def {limit = maxBound}]
@@ -283,3 +298,5 @@ data LayoutMessage
     deriving (Typeable)
 
 instance Message LayoutMessage
+
+-- vim: foldmethod=marker foldcolumn=1
