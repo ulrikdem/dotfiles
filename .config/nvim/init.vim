@@ -630,10 +630,6 @@ let g:coc_user_config = {
         \ 'invalidInsertCharacters': split(' /">:', '\zs'),
         \ 'detailField': 'preview',
     \ },
-    \ 'signature': {
-        \ 'preferShownAbove': v:false,
-        \ 'hideOnTextChange': v:true,
-    \ },
     \ 'diagnostic': {
         \ 'errorSign': '✕',
         \ 'warningSign': '⚠',
