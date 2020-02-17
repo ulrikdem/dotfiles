@@ -51,9 +51,9 @@ main = xmonad $ ewmh $ docks def
     , terminal = "termite"
     , manageHook = let r = W.RationalRect 0.25 0.25 0.5 0.5 in composeAll
         [ scratchpadManageHook r
-        , appName =? "download-prompt" --> customFloating r
+        , appName =? "xmonad-float-resize" --> customFloating r
         , placeHook $ fixed (0.5, 0.5)
-        , className =? "Gxmessage" --> doFloat
+        , appName =? "xmonad-float" --> doFloat
         ]
     , layoutHook = named "tiled" (avoidStruts layout)
         ||| named "full" (avoidStruts $ noBorders StateFull)
