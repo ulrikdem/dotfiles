@@ -1,6 +1,6 @@
 " Setup {{{1
 
-" vim: foldmethod=marker foldcolumn=2
+" vim: foldmethod=marker foldcolumn=1
 
 augroup vimrc
     autocmd!
