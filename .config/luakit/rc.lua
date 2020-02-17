@@ -21,7 +21,6 @@ local theme = lousy.theme.get()
 local adblock = require("adblock")
 local adblock_chrome = require("adblock_chrome")
 local binds_chrome = require("binds_chrome")
-local clear_data = require("clear_data")
 local cmdhist = require("cmdhist")
 local completion = require("completion")
 local downloads = require("downloads")
@@ -52,6 +51,10 @@ local view_source = require("view_source")
 local webinspector = require("webinspector")
 local webview = require("webview")
 local window = require("window")
+
+pcall(function()
+    require("clear_data")
+end)
 
 -- Settings {{{1
 
@@ -482,9 +485,9 @@ luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.
     adblock.load(true)
 end)
 
-if pcall(function() lousy.util.find_config("userconf.lua") end) then
+pcall(function()
     require("userconf")
-end
+end)
 
 if not session.restore() or #uris ~= 0 then
     window.new(uris)
