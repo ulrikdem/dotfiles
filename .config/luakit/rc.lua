@@ -258,7 +258,10 @@ local new_tab = window.methods.new_tab
 function window.methods.new_tab(win, arg, opts)
     opts = opts or {}
     opts.private = win.private
-    return new_tab(win, arg, opts)
+    function win.reload() end
+    local view = new_tab(win, arg, opts)
+    win.reload = nil
+    return view
 end
 
 modes.remove_binds("command", {":priv-t[abopen]"})
