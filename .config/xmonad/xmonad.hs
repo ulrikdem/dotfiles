@@ -29,7 +29,9 @@ import XMonad.Layout.Spacing
 import XMonad.Layout.StateFull
 import XMonad.Layout.WindowNavigation
 import XMonad.Prompt
+import XMonad.Prompt.FuzzyMatch
 import XMonad.Prompt.Shell
+import XMonad.Prompt.Window
 import qualified XMonad.StackSet as W
 import XMonad.Util.Cursor
 import XMonad.Util.CustomKeys
@@ -102,7 +104,10 @@ delKeys XConfig {modMask = mod} =
     ]
 
 insKeys XConfig {modMask = mod, terminal = term} =
-    [ ((mod, xK_p), shellPrompt . promptConf =<< initMatches)
+    [ ((mod, xK_g), windowPrompt windowPromptConf Goto allWindows)
+    , ((mod .|. shiftMask, xK_g), windowPrompt windowPromptConf Bring allWindows)
+
+    , ((mod, xK_p), shellPrompt . promptConf =<< initMatches)
     , ((mod .|. shiftMask, xK_p), termPrompt term . promptConf =<< initMatches)
 
     , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
@@ -162,6 +167,20 @@ weightFactor = 1.26
 
 -- Prompt {{{1
 
+windowPromptConf = def
+    { promptBorderWidth = 0
+    , height = decoHeight theme
+    , font = fontName theme
+    , searchPredicate = fuzzyMatch
+    , sorter = fuzzySort
+    , historySize = 0
+    , promptKeymap = M.union (M.fromList
+        [ ((controlMask, xK_u), killBefore)
+        , ((controlMask, xK_w), killWord Prev)
+        , ((mod1Mask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
+        ]) emacsLikeXPKeymap
+    }
+
 promptConf matches = def
     { promptBorderWidth = 0
     , height = decoHeight theme
@@ -170,10 +189,7 @@ promptConf matches = def
     , promptKeymap = M.union (M.fromList
         [ ((controlMask, xK_p), historyUpMatching matches)
         , ((controlMask, xK_n), historyDownMatching matches)
-        , ((controlMask, xK_u), killBefore)
-        , ((controlMask, xK_w), killWord Prev)
-        , ((mod1Mask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
-        ]) emacsLikeXPKeymap
+        ]) $ promptKeymap windowPromptConf
     }
 
 termPrompt term conf = do
