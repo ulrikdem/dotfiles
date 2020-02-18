@@ -22,6 +22,7 @@ if typeset -f isgrml >/dev/null; then
 
     zstyle ':vcs_info:*' formats '%8F[%F{blue}%b%c%u%8F] %f'
     zstyle ':vcs_info:*' actionformats '%8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F] %f'
+    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat %b%8F:%F{blue}%r
     zstyle ':vcs_info:*' stagedstr %8F:%F{green}S
     zstyle ':vcs_info:*' unstagedstr %8F:%F{red}U
     zstyle ':vcs_info:*' check-for-changes true
