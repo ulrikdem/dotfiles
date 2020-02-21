@@ -1,2 +1,2 @@
 #!/bin/bash
-GTK_THEME=Adwaita exec /usr/bin/luakit "$@"
+GTK_THEME=luakit-dark exec /usr/bin/luakit "$@"
