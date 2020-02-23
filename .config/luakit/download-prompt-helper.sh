@@ -1,4 +1,5 @@
 #!/bin/bash
+eval $(dircolors ~/.config/dir_colors)
 query=
 while true; do
     readarray -t result < <(ls --color | fzf --ansi --color hl:3,hl+:3,fg+:-1 --no-clear --reverse \
