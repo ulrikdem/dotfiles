@@ -301,7 +301,7 @@ autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
         \ 'errorformat': &grepformat,
     \ }, <q-args>)
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file RGrep
-    \ Grep<bang> <args> %:h:S
+    \ Grep<bang> <args> %:p:h:S
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
     \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
 autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mm <Cmd>silent update \| Make<CR>
