@@ -91,11 +91,13 @@ endfunction
 
 nnoremap <M-[><Esc> <Nop>
 nnoremap <M-]><Esc> <Nop>
+nmap <M-[><M-]> <M-]>
+nmap <M-]><M-[> <M-[>
 nmap <expr> <M-[> <SID>RepeatBracket('[', "\<M-[>")
 nmap <expr> <M-]> <SID>RepeatBracket(']', "\<M-]>")
 function! s:RepeatBracket(bracket, map) abort
     let l:char = getchar()
-    return a:bracket.(type(l:char) == v:t_number ? nr2char(l:char) : l:char).a:map
+    return a:bracket.(type(l:char) == v:t_number ? nr2char(l:char) : l:char).'zz'.a:map
 endfunction
 
 " Formatting {{{1
