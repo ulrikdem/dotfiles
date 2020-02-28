@@ -2,7 +2,7 @@
 
 text=()
 for file; do
-    if [[ $(file -b --mime-type -- "$file") =~ (^text/|^inode/x-empty$) ]]; then
+    if [[ $(file -Lb --mime-type -- "$file") =~ (^text/|^inode/x-empty$) ]]; then
         text+=("$file")
     else
         xdg-open "$file" &>/dev/null &
