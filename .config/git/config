@@ -13,3 +13,6 @@ tool = fugitive
 
 [mergetool "fugitive"]
 cmd = nvim -c Gdiff $MERGED
+
+[includeIf "gitdir:~/.dotfiles.git"]
+path = dotfiles
