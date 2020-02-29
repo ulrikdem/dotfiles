@@ -547,6 +547,18 @@ function! GitStatusline() abort
     endif
 endfunction
 
+autocmd vimrc User Plug_vim_fugitive autocmd vimrc SourcePost fugitive.vim call s:OverrideWorkTree()
+function! s:OverrideWorkTree() abort
+    let l:WorkTree = funcref('FugitiveWorkTree')
+    function! FugitiveWorkTree(...) abort closure
+        if exists('$GIT_WORK_TREE')
+            return $GIT_WORK_TREE
+        else
+            return call(l:WorkTree, a:000)
+        endif
+    endfunction
+endfunction
+
 " Search and completion {{{1
 
 set inccommand=nosplit
