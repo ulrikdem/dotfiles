@@ -502,19 +502,13 @@ function! s:ToggleGitStatus() abort
         return
     endif
     Gstatus
-    wincmd H
-    call s:ResizeToFit()
+    wincmd L
+    40 wincmd |
     set winfixwidth
     wincmd =
-    autocmd TextChanged <buffer> call s:ResizeToFit()
 endfunction
 
-function! s:ResizeToFit() abort
-    execute 'vertical resize'
-        \ max(add(map(getbufline('%', 1, '$'), {i, l -> strdisplaywidth(l)}), 20))
-endfunction
-
-autocmd vimrc User Plug_vim_fugitive autocmd vimrc FileType gitcommit wincmd K
+autocmd vimrc User Plug_vim_fugitive autocmd vimrc FileType gitcommit wincmd L
 
 nnoremap <Leader>td <Cmd>call <SID>ToggleDiff()<CR>
 function! s:ToggleDiff() abort
