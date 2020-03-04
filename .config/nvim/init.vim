@@ -1052,16 +1052,6 @@ if executable('gdb')
     endfunction
 endif
 
-if executable('cfr')
-    autocmd vimrc BufReadCmd *.class call s:DecompileJavaClass()
-    function! s:DecompileJavaClass() abort
-        setlocal undolevels=-1
-        read !cfr %
-        1 delete _
-        setlocal undolevels=-123456 filetype=java buftype=nowrite
-    endfunction
-endif
-
 " }}}
 
 call s:InitPlugins()
