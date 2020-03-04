@@ -31,6 +31,7 @@ endtry
 
 set clipboard=unnamed
 set cursorline
+set fillchars=foldopen:▾,foldclose:▸ foldtext=FoldText()
 set hidden
 set linebreak breakindent breakindentopt=shift:8,sbr showbreak=↪
 set list listchars=tab:→\ ,trail:␣
@@ -43,6 +44,11 @@ set updatetime=100
 
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
 autocmd vimrc VimResized * wincmd =
+
+function! FoldText() abort
+    return repeat('·', v:foldlevel * 2).substitute(trim(foldtext()), '.\{-}:', '', '').
+        \ ' ('.(v:foldend - v:foldstart + 1).' lines) '
+endfunction
 
 " Misc mappings {{{1
 
