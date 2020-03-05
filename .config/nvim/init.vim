@@ -192,7 +192,7 @@ let g:lightline = {
     \ },
     \ 'inactive': {
         \ 'left': [
-            \ ['git', 'filename', 'termtitle'],
+            \ ['git', 'filename'],
         \ ],
         \ 'right': [
             \ ['ruler'],
