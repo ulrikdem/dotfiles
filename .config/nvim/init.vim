@@ -1,6 +1,6 @@
 " Setup {{{1
 
-" vim: foldmethod=marker foldcolumn=1
+" vim: foldmethod=marker
 
 augroup vimrc
     autocmd!
@@ -31,7 +31,7 @@ endtry
 
 set clipboard=unnamed
 set cursorline
-set fillchars=foldopen:▾,foldclose:▸ foldtext=FoldText()
+set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
 set hidden
 set linebreak breakindent breakindentopt=shift:8,sbr showbreak=↪
 set list listchars=tab:→\ ,trail:␣
@@ -521,8 +521,8 @@ function! s:ToggleDiff() abort
     if &diff
         let l:current_win = win_getid()
         let l:wins = filter(gettabinfo(tabpagenr())[0].windows, {i, w -> getwinvar(w, '&diff')})
-    diffoff!
-    for l:win in l:wins
+        diffoff!
+        for l:win in l:wins
             execute win_id2win(l:win) 'wincmd w'
             if &foldmethod ==# 'manual'
                 normal! zE
@@ -530,7 +530,7 @@ function! s:ToggleDiff() abort
             if l:win != l:current_win
                 close
             end
-    endfor
+        endfor
         execute win_id2win(l:current_win) 'wincmd w'
     elseif exists(':Gdiffsplit')
         Gdiffsplit!
@@ -888,7 +888,6 @@ for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi'
 endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:InitVimtexBuffer()
 function! s:InitVimtexBuffer() abort
-    setlocal foldcolumn=auto:9
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
     nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>CleanTexFiles()<CR>
     nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>CleanTexFiles()<CR>

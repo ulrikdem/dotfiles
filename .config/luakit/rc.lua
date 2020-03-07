@@ -496,4 +496,4 @@ if not session.restore() or #uris ~= 0 then
     window.new(uris)
 end
 
--- vim: foldmethod=marker foldcolumn=1
+-- vim: foldmethod=marker

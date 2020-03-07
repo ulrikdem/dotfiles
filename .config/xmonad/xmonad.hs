@@ -315,4 +315,4 @@ data LayoutMessage
 
 instance Message LayoutMessage
 
--- vim: foldmethod=marker foldcolumn=1
+-- vim: foldmethod=marker
