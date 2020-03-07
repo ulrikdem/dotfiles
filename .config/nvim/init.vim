@@ -518,18 +518,23 @@ autocmd vimrc User Plug_vim_fugitive autocmd vimrc FileType gitcommit wincmd L
 
 nnoremap <Leader>td <Cmd>call <SID>ToggleDiff()<CR>
 function! s:ToggleDiff() abort
-    if !&diff
-        if exists(':Gdiffsplit')
-            Gdiffsplit!
-        endif
-        return
-    endif
-    let l:wins = filter(gettabinfo(tabpagenr())[0].windows,
-        \ {i, w -> w != win_getid() && getwinvar(w, '&diff')})
+    if &diff
+        let l:current_win = win_getid()
+        let l:wins = filter(gettabinfo(tabpagenr())[0].windows, {i, w -> getwinvar(w, '&diff')})
     diffoff!
     for l:win in l:wins
-        execute win_id2win(l:win) 'close'
+            execute win_id2win(l:win) 'wincmd w'
+            if &foldmethod ==# 'manual'
+                normal! zE
+            endif
+            if l:win != l:current_win
+                close
+            end
     endfor
+        execute win_id2win(l:current_win) 'wincmd w'
+    elseif exists(':Gdiffsplit')
+        Gdiffsplit!
+    endif
 endfunction
 
 set diffopt+=vertical,foldcolumn:1,algorithm:histogram,hiddenoff
