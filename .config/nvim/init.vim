@@ -311,10 +311,14 @@ endfunction
 " Command execution {{{1
 
 if executable('rg')
-    set grepprg=rg\ --vimgrep grepformat=%f:%l:%c:%m
+    set grepprg=rg\ --column\ --color=ansi
+    set grepformat=[0m[35m%f[0m:[0m[32m%l[0m:[0m%c[0m:%m
 else
     set grepprg=grep\ -rn
 endif
+
+let s:match_start = "\e[0m\e[1m\e[31m"
+let s:match_end = "\e[0m"
 
 Plug 'hauleth/asyncdo.vim'
 autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
@@ -417,12 +421,16 @@ endfunction
 
 " Quickfix {{{1
 
-autocmd vimrc FileType qf setlocal nolist
-
 autocmd vimrc QuickFixCmdPost [^l]* call s:OpenQuickfix('window')
 function! s:OpenQuickfix(cmd) abort
     let l:win = win_getid()
     execute 'botright c'.a:cmd
+    if &buftype ==# 'quickfix'
+        call matchadd('WarningMsg', s:match_start.'.\{-}'.s:match_end)
+        call matchadd('Conceal', '\e\[\d*m')
+        setlocal conceallevel=2 concealcursor=nv
+        setlocal nolist
+    endif
     call win_gotoid(l:win)
 endfunction
 
@@ -454,20 +462,19 @@ function! s:FzfFromQuickfix(options, items) abort
             if !get(l:item, 'valid', 1)
                 continue
             endif
-            let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
-            let l:right = "\e[90m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[m"
-            let l:left = substitute(l:item.text, "\t", ' ', 'g')
             if has_key(l:item, 'range')
                 let l:start = l:item.range.start.character
                 let l:end = l:item.range.end.character
-                let l:left = (l:start ? l:left[:(l:start - 1)] : '').
-                    \ "\e[31m".l:left[(l:start):(l:end - 1)]."\e[m".l:left[(l:end):]
+                let l:item.text = (l:start ? l:item.text[:(l:start - 1)] : '').s:match_start.
+                    \ (l:item.text[(l:start):(l:end - 1)]).s:match_end.(l:item.text[(l:end):])
             endif
-            let l:left = trim(l:left, ' ')
+            let l:left = trim(substitute(l:item.text, "\t", ' ', 'g'), ' ')
             if !empty(get(l:item, 'type', ''))
-                let l:left = "\e[31m".(l:item.type).":\e[m ".l:left
+                let l:left = s:match_start.(l:item.type).s:match_end.l:left
             endif
-            let l:pad = &columns - 3 - strwidth(substitute(l:left.l:right, '\e\[.\{-}m', '', 'g'))
+            let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
+            let l:right = "\e[90m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[0m"
+            let l:pad = &columns - 3 - strwidth(substitute(l:left.l:right, '\e\[\d*m', '', 'g'))
             call add(l:lines, len(l:valid_items).' '.l:left.repeat(' ', max([l:pad, 1])).l:right)
             call add(l:valid_items, l:item)
         endfor
