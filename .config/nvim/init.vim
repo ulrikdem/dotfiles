@@ -312,6 +312,8 @@ endfunction
 
 if executable('rg')
     set grepprg=rg\ --vimgrep grepformat=%f:%l:%c:%m
+else
+    set grepprg=grep\ -rn
 endif
 
 Plug 'hauleth/asyncdo.vim'
