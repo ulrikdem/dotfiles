@@ -31,7 +31,6 @@ endtry
 
 set clipboard=unnamed
 set cursorline
-set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
 set hidden
 set linebreak breakindent breakindentopt=shift:8,sbr showbreak=↪
 set list listchars=tab:→\ ,trail:␣
@@ -42,13 +41,14 @@ set splitbelow splitright
 set title titlestring=%F\ -\ nvim titlelen=0
 set updatetime=100
 
-autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
-autocmd vimrc VimResized * wincmd =
-
+set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
 function! FoldText() abort
     return repeat('·', v:foldlevel * 2).substitute(trim(foldtext()), '.\{-}:', '', '').
         \ ' ('.(v:foldend - v:foldstart + 1).' lines) '
 endfunction
+
+autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
+autocmd vimrc VimResized * wincmd =
 
 " Misc mappings {{{1
 
