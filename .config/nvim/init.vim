@@ -317,6 +317,7 @@ else
 endif
 
 Plug 'hauleth/asyncdo.vim'
+autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
 
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
     \ cclose | call asyncdo#run(<bang>0, {
@@ -325,11 +326,13 @@ autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
     \ }, <q-args>)
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file RGrep
     \ Grep<bang> <args> %:p:h:S
+autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gg <Cmd>Grep -Fw '<cword>'<CR>
+autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gG <Cmd>RGrep -Fw '<cword>'<CR>
+
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
     \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
 autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mm <Cmd>silent update \| Make<CR>
 autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
-autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
 
 Plug 'tpope/vim-eunuch'
 
