@@ -50,6 +50,19 @@ endfunction
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
 autocmd vimrc VimResized * wincmd =
 
+autocmd vimrc BufEnter * call s:ResizeHelp()
+function! s:ResizeHelp() abort
+    if exists('w:checked_help')
+        return
+    endif
+    let w:checked_help = 1
+    if &buftype ==# 'help'
+        wincmd L
+        80 wincmd |
+        set winfixwidth
+    endif
+endfunction
+
 " Misc mappings {{{1
 
 nnoremap <C-S> <Cmd>update<CR>
