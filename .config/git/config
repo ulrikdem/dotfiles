@@ -12,7 +12,7 @@ cmd = nvim -d $LOCAL $REMOTE
 tool = fugitive
 
 [mergetool "fugitive"]
-cmd = nvim -c Gdiff $MERGED
+cmd = nvim $MERGED +Gdiffsplit!
 
 [includeIf "gitdir:~/.dotfiles.git"]
 path = dotfiles
