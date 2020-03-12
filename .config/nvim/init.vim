@@ -317,7 +317,7 @@ else
     set grepprg=grep\ -rn
 endif
 
-let s:match_start = "\e[0m\e[1m\e[31m"
+let s:match_start = "\e[31m"
 let s:match_end = "\e[0m"
 
 Plug 'hauleth/asyncdo.vim'
@@ -426,13 +426,16 @@ function! s:OpenQuickfix(cmd) abort
     let l:win = win_getid()
     execute 'botright c'.a:cmd
     if &buftype ==# 'quickfix'
-        call matchadd('WarningMsg', s:match_start.'.\{-}'.s:match_end)
+        call matchadd('QuickFixMatch', s:match_start.'.\{-}'.s:match_end)
         call matchadd('Conceal', '\e\[\d*m')
         setlocal conceallevel=2 concealcursor=nv
         setlocal nolist
     endif
     call win_gotoid(l:win)
 endfunction
+
+autocmd vimrc ColorScheme * highlight QuickFixMatch ctermfg=Red guifg=Red
+autocmd vimrc ColorScheme srcery highlight! link QuickFixMatch SrceryRed
 
 nnoremap <Leader>tq <Cmd>call <SID>ToggleQuickfix()<CR>
 function! s:ToggleQuickfix() abort

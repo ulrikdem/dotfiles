@@ -7,6 +7,8 @@ path=(~/.local/bin ~/.local/share/nvim/plugged/fzf/bin $path)
 type -p fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L'
 export FZF_DEFAULT_OPTS='--color 16 --bind tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all,change:top,ctrl-z:ignore'
 
+[[ -r ~/.config/ripgreprc ]] && export RIPGREP_CONFIG_PATH=~/.config/ripgreprc
+
 export HIGHLIGHT_OPTIONS="-D $HOME/.config/highlight -t 4 -O xterm256"
 [[ -r ~/.config/highlight/themes/vim.theme ]] && HIGHLIGHT_OPTIONS="$HIGHLIGHT_OPTIONS -s vim"
 
