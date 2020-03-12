@@ -11,6 +11,9 @@ cmd = nvim -d $LOCAL $REMOTE
 [merge]
 tool = fugitive
 
+[mergetool]
+keepBackup = false
+
 [mergetool "fugitive"]
 cmd = nvim $MERGED +Gdiffsplit!
 
