@@ -340,6 +340,9 @@ autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
 
 Plug 'tpope/vim-eunuch'
 
+Plug 'lambdalisue/suda.vim'
+let g:suda_smart_edit = 1
+
 " Terminal {{{1
 
 autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
