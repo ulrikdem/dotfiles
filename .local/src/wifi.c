@@ -9,8 +9,7 @@ int main(int argc, char **argv) {
         args[0] = "/bin/sh";
         args[1] = "-c";
         args[2] = "/usr/bin/wpa_cli scan_results | /usr/bin/tail -n +3 | /usr/bin/awk '{print $3,$5,\"\t\",$4}' | /usr/bin/sort -nr";
-    } else if (!strcmp(argv[1], "start") || !strcmp(argv[1], "stop")
-            || !strcmp(argv[1], "restart") || !strcmp(argv[1], "status")) {
+    } else if (!strcmp(argv[1], "start") || !strcmp(argv[1], "stop") || !strcmp(argv[1], "restart") || !strcmp(argv[1], "status")) {
         args[0] = "/bin/systemctl";
         args[1] = argv[1];
         args[2] = "netctl-auto@wlan0.service";
