@@ -625,7 +625,7 @@ function! s:CompletionFallback() abort
         Plug 'ncm2/ncm2-bufword'
         Plug 'fgrsnau/ncm2-otherbuf'
         let g:ncm2#complete_length = 2
-        autocmd vimrc User Plug_ncm2 autocmd BufEnter * call ncm2#enable_for_buffer()
+        autocmd vimrc User Plug_ncm2 autocmd vimrc BufEnter * call ncm2#enable_for_buffer()
     else
         Plug 'lifepillar/vim-mucomplete'
         let g:mucomplete#enable_auto_at_startup = 1
