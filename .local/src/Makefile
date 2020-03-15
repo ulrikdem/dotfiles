@@ -1,4 +1,7 @@
-all: ../bin/nvidia-modules ../bin/vpn ../bin/wifi
+all: ../bin/igrep-format ../bin/nvidia-modules ../bin/vpn ../bin/wifi
+
+../bin/%: %.cpp
+	$(CXX) -std=c++17 -O3 -o $@ $<
 
 ../bin/%: %.c
 	$(CC) -o $@ $<

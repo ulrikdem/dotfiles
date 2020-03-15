@@ -329,9 +329,36 @@ autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
         \ 'errorformat': &grepformat,
     \ }, <q-args>)
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file RGrep
-    \ Grep<bang> <args> %:p:h:S
+    \ Grep<bang> <args> %:p:.:h:S
 autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gg <Cmd>Grep -Fw '<cword>'<CR>
 autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gG <Cmd>RGrep -Fw '<cword>'<CR>
+
+if executable('rg') && executable('igrep-format')
+    autocmd vimrc User Plug_fzf nnoremap <Leader>fg <Cmd>IGrep<CR>
+    autocmd vimrc User Plug_fzf nnoremap <Leader>fG <Cmd>IGrep %:p:.:h:S<CR>
+    autocmd vimrc User Plug_fzf command! -nargs=* -complete=file IGrep call s:IGrep(<q-args>)
+    function! s:IGrep(args) abort
+        cclose
+        let l:cmd = 'rg --null --column --color=ansi --smart-case {q} '.a:args.
+            \ ' | igrep-format '.&columns
+        call s:CustomFzf(substitute(l:cmd, '{q}', "''", ''), [
+            \ '--with-nth=-1..',
+            \ '--delimiter=\0',
+            \ '--ansi',
+            \ '--phony',
+            \ '--bind=change:top+reload:'.l:cmd,
+        \ ], function("\<SID>ParseIGrep"))
+    endfunction
+    function! s:ParseIGrep(line) abort
+        let [l:file, l:line, l:col; l:text] = split(a:line, '\n')[:-2]
+        return {
+            \ 'filename': l:file,
+            \ 'lnum': str2nr(l:line),
+            \ 'col': str2nr(l:col),
+            \ 'text': join(l:text, "\e"),
+        \ }
+    endfunction
+endif
 
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
     \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
@@ -486,16 +513,25 @@ function! s:FzfFromQuickfix(options, items) abort
         endfor
         return l:lines
     endfunction
+    call s:CustomFzf(s:ProcessItems(a:items), extend([
+        \ '--with-nth=2..',
+        \ '--delimiter= ',
+        \ '--ansi',
+    \ ], a:options), {l -> l:valid_items[split(l)[0]]})
+    return funcref("\<SID>ProcessItems")
+endfunction
+
+function! s:CustomFzf(source, options, parse) abort
     function! s:FzfSink(lines) abort closure
         let l:key = remove(a:lines, 0)
         if l:key ==# 'ctrl-q'
-            call s:SetQuickfix(map(a:lines, {i, l -> l:valid_items[split(l)[0]]}))
+            call s:SetQuickfix(map(a:lines, {i, l -> a:parse(l)}))
         else
             for l:line in a:lines
                 if empty(l:line)
                     continue
                 endif
-                let l:item = l:valid_items[split(l:line)[0]]
+                let l:item = a:parse(l:line)
                 let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
                 if empty(l:key) && fnamemodify(l:file, ':p') ==# expand('%:p')
                     normal! m'
@@ -507,19 +543,15 @@ function! s:FzfFromQuickfix(options, items) abort
         endif
     endfunction
     call fzf#run(fzf#wrap({
-        \ 'source': s:ProcessItems(a:items),
+        \ 'source': a:source,
         \ 'sink*': funcref("\<SID>FzfSink"),
         \ 'options': extend([
-            \ '--with-nth=2..',
-            \ '--delimiter= ',
-            \ '--tiebreak=begin',
-            \ '--ansi',
             \ '--layout=reverse-list',
+            \ '--tiebreak=begin',
             \ '--multi',
             \ '--expect=ctrl-x,ctrl-v,ctrl-t,ctrl-q',
         \ ], a:options),
     \ }))
-    return funcref("\<SID>ProcessItems")
 endfunction
 
 " Git {{{1
