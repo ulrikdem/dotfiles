@@ -402,7 +402,7 @@ let g:fzf_action = {
 \ }
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
-autocmd vimrc User Plug_fzf nnoremap <Leader>fr <Cmd>call fzf#run(fzf#wrap({
+autocmd vimrc User Plug_fzf nnoremap <Leader>fF <Cmd>call fzf#run(fzf#wrap({
     \ 'dir': expand('%:p:h'),
     \ 'options': [
         \ '--prompt='.pathshorten(substitute(expand('%:p:~:h'), '/$', '', '')).'/',
