@@ -723,7 +723,7 @@ let g:coc_user_config = {
 
 autocmd vimrc User Plug_coc_nvim autocmd vimrc FileType * call s:InitLspBuffer()
 function! s:InitLspBuffer() abort
-    if index(s:lsp_filetypes, &filetype) == -1 || @% =~# '^fugitive:'
+    if index(s:lsp_filetypes, &filetype) == -1 || @% =~# '^\w\+://'
         return
     endif
     setlocal signcolumn=yes
