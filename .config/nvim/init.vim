@@ -143,40 +143,46 @@ Plug 'godlygeek/tabular'
 
 Plug 'srcery-colors/srcery-vim'
 let g:srcery_transparent_background = 1
-let g:srcery_inverse = 0
 let g:srcery_italic = 1
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
+    call s:Highlight('Normal', {'bg': 'SrceryBlack'})
+    call s:Highlight('Operator', {'fg': 'Normal'})
+    call s:Highlight('CursorLineNr', {'bg': 'SrceryXgray2'})
+    call s:Highlight('Visual', {'bg': 'SrceryXgray4', 'attr': 'NONE'})
+    call s:Highlight('Search', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightYellow', 'attr': 'NONE'})
+    call s:Highlight('IncSearch', {'fg': 'SrceryBlack', 'bg': 'SrceryYellow', 'attr': 'NONE'})
+    call s:Highlight('DiffAdd', {'fg': 'SrceryBlack', 'bg': 'DiffAdd'})
+    call s:Highlight('DiffDelete', {'fg': 'SrceryBlack', 'bg': 'DiffDelete'})
+    call s:Highlight('DiffChange', {'fg': 'SrceryBlack', 'bg': 'DiffChange'})
+    call s:Highlight('DiffText', {'fg': 'SrceryBlack', 'bg': 'DiffText'})
+    call s:Highlight('PmenuThumb', {'bg': 'SrceryXgray5'})
+    highlight link PmenuSbar Pmenu
+    highlight link QuickFixLine Visual
     highlight! link NonText SrceryXgray6
     highlight! link SpecialKey SrceryBrightBlack
     highlight! link SpellBad ALEError
     highlight! link SpellLocal ALEWarning
     highlight! link SpellRare ALEInfo
     highlight! link SpellCap ALEInfo
-    highlight link QuickFixLine Visual
-    highlight link PmenuSbar Pmenu
-    execute 'highlight PmenuThumb'
-        \ 'ctermbg='.synIDattr(hlID('SrceryXgray5'), 'fg', 'cterm')
-        \ 'guibg='.synIDattr(hlID('SrceryXgray5'), 'fg', 'gui')
-    execute 'highlight CursorLineNr'
-        \ 'ctermbg='.synIDattr(hlID('CursorLine'), 'bg', 'cterm')
-        \ 'guibg='.synIDattr(hlID('CursorLine'), 'bg', 'gui')
-    execute 'highlight Visual'
-        \ 'cterm=NONE ctermbg='.synIDattr(hlID('SrceryXgray4'), 'fg', 'cterm')
-        \ 'gui=NONE guibg='.synIDattr(hlID('SrceryXgray4'), 'fg', 'gui')
-    for [l:group, l:color] in [
-        \ ['Search', 'SrceryBrightYellow'], ['IncSearch', 'SrceryYellow'],
-        \ ['DiffAdd', 'DiffAdd'], ['DiffDelete', 'DiffDelete'],
-        \ ['DiffChange', 'DiffChange'], ['DiffText', 'DiffText'],
-    \ ]
-        execute 'highlight' l:group 'cterm=NONE gui=NONE'
-            \ 'ctermfg='.synIDattr(hlID('SrceryBlack'), 'fg', 'cterm')
-            \ 'ctermbg='.synIDattr(hlID(l:color), 'fg', 'cterm')
-            \ 'guifg='.synIDattr(hlID('SrceryBlack'), 'fg', 'gui')
-            \ 'guibg='.synIDattr(hlID(l:color), 'fg', 'gui')
-    endfor
+endfunction
+
+function! s:Highlight(group, args) abort
+    if has_key(a:args, 'bg')
+        execute 'highlight' a:group
+            \ 'ctermbg='.synIDattr(hlID(a:args.bg), 'fg', 'cterm')
+            \ 'guibg='.synIDattr(hlID(a:args.bg), 'fg', 'gui')
+    endif
+    if has_key(a:args, 'fg')
+        execute 'highlight' a:group
+            \ 'ctermfg='.synIDattr(hlID(a:args.fg), 'fg', 'cterm')
+            \ 'guifg='.synIDattr(hlID(a:args.fg), 'fg', 'gui')
+    endif
+    if has_key(a:args, 'attr')
+        execute 'highlight' a:group 'cterm='.(a:args.attr) 'gui='.(a:args.attr)
+    endif
 endfunction
 
 function! s:GetSrceryColors(fg, bg) abort
@@ -272,9 +278,9 @@ endfunction
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery
     \ call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
+    call s:Highlight('StatusLine', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
+    call s:Highlight('StatusLineNC', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
     let l:common = s:GetSrceryColors('BrightWhite', 'Xgray5')
-    execute 'highlight StatusLine cterm=NONE ctermbg='.l:common[3].' gui=NONE guibg='.l:common[1]
-    execute 'highlight StatusLineNC cterm=NONE ctermbg='.l:common[3].' gui=NONE guibg='.l:common[1]
     let l:palette = {
         \ 'normal': {
             \ 'middle': [s:GetSrceryColors('BrightWhite', 'Xgray3')],
