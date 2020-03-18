@@ -374,7 +374,7 @@ autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
 Plug 'tpope/vim-eunuch'
 
 Plug 'lambdalisue/suda.vim'
-let g:suda_smart_edit = 1
+autocmd vimrc User Plug_suda_vim command! WriteSudo write suda://% | set noreadonly
 
 " Terminal {{{1
 
