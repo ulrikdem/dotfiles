@@ -154,10 +154,9 @@ function! s:UpdateColorScheme() abort
     call s:Highlight('Visual', {'bg': 'SrceryXgray4', 'attr': 'NONE'})
     call s:Highlight('Search', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightYellow', 'attr': 'NONE'})
     call s:Highlight('IncSearch', {'fg': 'SrceryBlack', 'bg': 'SrceryYellow', 'attr': 'NONE'})
-    call s:Highlight('DiffAdd', {'fg': 'SrceryBlack', 'bg': 'DiffAdd'})
-    call s:Highlight('DiffDelete', {'fg': 'SrceryBlack', 'bg': 'DiffDelete'})
-    call s:Highlight('DiffChange', {'fg': 'SrceryBlack', 'bg': 'DiffChange'})
-    call s:Highlight('DiffText', {'fg': 'SrceryBlack', 'bg': 'DiffText'})
+    call s:Highlight('DiffAdd', {'fg': 'SrceryBlack', 'bg': 'SrceryGreen'})
+    call s:Highlight('DiffChange', {'fg': 'SrceryBlack', 'bg': 'SrceryBlue'})
+    call s:Highlight('DiffText', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightBlue'})
     call s:Highlight('PmenuThumb', {'bg': 'SrceryXgray5'})
     highlight link PmenuSbar Pmenu
     highlight link QuickFixLine Visual
@@ -170,15 +169,15 @@ function! s:UpdateColorScheme() abort
 endfunction
 
 function! s:Highlight(group, args) abort
-    if has_key(a:args, 'bg')
-        execute 'highlight' a:group
-            \ 'ctermbg='.synIDattr(hlID(a:args.bg), 'fg', 'cterm')
-            \ 'guibg='.synIDattr(hlID(a:args.bg), 'fg', 'gui')
-    endif
     if has_key(a:args, 'fg')
         execute 'highlight' a:group
             \ 'ctermfg='.synIDattr(hlID(a:args.fg), 'fg', 'cterm')
             \ 'guifg='.synIDattr(hlID(a:args.fg), 'fg', 'gui')
+    endif
+    if has_key(a:args, 'bg')
+        execute 'highlight' a:group
+            \ 'ctermbg='.synIDattr(hlID(a:args.bg), 'fg', 'cterm')
+            \ 'guibg='.synIDattr(hlID(a:args.bg), 'fg', 'gui')
     endif
     if has_key(a:args, 'attr')
         execute 'highlight' a:group 'cterm='.(a:args.attr) 'gui='.(a:args.attr)
