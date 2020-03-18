@@ -148,8 +148,6 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
-    call s:Highlight('Normal', {'bg': 'SrceryBlack'})
-    call s:Highlight('Operator', {'fg': 'Normal'})
     call s:Highlight('CursorLineNr', {'bg': 'SrceryXgray2'})
     call s:Highlight('Visual', {'bg': 'SrceryXgray4', 'attr': 'NONE'})
     call s:Highlight('Search', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightYellow', 'attr': 'NONE'})
