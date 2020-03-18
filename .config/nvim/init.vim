@@ -675,16 +675,16 @@ endfunction
 " Language client {{{1
 
 if executable('curl') && executable('node')
-    function! DownloadCoc(options) abort
+    function! DownloadCoc(...) abort
         let l:dir = (g:plugs['coc.nvim'].dir).'/build'
         call mkdir(l:dir, 'p')
-        execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js'
-            \ "| sed -E '".
-            \ '/helps to fix undo issue/,+2d;'.
-            \ 's/(snippetSupport: )true/\1false/;'.
-            \ 's/( *)let sa = a\.sortText;/'.
-                \ '\1if (a.priority \!= b.priority) return b.priority - a.priority;\n&/;'.
-            \ "' >".fnameescape(l:dir.'/index.js')
+        execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js
+            \ | sed -E ''
+                \/helps to fix undo issue/,+2d;
+                \s/(snippetSupport: )true/\1false/;
+                \s/( *)let sa = a\.sortText;/
+                    \\1if (a.priority \!= b.priority) return b.priority - a.priority;\n&/;
+                \'' >'.fnameescape(l:dir.'/index.js')
     endfunction
     Plug 'neoclide/coc.nvim', {'do': function('DownloadCoc')}
 else
@@ -779,9 +779,9 @@ autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ls = filter(keys(g:coc_user_config.languageserver),
         \ {i, l -> index(g:coc_user_config.languageserver[l].filetypes, &filetype) != -1})[0]
-    let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:'.
-        \ 'nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" | '.
-        \ 'tail -c +2'], [])
+    let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:
+        \nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" |
+            \ tail -c +2'], [])
     let l:last_query = ''
     let l:results = ''
     function! WorkspaceSymbolQuery(query) abort closure
