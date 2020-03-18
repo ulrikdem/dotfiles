@@ -693,7 +693,7 @@ else
 endif
 
 autocmd vimrc User Plug_coc_nvim inoremap <silent> <expr> <Tab> pumvisible() ? "\<C-N>" :
-    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~# '\s' ? "\<Tab>" : coc#refresh()
+    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? "\<Tab>" : coc#refresh()
 autocmd vimrc User Plug_coc_nvim inoremap <CR> <C-G>u<CR>
 
 let g:coc_user_config = {
@@ -727,7 +727,7 @@ let g:coc_user_config = {
 
 autocmd vimrc User Plug_coc_nvim autocmd vimrc FileType * call s:InitLspBuffer()
 function! s:InitLspBuffer() abort
-    if index(s:lsp_filetypes, &filetype) == -1 || @% =~# '^\w\+://'
+    if index(s:lsp_filetypes, &filetype) == -1 || @% =~ '^\a\+://'
         return
     endif
     setlocal signcolumn=yes
