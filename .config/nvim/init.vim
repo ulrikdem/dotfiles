@@ -161,7 +161,6 @@ function! s:UpdateColorScheme() abort
     highlight link QuickFixLine Visual
     highlight! link NonText SrceryXgray6
     highlight! link SpecialKey SrceryBrightBlack
-    highlight! link Directory SrceryBlue
     highlight! link SpellBad ALEError
     highlight! link SpellLocal ALEWarning
     highlight! link SpellRare ALEInfo
@@ -397,6 +396,7 @@ Plug 'justinmk/vim-dirvish'
 set suffixes-=.h
 autocmd vimrc FileType dirvish nnoremap <buffer> C <Cmd>cd % \| pwd<CR>
 autocmd vimrc ColorScheme srcery highlight link DirvishArg SrceryOrangeBold
+autocmd vimrc ColorScheme srcery highlight link DirvishPathTail SrceryBlue
 highlight link DirvishPathHead NonText
 
 Plug 'junegunn/fzf', {'do': './install --bin'}
