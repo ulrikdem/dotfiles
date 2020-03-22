@@ -695,7 +695,7 @@ else
     call s:CompletionFallback()
 endif
 
-autocmd vimrc User Plug_coc_nvim inoremap <silent> <expr> <Tab> pumvisible() ? "\<C-N>" :
+autocmd vimrc User Plug_coc_nvim inoremap <silent><expr> <Tab> pumvisible() ? "\<C-N>" :
     \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? "\<Tab>" : coc#refresh()
 autocmd vimrc User Plug_coc_nvim inoremap <CR> <C-G>u<CR>
 
