@@ -49,8 +49,6 @@ type g++ >/dev/null && alias g++='g++ -Wall -Wextra'
 type nvim >/dev/null && alias vim=nvim
 type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
 type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
-type udevil >/dev/null && alias pmount='udevil mount'
-type udevil >/dev/null && alias pumount='udevil umount'
 
 stty -ixon
 
