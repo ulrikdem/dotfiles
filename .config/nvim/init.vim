@@ -577,10 +577,10 @@ function! s:ToggleGitStatus() abort
     if !empty(l:buf)
         execute 'bdelete' l:buf[0].bufnr
         return
-    elseif !exists(':Gstatus')
+    elseif !exists(':Git')
         return
     endif
-    Gstatus
+    Git
     wincmd L
     40 wincmd |
     set winfixwidth
