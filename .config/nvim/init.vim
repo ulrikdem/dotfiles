@@ -161,6 +161,9 @@ function! s:UpdateColorScheme() abort
     highlight link QuickFixLine Visual
     highlight! link Directory SrceryGreen
     highlight! link SpecialKey SrceryBrightBlack
+    highlight! link Error SrceryRedBold
+    highlight! link ErrorMsg SrceryRedBold
+    highlight! link WarningMsg SrceryRed
     highlight! link SpellBad ALEError
     highlight! link SpellLocal ALEWarning
     highlight! link SpellRare ALEInfo
