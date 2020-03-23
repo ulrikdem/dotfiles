@@ -159,9 +159,8 @@ function! s:UpdateColorScheme() abort
     call s:Highlight('PmenuThumb', {'bg': 'SrceryXgray5'})
     highlight link PmenuSbar Pmenu
     highlight link QuickFixLine Visual
-    highlight! link NonText SrceryXgray6
-    highlight! link SpecialKey SrceryBrightBlack
     highlight! link Directory SrceryGreen
+    highlight! link SpecialKey SrceryBrightBlack
     highlight! link SpellBad ALEError
     highlight! link SpellLocal ALEWarning
     highlight! link SpellRare ALEInfo
