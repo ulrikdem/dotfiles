@@ -220,7 +220,7 @@ let g:lightline = {
     \ },
     \ 'component': {
         \ 'filename': '
-            \%{substitute(expand("%:p:~"), "\\v^(/)$|^(\\~)/$|.*/([^/]+)/$|.*", "\\1\\2\\3", "")}%t
+            \%{substitute(expand("%:p:~"), ''\v^(/)$|^(\~)/$|.*/(.+)/$|.*'', ''\1\2\3'', "")}%t
             \%{&modified ? " •" : ""}',
         \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
