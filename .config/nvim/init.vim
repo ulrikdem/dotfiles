@@ -659,10 +659,11 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([
 
 set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
-inoremap <expr> <Tab> pumvisible() ? "\<C-N>" : "\<Tab>"
-inoremap <expr> <S-Tab> pumvisible() ? "\<C-P>" : "\<S-Tab>"
 
-autocmd vimrc CompleteChanged * if !empty(reg_recording()) | call feedkeys("\<C-E>", 'in') | endif
+let g:start_completion = "\<C-N>"
+inoremap <silent><expr> <Tab> pumvisible() ? empty(reg_recording()) ? "\<C-N>" : "" :
+    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? "\<Tab>" : g:start_completion
+inoremap <expr> <S-Tab> !pumvisible() ? "\<S-Tab>" : empty(reg_recording()) ? "\<C-P>" : ""
 
 function! s:CompletionFallback() abort
     if has('python3')
@@ -703,9 +704,9 @@ else
     call s:CompletionFallback()
 endif
 
-autocmd vimrc User Plug_coc_nvim inoremap <silent><expr> <Tab> pumvisible() ? "\<C-N>" :
-    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? "\<Tab>" : coc#refresh()
 autocmd vimrc User Plug_coc_nvim inoremap <CR> <C-G>u<CR>
+
+autocmd vimrc User Plug_coc_nvim let g:start_completion = coc#refresh()
 
 let g:coc_user_config = {
     \ 'coc': {
