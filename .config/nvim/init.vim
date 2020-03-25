@@ -461,21 +461,26 @@ endfunction
 
 " Quickfix {{{1
 
+autocmd vimrc FileType qf call s:InitQuickfixBuffer()
+function! s:InitQuickfixBuffer() abort
+    if exists('w:added_qf_matches')
+        return
+    endif
+    call matchadd('QuickFixMatch', s:match_start.'.\{-}'.s:match_end)
+    call matchadd('Conceal', '\e\[\d*m')
+    setlocal conceallevel=2 concealcursor=nv
+    setlocal nolist
+    let w:added_qf_matches = 1
+endfunction
+autocmd vimrc ColorScheme * highlight QuickFixMatch ctermfg=Red guifg=Red
+autocmd vimrc ColorScheme srcery highlight! link QuickFixMatch SrceryRed
+
 autocmd vimrc QuickFixCmdPost [^l]* call s:OpenQuickfix('window')
 function! s:OpenQuickfix(cmd) abort
     let l:win = win_getid()
     execute 'botright c'.a:cmd
-    if &buftype ==# 'quickfix'
-        call matchadd('QuickFixMatch', s:match_start.'.\{-}'.s:match_end)
-        call matchadd('Conceal', '\e\[\d*m')
-        setlocal conceallevel=2 concealcursor=nv
-        setlocal nolist
-    endif
     call win_gotoid(l:win)
 endfunction
-
-autocmd vimrc ColorScheme * highlight QuickFixMatch ctermfg=Red guifg=Red
-autocmd vimrc ColorScheme srcery highlight! link QuickFixMatch SrceryRed
 
 nnoremap <Leader>tq <Cmd>call <SID>ToggleQuickfix()<CR>
 function! s:ToggleQuickfix() abort
