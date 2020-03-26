@@ -337,16 +337,16 @@ autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
     \ }, <q-args>)
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file RGrep
     \ Grep<bang> <args> %:p:.:h:S
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gg <Cmd>Grep -Fw '<cword>'<CR>
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gG <Cmd>RGrep -Fw '<cword>'<CR>
+autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gg <Cmd>Grep -Fwe '<cword>'<CR>
+autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gG <Cmd>RGrep -Fwe '<cword>'<CR>
 
 if executable('rg') && executable('igrep-format')
     autocmd vimrc User Plug_fzf nnoremap <Leader>fg <Cmd>IGrep<CR>
-    autocmd vimrc User Plug_fzf nnoremap <Leader>fG <Cmd>IGrep %:p:.:h:S<CR>
+    autocmd vimrc User Plug_fzf nnoremap <Leader>fG <Cmd>IGrep -- %:p:.:h:S<CR>
     autocmd vimrc User Plug_fzf command! -nargs=* -complete=file IGrep call s:IGrep(<q-args>)
     function! s:IGrep(args) abort
         cclose
-        let l:cmd = 'rg --null --column --color=ansi --smart-case {q} '.a:args.
+        let l:cmd = 'rg --null --column --color=ansi --smart-case --regexp {q} '.a:args.
             \ ' | igrep-format '.&columns
         call s:CustomFzf(substitute(l:cmd, '{q}', "''", ''), [
             \ '--with-nth=-1..',
