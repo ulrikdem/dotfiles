@@ -51,7 +51,7 @@ main = xmonad $ ewmh $ docks def
     , modMask = mod4Mask
     , keys = customKeys delKeys insKeys
     , terminal = "termite"
-    , manageHook = let r = W.RationalRect 0.25 0.25 0.5 0.5 in composeAll
+    , manageHook = let r = W.RationalRect 0 (2 / 3) 1 (1 / 3) in composeAll
         [ scratchpadManageHook r
         , appName =? "xmonad-float-resize" --> customFloating r
         , placeHook $ fixed (0.5, 0.5)
