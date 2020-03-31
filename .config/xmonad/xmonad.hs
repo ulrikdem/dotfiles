@@ -67,16 +67,19 @@ main = xmonad $ ewmh $ docks def
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , decoHeight = 20
-    , fontName = "xft:monospace:pixelsize=14"
+    , decoHeight = 18
+    , fontName = "xft:monospace:size=" ++ show fontSize
     }
+
+fontSize = 9
 
 -- Bar {{{1
 
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:pixelsize=18'"
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
+    ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=" ++ show (fontSize + 4) ++ "'"
 
 barLogHook = multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . wrapWorkspace}
     pp {ppCurrent = xmobarColor "black" "gray50" . wrapWorkspace}
@@ -86,7 +89,7 @@ pp = namedScratchpadFilterOutWorkspacePP def
     , ppHidden = wrapWorkspace
     , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . wrapWorkspace
     , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
-    , ppTitle = xmobarRaw . shorten 80
+    , ppTitle = xmobarRaw . shorten 120
     , ppTitleSanitize = id
     , ppOrder = \[w, l, t] -> [w, t]
     , ppSep = "<fc=gray25>│</fc> "
