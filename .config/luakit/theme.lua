@@ -1,5 +1,5 @@
 return {
-    font = "12px monospace",
+    font = "9pt monospace",
     fg = "#fff",
     bg = "#000",
 
@@ -30,7 +30,7 @@ return {
 
     private_sbar_bg = "#004",
 
-    hint_font = "10px monospace",
+    hint_font = "7pt monospace",
     hint_fg = "#000";
     hint_bg = "rgb(252,96,72)",
     hint_border = "none; border-radius: 2px; padding: 1px",
