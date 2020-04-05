@@ -765,6 +765,8 @@ function! s:InitLspBuffer() abort
     xnoremap <buffer> ga <Esc><Cmd>call CocActionAsync('codeAction', visualmode())<CR>
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
     nnoremap <buffer> <Leader>gf <Cmd>call coc#util#float_jump()<CR>
+    nnoremap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
+    setlocal formatexpr=CocActionAsync('formatSelected')
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
             \ {e, s -> <SID>FzfFromQuickfix([], <SID>MapSymbols(s))})<CR>
@@ -772,11 +774,8 @@ function! s:InitLspBuffer() abort
             nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
         endif
     endif
-    if &filetype !~# 'javascript\|typescript'
-        nnoremap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
-        setlocal formatexpr=CocActionAsync('formatSelected')
-        autocmd CursorHold <buffer> call CocActionAsync('highlight')
-    endif
+    autocmd CursorHold <buffer>
+        \ if CocHasProvider('documentHighlight') | call CocActionAsync('highlight') | endif
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
     nnoremap <buffer> <C-RightMouse> <C-O>
