@@ -704,10 +704,6 @@ else
     call s:CompletionFallback()
 endif
 
-autocmd vimrc User Plug_coc_nvim inoremap <CR> <C-G>u<CR>
-
-autocmd vimrc User Plug_coc_nvim let g:start_completion = coc#refresh()
-
 let g:coc_user_config = {
     \ 'coc': {
         \ 'preferences': {
@@ -737,7 +733,18 @@ let g:coc_user_config = {
     \ },
 \ }
 
-autocmd vimrc User Plug_coc_nvim autocmd vimrc FileType * call s:InitLspBuffer()
+autocmd vimrc User Plug_coc_nvim call s:InitLsp()
+function! s:InitLsp() abort
+    let g:start_completion = coc#refresh()
+    inoremap <CR> <C-G>u<CR>
+
+    let s:lsp_filetypes = []
+    for l:ls in values(g:coc_user_config.languageserver)
+        call extend(s:lsp_filetypes, l:ls.filetypes)
+    endfor
+    autocmd vimrc FileType * call s:InitLspBuffer()
+endfunction
+
 function! s:InitLspBuffer() abort
     if index(s:lsp_filetypes, &filetype) == -1 || @% =~ '^\a\+://'
         return
