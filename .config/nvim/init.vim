@@ -1002,19 +1002,7 @@ if executable('dot')
         \ nnoremap <buffer> <Leader>ms <Cmd>silent update \| Make svg<CR>
 endif
 if executable('xdg-open')
-    autocmd vimrc FileType dot,plantuml
-        \ nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
-endif
-
-Plug 'Elzair/ifm-vim'
-autocmd vimrc FileType ifm setlocal commentstring=#%s
-if executable('ifm')
-    autocmd vimrc FileType ifm let &l:makeprg =
-        \ 'ifm -m -o '.expand('%:p:r:S').'.ps '.expand('%:p:S')
-    autocmd vimrc FileType ifm setlocal errorformat=ifm:\ error:\ %f\\,\ line\ %l:\ %m
-endif
-if executable('xdg-open')
-    autocmd vimrc FileType ifm nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.ps &<CR>
+    autocmd vimrc FileType dot nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
 endif
 
 " Debugging {{{1
