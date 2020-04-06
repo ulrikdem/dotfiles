@@ -403,12 +403,20 @@ autocmd vimrc ColorScheme srcery highlight link DirvishPathTail SrceryBlue
 highlight link DirvishPathHead NonText
 
 Plug 'junegunn/fzf', {'do': './install --bin'}
-let g:fzf_layout = {'down': 15}
 let g:fzf_action = {
     \ '': 'edit',
     \ 'ctrl-x': 'split',
     \ 'ctrl-v': 'vsplit',
     \ 'ctrl-t': 'tab split',
+\ }
+let g:fzf_layout = {
+    \ 'window': {
+        \ 'width': 1,
+        \ 'height': 0.25,
+        \ 'yoffset': 1,
+        \ 'border': 'top',
+        \ 'highlight': 'VertSplit',
+    \ },
 \ }
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
