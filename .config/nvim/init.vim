@@ -733,13 +733,36 @@ let g:coc_user_config = {
         \ 'detailField': 'preview',
     \ },
     \ 'diagnostic': {
+        \ 'locationlist': v:false,
         \ 'errorSign': '✕',
         \ 'warningSign': '⚠',
         \ 'infoSign': 'ℹ',
         \ 'hintSign': 'ℹ',
-        \ 'locationlist': v:false,
     \ },
 \ }
+
+autocmd vimrc ColorScheme * highlight Bold cterm=bold gui=bold
+highlight link CocHighlightText Bold
+highlight link CocUnderline Bold
+highlight link CocErrorSign ALEErrorSign
+highlight link CocWarningSign ALEWarningSign
+highlight link CocInfoSign ALEInfoSign
+highlight link CocHintSign ALEInfoSign
+highlight link CocErrorHighlight ALEError
+highlight link CocWarningHighlight ALEWarning
+highlight link CocInfoHighlight ALEInfo
+highlight link CocHintHighlight ALEInfo
+highlight link CocHoverRange NONE
+
+autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
+function! CocErrorCount() abort
+    let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
+    return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
+endfunction
+function! CocWarningCount() abort
+    let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
+    return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
+endfunction
 
 autocmd vimrc User Plug_coc_nvim call s:InitLsp()
 function! s:InitLsp() abort
@@ -757,7 +780,9 @@ function! s:InitLspBuffer() abort
     if index(s:lsp_filetypes, &filetype) == -1 || @% =~ '^\a\+://'
         return
     endif
+
     setlocal signcolumn=yes
+
     nnoremap <buffer> ]g <Cmd>call CocActionAsync('diagnosticNext')<CR>
     nnoremap <buffer> [g <Cmd>call CocActionAsync('diagnosticPrevious')<CR>
     nnoremap <buffer> <Leader>ge
@@ -768,20 +793,26 @@ function! s:InitLspBuffer() abort
             \ 'type': d.severity[0],
             \ 'text': d.message,
         \ }}))})<CR>
+
     nnoremap <buffer> <Leader>gc
         \ <Cmd>call CocActionAsync('getCurrentFunctionSymbol', function('<SID>EchoResult'))<CR>
+
     nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDefinition')<CR>
     nnoremap <buffer> <Leader>gD <Cmd>call CocActionAsync('jumpDeclaration')<CR>
     nnoremap <buffer> <Leader>gt <Cmd>call CocActionAsync('jumpTypeDefinition')<CR>
     nnoremap <buffer> <Leader>gi <Cmd>call CocActionAsync('jumpImplementation')<CR>
     nnoremap <buffer> <Leader>gr <Cmd>call CocActionAsync('jumpReferences')<CR>
+
     nnoremap <buffer> <Leader>gR <Cmd>call CocActionAsync('rename')<CR>
     nnoremap <buffer> <Leader>ga <Cmd>call CocActionAsync('codeAction')<CR>
     xnoremap <buffer> ga <Esc><Cmd>call CocActionAsync('codeAction', visualmode())<CR>
+
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
     nnoremap <buffer> <Leader>gf <Cmd>call coc#util#float_jump()<CR>
+
     nnoremap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
     setlocal formatexpr=CocActionAsync('formatSelected')
+
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
             \ {e, s -> <SID>FzfFromQuickfix([], <SID>MapSymbols(s))})<CR>
@@ -789,12 +820,15 @@ function! s:InitLspBuffer() abort
             nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
         endif
     endif
+
     autocmd CursorHold <buffer>
         \ if CocHasProvider('documentHighlight') | call CocActionAsync('highlight') | endif
+
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
     nnoremap <buffer> <C-RightMouse> <C-O>
 endfunction
+
 function! s:EchoResult(err, result) abort
     echo a:result
 endfunction
@@ -837,6 +871,7 @@ function! s:FzfFromWorkspaceSymbols() abort
         return l:results
     endfunction
 endfunction
+
 function! s:MapSymbols(symbols) abort
     return map(a:symbols, {i, s -> {
         \ 'filename': get(s, 'filepath', @%),
@@ -852,29 +887,6 @@ function! s:MapSymbols(symbols) abort
             \ },
         \ },
     \ }})
-endfunction
-
-autocmd vimrc ColorScheme * highlight Bold cterm=bold gui=bold
-highlight link CocHighlightText Bold
-highlight link CocUnderline Bold
-highlight link CocErrorSign ALEErrorSign
-highlight link CocWarningSign ALEWarningSign
-highlight link CocInfoSign ALEInfoSign
-highlight link CocHintSign ALEInfoSign
-highlight link CocErrorHighlight ALEError
-highlight link CocWarningHighlight ALEWarning
-highlight link CocInfoHighlight ALEInfo
-highlight link CocHintHighlight ALEInfo
-highlight link CocHoverRange NONE
-
-autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
-function! CocErrorCount() abort
-    let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
-    return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
-endfunction
-function! CocWarningCount() abort
-    let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
-    return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
 endfunction
 
 " Language server {{{1
