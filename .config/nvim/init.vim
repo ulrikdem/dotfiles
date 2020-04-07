@@ -595,7 +595,7 @@ function! s:ToggleGitStatus() abort
     endif
     Git
     wincmd L
-    40 wincmd |
+    60 wincmd |
     set winfixwidth
     wincmd =
 endfunction
