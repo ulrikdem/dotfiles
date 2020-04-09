@@ -821,8 +821,7 @@ function! s:InitLspBuffer() abort
         endif
     endif
 
-    autocmd CursorHold <buffer>
-        \ if CocHasProvider('documentHighlight') | call CocActionAsync('highlight') | endif
+    autocmd CursorHold <buffer> call CocActionAsync('highlight')
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
