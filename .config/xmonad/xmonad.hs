@@ -53,7 +53,7 @@ main = xmonad $ ewmh $ docks def
     , terminal = "termite"
     , manageHook = let r = W.RationalRect 0 (2 / 3) 1 (1 / 3) in composeAll
         [ scratchpadManageHook r
-        , appName =? "xmonad-float-resize" --> customFloating r
+        , appName =? "xmonad-custom-float" --> customFloating r
         , placeHook $ fixed (0.5, 0.5)
         , appName =? "xmonad-float" --> doFloat
         ]
@@ -143,7 +143,7 @@ insKeys XConfig {modMask = mod, terminal = term} =
     , ((mod .|. shiftMask, xK_minus), sendMessage $ ModifyWinWeight (/ weightFactor))
     , ((mod .|. shiftMask, xK_equal), sendMessage $ ModifyWinWeight (* weightFactor))
     , ((mod .|. shiftMask, xK_BackSpace), sendMessage $ ModifyWinWeight $ const 1)
-    , ((mod, xK_c), withFocused (\w -> ($ w) . ($ "collapsed") . bool addTag delTag =<< hasTag "collapsed" w))
+    , ((mod, xK_c), withFocused (\w -> ($ w) . ($ "collapsible") . bool addTag delTag =<< hasTag "collapsible" w))
 
     , ((mod, xK_space), sendMessage $ JumpToLayout "tiled")
     , ((mod, xK_f), sendMessage $ JumpToLayout "full")
@@ -220,7 +220,7 @@ instance DecorationStyle CollapseDeco Window where
         fmap (bool Nothing (Just rect) . (&& rect_height rect <= height)) $ isCollapsed stack win
     shrink _ _ = id
 
-isCollapsed stack win = fmap (&& win /= W.focus stack) $ hasTag "collapsed" win
+isCollapsed stack win = fmap (&& win /= W.focus stack) $ hasTag "collapsible" win
 
 data Column = Column
     { limit :: Int
