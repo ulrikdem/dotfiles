@@ -3,7 +3,7 @@ eval $(dircolors ~/.config/dir_colors)
 query=
 while true; do
     readarray -t result < <(ls --color | fzf --ansi --color hl:3,hl+:3,fg+:-1 --no-clear --reverse \
-        --prompt "${PWD%/}/" --query "$query" --print-query --expect ctrl-p,tab,ctrl-n,ctrl-o)
+        --prompt "${PWD%/}/" --query "$query" --print-query --expect ctrl-p,tab,shift-tab,ctrl-o)
     ((!${#result[@]})) && exit
     query=
     case ${result[1]} in
@@ -13,7 +13,7 @@ while true; do
         tab)
             [[ -n ${result[2]} ]] && name=${result[2]} || name=${result[0]}
             cd -- "$name" 2>/dev/null || query=$name;;
-        ctrl-n)
+        shift-tab)
             [[ -n ${result[0]} ]] && mkdir -p -- "${result[0]}" && cd -- "${result[0]}";;
         ctrl-o)
             mktemp -t "luakit.XXXXXXXX.$1"
