@@ -258,10 +258,7 @@ local new_tab = window.methods.new_tab
 function window.methods.new_tab(win, arg, opts)
     opts = opts or {}
     opts.private = win.private
-    function win.reload() end
-    local view = new_tab(win, arg, opts)
-    win.reload = nil
-    return view
+    return new_tab(win, arg, opts)
 end
 
 modes.remove_binds("command", {":priv-t[abopen]"})
@@ -443,20 +440,7 @@ function window.methods.search_open(win, s)
     return uri
 end
 
-local preserve_uri = false
 webview.add_signal("init", function(view)
-    if preserve_uri then
-        preserve_uri = false
-    else
-        view.uri = settings.window.new_tab_page
-    end
-
-    view:remove_signals("create-web-view")
-    view:add_signal("create-web-view", function()
-        preserve_uri = true
-        return webview.window(view):new_tab()
-    end)
-
     view:add_signal("new-window-decision", function(_, uri)
         view.uri = uri
         return false
