@@ -1,4 +1,2 @@
 #!/bin/bash
 loginctl lock-session $(loginctl --no-legend list-sessions | grep "^[0-9]\+ $UID " | cut -d' ' -f1)
-sleep 1
-xset dpms force off
