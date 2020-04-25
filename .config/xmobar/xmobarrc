@@ -14,7 +14,7 @@ Config
             , "-L", "25"
             ] 10
         , Run Com "sh"
-            [ "-c", "ip address show up scope global | sed -nE 's/.*inet ([0-9.]+).*/\\1 /p'"
+            [ "-c", "ip route show default | sed -E 's/.*src (\\S+).*/\\1 /'"
             ] "ip" 10
         , Run DynNetwork
             [ "-t", "<rx>K <tx>K <dev> <fc=gray25>│</fc> "
