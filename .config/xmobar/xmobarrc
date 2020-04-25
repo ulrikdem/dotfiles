@@ -1,9 +1,18 @@
 Config
     { fgColor = "gray50"
-    , template = "%GPU_ICON%%UnsafeStdinReader%}{%ip%%dynnetwork%%wlan0wi%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    , template = "%GPU_ICON%%UnsafeStdinReader%}{%wlan0wi%%ip%%dynnetwork%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =
         [ Run XPropertyLog "GPU_ICON"
         , Run UnsafeStdinReader
+        , Run Wireless "wlan0"
+            [ "-t", "<ssid> 直 <quality>% <fc=gray25>│<raw=1: /></fc>"
+            , "-x", "<fc=black><raw=26:"
+            , "-h", "green4"
+            , "-n", "orange3"
+            , "-l", "red3"
+            , "-H", "50"
+            , "-L", "25"
+            ] 10
         , Run Com "sh"
             [ "-c", "ip address show up scope global | sed -nE 's/.*inet ([0-9.]+).*/\\1 /p'"
             ] "ip" 10
@@ -13,15 +22,6 @@ Config
             , "-l", "orange3"
             , "-H", "0"
             , "-L", "0"
-            ] 10
-        , Run Wireless "wlan0"
-            [ "-t", "<essid> 直 <quality>% <fc=gray25>│</fc> "
-            , "-x", "<fn=0></fn>"
-            , "-h", "green4"
-            , "-n", "orange3"
-            , "-l", "red3"
-            , "-H", "50"
-            , "-L", "25"
             ] 10
         , Run Cpu
             [ "-t", "﬙ <total>% <fc=gray25>│</fc> "
