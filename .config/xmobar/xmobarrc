@@ -1,6 +1,6 @@
 Config
     { fgColor = "gray50"
-    , template = "%GPU_ICON%%UnsafeStdinReader%}{%wlan0wi%%ip%%dynnetwork%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    , template = "%GPU_ICON%%UnsafeStdinReader%}{%wlan0wi%%dynnetwork%%ip%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =
         [ Run XPropertyLog "GPU_ICON"
         , Run UnsafeStdinReader
@@ -13,16 +13,16 @@ Config
             , "-H", "50"
             , "-L", "25"
             ] 10
-        , Run Com "sh"
-            [ "-c", "ip route show default | sed -E 's/.*src (\\S+).*/\\1 /'"
-            ] "ip" 10
         , Run DynNetwork
-            [ "-t", "<rx>K <tx>K <dev> <fc=gray25>│</fc> "
+            [ "-t", "<dev> <rx>K <tx>K <fc=gray25>│</fc> "
             , "-h", "green4"
             , "-l", "orange3"
             , "-H", "0"
             , "-L", "0"
             ] 10
+        , Run Com "sh"
+            [ "-c", "ip route show default | sed -E 's:.*src (\\S+).*:\\1 <fc=gray25>│</fc> :'"
+            ] "ip" 10
         , Run Cpu
             [ "-t", "﬙ <total>% <fc=gray25>│</fc> "
             , "-h", "red3"
@@ -62,7 +62,7 @@ Config
             , "-O", "<fc=gray50></fc>"
             , "-o", "<fc=gray50></fc>"
             ] 10
-        , Run Date "%F %T " "date" 10
+        , Run Date "%Y-%m-%d %H:%M:%S " "date" 10
         ]
     }
 
