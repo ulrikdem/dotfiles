@@ -96,7 +96,7 @@ pp = namedScratchpadFilterOutWorkspacePP def
     , ppWsSep = ""
     }
 
-wrapWorkspace s = xmobarAction ("xdotool set_desktop " ++ show (read s - 1)) "1" $ pad s
+wrapWorkspace s = xmobarAction ("xdotool key super+" ++ s) "1" $ pad s
 
 -- Keys {{{1
 
