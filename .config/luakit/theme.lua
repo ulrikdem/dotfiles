@@ -11,13 +11,12 @@ return {
 
     ok = {fg = "#fff", bg = "#444"},
     error = {fg = "#f00", bg = "#444"},
-    ibar_bg = "#666",
 
     menu_selected_bg = "#444",
     title_fg = "#f00",
 
     tab_fg = "#888",
-    tab_hover_bg = "#444",
+    tab_hover_bg = "#222",
     tab_ntheme = "#888",
     selected_ntheme = "#fff",
     tab_loading_fg = "#0ff",
@@ -28,7 +27,7 @@ return {
     trust_scheme_fg = "#0f0",
     notrust_scheme_fg = "#f00",
 
-    private_sbar_bg = "#004",
+    private_sbar_bg = "#003",
 
     hint_font = "7pt monospace",
     hint_fg = "#000";
