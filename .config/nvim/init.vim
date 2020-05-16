@@ -909,7 +909,11 @@ if executable('ccls')
                 \ 'directory': '/tmp/ccls',
             \ },
             \ 'clang': {
-                \ 'extraArgs': ['-std=c++17', '-Wall', '-Wextra'],
+                \ 'extraArgs': [
+                    \ '-std=c++17',
+                    \ '-Wall', '-Wextra',
+                    \ '-Wconversion', '-Wno-sign-conversion',
+                \ ],
             \ },
             \ 'completion': {
                 \ 'detailedLabel': v:false,

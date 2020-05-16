@@ -44,8 +44,8 @@ alias rmcdir-rf='cd ..; rm -rf -- $OLDPWD || cd -- $OLDPWD'
 
 type abduco >/dev/null && alias abduco="abduco -e '^_'"
 type diff >/dev/null && alias diff='diff --color=auto'
-type gcc >/dev/null && alias gcc='gcc -Wall -Wextra'
-type g++ >/dev/null && alias g++='g++ -Wall -Wextra'
+type gcc >/dev/null && alias gcc='gcc -Wall -Wextra -Wconversion'
+type g++ >/dev/null && alias g++='g++ -Wall -Wextra -Wconversion'
 type nvim >/dev/null && alias vim=nvim
 type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
 type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
