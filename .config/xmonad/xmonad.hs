@@ -67,7 +67,7 @@ main = xmonad $ ewmh $ docks def
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , decoHeight = 18
+    , decoHeight = 17
     , fontName = "xft:monospace:size=" ++ show fontSize
     }
 
