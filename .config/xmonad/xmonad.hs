@@ -156,8 +156,14 @@ insKeys XConfig {modMask = mod, terminal = term} =
     [ ((mod .|. controlMask, k), windows $ swapWithCurrent w)
     | (k, w) <- zip [xK_1..] $ workspaces def
     ] ++
-    [ ((mod .|. m, k), f def i)
-    | (m, f) <- [(0, viewScreen), (shiftMask, sendToScreen)]
+
+    [ ((mod .|. m, k), f i)
+    | (m, f) <-
+        [ (0, viewScreen def)
+        , (shiftMask, sendToScreen def)
+        , (controlMask,
+            (flip whenJust ((flip whenJust (windows . W.greedyView) =<<) . screenWorkspace) =<<) . getScreen def)
+        ]
     , (k, i) <- zip [xK_w, xK_e, xK_r] [0..]
     ]
 
