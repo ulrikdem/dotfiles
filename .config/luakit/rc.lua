@@ -187,8 +187,8 @@ webview.add_signal("init", function(view)
                 or win.view:ssl_trusted() and theme.trust_scheme_fg
                 or (win.view:ssl_trusted() == false or scheme == "http:") and theme.notrust_scheme_fg
                 or theme.scheme_fg
-            widget.text = string.format("<span color=%q>%s</span>%s", color,
-                lousy.util.escape(scheme), lousy.util.escape(widget.text:sub(#scheme + 1)))
+            widget.text = string.format("<span color=%q>%s</span>%s",
+                color, scheme, widget.text:sub(#scheme + 1))
         end
         for _, signal in ipairs{"property::uri", "switched-page", "link-hover", "link-unhover"} do
             view:add_signal(signal, update_uri)
