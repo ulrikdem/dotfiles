@@ -408,6 +408,11 @@ autocmd vimrc FileType dirvish nnoremap <buffer> C <Cmd>cd % \| pwd<CR>
 autocmd vimrc ColorScheme srcery highlight link DirvishArg SrceryOrangeBold
 autocmd vimrc ColorScheme srcery highlight link DirvishPathTail SrceryBlue
 highlight link DirvishPathHead NonText
+if $RANGER_LEVEL
+    autocmd vimrc User Plug_vim_dirvish nmap <expr> -
+        \ !v:count && !&modified && bufnr('$') * winnr('$') * tabpagenr('$') == 1 ?
+            \ '<C-W>q' : '<Plug>(dirvish_up)'
+endif
 
 Plug 'junegunn/fzf', {'do': './install --bin'}
 let g:fzf_action = {
