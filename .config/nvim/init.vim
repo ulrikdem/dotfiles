@@ -119,8 +119,8 @@ nnoremap <M-[><Esc> <Nop>
 nnoremap <M-]><Esc> <Nop>
 nmap <M-[><M-]> <M-]>
 nmap <M-]><M-[> <M-[>
-nmap <expr> <M-[> <SID>RepeatBracket('[', "\<M-[>")
-nmap <expr> <M-]> <SID>RepeatBracket(']', "\<M-]>")
+nmap <expr> <M-[> <SID>RepeatBracket('[', '<M-[>')
+nmap <expr> <M-]> <SID>RepeatBracket(']', '<M-]>')
 function! s:RepeatBracket(bracket, map) abort
     let l:char = getchar()
     return a:bracket.(type(l:char) == v:t_number ? nr2char(l:char) : l:char).'zz'.a:map
@@ -398,7 +398,7 @@ tnoremap <M-k> <C-\><C-N><C-W>k
 tnoremap <M-l> <C-\><C-N><C-W>l
 
 nnoremap <Leader>ot <Cmd>terminal<CR>
-nnoremap <expr> <Leader>oT "\<Cmd>edit ".fnameescape('term://'.expand('%:p:h').'//'.&shell)."\<CR>"
+nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'//'.&shell).'<CR>'
 
 " File navigation {{{1
 
@@ -459,8 +459,8 @@ function! DeleteBuffer(name) abort
     return join(s:ListBuffers(), "\n")
 endfunction
 
-nnoremap <M-o> <Cmd>call <SID>BufferJump(-1, "\<C-O>")<CR>
-nnoremap <M-i> <Cmd>call <SID>BufferJump(1, "\<C-I>")<CR>
+nnoremap <M-o> <Cmd>call <SID>BufferJump(-1, '<C-O>')<CR>
+nnoremap <M-i> <Cmd>call <SID>BufferJump(1, '<C-I>')<CR>
 function! s:BufferJump(dir, key) abort
     let [l:jumps, l:current] = getjumplist()
     let l:i = l:current + a:dir
@@ -669,10 +669,10 @@ set ignorecase smartcase
 Plug 'pgdouyon/vim-evanesco'
 
 set wildignorecase wildmode=longest:full,full wildcharm=<Tab>
-cnoremap <expr> <C-N> pumvisible() ? "\<C-N>" : "\<Down>"
-cnoremap <expr> <C-P> pumvisible() ? "\<C-P>" : "\<Up>"
+cnoremap <expr> <C-N> pumvisible() ? '<C-N>' : '<Down>'
+cnoremap <expr> <C-P> pumvisible() ? '<C-P>' : '<Up>'
 cnoremap <expr> /
-    \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? "\<C-Y>" : '/'
+    \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? '<C-Y>' : '/'
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
     \ map(getbufline('%', 1, '$'), {i, l -> {'bufnr': bufnr(), 'lnum': i + 1, 'text': l}}))<CR>
@@ -681,9 +681,9 @@ set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
 
 let g:start_completion = "\<C-N>"
-inoremap <silent><expr> <Tab> pumvisible() ? empty(reg_recording()) ? "\<C-N>" : "" :
-    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? "\<Tab>" : g:start_completion
-inoremap <expr> <S-Tab> !pumvisible() ? "\<S-Tab>" : empty(reg_recording()) ? "\<C-P>" : ""
+inoremap <silent><expr> <Tab> pumvisible() ? empty(reg_recording()) ? '<C-N>' : '' :
+    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? '<Tab>' : g:start_completion
+inoremap <expr> <S-Tab> !pumvisible() ? '<S-Tab>' : empty(reg_recording()) ? '<C-P>' : ''
 
 function! s:CompletionFallback() abort
     if has('python3')
@@ -702,7 +702,7 @@ function! s:CompletionFallback() abort
         autocmd vimrc User Plug_vim_mucomplete iunmap <Tab>
         autocmd vimrc User Plug_vim_mucomplete iunmap <S-Tab>
     endif
-    inoremap <expr> <CR> pumvisible() ? "\<C-Y>\<CR>" : "\<CR>"
+    inoremap <expr> <CR> pumvisible() ? '<C-Y><CR>' : '<CR>'
 endfunction
 
 " Language client {{{1
