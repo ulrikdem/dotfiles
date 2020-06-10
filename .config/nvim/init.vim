@@ -904,20 +904,33 @@ endfunction
 let g:coc_user_config.languageserver = {}
 
 if executable('ccls')
-    let g:coc_user_config.languageserver.ccls = {
+    let g:coc_user_config.languageserver.c = {
         \ 'command': 'ccls',
-        \ 'filetypes': ['c', 'cpp'],
+        \ 'filetypes': ['c'],
         \ 'rootPatterns': ['compile_commands.json', '.ccls'],
         \ 'initializationOptions': {
             \ 'cache': {
                 \ 'directory': '/tmp/ccls',
             \ },
             \ 'clang': {
-                \ 'extraArgs': [
-                    \ '-std=c++17',
-                    \ '-Wall', '-Wextra',
-                    \ '-Wconversion', '-Wno-sign-conversion',
-                \ ],
+                \ 'extraArgs': ['-std=c17', '-Wall', '-Wextra', '-Wconversion'],
+            \ },
+            \ 'completion': {
+                \ 'detailedLabel': v:false,
+            \ },
+        \ }
+    \ }
+
+    let g:coc_user_config.languageserver.cpp = {
+        \ 'command': 'ccls',
+        \ 'filetypes': ['cpp'],
+        \ 'rootPatterns': ['compile_commands.json', '.ccls'],
+        \ 'initializationOptions': {
+            \ 'cache': {
+                \ 'directory': '/tmp/ccls',
+            \ },
+            \ 'clang': {
+                \ 'extraArgs': ['-std=c++17', '-Wall', '-Wextra', '-Wconversion', '-Wno-sign-conversion'],
             \ },
             \ 'completion': {
                 \ 'detailedLabel': v:false,
@@ -927,7 +940,7 @@ if executable('ccls')
 endif
 
 if executable('javascript-typescript-stdio')
-    let g:coc_user_config.languageserver.jstsls = {
+    let g:coc_user_config.languageserver.javascript_typescript = {
         \ 'command': 'javascript-typescript-stdio',
         \ 'filetypes': ['javascript', 'typescript'],
         \ 'rootPatterns': ['package.json'],
@@ -935,14 +948,14 @@ if executable('javascript-typescript-stdio')
 endif
 
 if executable('pyls')
-    let g:coc_user_config.languageserver.pyls = {
+    let g:coc_user_config.languageserver.python = {
         \ 'command': 'pyls',
         \ 'filetypes': ['python'],
     \ }
 endif
 
 if executable('rls')
-    let g:coc_user_config.languageserver.rls = {
+    let g:coc_user_config.languageserver.rust = {
         \ 'command': 'rls',
         \ 'filetypes': ['rust'],
         \ 'rootPatterns': ['Cargo.toml'],
