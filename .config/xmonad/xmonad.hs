@@ -150,8 +150,8 @@ insKeys XConfig {modMask = mod, terminal = term} =
     , ((mod .|. shiftMask, xK_f), sendMessage $ JumpToLayout "fullscreen")
 
     , ((mod, xK_Tab), toggleWS)
-    , ((mod .|. shiftMask, xK_comma), moveTo Prev $ WSIs $ return $ (/= "NSP") . W.tag)
-    , ((mod .|. shiftMask, xK_period), moveTo Next $ WSIs $ return $ (/= "NSP") . W.tag)
+    , ((mod .|. shiftMask, xK_comma), moveTo Prev cycleWSType)
+    , ((mod .|. shiftMask, xK_period), moveTo Next cycleWSType)
     ] ++
     [ ((mod .|. controlMask, k), windows $ swapWithCurrent w)
     | (k, w) <- zip [xK_1..] $ workspaces def
@@ -173,6 +173,10 @@ moveRight win stack = stack {W.down = b, W.up = reverse a ++ W.up stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.down stack) $ W.down stack
 
 weightFactor = 1.26
+
+cycleWSType = WSIs $ do
+    hidden <- gets $ map W.tag . W.hidden . windowset
+    return $ (\w -> w `elem` hidden && w /= "NSP") . W.tag
 
 -- Prompt {{{1
 
