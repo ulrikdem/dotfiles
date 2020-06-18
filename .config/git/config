@@ -1,6 +1,9 @@
 [include]
 path = user
 
+[pull]
+ff = only
+
 [diff]
 algorithm = histogram
 tool = nvimdiff
