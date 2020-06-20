@@ -1,4 +1,4 @@
-@import url("resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css");
+@import "/usr/share/themes/Materia-compact/gtk-3.0/gtk-dark.css";
 
 .background {
     background-color: black;
