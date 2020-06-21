@@ -3,17 +3,16 @@ return {
     fg = "#fff",
     bg = "#000",
 
-    notif_bg = "#444",
-    warning_fg = "#f00",
-    warning_bg = "#444",
+    ok = {fg = "#fff", bg = "#000"},
+    error = {fg = "#f00", bg = "#000"},
     error_fg = "#f00",
-    error_bg = "#444",
+    warning_fg = "#f00",
 
-    ok = {fg = "#fff", bg = "#444"},
-    error = {fg = "#f00", bg = "#444"},
+    private_bg = "#003",
+    ibar_bg = "rgba(0,0,0,0)",
 
-    menu_selected_bg = "#444",
     title_fg = "#f00",
+    menu_selected_bg = "#444",
 
     tab_fg = "#888",
     tab_hover_bg = "#222",
@@ -26,8 +25,6 @@ return {
     scheme_fg = "#888",
     trust_scheme_fg = "#0f0",
     notrust_scheme_fg = "#f00",
-
-    private_sbar_bg = "#003",
 
     hint_font = "7pt monospace",
     hint_fg = "#000";

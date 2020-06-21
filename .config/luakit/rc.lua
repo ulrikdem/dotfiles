@@ -120,7 +120,7 @@ modes.add_binds("normal", {
 settings.window.act_on_synthetic_keys = true
 modes.add_binds({"normal", "insert"}, {
     {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
-        function win.hit(_, mods, key)
+        function win:hit(mods, key)
             win.hit = nil
             win.view:send_key(key, mods)
             return true
@@ -242,10 +242,10 @@ function window.new(args)
     local function set_private(win)
         if private then
             win.private = true
-            win.sbar.ebox.bg = theme.private_sbar_bg
-            win.sbar.l.ebox.bg = theme.private_sbar_bg
-            win.sbar.sep.bg = theme.private_sbar_bg
-            win.sbar.r.ebox.bg = theme.private_sbar_bg
+            win.sbar.ebox.bg = theme.private_bg
+            win.sbar.l.ebox.bg = theme.private_bg
+            win.sbar.sep.bg = theme.private_bg
+            win.sbar.r.ebox.bg = theme.private_bg
         end
     end
     window.add_signal("init", set_private)
@@ -259,6 +259,20 @@ function window.methods.new_tab(win, arg, opts)
     opts = opts or {}
     opts.private = win.private
     return new_tab(win, arg, opts)
+end
+
+local set_prompt = window.methods.set_prompt
+function window.methods.set_prompt(win, text, opts)
+    opts = opts or {}
+    set_prompt(win, text, {fg = opts.fg, bg = win.private and theme.private_bg or opts.bg})
+end
+
+local set_ibar_theme = window.methods.set_ibar_theme
+function window.methods.set_ibar_theme(win, name)
+    set_ibar_theme(win, name)
+    if win.private then
+        win.ibar.layout.bg = theme.private_bg
+    end
 end
 
 modes.remove_binds("command", {":priv-t[abopen]"})
