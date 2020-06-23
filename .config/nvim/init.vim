@@ -915,7 +915,7 @@ if executable('ccls')
             \ 'completion': {
                 \ 'detailedLabel': v:false,
             \ },
-        \ }
+        \ },
     \ }
 
     let g:coc_user_config.languageserver.cpp = {
@@ -932,7 +932,7 @@ if executable('ccls')
             \ 'completion': {
                 \ 'detailedLabel': v:false,
             \ },
-        \ }
+        \ },
     \ }
 endif
 
