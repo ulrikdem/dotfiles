@@ -210,6 +210,7 @@ let g:lightline = {
         \ 'left': [
             \ ['mode'],
             \ ['git', 'filename'],
+            \ ['function'],
         \ ],
         \ 'right': [
             \ ['ruler'],
@@ -229,6 +230,7 @@ let g:lightline = {
         \ 'filename': '
             \%{substitute(expand("%:p:~"), ''\v^(/)$|^(\~)/$|.*/(.+)/$|.*'', ''\1\2\3'', "")}%t
             \%{&modified ? " •" : ""}',
+        \ 'function': '%{get(b:, "coc_current_function", "")}',
         \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
         \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
@@ -236,6 +238,7 @@ let g:lightline = {
         \ 'ruler': '%p%% %l:%v%<',
     \ },
     \ 'component_visible_condition': {
+        \ 'function': 'get(b:, "coc_current_function", "") != ""',
         \ 'asyncdo': 'exists("g:asyncdo")',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
@@ -727,6 +730,7 @@ let g:coc_user_config = {
     \ 'coc': {
         \ 'preferences': {
             \ 'extensionUpdateCheck': 'never',
+            \ 'currentFunctionSymbolAutoUpdate': v:true,
         \ },
         \ 'source': {
             \ 'around': {
@@ -805,9 +809,6 @@ function! s:InitLspBuffer() abort
             \ 'text': d.message,
         \ }}))})<CR>
 
-    nnoremap <buffer> <Leader>gc
-        \ <Cmd>call CocActionAsync('getCurrentFunctionSymbol', function('<SID>EchoResult'))<CR>
-
     nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDefinition')<CR>
     nnoremap <buffer> <Leader>gD <Cmd>call CocActionAsync('jumpDeclaration')<CR>
     nnoremap <buffer> <Leader>gt <Cmd>call CocActionAsync('jumpTypeDefinition')<CR>
@@ -837,10 +838,6 @@ function! s:InitLspBuffer() abort
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
     nnoremap <buffer> <C-RightMouse> <C-O>
-endfunction
-
-function! s:EchoResult(err, result) abort
-    echo a:result
 endfunction
 
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
