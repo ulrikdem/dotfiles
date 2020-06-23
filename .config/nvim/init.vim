@@ -709,19 +709,8 @@ endfunction
 
 " Language client {{{1
 
-if executable('curl') && executable('node')
-    function! DownloadCoc(...) abort
-        let l:dir = (g:plugs['coc.nvim'].dir).'/build'
-        call mkdir(l:dir, 'p')
-        execute '!curl -f https://raw.githubusercontent.com/neoclide/coc.nvim/release/build/index.js
-            \ | sed -E ''
-                \/helps to fix undo issue/,+2d;
-                \s/(snippetSupport: )true/\1false/;
-                \s/( *)let sa = a\.sortText;/
-                    \\1if (a.priority \!= b.priority) return b.priority - a.priority;\n&/;
-                \'' >'.fnameescape(l:dir.'/index.js')
-    endfunction
-    Plug 'neoclide/coc.nvim', {'do': function('DownloadCoc')}
+if executable('node')
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
 else
     call s:CompletionFallback()
 endif
@@ -729,7 +718,6 @@ endif
 let g:coc_user_config = {
     \ 'coc': {
         \ 'preferences': {
-            \ 'extensionUpdateCheck': 'never',
             \ 'currentFunctionSymbolAutoUpdate': v:true,
         \ },
         \ 'source': {
@@ -744,17 +732,21 @@ let g:coc_user_config = {
     \ },
     \ 'suggest': {
         \ 'maxCompleteItemCount': 1000,
-        \ 'invalidInsertCharacters': split(' /">:', '\zs'),
         \ 'detailField': 'preview',
+        \ 'invalidInsertCharacters': split(' "(/:<', '\zs'),
+        \ 'snippetIndicator': '',
     \ },
     \ 'diagnostic': {
-        \ 'locationlist': v:false,
         \ 'errorSign': '✕',
         \ 'warningSign': '⚠',
         \ 'infoSign': 'ℹ',
         \ 'hintSign': 'ℹ',
+        \ 'enableHighlightLineNumber': v:false,
+        \ 'format': '%message',
+        \ 'separateRelatedInformationAsDiagnostics': v:true,
     \ },
 \ }
+autocmd vimrc User CocNvimInit call coc#config('', {'coc': {}})
 
 autocmd vimrc ColorScheme * highlight Bold cterm=bold gui=bold
 highlight link CocHighlightText Bold
