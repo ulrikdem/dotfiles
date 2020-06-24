@@ -852,8 +852,6 @@ autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
     \ call s:FzfFromQuickfix([], g:coc_jump_locations)
 
 function! s:FzfFromWorkspaceSymbols() abort
-    let l:ls = filter(keys(g:coc_user_config.languageserver),
-        \ {i, l -> index(g:coc_user_config.languageserver[l].filetypes, &filetype) != -1})[0]
     let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:
         \nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" |
             \ tail -c +2'], [])
@@ -867,7 +865,7 @@ function! s:FzfFromWorkspaceSymbols() abort
         if l:words[0] ==# l:last_query
             return l:results
         endif
-        let l:symbols = map(CocRequest(l:ls, 'workspace/symbol', {'query': l:words[0]}), {i, s -> {
+        let l:symbols = map(CocAction('getWorkspaceSymbols', l:words[0]), {i, s -> {
             \ 'filepath': iconv(substitute(substitute(s.location.uri, '^file://', '', ''),
                 \ '%\(\x\x\)', {m -> nr2char('0x'.m[1])}, 'g'), 'utf-8', 'latin1'),
             \ 'lnum': s.location.range.start.line + 1,
