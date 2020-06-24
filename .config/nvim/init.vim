@@ -7,7 +7,7 @@ augroup vimrc
 augroup END
 
 try
-    call plug#begin('~/.local/share/nvim/plugged')
+    call plug#begin(stdpath('data').'/plugged')
 
     function! s:InitPlugins() abort
         call plug#end()
@@ -715,7 +715,25 @@ endfunction
 " Language client {{{1
 
 if executable('node')
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    function! PatchCoc(info) abort
+        call s:PatchFile(stdpath('config').'/autoload/coc/util.vim', readfile('autoload/coc/util.vim'), [
+            \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
+            \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
+        \ ])
+        call s:PatchFile('bin/server.js', readfile('build/index.js'), [
+            \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
+        \ ])
+        call s:PatchFile('lib/attach.js', [], [])
+    endfunction
+    function! s:PatchFile(path, lines, subs) abort
+        let l:lines = a:lines
+        for [l:pattern, l:sub] in a:subs
+            let l:lines = map(l:lines, {i, s -> substitute(s, l:pattern, l:sub, '')})
+        endfor
+        call mkdir(fnamemodify(a:path, ':h'), 'p')
+        call writefile(l:lines, a:path)
+    endfunction
+    Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': function('PatchCoc')}
 else
     call s:CompletionFallback()
 endif
