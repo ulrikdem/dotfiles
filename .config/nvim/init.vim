@@ -756,14 +756,6 @@ autocmd vimrc User CocNvimInit call coc#config('', {'coc': {}})
 autocmd vimrc ColorScheme * highlight Bold cterm=bold gui=bold
 highlight link CocHighlightText Bold
 highlight link CocUnderline Bold
-highlight link CocErrorSign ALEErrorSign
-highlight link CocWarningSign ALEWarningSign
-highlight link CocInfoSign ALEInfoSign
-highlight link CocHintSign ALEInfoSign
-highlight link CocErrorHighlight ALEError
-highlight link CocWarningHighlight ALEWarning
-highlight link CocInfoHighlight ALEInfo
-highlight link CocHintHighlight ALEInfo
 highlight link CocHoverRange NONE
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
