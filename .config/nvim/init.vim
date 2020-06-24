@@ -733,7 +733,7 @@ let g:coc_user_config = {
     \ 'suggest': {
         \ 'maxCompleteItemCount': 1000,
         \ 'detailField': 'preview',
-        \ 'invalidInsertCharacters': split(' "(/:<', '\zs'),
+        \ 'invalidInsertCharacters': split(' (/:<', '\zs'),
         \ 'snippetIndicator': '',
     \ },
     \ 'diagnostic': {
@@ -926,6 +926,11 @@ if executable('ccls')
             \ },
         \ },
     \ }
+
+    autocmd vimrc FileType c,cpp inoremap <expr> "
+        \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '"' ? '<C-Y>' : '"'
+    autocmd vimrc FileType c,cpp inoremap <expr> >
+        \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '>' ? '<C-Y>' : '>'
 endif
 
 if executable('javascript-typescript-stdio')
