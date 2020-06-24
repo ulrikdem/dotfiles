@@ -696,11 +696,16 @@ function! s:CompletionFallback() abort
         Plug 'fgrsnau/ncm2-otherbuf'
         let g:ncm2#complete_length = 2
         autocmd vimrc User Plug_ncm2 autocmd vimrc BufEnter * call ncm2#enable_for_buffer()
+        autocmd vimrc User Plug_ncm2 let g:start_completion = "\<C-R>=ncm2#force_trigger()\<CR>"
     else
         Plug 'lifepillar/vim-mucomplete'
         let g:mucomplete#enable_auto_at_startup = 1
         let g:mucomplete#minimum_prefix_length = 1
         let g:mucomplete#buffer_relative_paths = 1
+        let g:mucomplete#chains = {
+            \ 'default': ['path', 'omni', 'keyn'],
+            \ 'vim': ['path', 'cmd', 'keyn'],
+        \ }
         autocmd vimrc User Plug_vim_mucomplete iunmap <Tab>
         autocmd vimrc User Plug_vim_mucomplete iunmap <S-Tab>
     endif
