@@ -171,10 +171,10 @@ function! s:UpdateColorScheme() abort
     highlight! link Error SrceryRedBold
     highlight! link ErrorMsg SrceryRedBold
     highlight! link WarningMsg SrceryRed
-    highlight! link SpellBad ALEError
-    highlight! link SpellLocal ALEWarning
-    highlight! link SpellRare ALEInfo
-    highlight! link SpellCap ALEInfo
+    highlight! link SpellBad CocErrorHighlight
+    highlight! link SpellLocal CocWarningHighlight
+    highlight! link SpellCap CocInfoHighlight
+    highlight! link SpellRare CocHintHighlight
 endfunction
 
 function! s:Highlight(group, args) abort
