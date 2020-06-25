@@ -683,9 +683,12 @@ set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
 
 let g:start_completion = "\<C-N>"
-inoremap <silent><expr> <Tab> pumvisible() ? empty(reg_recording()) ? '<C-N>' : '' :
-    \ col('.') <= 1 \|\| getline('.')[col('.') - 2] =~ '\s' ? '<Tab>' : g:start_completion
-inoremap <expr> <S-Tab> !pumvisible() ? '<S-Tab>' : empty(reg_recording()) ? '<C-P>' : ''
+inoremap <silent><expr> <Tab> <SID>TabMap('<Tab>', '<C-N>')
+inoremap <silent><expr> <S-Tab> <SID>TabMap('<S-Tab>', '<C-P>')
+function! s:TabMap(tab, key) abort
+    return pumvisible() ? empty(reg_recording()) ? a:key : '' :
+        \ col('.') <= 1 || getline('.')[col('.') - 2] =~ '\s' ? a:tab : g:start_completion
+endfunction
 
 function! s:CompletionFallback() abort
     if has('python3')
