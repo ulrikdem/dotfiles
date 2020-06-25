@@ -718,10 +718,12 @@ endfunction
 " Language client {{{1
 
 if executable('node')
-    function! PatchCoc(info) abort
+    function! PatchCoc(...) abort
         call s:PatchFile(stdpath('config').'/autoload/coc/util.vim', readfile('autoload/coc/util.vim'), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
+            \ ['call setwinvar(winid, ''&linebreak'', 1)\zs',
+                \ ' | call setwinvar(winid, "\&breakindentopt", "")'],
         \ ])
         call s:PatchFile('bin/server.js', readfile('build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
