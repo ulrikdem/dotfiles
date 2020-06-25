@@ -964,15 +964,17 @@ if executable('pyls')
     \ }
 endif
 
-if executable('rls')
+if executable('rust-analyzer')
     let g:coc_user_config.languageserver.rust = {
-        \ 'command': 'rls',
+        \ 'command': 'rust-analyzer',
         \ 'filetypes': ['rust'],
         \ 'rootPatterns': ['Cargo.toml'],
         \ 'requireRootPattern': v:true,
         \ 'settings': {
-            \ 'rust': {
-                \ 'clippy_preference': 'on',
+            \ 'rust-analyzer': {
+                \ 'checkOnSave': {
+                    \ 'command': 'clippy',
+                \ },
             \ },
         \ },
     \ }
