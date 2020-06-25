@@ -179,14 +179,14 @@ endfunction
 
 function! s:Highlight(group, args) abort
     if has_key(a:args, 'fg')
+        let l:id = synIDtrans(hlID(a:args.fg))
         execute 'highlight' a:group
-            \ 'ctermfg='.synIDattr(hlID(a:args.fg), 'fg', 'cterm')
-            \ 'guifg='.synIDattr(hlID(a:args.fg), 'fg', 'gui')
+            \ 'ctermfg='.synIDattr(l:id, 'fg', 'cterm') 'guifg='.synIDattr(l:id, 'fg', 'gui')
     endif
     if has_key(a:args, 'bg')
+        let l:id = synIDtrans(hlID(a:args.bg))
         execute 'highlight' a:group
-            \ 'ctermbg='.synIDattr(hlID(a:args.bg), 'fg', 'cterm')
-            \ 'guibg='.synIDattr(hlID(a:args.bg), 'fg', 'gui')
+            \ 'ctermbg='.synIDattr(l:id, 'fg', 'cterm') 'guibg='.synIDattr(l:id, 'fg', 'gui')
     endif
     if has_key(a:args, 'attr')
         execute 'highlight' a:group 'cterm='.(a:args.attr) 'gui='.(a:args.attr)
@@ -770,16 +770,26 @@ let g:coc_user_config = {
         \ 'infoSign': 'ℹ',
         \ 'hintSign': 'ℹ',
         \ 'enableHighlightLineNumber': v:false,
+        \ 'virtualText': v:true,
+        \ 'virtualTextLines': 1,
+        \ 'enableMessage': 'never',
+        \ 'checkCurrentLine': v:true,
         \ 'format': '%message',
         \ 'separateRelatedInformationAsDiagnostics': v:true,
     \ },
 \ }
 autocmd vimrc User CocNvimInit call coc#config('', {'coc': {}})
 
-autocmd vimrc ColorScheme * highlight Bold cterm=bold gui=bold
-highlight link CocHighlightText Bold
-highlight link CocUnderline Bold
-highlight link CocHoverRange NONE
+autocmd vimrc ColorScheme * call s:UpdateCocColors()
+function! s:UpdateCocColors() abort
+    for l:level in ['Error', 'Warning', 'Info', 'Hint']
+        call s:Highlight('Coc'.l:level.'VirtualText', {'fg': 'Coc'.l:level.'Sign', 'attr': 'italic'})
+    endfor
+    highlight Bold cterm=bold gui=bold
+    highlight link CocHighlightText Bold
+    highlight link CocUnderline Bold
+    highlight link CocHoverRange NONE
+endfunction
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
 function! CocErrorCount() abort
@@ -812,7 +822,8 @@ function! s:InitLspBuffer() abort
 
     nnoremap <buffer> ]g <Cmd>call CocActionAsync('diagnosticNext')<CR>
     nnoremap <buffer> [g <Cmd>call CocActionAsync('diagnosticPrevious')<CR>
-    nnoremap <buffer> <Leader>ge
+    nmap <buffer> <Leader>ge <Cmd>call CocActionAsync('diagnosticInfo')<CR>
+    nnoremap <buffer> <Leader>gE
         \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>SetQuickfix(map(d, {i, d -> {
             \ 'filename': fnamemodify(d.file, ':p:~:.'),
             \ 'lnum': d.lnum,
