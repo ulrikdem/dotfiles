@@ -724,24 +724,26 @@ if executable('node')
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
             \ ['call setwinvar(winid, ''&linebreak'', 1)\zs',
                 \ ' | call setwinvar(winid, "\&breakindentopt", "")'],
+            \ ['let res = inputlist(\[a:title] + a:items)', 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
         call s:PatchFile('bin/server.js', readfile('build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
         \ ])
         call s:PatchFile('lib/attach.js', [], [])
     endfunction
-    function! s:PatchFile(path, lines, subs) abort
-        let l:lines = a:lines
-        for [l:pattern, l:sub] in a:subs
-            let l:lines = map(l:lines, {i, s -> substitute(s, l:pattern, l:sub, '')})
-        endfor
-        call mkdir(fnamemodify(a:path, ':h'), 'p')
-        call writefile(l:lines, a:path)
-    endfunction
     Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': function('PatchCoc')}
 else
     call s:CompletionFallback()
 endif
+
+function! s:PatchFile(path, lines, subs) abort
+    let l:lines = a:lines
+    for [l:pattern, l:sub] in a:subs
+        let l:lines = map(l:lines, {i, s -> substitute(s, l:pattern, l:sub, '')})
+    endfor
+    call mkdir(fnamemodify(a:path, ':h'), 'p')
+    call writefile(l:lines, a:path)
+endfunction
 
 let g:coc_user_config = {
     \ 'coc': {
@@ -867,6 +869,40 @@ autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
     \ call s:FzfFromQuickfix([], g:coc_jump_locations)
 
+function! ChooseCodeAction(items, callback) abort
+    if isdirectory(g:plugs.fzf.dir)
+        call fzf#run({
+            \ 'source': a:items,
+            \ 'sink*': {r -> empty(r[0]) ? a:callback(v:null, r[1]) : a:callback(v:null, 0)},
+            \ 'options': [
+                \ '--with-nth=2..',
+                \ '--delimiter=\. ',
+                \ '--expect=esc,ctrl-c,ctrl-g,ctrl-q',
+            \ ],
+            \ 'window': g:fzf_layout.window,
+        \ })
+    else
+        call a:callback(v:null, inputlist(['Choose code action'] + a:items))
+    endif
+endfunction
+
+function! s:MapSymbols(symbols) abort
+    return map(a:symbols, {i, s -> {
+        \ 'filename': get(s, 'filepath', @%),
+        \ 'lnum': s.lnum,
+        \ 'col': s.col,
+        \ 'text': (s.text).' ['.(s.kind).']',
+        \ 'range': {
+            \ 'start': {
+                \ 'character': strwidth(s.text) + 1,
+            \ },
+            \ 'end': {
+                \ 'character': strwidth(s.text) + strwidth(s.kind) + 3,
+            \ },
+        \ },
+    \ }})
+endfunction
+
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:
         \nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" |
@@ -898,23 +934,6 @@ function! s:FzfFromWorkspaceSymbols() abort
         let l:results = "\n".join(l:ProcessItems(s:MapSymbols(l:symbols)), "\n")."\n"
         return l:results
     endfunction
-endfunction
-
-function! s:MapSymbols(symbols) abort
-    return map(a:symbols, {i, s -> {
-        \ 'filename': get(s, 'filepath', @%),
-        \ 'lnum': s.lnum,
-        \ 'col': s.col,
-        \ 'text': (s.text).' ['.(s.kind).']',
-        \ 'range': {
-            \ 'start': {
-                \ 'character': strwidth(s.text) + 1,
-            \ },
-            \ 'end': {
-                \ 'character': strwidth(s.text) + strwidth(s.kind) + 3,
-            \ },
-        \ },
-    \ }})
 endfunction
 
 " Language server {{{1
