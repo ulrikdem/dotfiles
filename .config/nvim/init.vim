@@ -862,8 +862,8 @@ function! s:InitLspBuffer() abort
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
-    nnoremap <buffer> <C-RightMouse> <C-O>
 endfunction
+nnoremap <C-RightMouse> <C-O>
 
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
