@@ -860,6 +860,15 @@ function! s:InitLspBuffer() abort
     nmap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
     setlocal formatexpr=CocActionAsync('formatSelected')
 
+    omap <buffer><silent> if <Plug>(coc-funcobj-i)
+    xmap <buffer><silent> if <Plug>(coc-funcobj-i)
+    omap <buffer><silent> af <Plug>(coc-funcobj-a)
+    xmap <buffer><silent> af <Plug>(coc-funcobj-a)
+    omap <buffer><silent> ic <Plug>(coc-classobj-i)
+    xmap <buffer><silent> ic <Plug>(coc-classobj-i)
+    omap <buffer><silent> ac <Plug>(coc-classobj-a)
+    xmap <buffer><silent> ac <Plug>(coc-classobj-a)
+
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
