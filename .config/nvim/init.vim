@@ -716,19 +716,22 @@ endfunction
 
 if executable('node')
     function! PatchCoc(...) abort
-        call s:PatchFile(stdpath('config').'/autoload/coc/util.vim', readfile('autoload/coc/util.vim'), [
+        let l:dir = g:plugs['coc.nvim'].dir
+        let l:util = '/autoload/coc/util.vim'
+        call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
             \ ['coc#util#create_float_buf(a:bufnr)\zs',
                 \ ' | call setbufvar(bufnr, "\&modifiable", 1)'],
             \ ['call setwinvar(winid, ''&linebreak'', 1)\zs',
                 \ ' | call setwinvar(winid, "\&breakindentopt", "")'],
-            \ ['let res = inputlist(\[a:title] + a:items)', 'return ChooseCodeAction(a:items, a:cb)'],
+            \ ['let res = inputlist(\[a:title] + a:items)',
+                \ 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
-        call s:PatchFile('bin/server.js', readfile('build/index.js'), [
+        call s:PatchFile(l:dir.'/bin/server.js', readfile(l:dir.'/build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
         \ ])
-        call s:PatchFile('lib/attach.js', [], [])
+        call s:PatchFile(l:dir.'/lib/attach.js', [], [])
     endfunction
     Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': function('PatchCoc')}
 else
