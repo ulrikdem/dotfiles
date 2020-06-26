@@ -800,6 +800,10 @@ function! CocWarningCount() abort
     return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
 endfunction
 
+autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
+autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
+    \ call s:FzfFromQuickfix([], g:coc_jump_locations)
+
 autocmd vimrc User Plug_coc_nvim call s:InitLsp()
 function! s:InitLsp() abort
     let g:start_completion = coc#refresh()
@@ -821,7 +825,7 @@ function! s:InitLspBuffer() abort
 
     nnoremap <buffer> ]g <Cmd>call CocActionAsync('diagnosticNext')<CR>
     nnoremap <buffer> [g <Cmd>call CocActionAsync('diagnosticPrevious')<CR>
-    nmap <buffer> <Leader>ge <Cmd>call CocActionAsync('diagnosticInfo')<CR>
+    nmap <buffer> <Leader>ge <Cmd>call <SID>OpenFloat('diagnosticInfo')<CR>
     nnoremap <buffer> <Leader>gE
         \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>SetQuickfix(map(d, {i, d -> {
             \ 'filename': fnamemodify(d.file, ':p:~:.'),
@@ -866,16 +870,18 @@ function! s:InitLspBuffer() abort
     omap <buffer><silent> ac <Plug>(coc-classobj-a)
     xmap <buffer><silent> ac <Plug>(coc-classobj-a)
 
-    nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
+    nnoremap <buffer> <Leader>gh <Cmd>call <SID>OpenFloat('doHover')<CR>
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><C-]>
 endfunction
 nnoremap <C-RightMouse> <C-O>
 
-autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
-autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
-    \ call s:FzfFromQuickfix([], g:coc_jump_locations)
+function! s:OpenFloat(action) abort
+    call CocAction(a:action)
+    call coc#util#float_jump()
+    nnoremap <buffer> <Esc> <C-W>c
+endfunction
 
 function! s:CodeActionOperatorFunc(type) abort
     call CocActionAsync('codeAction', a:type)
