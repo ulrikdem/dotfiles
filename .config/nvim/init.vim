@@ -840,15 +840,7 @@ function! s:InitLspBuffer() abort
     nnoremap <buffer> <Leader>gi <Cmd>call CocActionAsync('jumpImplementation')<CR>
     nnoremap <buffer> <Leader>gr <Cmd>call CocActionAsync('jumpReferences')<CR>
 
-    nnoremap <buffer> <Leader>gR <Cmd>call CocActionAsync('rename')<CR>
-    nnoremap <buffer> <Leader>ga <Cmd>call CocActionAsync('codeAction')<CR>
-    xnoremap <buffer> ga <Esc><Cmd>call CocActionAsync('codeAction', visualmode())<CR>
-
-    nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
-    nnoremap <buffer> <Leader>gf <Cmd>call coc#util#float_jump()<CR>
-
-    nnoremap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
-    setlocal formatexpr=CocActionAsync('formatSelected')
+    autocmd CursorHold <buffer> call CocActionAsync('highlight')
 
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
@@ -858,7 +850,17 @@ function! s:InitLspBuffer() abort
         endif
     endif
 
-    autocmd CursorHold <buffer> call CocActionAsync('highlight')
+    nmap <buffer> <Leader>gR <Cmd>call CocActionAsync('rename')<CR>
+
+    nmap <buffer> <Leader>gA <Cmd>call CocActionAsync('codeAction')<CR>
+    nmap <buffer> <Leader>gaa <Cmd>call CocActionAsync('codeAction', 'n')<CR>
+    nmap <buffer> <Leader>ga <Cmd>set operatorfunc=<SID>CodeActionOperatorFunc<CR>g@
+    xmap <buffer> ga <Esc><Cmd>call CocActionAsync('codeAction', visualmode())<CR>
+
+    nmap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
+    setlocal formatexpr=CocActionAsync('formatSelected')
+
+    nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
@@ -868,6 +870,10 @@ nnoremap <C-RightMouse> <C-O>
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
     \ call s:FzfFromQuickfix([], g:coc_jump_locations)
+
+function! s:CodeActionOperatorFunc(type) abort
+    call CocActionAsync('codeAction', a:type)
+endfunction
 
 function! ChooseCodeAction(items, callback) abort
     if isdirectory(g:plugs.fzf.dir)
