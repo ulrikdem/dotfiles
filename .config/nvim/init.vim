@@ -721,8 +721,6 @@ if executable('node')
         call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
-            \ ['coc#util#create_float_buf(a:bufnr)\zs',
-                \ ' | call setbufvar(bufnr, "\&modifiable", 1)'],
             \ ['call setwinvar(winid, ''&linebreak'', 1)\zs',
                 \ ' | call setwinvar(winid, "\&breakindentopt", "")'],
             \ ['let res = inputlist(\[a:title] + a:items)',
@@ -885,7 +883,6 @@ nnoremap <C-RightMouse> <C-O>
 function! s:OpenFloat(action) abort
     call CocAction(a:action)
     call coc#util#float_jump()
-    set nomodifiable
     nnoremap <buffer> <Esc> <C-W>c
 endfunction
 
