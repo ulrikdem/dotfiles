@@ -134,12 +134,9 @@ Plug 'tpope/vim-sleuth'
 set nojoinspaces
 
 if has('python3') && filereadable('/usr/share/clang/clang-format.py')
-    autocmd vimrc FileType c,cpp,java,javascript,typescript
-        \ nnoremap <buffer> <Leader>gq <Cmd>call ClangFormat('all')<CR>
-    autocmd vimrc FileType c,cpp,java,javascript,typescript
-        \ setlocal formatexpr=ClangFormat((v:lnum).':'.(v:lnum+v:count-1))
-    function! ClangFormat(lines) abort
-        let l:lines = a:lines
+    command! -range=% ClangFormat call ClangFormat('<line1>:<line2>')
+    function! ClangFormat(...) abort
+        let l:lines = a:0 ? a:1 : v:lnum.':'.(v:lnum + v:count - 1)
         py3file /usr/share/clang/clang-format.py
     endfunction
 endif
