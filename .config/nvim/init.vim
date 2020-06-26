@@ -834,8 +834,8 @@ function! s:InitLspBuffer() abort
             \ 'text': d.message,
         \ }}))})<CR>
 
-    nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDefinition')<CR>
-    nnoremap <buffer> <Leader>gD <Cmd>call CocActionAsync('jumpDeclaration')<CR>
+    nnoremap <buffer> <C-]> <Cmd>call CocActionAsync('jumpDefinition')<CR>
+    nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDeclaration')<CR>
     nnoremap <buffer> <Leader>gt <Cmd>call CocActionAsync('jumpTypeDefinition')<CR>
     nnoremap <buffer> <Leader>gi <Cmd>call CocActionAsync('jumpImplementation')<CR>
     nnoremap <buffer> <Leader>gr <Cmd>call CocActionAsync('jumpReferences')<CR>
@@ -872,7 +872,7 @@ function! s:InitLspBuffer() abort
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover')<CR>
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
-    nmap <buffer> <C-LeftMouse> <LeftMouse><Leader>gd
+    nmap <buffer> <C-LeftMouse> <LeftMouse><C-]>
 endfunction
 nnoremap <C-RightMouse> <C-O>
 
