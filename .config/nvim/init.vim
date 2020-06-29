@@ -204,58 +204,32 @@ endfunction
 Plug 'itchyny/lightline.vim'
 let g:lightline = {
     \ 'active': {
-        \ 'left': [
-            \ ['mode'],
-            \ ['git', 'filename'],
-            \ ['function'],
-        \ ],
-        \ 'right': [
-            \ ['ruler'],
-            \ ['fileformat', 'fileencoding', 'filetype'],
-            \ ['warnings', 'errors', 'asyncdo'],
-        \ ],
+        \ 'left': [['mode'], ['filename'], []],
+        \ 'right': [['ruler'], ['fileformat', 'fileencoding', 'filetype'], []],
     \ },
     \ 'inactive': {
-        \ 'left': [
-            \ ['git', 'filename'],
-        \ ],
-        \ 'right': [
-            \ ['ruler'],
-        \ ],
+        \ 'left': [['filename']],
+        \ 'right': [['ruler']],
     \ },
     \ 'component': {
         \ 'filename': '
             \%{substitute(expand("%:p:~"), ''\v^(/)$|^(\~)/$|.*/(.+)/$|.*'', ''\1\2\3'', "")}%t
             \%{&modified ? " •" : ""}',
-        \ 'function': '%{get(b:, "coc_current_function", "")}',
-        \ 'asyncdo': '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}',
         \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
         \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
         \ 'filetype': '%{&filetype}',
         \ 'ruler': '%p%% %l:%v%<',
     \ },
     \ 'component_visible_condition': {
-        \ 'function': 'get(b:, "coc_current_function", "") != ""',
-        \ 'asyncdo': 'exists("g:asyncdo")',
         \ 'fileformat': '&fileformat !=# "unix"',
         \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
         \ 'filetype': '!empty(&filetype)',
     \ },
-    \ 'component_function': {
-        \ 'git': 'GitStatusline',
-    \ },
-    \ 'component_expand': {
-        \ 'errors': 'CocErrorCount',
-        \ 'warnings': 'CocWarningCount',
-    \ },
-    \ 'component_type': {
-        \ 'errors': 'error',
-        \ 'warnings': 'warning',
-    \ },
+    \ 'component_function': {},
+    \ 'component_expand': {},
+    \ 'component_type': {},
     \ 'tabline': {
-        \ 'left': [
-            \ ['tabs'],
-        \ ],
+        \ 'left': [['tabs']],
         \ 'right': [],
     \ },
     \ 'tab': {
@@ -336,6 +310,10 @@ let s:match_end = "\e[0m"
 
 Plug 'hauleth/asyncdo.vim'
 autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
+
+call add(g:lightline.active.right[2], 'asyncdo')
+let g:lightline.component.asyncdo = '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}'
+let g:lightline.component_visible_condition.asyncdo = 'exists("g:asyncdo")'
 
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
     \ cclose | call asyncdo#run(<bang>0, {
@@ -636,6 +614,9 @@ endfunction
 
 set diffopt+=vertical,foldcolumn:1,algorithm:histogram,hiddenoff
 
+call insert(g:lightline.active.left[1], 'git')
+call insert(g:lightline.inactive.left[0], 'git')
+let g:lightline.component_function.git = 'GitStatusline'
 function! GitStatusline() abort
     if !exists('*FugitiveStatusline')
         return ''
@@ -793,7 +774,16 @@ function! s:UpdateCocColors() abort
     highlight link CocHoverRange NONE
 endfunction
 
-autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
+call add(g:lightline.active.left[2], 'function')
+let g:lightline.component.function = '%{get(b:, "coc_current_function", "")}'
+let g:lightline.component_visible_condition.function = 'get(b:, "coc_current_function", "") != ""'
+
+call insert(g:lightline.active.right[2], 'errors')
+call insert(g:lightline.active.right[2], 'warnings')
+let g:lightline.component_type.errors = 'error'
+let g:lightline.component_type.warnings = 'warning'
+let g:lightline.component_expand.errors = 'CocErrorCount'
+let g:lightline.component_expand.warnings = 'CocWarningCount'
 function! CocErrorCount() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
     return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
@@ -802,6 +792,7 @@ function! CocWarningCount() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
     return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
 endfunction
+autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
 
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
