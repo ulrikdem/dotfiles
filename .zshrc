@@ -61,15 +61,15 @@ if [[ -r ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
         fzf-file-widget-helper() {
             local query=${1##*/}
             local dir=${1:0:${#1}-${#query}}
-            while [[ -n $dir && ! -d $dir ]]; do
+            while [[ -n $dir && ! -d ${~dir} ]]; do
                 dir=${dir%/}
                 query=${dir##*/}/$query
                 dir=${1:0:${#1}-${#query}}
             done
-            cd -- "$dir"
+            cd -- ${~dir:-.}
             unset REPORTTIME
             local item
-            fd -L0 | fzf --read0 --height 40% --reverse --prompt "> $dir" -q "$query" -m --print0 |
+            fd -L0 | fzf --read0 --height 40% --reverse --prompt ${dir:-./} -q "$query" -m --print0 |
                 while read -rd $'\0' item; do
                     echo -n "$dir${(q)item} "
                 done
