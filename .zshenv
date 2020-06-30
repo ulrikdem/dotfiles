@@ -5,7 +5,7 @@ path=(~/.local/bin ~/.local/share/nvim/plugged/fzf/bin $path)
 [[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim ABDUCO_CMD='nvim +terminal'
 
 type -p fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L'
-export FZF_DEFAULT_OPTS='--color 16,info:8 --bind tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all,change:top,ctrl-z:ignore'
+export FZF_DEFAULT_OPTS='--color 16,info:8 --tiebreak end,length --bind tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all,change:top,ctrl-z:ignore'
 
 [[ -r ~/.config/ripgreprc ]] && export RIPGREP_CONFIG_PATH=~/.config/ripgreprc
 
