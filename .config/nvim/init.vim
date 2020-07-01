@@ -515,7 +515,7 @@ function! s:FzfFromQuickfix(options, items) abort
             endif
             let l:left = trim(substitute(l:item.text, "\t", ' ', 'g'), ' ')
             if !empty(get(l:item, 'type', ''))
-                let l:left = s:match_start.(l:item.type).s:match_end.l:left
+                let l:left = s:match_start.'['.(l:item.type).'] '.s:match_end.l:left
             endif
             let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
             let l:right = "\e[90m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[0m"
