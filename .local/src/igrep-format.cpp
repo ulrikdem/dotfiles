@@ -5,7 +5,7 @@
 #include <string>
 #include <string_view>
 
-int count_chars(const std::string_view &text) {
+int count_chars(std::string_view text) {
     int n = text.size();
     bool escaped = false;
     char prev = 0;
@@ -34,8 +34,7 @@ int main(int argc, char **argv) {
 
     std::ios::sync_with_stdio(false);
 
-    std::string line;
-    while (std::getline(std::cin, line)) {
+    for (std::string line; std::getline(std::cin, line);) {
         std::size_t i = line.find('\0', filename_prefix + 1 + filename_suffix);
         std::size_t j = line.find(':', i + line_no_prefix + 1 + line_no_suffix);
         std::size_t k = line.find(':', j + column_no_prefix + 1 + column_no_suffix);
