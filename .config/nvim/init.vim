@@ -465,7 +465,7 @@ function! s:InitQuickfixBuffer() abort
     endif
     call matchadd('QuickFixMatch', s:match_start.'.\{-}'.s:match_end)
     call matchadd('Conceal', '\e\[\d*m')
-    setlocal conceallevel=2 concealcursor=nv
+    setlocal conceallevel=2 concealcursor=nvc
     setlocal nolist
     let w:added_qf_matches = 1
 endfunction
@@ -883,7 +883,7 @@ function! s:FocusFloat(...) abort
         return
     endif
     call coc#util#float_jump()
-    setlocal nomodifiable
+    setlocal nomodifiable concealcursor=nvc
     nnoremap <buffer> <Esc> <C-W>c
 endfunction
 
