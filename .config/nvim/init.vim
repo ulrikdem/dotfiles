@@ -660,12 +660,12 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([
 set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
 
-let g:start_completion = "\<C-N>"
+let s:start_completion = "\<C-N>"
 inoremap <silent><expr> <Tab> <SID>TabMap('<Tab>', '<C-N>')
 inoremap <silent><expr> <S-Tab> <SID>TabMap('<S-Tab>', '<C-P>')
 function! s:TabMap(tab, key) abort
     return pumvisible() ? empty(reg_recording()) ? a:key : '' :
-        \ col('.') <= 1 || getline('.')[col('.') - 2] =~ '\s' ? a:tab : g:start_completion
+        \ col('.') <= 1 || getline('.')[col('.') - 2] =~ '\s' ? a:tab : s:start_completion
 endfunction
 
 function! s:CompletionFallback() abort
@@ -677,7 +677,7 @@ function! s:CompletionFallback() abort
         Plug 'fgrsnau/ncm2-otherbuf'
         let g:ncm2#complete_length = 2
         autocmd vimrc User Plug_ncm2 autocmd vimrc BufEnter * call ncm2#enable_for_buffer()
-        autocmd vimrc User Plug_ncm2 let g:start_completion = "\<C-R>=ncm2#force_trigger()\<CR>"
+        autocmd vimrc User Plug_ncm2 let s:start_completion = "\<C-R>=ncm2#force_trigger()\<CR>"
     else
         Plug 'lifepillar/vim-mucomplete'
         let g:mucomplete#enable_auto_at_startup = 1
@@ -805,7 +805,7 @@ autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
 
 autocmd vimrc User Plug_coc_nvim call s:InitLsp()
 function! s:InitLsp() abort
-    let g:start_completion = coc#refresh()
+    let s:start_completion = coc#refresh()
     inoremap <CR> <C-G>u<CR>
 
     let s:lsp_filetypes = []
