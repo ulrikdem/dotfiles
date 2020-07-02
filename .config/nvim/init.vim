@@ -32,7 +32,7 @@ endtry
 set clipboard=unnamed
 set cursorline
 set hidden
-set linebreak breakindent breakindentopt=shift:8,sbr showbreak=↪
+set linebreak breakindent showbreak=↪
 set list listchars=tab:→\ ,trail:␣
 set mouse=a
 set scrolloff=4
@@ -702,8 +702,6 @@ if executable('node')
         call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
-            \ ['call setwinvar(winid, ''&linebreak'', 1)\zs',
-                \ ' | call setwinvar(winid, "\&breakindentopt", "")'],
             \ ['let res = inputlist(\[a:title] + a:items)',
                 \ 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
