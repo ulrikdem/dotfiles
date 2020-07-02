@@ -702,6 +702,8 @@ if executable('node')
         call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
+            \ ['coc#util#create_float_buf(a:bufnr)\zs',
+                \ ' | call setbufvar(bufnr, "\&modifiable", 1)'],
             \ ['let res = inputlist(\[a:title] + a:items)',
                 \ 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
@@ -822,7 +824,8 @@ function! s:InitLspBuffer() abort
 
     nnoremap <buffer> ]g <Cmd>call CocActionAsync('diagnosticNext')<CR>
     nnoremap <buffer> [g <Cmd>call CocActionAsync('diagnosticPrevious')<CR>
-    nmap <buffer> <Leader>ge <Cmd>call <SID>OpenFloat('diagnosticInfo')<CR>
+    nmap <buffer> <Leader>ge
+        \ <Cmd>call CocActionAsync('diagnosticInfo', function('<SID>FocusFloat'))<CR>
     nnoremap <buffer> <Leader>gE
         \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>SetQuickfix(map(d, {i, d -> {
             \ 'filename': fnamemodify(d.file, ':p:~:.'),
@@ -867,16 +870,20 @@ function! s:InitLspBuffer() abort
     omap <buffer><silent> ac <Plug>(coc-classobj-a)
     xmap <buffer><silent> ac <Plug>(coc-classobj-a)
 
-    nnoremap <buffer> <Leader>gh <Cmd>call <SID>OpenFloat('doHover')<CR>
+    nnoremap <buffer> <Leader>gh
+        \ <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><C-]>
 endfunction
 nnoremap <C-RightMouse> <C-O>
 
-function! s:OpenFloat(action) abort
-    call CocAction(a:action)
+function! s:FocusFloat(...) abort
+    if !coc#util#has_float()
+        return
+    endif
     call coc#util#float_jump()
+    setlocal nomodifiable
     nnoremap <buffer> <Esc> <C-W>c
 endfunction
 
