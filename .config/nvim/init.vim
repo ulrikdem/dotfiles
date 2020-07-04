@@ -204,28 +204,30 @@ endfunction
 Plug 'itchyny/lightline.vim'
 let g:lightline = {
     \ 'active': {
-        \ 'left': [['mode'], ['filename'], []],
+        \ 'left': [['mode'], ['filename'], ['truncate']],
         \ 'right': [['ruler'], ['fileformat', 'fileencoding', 'filetype'], []],
     \ },
     \ 'inactive': {
-        \ 'left': [['filename']],
+        \ 'left': [['filename'], ['truncate', 'space']],
         \ 'right': [['ruler']],
     \ },
     \ 'component': {
         \ 'filename': '
-            \%{substitute(expand("%:p:~"), ''\v^(/)$|^(\~)/$|.*/(.+)/$|.*'', ''\1\2\3'', "")}%t
+            \%{substitute(expand("%:p:~"), ''\v^(/)$|(.*/)?(.+)/$|.*'', ''\1\3'', "")}%t
             \%{&modified ? " •" : ""}',
-        \ 'fileformat': '%{&fileformat !=# "unix" ? &fileformat : ""}',
-        \ 'fileencoding': '%{&fileencoding !~# "\\v^(utf-8)?$" ? &fileencoding : ""}',
-        \ 'filetype': '%{&filetype}',
-        \ 'ruler': '%p%% %l:%v%<',
+        \ 'truncate': '%<',
+        \ 'space': ' ',
+        \ 'ruler': '%p%% %l:%v',
     \ },
     \ 'component_visible_condition': {
-        \ 'fileformat': '&fileformat !=# "unix"',
-        \ 'fileencoding': '&fileencoding !~# "\\v^(utf-8)?$"',
-        \ 'filetype': '!empty(&filetype)',
+        \ 'truncate': '0',
     \ },
-    \ 'component_function': {},
+    \ 'component_function': {
+        \ 'mode': 'StatusLineMode',
+        \ 'fileformat': 'StatusLineFileFormat',
+        \ 'fileencoding': 'StatusLineFileEncoding',
+        \ 'filetype': 'StatusLineFileType',
+    \ },
     \ 'component_expand': {},
     \ 'component_type': {},
     \ 'tabline': {
@@ -249,13 +251,31 @@ let g:lightline = {
     \ },
 \ }
 
-autocmd vimrc User Plug_lightline_vim set noshowmode
-autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
+function! StatusLineMode() abort
+    return s:NarrowWindow() ? lightline#mode()[0] : lightline#mode()
+endfunction
+
+function! StatusLineFileFormat() abort
+    return s:NarrowWindow() || &fileformat ==# 'unix' ? '' : &fileformat
+endfunction
+function! StatusLineFileEncoding() abort
+    return s:NarrowWindow() || &fileencoding =~# '\v^(utf-8)?$' ? '' : &fileencoding
+endfunction
+function! StatusLineFileType() abort
+    return s:NarrowWindow() ? '' : &filetype
+endfunction
+
+function! s:NarrowWindow() abort
+    return winwidth(0) < 60
+endfunction
 
 function! TabWindowCount(tab) abort
     let l:count = len(tabpagebuflist(a:tab))
     return l:count > 1 ? '(+'.(l:count - 1).')' : ''
 endfunction
+
+autocmd vimrc User Plug_lightline_vim set noshowmode
+autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery
     \ call s:UpdateLightlineColors()
