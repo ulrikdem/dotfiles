@@ -4,8 +4,12 @@ if [[ -r ~/.config/xrandr ]]; then
     . ~/.config/xrandr
     srandrd bash ~/.config/xrandr
 else
-    xrandr --auto --dpi 96
+    xrandr --auto
 fi
+
+export GDK_SCALE=${GDK_SCALE:-1}
+export GDK_DPI_SCALE=$(bc <<<"scale=2; 1/$GDK_SCALE")
+echo "Xft.dpi: $((96*GDK_SCALE))" | xrdb -merge
 
 xrandr --listproviders | grep -q NVIDIA && gpu_icon=' ﯎ <fc=gray25>│</fc>'
 xprop -root -f GPU_ICON 8u -set GPU_ICON "$gpu_icon"
