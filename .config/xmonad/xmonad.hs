@@ -1,5 +1,6 @@
 -- Imports {{{1
 
+-- vim: foldmethod=marker
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 
 import Control.Monad
@@ -9,6 +10,7 @@ import Data.List
 import qualified Data.Map.Strict as M
 import Data.Maybe
 import Graphics.X11.ExtraTypes.XF86
+import Graphics.X11.Xft
 import XMonad hiding ((|||))
 import XMonad.Actions.CycleWS
 import XMonad.Actions.PhysicalScreens
@@ -41,7 +43,7 @@ import XMonad.Util.Scratchpad
 
 -- Main {{{1
 
-main = xmonad $ ewmh $ docks def
+main = getFontHeight >>= \fontHeight -> xmonad $ ewmh $ docks def
     { startupHook = barStartupHook <+> setDefaultCursor xC_left_ptr
     , handleEventHook = barEventHook
     , logHook = barLogHook <+> withWindowSet (\s -> mapM_ (\w ->
@@ -49,7 +51,7 @@ main = xmonad $ ewmh $ docks def
     , normalBorderColor = "black"
     , focusedBorderColor = "gray50"
     , modMask = mod4Mask
-    , keys = customKeys delKeys insKeys
+    , keys = customKeys delKeys $ insKeys fontHeight
     , terminal = "termite"
     , manageHook = let r = W.RationalRect 0 (2 / 3) 1 (1 / 3) in composeAll
         [ scratchpadManageHook r
@@ -57,7 +59,7 @@ main = xmonad $ ewmh $ docks def
         , placeHook $ fixed (0.5, 0.5)
         , appName =? "xmonad-float" --> doFloat
         ]
-    , layoutHook = named "tiled" (avoidStruts layout)
+    , layoutHook = named "tiled" (avoidStruts $ layout fontHeight)
         ||| named "full" (avoidStruts $ noBorders StateFull)
         ||| named "fullscreen" (noBorders StateFull)
     }
@@ -67,11 +69,19 @@ main = xmonad $ ewmh $ docks def
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , decoHeight = 17
     , fontName = "xft:monospace:size=" ++ show fontSize
     }
 
 fontSize = 9
+
+getFontHeight = do
+    display <- openDisplay ""
+    font <- xftFontOpen display (defaultScreenOfDisplay display) $ fontName theme
+    ascent <- xftfont_ascent font
+    descent <- xftfont_descent font
+    xftFontClose display font
+    closeDisplay display
+    return $ fromIntegral $ ascent + descent + 2
 
 -- Bar {{{1
 
@@ -106,12 +116,12 @@ delKeys XConfig {modMask = mod} =
     , (mod .|. shiftMask, xK_Tab)
     ]
 
-insKeys XConfig {modMask = mod, terminal = term} =
-    [ ((mod, xK_g), windowPrompt windowPromptConf Goto allWindows)
-    , ((mod .|. shiftMask, xK_g), windowPrompt windowPromptConf Bring allWindows)
+insKeys fontHeight XConfig {modMask = mod, terminal = term} =
+    [ ((mod, xK_g), windowPrompt (windowPromptConf fontHeight) Goto allWindows)
+    , ((mod .|. shiftMask, xK_g), windowPrompt (windowPromptConf fontHeight) Bring allWindows)
 
-    , ((mod, xK_p), shellPrompt . promptConf =<< initMatches)
-    , ((mod .|. shiftMask, xK_p), termPrompt term . promptConf =<< initMatches)
+    , ((mod, xK_p), shellPrompt . promptConf fontHeight =<< initMatches)
+    , ((mod .|. shiftMask, xK_p), termPrompt term . promptConf fontHeight =<< initMatches)
 
     , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
     , ((mod, xK_b), spawn "luakit")
@@ -180,9 +190,9 @@ cycleWSType = WSIs $ do
 
 -- Prompt {{{1
 
-windowPromptConf = def
+windowPromptConf fontHeight = def
     { promptBorderWidth = 0
-    , height = decoHeight theme
+    , height = fontHeight
     , font = fontName theme
     , searchPredicate = fuzzyMatch
     , sorter = fuzzySort
@@ -194,15 +204,15 @@ windowPromptConf = def
         ]) emacsLikeXPKeymap
     }
 
-promptConf matches = def
+promptConf fontHeight matches = def
     { promptBorderWidth = 0
-    , height = decoHeight theme
+    , height = fontHeight
     , font = fontName theme
     , historyFilter = deleteAllDuplicates
     , promptKeymap = M.union (M.fromList
         [ ((controlMask, xK_p), historyUpMatching matches)
         , ((controlMask, xK_n), historyDownMatching matches)
-        ]) $ promptKeymap windowPromptConf
+        ]) $ promptKeymap $ windowPromptConf fontHeight
     }
 
 termPrompt term conf = do
@@ -217,10 +227,13 @@ instance XPrompt TermPrompt where
 
 -- Layout {{{1
 
-layout = decoration shrinkText theme CollapseDeco $ spacingWithEdge gapWidth
-    $ configurableNavigation noNavigateBorders $ EmptyLayout [def, def {limit = maxBound}]
-
-gapWidth = 6
+layout :: Dimension -> ModifiedLayout (Decoration CollapseDeco DefaultShrinker)
+    (ModifiedLayout Spacing (ModifiedLayout WindowNavigation CustomLayout)) Window
+layout fontHeight = decoration shrinkText theme {decoHeight = fontHeight} CollapseDeco
+    $ spacingWithEdge gapWidth $ configurableNavigation noNavigateBorders
+    $ EmptyLayout [def, def {limit = maxBound}] $ fontHeight + fromIntegral gapWidth * 2
+    where
+        gapWidth = round $ fromIntegral fontHeight / 3
 
 data CollapseDeco a = CollapseDeco
     deriving (Read, Show)
@@ -242,7 +255,7 @@ data Column = Column
 instance Default Column where
     def = Column {limit = 1, colWeight = 1, winWeights = M.empty}
 
-data CustomLayout a = CustomLayout (W.Stack Column) Int | EmptyLayout [Column]
+data CustomLayout a = CustomLayout (W.Stack Column) Int Dimension | EmptyLayout [Column] Dimension
     deriving (Read, Show)
 
 instance LayoutClass CustomLayout Window where
@@ -250,21 +263,20 @@ instance LayoutClass CustomLayout Window where
         let wins = W.integrate stack
         collapsed <- mapM (isCollapsed stack) wins
 
-        let cols = case layout of
-                CustomLayout c _ -> W.integrate c
-                EmptyLayout c -> c
+        let (cols, collapsedHeight) = case layout of
+                CustomLayout c _ h -> (W.integrate c, h)
+                EmptyLayout c h -> (c, h)
             cumLimits = scanl (+) 0 $ map limit $ init cols
 
             split rect weights = split' rect weights where
                 split' rect@Rectangle {rect_height = height} (Just weight : weights) = setHeight rect weights $ round
-                    $ fromIntegral (height - collapsedHeight * fromIntegral (length $ filter isNothing weights))
+                    $ fromIntegral (height - collapsedHeight' * fromIntegral (length $ filter isNothing weights))
                         * weight / (weight + sum (catMaybes weights))
                 split' rect (Nothing : weights) = setHeight rect weights collapsedHeight
                 split' _ [] = []
                 setHeight (Rectangle x y w h) weights h' =
                     Rectangle x y w h' : split' (Rectangle x (y + fromIntegral h') w (h - h')) weights
-                collapsedHeight = min (decoHeight theme + fromIntegral gapWidth * 2)
-                    (rect_height rect `div` fromIntegral (length weights))
+                collapsedHeight' = min collapsedHeight $ rect_height rect `div` fromIntegral (length weights)
 
             collapsedWins = M.fromList $ zip (map fst $ filter snd $ zip wins collapsed) $ repeat Nothing
             layoutCol col rect wins = zip wins $ split rect
@@ -283,40 +295,40 @@ instance LayoutClass CustomLayout Window where
                 { W.up = reverse $ take colIndex cols
                 , W.focus = cols !! colIndex
                 , W.down = drop (colIndex + 1) cols
-                } winIndex
+                } winIndex collapsedHeight
 
         return (winRects, Just layout')
 
-    emptyLayout (CustomLayout cols _) _ = return ([], Just $ EmptyLayout $ W.integrate cols)
-    emptyLayout (EmptyLayout _) _ = return ([], Nothing)
+    emptyLayout (CustomLayout cols _ height) _ = return ([], Just $ EmptyLayout (W.integrate cols) height)
+    emptyLayout (EmptyLayout _ _) _ = return ([], Nothing)
 
-    handleMessage (CustomLayout cols@W.Stack {W.focus = col} focus) m =
+    handleMessage (CustomLayout cols@W.Stack {W.focus = col} focus height) m =
         case fromMessage m of
             Just AddColumn -> fixFocus $ CustomLayout cols
                 { W.focus = def
                 , W.down = col : W.down cols
-                } focus
+                } focus height
             Just DeleteColumn -> skipLastCol $ fixFocus $ CustomLayout cols
                 { W.focus = head $ W.down cols
                 , W.down = tail $ W.down cols
-                } focus
+                } focus height
             Just (ModifyLimit f) -> skipLastCol $ fixFocus $ CustomLayout cols
                 { W.focus = col {limit = max 1 $ f $ limit col}
-                } focus
+                } focus height
             Just (ModifyColWeight f) -> return $ Just $ CustomLayout cols
                 { W.focus = col {colWeight = f $ colWeight col}
-                } focus
+                } focus height
             Just (ModifyWinWeight f) -> return $ Just $ CustomLayout cols
                 { W.focus = col {winWeights = M.alter (mfilter (/= 1) . Just . f . fromMaybe 1) focus $ winWeights col}
-                } focus
+                } focus height
             Nothing -> return Nothing
         where
             skipLastCol r = if null (W.down cols) then return Nothing else r
-            fixFocus (CustomLayout cols focus) = do
+            fixFocus (CustomLayout cols focus height) = do
                 let focus' = min focus $ pred $ limit $ W.focus cols
                 modifyWindowSet $ foldr (.) id $ replicate (focus - focus') W.focusUp
-                return $ Just $ CustomLayout cols focus'
-    handleMessage (EmptyLayout _) _ = return Nothing
+                return $ Just $ CustomLayout cols focus' height
+    handleMessage (EmptyLayout _ _) _ = return Nothing
 
 data LayoutMessage
     = AddColumn
@@ -327,5 +339,3 @@ data LayoutMessage
     deriving (Typeable)
 
 instance Message LayoutMessage
-
--- vim: foldmethod=marker
