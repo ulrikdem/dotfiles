@@ -1,0 +1,12 @@
+#!/bin/bash
+
+(($# < 2)) && echo 'xrandr-default <output> <xrandr-arg>...' >&2 && exit 1
+
+output=$1
+shift
+
+if xrandr | grep -q "^$output disconnected "; then
+    xrandr --output "$output" --off
+elif [[ -z $SRANDRD_ACTION ]] || ! xrandr --listmonitors | grep -q "  $output\$"; then
+    xrandr --output "$output" "$@"
+fi
