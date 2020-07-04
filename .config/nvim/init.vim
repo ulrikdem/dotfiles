@@ -865,7 +865,7 @@ function! s:InitLspBuffer() abort
 
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
-            \ {e, s -> <SID>FzfFromQuickfix([], <SID>MapSymbols(s))})<CR>
+            \ {e, s -> <SID>FzfFromQuickfix([], map(s, {i, s -> <SID>SymbolToQuickfix(s)}))})<CR>
         if executable('nvr')
             nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
         endif
@@ -928,21 +928,23 @@ function! ChooseCodeAction(items, callback) abort
     endif
 endfunction
 
-function! s:MapSymbols(symbols) abort
-    return map(a:symbols, {i, s -> {
-        \ 'filename': get(s, 'filepath', @%),
-        \ 'lnum': s.lnum,
-        \ 'col': s.col,
-        \ 'text': (s.text).' ['.(s.kind).']',
+function! s:SymbolToQuickfix(symbol) abort
+    let l:line = getbufline(get(a:symbol, 'filename', '%'), a:symbol.lnum)
+    return {
+        \ 'filename': get(a:symbol, 'filename', @%),
+        \ 'lnum': a:symbol.lnum,
+        \ 'col': empty(l:line) ? a:symbol.col :
+            \ v:lua.vim.str_byteindex(l:line[0], a:symbol.col - 1) + 1,
+        \ 'text': (a:symbol.text).' ['.(a:symbol.kind).']',
         \ 'range': {
             \ 'start': {
-                \ 'character': strwidth(s.text) + 1,
+                \ 'character': strwidth(a:symbol.text) + 1,
             \ },
             \ 'end': {
-                \ 'character': strwidth(s.text) + strwidth(s.kind) + 3,
+                \ 'character': strwidth(a:symbol.text) + strwidth(a:symbol.kind) + 3,
             \ },
         \ },
-    \ }})
+    \ }
 endfunction
 
 function! s:FzfFromWorkspaceSymbols() abort
@@ -959,21 +961,15 @@ function! s:FzfFromWorkspaceSymbols() abort
         if l:words[0] ==# l:last_query
             return l:results
         endif
-        let l:symbols = map(CocAction('getWorkspaceSymbols', l:words[0]), {i, s -> {
-            \ 'filepath': iconv(substitute(substitute(s.location.uri, '^file://', '', ''),
-                \ '%\(\x\x\)', {m -> nr2char('0x'.m[1])}, 'g'), 'utf-8', 'latin1'),
+        let l:symbols = map(CocAction('getWorkspaceSymbols', l:words[0]), {i, s -> s:SymbolToQuickfix({
+            \ 'filename': v:lua.vim.uri_to_fname(s.location.uri),
             \ 'lnum': s.location.range.start.line + 1,
             \ 'col': s.location.range.start.character + 1,
             \ 'text': s.name,
-            \ 'kind': s.kind > 26 ? 'Unknown' : [
-                \ 'File', 'Module', 'Namespace', 'Package', 'Class', 'Method', 'Property',
-                \ 'Field', 'Constructor', 'Enum', 'Interface', 'Function', 'Variable',
-                \ 'Constant', 'String', 'Number', 'Boolean', 'Array', 'Object', 'Key',
-                \ 'Null', 'EnumMember', 'Struct', 'Event', 'Operator', 'TypeParameter',
-            \ ][s.kind - 1],
-        \ }})
+            \ 'kind': v:lua.vim.lsp.util._get_symbol_kind_name(s.kind),
+        \ })})
         let l:last_query = l:words[0]
-        let l:results = "\n".join(l:ProcessItems(s:MapSymbols(l:symbols)), "\n")."\n"
+        let l:results = "\n".join(l:ProcessItems(l:symbols), "\n")."\n"
         return l:results
     endfunction
 endfunction
