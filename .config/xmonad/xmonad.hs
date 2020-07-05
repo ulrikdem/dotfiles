@@ -69,10 +69,8 @@ main = getFontHeight >>= \fontHeight -> xmonad $ ewmh $ docks def
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:monospace:size=" ++ show fontSize
+    , fontName = "xft:monospace:size=9"
     }
-
-fontSize = 9
 
 getFontHeight = do
     display <- openDisplay ""
@@ -88,12 +86,13 @@ getFontHeight = do
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
-    ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=" ++ show (fontSize + 4) ++ "'"
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=13'"
 
-barLogHook = multiPP (pp "darkgreen") (pp "gray50")
+barLogHook = withWindowSet $ \s -> do
+    icons <- fmap M.fromList $ mapM workspaceIcon $ W.workspaces s
+    multiPP (pp icons "darkgreen") (pp icons "gray50")
 
-pp color = namedScratchpadFilterOutWorkspacePP def
+pp icons color = namedScratchpadFilterOutWorkspacePP def
     { ppCurrent = xmobarColor "black" color . wrapWorkspace
     , ppVisible = wrapWorkspace
     , ppHidden = wrapWorkspace
@@ -105,8 +104,22 @@ pp color = namedScratchpadFilterOutWorkspacePP def
     , ppSep = "<fc=gray25>│</fc> "
     , ppWsSep = ""
     }
+    where
+        wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1" $ pad
+            $ fromMaybe w $ fmap (wrap "<fn=1>" "</fn>") $ M.findWithDefault Nothing w icons
 
-wrapWorkspace tag = xmobarAction ("xdotool key super+" ++ tag) "1" $ pad tag
+workspaceIcon w = do
+    icons <- case W.stack w of
+        Just s -> mapM (\(q, i) -> fmap (bool Nothing $ Just i) $ runQuery q $ W.focus s) iconRules
+        Nothing -> return []
+    return (W.tag w, foldr (flip maybe Just) Nothing icons)
+
+iconRules =
+    [ (return True, "\xfaae")
+    , (className =? "Luakit", "\xf484")
+    , (className =? "Termite", "\xe7a2")
+    , (className =? "Termite" <&&> fmap (" - nvim" `isSuffixOf`) title, "\xe62b")
+    ]
 
 -- Keys {{{1
 
