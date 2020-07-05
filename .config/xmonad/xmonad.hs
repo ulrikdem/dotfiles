@@ -91,11 +91,11 @@ barEventHook = dynStatusBarEventHook spawnBar $ return ()
 spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
     ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=" ++ show (fontSize + 4) ++ "'"
 
-barLogHook = multiPP pp {ppCurrent = xmobarColor "black" "darkgreen" . wrapWorkspace}
-    pp {ppCurrent = xmobarColor "black" "gray50" . wrapWorkspace}
+barLogHook = multiPP (pp "darkgreen") (pp "gray50")
 
-pp = namedScratchpadFilterOutWorkspacePP def
-    { ppVisible = wrapWorkspace
+pp color = namedScratchpadFilterOutWorkspacePP def
+    { ppCurrent = xmobarColor "black" color . wrapWorkspace
+    , ppVisible = wrapWorkspace
     , ppHidden = wrapWorkspace
     , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . wrapWorkspace
     , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
@@ -106,7 +106,7 @@ pp = namedScratchpadFilterOutWorkspacePP def
     , ppWsSep = ""
     }
 
-wrapWorkspace s = xmobarAction ("xdotool key super+" ++ s) "1" $ pad s
+wrapWorkspace tag = xmobarAction ("xdotool key super+" ++ tag) "1" $ pad tag
 
 -- Keys {{{1
 
