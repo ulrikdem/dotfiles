@@ -11,6 +11,7 @@ import qualified Data.Map.Strict as M
 import Data.Maybe
 import Graphics.X11.ExtraTypes.XF86
 import Graphics.X11.Xft
+import IconRules
 import XMonad hiding ((|||))
 import XMonad.Actions.CycleWS
 import XMonad.Actions.PhysicalScreens
@@ -113,13 +114,6 @@ workspaceIcon w = do
         Just s -> mapM (\(q, i) -> fmap (bool Nothing $ Just i) $ runQuery q $ W.focus s) iconRules
         Nothing -> return []
     return (W.tag w, foldr (flip maybe Just) Nothing icons)
-
-iconRules =
-    [ (return True, "\xfaae")
-    , (className =? "Luakit", "\xf484")
-    , (className =? "Termite", "\xe7a2")
-    , (className =? "Termite" <&&> fmap (" - nvim" `isSuffixOf`) title, "\xe62b")
-    ]
 
 -- Keys {{{1
 
