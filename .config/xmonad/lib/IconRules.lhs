@@ -1,6 +1,6 @@
 \begin{code}
 
-module IconRules where
+module IconRules (iconRules) where
 
 import Data.List
 import XMonad.ManageHook
@@ -9,7 +9,10 @@ iconRules =
     [ (return True, "\xfaae")
     , (className =? "Luakit", "\xf484")
     , (className =? "Termite", "\xe7a2")
-    , (className =? "Termite" <&&> fmap (" - nvim" `isSuffixOf`) title, "\xe62b")
+    , (className =? "Termite" <&&> title $? " - nvim", "\xe62b")
     ]
+
+q ^? s = fmap (s `isPrefixOf`) q
+q $? s = fmap (s `isSuffixOf`) q
 
 \end{code}
