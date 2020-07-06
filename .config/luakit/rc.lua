@@ -455,11 +455,6 @@ function window.methods.search_open(win, s)
 end
 
 webview.add_signal("init", function(view)
-    view:add_signal("new-window-decision", function(_, uri)
-        view.uri = uri
-        return false
-    end)
-
     view:add_signal("navigation-request", function(_, uri)
         if uri:match("^https://[^/]+%.m%.wikipedia%.org/") then
             view.uri = uri:gsub("^https://([^/]+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
