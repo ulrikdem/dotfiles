@@ -277,8 +277,7 @@ endfunction
 autocmd vimrc User Plug_lightline_vim set noshowmode
 autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
 
-autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery
-    \ call s:UpdateLightlineColors()
+autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
     call s:Highlight('StatusLine', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
     call s:Highlight('StatusLineNC', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
@@ -335,6 +334,11 @@ call add(g:lightline.active.right[2], 'asyncdo')
 let g:lightline.component.asyncdo = '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}'
 let g:lightline.component_visible_condition.asyncdo = 'exists("g:asyncdo")'
 
+autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
+    \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
+autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mm <Cmd>silent update \| Make<CR>
+autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
+
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
     \ cclose | call asyncdo#run(<bang>0, {
         \ 'job': substitute(&grepprg, '\\|', '|', 'g'),
@@ -371,11 +375,6 @@ if executable('rg') && executable('igrep-format')
         \ }
     endfunction
 endif
-
-autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
-    \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mm <Cmd>silent update \| Make<CR>
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
 
 Plug 'tpope/vim-eunuch'
 
@@ -516,8 +515,8 @@ function! s:SetQuickfix(items) abort
     cfirst
 endfunction
 
-autocmd vimrc User Plug_fzf
-    \ nnoremap <Leader>fq <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
+autocmd vimrc User Plug_fzf nnoremap <Leader>fq
+    \ <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
 function! s:FzfFromQuickfix(options, items) abort
     let l:valid_items = []
     function! s:ProcessItems(items) abort closure
@@ -722,10 +721,8 @@ if executable('node')
         call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
-            \ ['coc#util#create_float_buf(a:bufnr)\zs',
-                \ ' | call setbufvar(bufnr, "\&modifiable", 1)'],
-            \ ['let res = inputlist(\[a:title] + a:items)',
-                \ 'return ChooseCodeAction(a:items, a:cb)'],
+            \ ['coc#util#create_float_buf(a:bufnr)\zs', ' | call setbufvar(bufnr, "\&modifiable", 1)'],
+            \ ['let res = inputlist(\[a:title] + a:items)', 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
         call s:PatchFile(l:dir.'/bin/server.js', readfile(l:dir.'/build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
@@ -752,13 +749,8 @@ let g:coc_user_config = {
             \ 'currentFunctionSymbolAutoUpdate': v:true,
         \ },
         \ 'source': {
-            \ 'around': {
-                \ 'priority': 2,
-                \ 'firstMatch': v:false,
-            \ },
-            \ 'buffer': {
-                \ 'firstMatch': v:false,
-            \ },
+            \ 'around': {'firstMatch': v:false, 'priority': 2},
+            \ 'buffer': {'firstMatch': v:false},
         \ },
     \ },
     \ 'suggest': {
@@ -890,8 +882,7 @@ function! s:InitLspBuffer() abort
     omap <buffer><silent> ac <Plug>(coc-classobj-a)
     xmap <buffer><silent> ac <Plug>(coc-classobj-a)
 
-    nnoremap <buffer> <Leader>gh
-        \ <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
+    nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
 
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
     nmap <buffer> <C-LeftMouse> <LeftMouse><C-]>
@@ -937,20 +928,15 @@ function! s:SymbolToQuickfix(symbol) abort
             \ v:lua.vim.str_byteindex(l:line[0], a:symbol.col - 1) + 1,
         \ 'text': (a:symbol.text).' ['.(a:symbol.kind).']',
         \ 'range': {
-            \ 'start': {
-                \ 'character': strwidth(a:symbol.text) + 1,
-            \ },
-            \ 'end': {
-                \ 'character': strwidth(a:symbol.text) + strwidth(a:symbol.kind) + 3,
-            \ },
+            \ 'start': {'character': strwidth(a:symbol.text) + 1},
+            \ 'end': {'character': strwidth(a:symbol.text) + strwidth(a:symbol.kind) + 3},
         \ },
     \ }
 endfunction
 
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:
-        \nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" |
-            \ tail -c +2'], [])
+        \nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" | tail -c +2'], [])
     let l:last_query = ''
     let l:results = ''
     function! WorkspaceSymbolQuery(query) abort closure
@@ -1198,8 +1184,7 @@ if executable('gdb')
             call extend(l:maps, [
                 \ ['<M-w>', '<Cmd>call <SID>WatchExpression("watch")<CR>', 'nx'],
                 \ ['<M-W>', '<Cmd>call <SID>WatchExpression("unwatch")<CR>', 'nx'],
-                \ ['<M-C-W>', '<Cmd>call TermDebugSendCommand("dashboard expression clear")<CR>',
-                    \ 'nt'],
+                \ ['<M-C-W>', '<Cmd>call TermDebugSendCommand("dashboard expression clear")<CR>', 'nt'],
             \ ])
         endif
 
