@@ -681,6 +681,7 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([
 set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
 
+set complete-=t
 let s:start_completion = "\<C-N>"
 inoremap <silent><expr> <Tab> <SID>TabMap('<Tab>', '<C-N>')
 inoremap <silent><expr> <S-Tab> <SID>TabMap('<S-Tab>', '<C-P>')
