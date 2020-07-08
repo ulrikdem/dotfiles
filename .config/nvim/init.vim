@@ -1066,7 +1066,7 @@ if executable('cargo')
         \ nnoremap <buffer> <Leader>mr <Cmd>silent update \| Make build --release<CR>
 endif
 
-autocmd vimrc FileType gitcommit,mail,markdown,tex setlocal spell
+autocmd vimrc FileType mail,markdown,tex setlocal spell
 autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail setlocal formatoptions-=tc
 
 Plug 'lervag/vimtex'
