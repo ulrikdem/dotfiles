@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -44,14 +45,15 @@ int main(int argc, char **argv) {
         std::string_view filename(line.data() + filename_prefix, i - (filename_prefix + filename_suffix));
         std::string_view line_no(line.data() + i + line_no_prefix, j - i - (line_no_prefix + line_no_suffix));
         std::string_view column_no(line.data() + j + column_no_prefix, k - j - (column_no_prefix + column_no_suffix));
-        std::string_view text(line.data() + k + text_prefix, line.size() - k - (text_prefix + text_suffix));
+        std::span text_span(line.data() + k + text_prefix, line.size() - k - (text_prefix + text_suffix));
+        std::string_view text(text_span.data(), text_span.size());
 
-        for (auto i = k + text_prefix; i < line.size() - text_suffix; ++i)
-            line[i] = line[i] == 0x1b ? 0 : line[i];
+        for (auto &c : text_span)
+            c = c == 0x1b ? 0 : c;
         std::cout << filename << '\0' << line_no << '\0' << column_no << '\0' << text << '\0';
 
-        for (auto i = k + text_prefix; i < line.size() - text_suffix; ++i)
-            line[i] = line[i] == '\t' ? ' ' : line[i] ? line[i] : 0x1b;
+        for (auto &c : text_span)
+            c = c == '\t' ? ' ' : c ? c : 0x1b;
         text.remove_prefix(std::min(text.find_first_not_of(' '), text.size()));
         if (!text.empty())
             text.remove_suffix(text.size() - text.find_last_not_of(' ') - 1);

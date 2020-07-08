@@ -8,7 +8,7 @@ clean:
 .PHONY: clean
 
 ../bin/%: %.cpp
-	$(CXX) -std=c++17 -O3 -o $@ $<
+	$(CXX) -std=c++20 -O3 -o $@ $<
 
 ../bin/%: %.c
 	$(CC) -o $@ $<
