@@ -14,9 +14,6 @@ echo "Xft.dpi: $((96*GDK_SCALE))" | xrdb -merge
 xrandr --listproviders | grep -q NVIDIA && gpu_icon=' ﯎ <fc=gray25>│</fc>'
 xprop -root -f GPU_ICON 8u -set GPU_ICON "$gpu_icon"
 
-setxkbmap -option ctrl:nocaps -option shift:both_capslock
-numlockx
-
 xset s off
 xset dpms 0 0 0
 xss-lock -- sh -c 'xset dpms 5; i3lock -nec 000000 && killall -q i3lock; xset dpms 0' &
