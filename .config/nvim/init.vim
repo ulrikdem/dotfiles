@@ -385,7 +385,6 @@ autocmd vimrc User Plug_suda_vim command! WriteSudo write suda://% | set noreado
 
 " Terminal {{{1
 
-autocmd vimrc TermOpen * execute 'file' fnameescape('[Terminal '.jobpid(&channel).']')
 autocmd vimrc TermOpen * setlocal matchpairs= nocursorline
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
@@ -1181,7 +1180,7 @@ if executable('gdb')
             \ filereadable(expand('~/.config/gdb-dashboard'))
             enew
             let l:dashboard_buf = bufnr()
-            let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null')).pty
+            let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null # /dashboard')).pty
             call TermDebugSendCommand('source ~/.config/gdb-dashboard')
             call TermDebugSendCommand('dashboard -output '.l:pty)
             call extend(l:maps, [
@@ -1217,7 +1216,7 @@ if executable('gdb')
 
         Program
         set nomodified
-        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null', {
+        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null # /io', {
             \ 'on_stdout': function("\<SID>OnDebugStdout"),
             \ 'on_exit': funcref("\<SID>OnDebugExit"),
         \ })).pty
