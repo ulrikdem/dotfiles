@@ -1,10 +1,9 @@
 Config
     { fgColor = "gray50"
     , additionalFonts = ["xft:Hack Nerd Font Mono:size=11"]
-    , template = "%GPU_ICON%%UnsafeStdinReader%}{%wlan0wi%%dynnetwork%%ip%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    , template = "%UnsafeStdinReader%}{%wlan0wi%%dynnetwork%%ip%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =
-        [ Run XPropertyLog "GPU_ICON"
-        , Run UnsafeStdinReader
+        [ Run UnsafeStdinReader
         , Run Wireless "wlan0"
             [ "-t", "<ssid> 直 <quality>% <fc=gray25>│<raw=1: /></fc>"
             , "-x", "<fc=black><raw=26:"
