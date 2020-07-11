@@ -793,26 +793,6 @@ function! s:UpdateCocColors() abort
     highlight link CocHoverRange NONE
 endfunction
 
-call add(g:lightline.active.left[2], 'function')
-let g:lightline.component.function = '%{get(b:, "coc_current_function", "")}'
-let g:lightline.component_visible_condition.function = 'get(b:, "coc_current_function", "") != ""'
-
-call insert(g:lightline.active.right[2], 'errors')
-call insert(g:lightline.active.right[2], 'warnings')
-let g:lightline.component_type.errors = 'error'
-let g:lightline.component_type.warnings = 'warning'
-let g:lightline.component_expand.errors = 'CocErrorCount'
-let g:lightline.component_expand.warnings = 'CocWarningCount'
-function! CocErrorCount() abort
-    let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
-    return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
-endfunction
-function! CocWarningCount() abort
-    let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
-    return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
-endfunction
-autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
-
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
     \ call s:FzfFromQuickfix([], g:coc_jump_locations)
@@ -961,6 +941,29 @@ function! s:FzfFromWorkspaceSymbols() abort
         return l:results
     endfunction
 endfunction
+
+call add(g:lightline.active.left[2], 'lsp_symbol')
+let g:lightline.component_function.lsp_symbol = 'CurrentLspSymbol'
+function! CurrentLspSymbol() abort
+    let l:symbol = get(b:, 'coc_current_function', '')
+    return empty(l:symbol) ? ' ' : l:symbol
+endfunction
+
+call insert(g:lightline.active.right[2], 'errors')
+call insert(g:lightline.active.right[2], 'warnings')
+let g:lightline.component_type.errors = 'error'
+let g:lightline.component_type.warnings = 'warning'
+let g:lightline.component_expand.errors = 'LspErrorCount'
+let g:lightline.component_expand.warnings = 'LspWarningCount'
+function! LspErrorCount() abort
+    let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
+    return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
+endfunction
+function! LspWarningCount() abort
+    let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
+    return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
+endfunction
+autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
 
 " Language server {{{1
 
