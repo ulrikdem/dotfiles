@@ -87,7 +87,7 @@ getFontHeight = do
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=13'"
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=11'"
 
 barLogHook = withWindowSet $ \s -> do
     icons <- fmap M.fromList $ mapM workspaceIcon $ W.workspaces s
