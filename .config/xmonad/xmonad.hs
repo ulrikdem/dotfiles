@@ -107,7 +107,7 @@ pp icons color = namedScratchpadFilterOutWorkspacePP def
     }
     where
         wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1" $ pad
-            $ fromMaybe w $ fmap (wrap "<fn=1>" "</fn>") $ M.findWithDefault Nothing w icons
+            $ fromMaybe w $ wrap "<fn=1>" "</fn>" <$> M.findWithDefault Nothing w icons
 
 workspaceIcon w = do
     icons <- case W.stack w of
@@ -247,10 +247,10 @@ data CollapseDeco a = CollapseDeco
 
 instance DecorationStyle CollapseDeco Window where
     decorate _ _ height _ stack _ (win, rect) =
-        fmap (bool Nothing (Just rect) . (&& rect_height rect <= height)) $ isCollapsed stack win
+        bool Nothing (Just rect) . (&& rect_height rect <= height) <$> isCollapsed stack win
     shrink _ _ = id
 
-isCollapsed stack win = fmap (&& win /= W.focus stack) $ hasTag "collapsible" win
+isCollapsed stack win = (&& win /= W.focus stack) <$> hasTag "collapsible" win
 
 data Column = Column
     { limit :: Int
@@ -273,7 +273,7 @@ instance LayoutClass CustomLayout Window where
         let (cols, collapsedHeight) = case layout of
                 CustomLayout c _ h -> (W.integrate c, h)
                 EmptyLayout c h -> (c, h)
-            cumLimits = scanl (+) 0 $ map limit $ init cols
+            cumLimits = scanl (+) 0 $ limit <$> init cols
 
             split rect weights = split' rect weights where
                 split' rect@Rectangle {rect_height = height} (Just weight : weights) = setHeight rect weights $ round
@@ -293,7 +293,7 @@ instance LayoutClass CustomLayout Window where
                     winWeights' = M.map Just $ M.mapKeys (wins !!) $ M.takeWhileAntitone (< length wins) $ winWeights col
 
             colWins = takeWhile (not . null) $ zipWith take (map limit cols) $ zipWith drop cumLimits $ repeat wins
-            colRects = map mirrorRect $ split (mirrorRect rect) $ map (Just . colWeight) $ take (length colWins) cols
+            colRects = map mirrorRect $ split (mirrorRect rect) $ Just . colWeight <$> take (length colWins) cols
             winRects = concat $ zipWith3 layoutCol cols colRects colWins
 
             colIndex = pred $ fromMaybe (length cols) $ findIndex (> length (W.up stack)) cumLimits
