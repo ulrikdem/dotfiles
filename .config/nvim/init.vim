@@ -527,12 +527,6 @@ function! s:FzfFromQuickfix(options, items) abort
             if !get(l:item, 'valid', 1)
                 continue
             endif
-            if has_key(l:item, 'range')
-                let l:start = l:item.range.start.character
-                let l:end = l:item.range.end.character
-                let l:item.text = (l:start ? l:item.text[:(l:start - 1)] : '').s:match_start.
-                    \ (l:item.text[(l:start):(l:end - 1)]).s:match_end.(l:item.text[(l:end):])
-            endif
             let l:left = trim(substitute(l:item.text, "\t", ' ', 'g'), ' ')
             if !empty(get(l:item, 'type', ''))
                 let l:left = s:match_start.'['.(l:item.type).'] '.s:match_end.l:left
@@ -793,10 +787,6 @@ function! s:UpdateCocColors() abort
     highlight link CocHoverRange NONE
 endfunction
 
-autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
-autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
-    \ call s:FzfFromQuickfix([], g:coc_jump_locations)
-
 autocmd vimrc User Plug_coc_nvim call s:InitLsp()
 function! s:InitLsp() abort
     let s:start_completion = coc#refresh()
@@ -901,6 +891,17 @@ function! ChooseCodeAction(items, callback) abort
     endif
 endfunction
 
+autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
+autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
+    \ call s:FzfFromQuickfix([], map(g:coc_jump_locations, function("\<SID>HighlightRange")))
+function! s:HighlightRange(index, item) abort
+    let l:start = v:lua.vim.str_byteindex(a:item.text, a:item.range.start.character)
+    let l:end = v:lua.vim.str_byteindex(a:item.text, a:item.range.end.character)
+    let a:item.text = (l:start ? a:item.text[:(l:start - 1)] : '').s:match_start.
+        \ (a:item.text[(l:start):(l:end - 1)]).s:match_end.(a:item.text[(l:end):])
+    return a:item
+endfunction
+
 function! s:SymbolToQuickfix(symbol) abort
     let l:line = getbufline(get(a:symbol, 'filename', '%'), a:symbol.lnum)
     return {
@@ -908,11 +909,7 @@ function! s:SymbolToQuickfix(symbol) abort
         \ 'lnum': a:symbol.lnum,
         \ 'col': empty(l:line) ? a:symbol.col :
             \ v:lua.vim.str_byteindex(l:line[0], a:symbol.col - 1) + 1,
-        \ 'text': (a:symbol.text).' ['.(a:symbol.kind).']',
-        \ 'range': {
-            \ 'start': {'character': strwidth(a:symbol.text) + 1},
-            \ 'end': {'character': strwidth(a:symbol.text) + strwidth(a:symbol.kind) + 3},
-        \ },
+        \ 'text': (a:symbol.text).s:match_start.' ['.(a:symbol.kind).']'.s:match_end,
     \ }
 endfunction
 
