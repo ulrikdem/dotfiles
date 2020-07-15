@@ -9,7 +9,6 @@ import Data.Char
 import Data.List
 import qualified Data.Map.Strict as M
 import Data.Maybe
-import Graphics.X11.ExtraTypes.XF86
 import Graphics.X11.Xft
 import IconRules
 import XMonad hiding ((|||))
@@ -37,23 +36,18 @@ import XMonad.Prompt.Shell
 import XMonad.Prompt.Window
 import qualified XMonad.StackSet as W
 import XMonad.Util.Cursor
-import XMonad.Util.CustomKeys
+import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Scratchpad
 
 -- Main {{{1
 
-main = getFontHeight >>= \fontHeight -> xmonad $ ewmh $ docks def
-    { startupHook = barStartupHook <+> setDefaultCursor xC_left_ptr
+main = getFontHeight >>= \fontHeight -> xmonad $ ewmh $ docks $ def
+    { startupHook = setDefaultCursor xC_left_ptr >> barStartupHook
     , handleEventHook = barEventHook
-    , logHook = barLogHook <+> withWindowSet (\s -> mapM_ (\w ->
+    , logHook = barLogHook >> withWindowSet (\s -> mapM_ (\w ->
         (if M.member w $ W.floating s then addTag else delTag) "floating" w) $ W.allWindows s)
-    , normalBorderColor = "black"
-    , focusedBorderColor = "gray50"
-    , modMask = mod4Mask
-    , keys = customKeys delKeys $ insKeys fontHeight
-    , terminal = "termite"
     , manageHook = let r = W.RationalRect 0 (2 / 3) 1 (1 / 3) in composeAll
         [ scratchpadManageHook r
         , appName =? "xmonad-custom-float" --> customFloating r
@@ -63,7 +57,13 @@ main = getFontHeight >>= \fontHeight -> xmonad $ ewmh $ docks def
     , layoutHook = named "tiled" (avoidStruts $ layout fontHeight)
         ||| named "full" (avoidStruts $ noBorders StateFull)
         ||| named "fullscreen" (noBorders StateFull)
-    }
+    , normalBorderColor = "black"
+    , focusedBorderColor = "gray50"
+    , terminal = term
+    , modMask = mod4Mask
+    } `additionalKeysP` extraKeys fontHeight `removeKeysP` removedKeys
+
+term = "termite"
 
 -- Theme {{{1
 
@@ -117,71 +117,66 @@ workspaceIcon w = do
 
 -- Keys {{{1
 
-delKeys XConfig {modMask = mod} =
-    [ (mod, xK_question)
-    , (mod .|. shiftMask, xK_slash)
-    , (mod .|. shiftMask, xK_Tab)
-    ]
+removedKeys = ["M-?", "M-S-/", "M-S-<Tab>"]
 
-insKeys fontHeight XConfig {modMask = mod, terminal = term} =
-    [ ((mod, xK_g), windowPrompt (windowPromptConf fontHeight) Goto allWindows)
-    , ((mod .|. shiftMask, xK_g), windowPrompt (windowPromptConf fontHeight) Bring allWindows)
+extraKeys fontHeight =
+    [ ("M-g", windowPrompt (windowPromptConf fontHeight) Goto allWindows)
+    , ("M-S-g", windowPrompt (windowPromptConf fontHeight) Bring allWindows)
 
-    , ((mod, xK_p), shellPrompt . promptConf fontHeight =<< initMatches)
-    , ((mod .|. shiftMask, xK_p), termPrompt term . promptConf fontHeight =<< initMatches)
+    , ("M-p", shellPrompt . promptConf fontHeight =<< initMatches)
+    , ("M-S-p", termPrompt term . promptConf fontHeight =<< initMatches)
 
-    , ((mod, xK_s), scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
-    , ((mod, xK_b), spawn "luakit")
-    , ((mod .|. shiftMask, xK_b), spawn "luakit --private")
-    , ((mod, xK_z), spawn "lock")
+    , ("M-s", scratchpadSpawnActionCustom $ term ++ " --name scratchpad")
+    , ("M-b", spawn "luakit")
+    , ("M-S-b", spawn "luakit --private")
+    , ("M-z", spawn "lock")
 
-    , ((0, xF86XK_AudioMute), spawn "amixer set Master toggle")
-    , ((0, xF86XK_AudioLowerVolume), spawn "amixer set Master 5%-")
-    , ((0, xF86XK_AudioRaiseVolume), spawn "amixer set Master 5%+")
-    , ((0, xF86XK_MonBrightnessDown), spawn "light -U 25")
-    , ((0, xF86XK_MonBrightnessUp), spawn "light -A 25")
+    , ("<XF86AudioMute>", spawn "amixer set Master toggle")
+    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%-")
+    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+")
+    , ("<XF86MonBrightnessDown>", spawn "light -U 25")
+    , ("<XF86MonBrightnessUp>", spawn "light -A 25")
 
-    , ((mod .|. shiftMask, xK_m), placeFocused $ fixed (0.5, 0.5))
-    , ((mod, xK_Return), promote)
-    , ((mod .|. controlMask, xK_j), rotAllDown)
-    , ((mod .|. controlMask, xK_k), rotAllUp)
-    , ((mod, xK_h), sendMessage $ Go L)
-    , ((mod, xK_l), sendMessage $ Go R)
-    , ((mod .|. shiftMask, xK_h), sendMessage $ Apply (windows . W.modify' . moveLeft) L)
-    , ((mod .|. shiftMask, xK_l), sendMessage $ Apply (windows . W.modify' . moveRight) R)
+    , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
+    , ("M-<Return>", promote)
+    , ("M-C-j", rotAllDown)
+    , ("M-C-k", rotAllUp)
+    , ("M-h", sendMessage $ Go L)
+    , ("M-l", sendMessage $ Go R)
+    , ("M-S-h", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
+    , ("M-S-l", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
-    , ((mod, xK_a), sendMessage AddColumn)
-    , ((mod, xK_d), sendMessage DeleteColumn)
-    , ((mod, xK_comma), sendMessage $ ModifyLimit succ)
-    , ((mod, xK_period), sendMessage $ ModifyLimit pred)
-    , ((mod, xK_minus), sendMessage $ ModifyColWeight (/ weightFactor))
-    , ((mod, xK_equal), sendMessage $ ModifyColWeight (* weightFactor))
-    , ((mod, xK_BackSpace), sendMessage $ ModifyColWeight $ const 1)
-    , ((mod .|. shiftMask, xK_minus), sendMessage $ ModifyWinWeight (/ weightFactor))
-    , ((mod .|. shiftMask, xK_equal), sendMessage $ ModifyWinWeight (* weightFactor))
-    , ((mod .|. shiftMask, xK_BackSpace), sendMessage $ ModifyWinWeight $ const 1)
-    , ((mod, xK_c), withFocused (\w -> ($ w) . ($ "collapsible") . bool addTag delTag =<< hasTag "collapsible" w))
+    , ("M-a", sendMessage AddColumn)
+    , ("M-d", sendMessage DeleteColumn)
+    , ("M-,", sendMessage $ ModifyLimit succ)
+    , ("M-.", sendMessage $ ModifyLimit pred)
+    , ("M--", sendMessage $ ModifyColWeight (/ weightFactor))
+    , ("M-=", sendMessage $ ModifyColWeight (* weightFactor))
+    , ("M-<Backspace>", sendMessage $ ModifyColWeight $ const 1)
+    , ("M-S--", sendMessage $ ModifyWinWeight (/ weightFactor))
+    , ("M-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
+    , ("M-S-<Backspace>", sendMessage $ ModifyWinWeight $ const 1)
+    , ("M-c", withFocused (\w -> ($ w) . ($ "collapsible") . bool addTag delTag =<< hasTag "collapsible" w))
 
-    , ((mod, xK_space), sendMessage $ JumpToLayout "tiled")
-    , ((mod, xK_f), sendMessage $ JumpToLayout "full")
-    , ((mod .|. shiftMask, xK_f), sendMessage $ JumpToLayout "fullscreen")
+    , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
+    , ("M-f", sendMessage $ JumpToLayout "full")
+    , ("M-S-f", sendMessage $ JumpToLayout "fullscreen")
 
-    , ((mod, xK_Tab), toggleWS)
-    , ((mod .|. shiftMask, xK_comma), moveTo Prev cycleWSType)
-    , ((mod .|. shiftMask, xK_period), moveTo Next cycleWSType)
+    , ("M-<Tab>", toggleWS)
+    , ("M-S-,", moveTo Prev cycleWSType)
+    , ("M-S-.", moveTo Next cycleWSType)
     ] ++
-    [ ((mod .|. controlMask, k), windows $ swapWithCurrent w)
-    | (k, w) <- zip [xK_1..] $ workspaces def
+    [ ("M-C-" ++ [k], windows $ swapWithCurrent w)
+    | (k, w) <- zip ['1'..] $ workspaces def
     ] ++
 
-    [ ((mod .|. m, k), f i)
+    [ ("M-" ++ m ++ [k], f i)
     | (m, f) <-
-        [ (0, viewScreen def)
-        , (shiftMask, sendToScreen def)
-        , (controlMask,
-            (flip whenJust ((flip whenJust (windows . W.greedyView) =<<) . screenWorkspace) =<<) . getScreen def)
+        [ ("", viewScreen def)
+        , ("S-", sendToScreen def)
+        , ("C-", (flip whenJust ((flip whenJust (windows . W.greedyView) =<<) . screenWorkspace) =<<) . getScreen def)
         ]
-    , (k, i) <- zip [xK_w, xK_e, xK_r] [0..]
+    , (k, i) <- zip "wer" [0..]
     ]
 
 moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
