@@ -385,6 +385,9 @@ autocmd vimrc User Plug_suda_vim command! WriteSudo write suda://% | set noreado
 
 " Terminal {{{1
 
+autocmd vimrc BufEnter * let &titlestring = (&buftype ==# 'terminal' ? 'terminal' : '%F').' - nvim'
+autocmd vimrc TermOpen * set titlestring=terminal\ -\ nvim
+
 autocmd vimrc TermOpen * setlocal matchpairs= nocursorline
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
