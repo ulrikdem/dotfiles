@@ -461,10 +461,7 @@ webview.add_signal("init", function(view)
     end)
 
     view:add_signal("navigation-request", function(_, uri)
-        if uri:match("^https://[^/]+%.m%.wikipedia%.org/") then
-            view.uri = uri:gsub("^https://([^/]+)%.m%.wikipedia%.org/", "https://%1.wikipedia.org/")
-            return false
-        elseif uri:match("^magnet:") then
+        if uri:match("^magnet:") then
             add_torrent(uri, webview.window(view))
             return false
         elseif uri:match("^mailto:") then
