@@ -1010,14 +1010,6 @@ if executable('ccls')
         \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '>' ? '<C-Y>' : '>'
 endif
 
-if executable('javascript-typescript-stdio')
-    let g:coc_user_config.languageserver.javascript_typescript = {
-        \ 'command': 'javascript-typescript-stdio',
-        \ 'filetypes': ['javascript', 'typescript'],
-        \ 'rootPatterns': ['package.json'],
-    \ }
-endif
-
 if executable('pyls')
     let g:coc_user_config.languageserver.python = {
         \ 'command': 'pyls',
@@ -1036,6 +1028,15 @@ if executable('rls')
                 \ 'clippy_preference': 'on',
             \ },
         \ },
+    \ }
+endif
+
+if executable('typescript-language-server')
+    let g:coc_user_config.languageserver.typescript = {
+        \ 'command': 'typescript-language-server',
+        \ 'args': ['--stdio'],
+        \ 'filetypes': ['typescript', 'javascript'],
+        \ 'rootPatterns': ['package.json'],
     \ }
 endif
 
