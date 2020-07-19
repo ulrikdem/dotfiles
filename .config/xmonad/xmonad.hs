@@ -170,11 +170,11 @@ extraKeys fontHeight =
     | (k, w) <- zip ['1'..] $ workspaces def
     ] ++
 
-    [ ("M-" ++ m ++ [k], f i)
+    [ (m ++ [k], f i)
     | (m, f) <-
-        [ ("", viewScreen def)
-        , ("S-", sendToScreen def)
-        , ("C-", (flip whenJust ((flip whenJust (windows . W.greedyView) =<<) . screenWorkspace) =<<) . getScreen def)
+        [ ("M-", viewScreen def)
+        , ("M-S-", sendToScreen def)
+        , ("M-C-", (flip whenJust ((flip whenJust (windows . W.greedyView) =<<) . screenWorkspace) =<<) . getScreen def)
         ]
     , (k, i) <- zip "wer" [0..]
     ]
