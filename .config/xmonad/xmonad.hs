@@ -91,23 +91,20 @@ spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme
 
 barLogHook = withWindowSet $ \s -> do
     icons <- fmap M.fromList $ mapM workspaceIcon $ W.workspaces s
-    multiPP (pp icons "darkgreen") (pp icons "gray50")
-
-pp icons color = namedScratchpadFilterOutWorkspacePP def
-    { ppCurrent = xmobarColor "black" color . wrapWorkspace
-    , ppVisible = wrapWorkspace
-    , ppHidden = wrapWorkspace
-    , ppVisibleNoWindows = Just $ xmobarColor "gray25" "" . wrapWorkspace
-    , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
-    , ppTitle = xmobarRaw . shorten 120
-    , ppTitleSanitize = id
-    , ppOrder = \[w, l, t] -> [w, t]
-    , ppSep = "<fc=gray25>│</fc> "
-    , ppWsSep = ""
-    }
-    where
-        wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1" $ pad
+    let wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1" $ pad
             $ fromMaybe w $ wrap "<fn=1>" "</fn>" <$> M.findWithDefault Nothing w icons
+        pp color = namedScratchpadFilterOutWorkspacePP def
+            { ppCurrent = xmobarColor "black" color . wrapWorkspace
+            , ppVisible = xmobarColor "black" "gray25" . wrapWorkspace
+            , ppHidden = wrapWorkspace
+            , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
+            , ppTitle = xmobarRaw . shorten 120
+            , ppTitleSanitize = id
+            , ppOrder = \[w, l, t] -> [w, t]
+            , ppSep = "<fc=gray25>│</fc> "
+            , ppWsSep = ""
+            }
+    multiPP (pp "darkgreen") (pp "gray50")
 
 workspaceIcon w = do
     icons <- case W.stack w of
