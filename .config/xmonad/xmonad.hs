@@ -274,7 +274,7 @@ instance LayoutClass CustomLayout Window where
                 split' rect@Rectangle {rect_height = height} (Just weight : weights) = setHeight rect weights $ round
                     $ fromIntegral (height - collapsedHeight' * fromIntegral (length $ filter isNothing weights))
                         * weight / (weight + sum (catMaybes weights))
-                split' rect (Nothing : weights) = setHeight rect weights collapsedHeight
+                split' rect (Nothing : weights) = setHeight rect weights collapsedHeight'
                 split' _ [] = []
                 setHeight (Rectangle x y w h) weights h' =
                     Rectangle x y w h' : split' (Rectangle x (y + fromIntegral h') w (h - h')) weights
