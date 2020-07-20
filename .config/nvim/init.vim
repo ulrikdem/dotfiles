@@ -782,7 +782,7 @@ autocmd vimrc User CocNvimInit call coc#config('', {'coc': {}})
 autocmd vimrc ColorScheme * call s:UpdateCocColors()
 function! s:UpdateCocColors() abort
     for l:level in ['Error', 'Warning', 'Info', 'Hint']
-        call s:Highlight('Coc'.l:level.'VirtualText', {'fg': 'Coc'.l:level.'Sign', 'attr': 'italic'})
+        call s:Highlight('Coc'.l:level.'VirtualText', {'fg': 'Coc'.l:level.'Float', 'attr': 'italic'})
     endfor
     highlight Bold cterm=bold gui=bold
     highlight link CocHighlightText Bold
