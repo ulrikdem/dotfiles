@@ -210,11 +210,54 @@ function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
 end
 
-local function fix_scroll_widget_error(view)
+-- Scrolling {{{1
+
+local function patch_webview_scroll(view)
+    local scroll_targets = {x = {}, y = {}}
+
     local index = getmetatable(view).__index
     getmetatable(view).__index = function(view, key)
         local value = index(view, key)
-        if key == "eval_js" then
+
+        if key == "scroll" then
+            return setmetatable({}, {
+                __index = function(_, key)
+                    return scroll_targets[key] and scroll_targets[key][view] or value[key]
+                end,
+                __newindex = function(_, axis, target)
+                    target = math.min(math.max(target, 0), value[axis.."max"])
+                    local targets = scroll_targets[axis]
+                    if targets[view] then
+                        targets[view] = target
+                        return
+                    end
+                    targets[view] = target
+                    local position = value[axis]
+                    local velocity = 0
+                    local scroll_timer = timer{interval = 16}
+                    local delta_time = scroll_timer.interval / 1000
+                    local undamped_freq = 30
+                    local decay = math.exp(-undamped_freq * delta_time)
+                    scroll_timer:add_signal("timeout", function()
+                        local target = targets[view]
+                        local rel_position = position - target
+                        local temp = (undamped_freq * rel_position + velocity) * delta_time
+                        velocity = (velocity - undamped_freq * temp) * decay
+                        rel_position = (rel_position + temp) * decay
+                        position = target + rel_position
+                        local success = pcall(function()
+                            value[axis] = math.floor(position + 0.5)
+                        end)
+                        if not success or math.abs(rel_position) < 0.5 then
+                            targets[view] = nil
+                            scroll_timer:stop()
+                        end
+                    end)
+                    scroll_timer:start()
+                end,
+            })
+
+        elseif key == "eval_js" then
             return function(view, js, opts)
                 if opts.callback then
                     local cb = opts.callback
@@ -225,11 +268,12 @@ local function fix_scroll_widget_error(view)
                 value(view, js, opts)
             end
         end
+
         return value
     end
-    webview.remove_signal("init", fix_scroll_widget_error)
+    webview.remove_signal("init", patch_webview_scroll)
 end
-webview.add_signal("init", fix_scroll_widget_error)
+webview.add_signal("init", patch_webview_scroll)
 
 -- Private mode {{{1
 
