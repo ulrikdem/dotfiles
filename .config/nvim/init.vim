@@ -117,15 +117,26 @@ function! s:ShowRelativeNumber() abort
     return type(l:char) == v:t_number ? nr2char(l:char) : l:char
 endfunction
 
-nnoremap <M-[><Esc> <Nop>
-nnoremap <M-]><Esc> <Nop>
-nmap <M-[><M-]> <M-]>
-nmap <M-]><M-[> <M-[>
-nmap <expr> <M-[> <SID>RepeatBracket('[', '<M-[>')
-nmap <expr> <M-]> <SID>RepeatBracket(']', '<M-]>')
-function! s:RepeatBracket(bracket, map) abort
+nmap <expr> <M-[> <SID>StartBracketRepeat('[')
+nmap <expr> <M-]> <SID>StartBracketRepeat(']')
+function! s:StartBracketRepeat(bracket) abort
+    let g:fake_mode = a:bracket.'-REPEAT'
+    redrawstatus
+    return a:bracket."\<Char-0xA0>"
+endfunction
+
+nnoremap [<Char-0xA0><Esc> <Cmd>unlet g:fake_mode<CR>
+nnoremap ]<Char-0xA0><Esc> <Cmd>unlet g:fake_mode<CR>
+nmap <expr> [<Char-0xA0> <SID>RepeatBracket('[', '<M-[>')
+nmap <expr> ]<Char-0xA0> <SID>RepeatBracket(']', '<M-]>')
+function! s:RepeatBracket(bracket, restart) abort
+    unlet g:fake_mode
     let l:char = getchar()
-    return a:bracket.(type(l:char) == v:t_number ? nr2char(l:char) : l:char).'zz'.a:map
+    let l:char = type(l:char) == v:t_number ? nr2char(l:char) : l:char
+    if l:char == "\<M-[>" || l:char == "\<M-]>"
+        return l:char
+    endif
+    return a:bracket.l:char.'zz'.a:restart
 endfunction
 
 " Formatting {{{1
@@ -254,7 +265,11 @@ let g:lightline = {
 \ }
 
 function! StatusLineMode() abort
-    return s:NarrowWindow() ? lightline#mode()[0] : lightline#mode()
+    if exists('g:fake_mode')
+        call lightline#link('c')
+    endif
+    let l:mode = get(g:, 'fake_mode', lightline#mode())
+    return s:NarrowWindow() ? l:mode[0] : l:mode
 endfunction
 
 function! StatusLineFileFormat() abort
