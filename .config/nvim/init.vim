@@ -987,42 +987,43 @@ let g:coc_user_config.languageserver = {}
 if executable('ccls')
     let g:coc_user_config.languageserver.c = {
         \ 'command': 'ccls',
-        \ 'filetypes': ['c'],
+        \ 'filetypes': ['c', 'cpp'],
         \ 'rootPatterns': ['compile_commands.json', '.ccls'],
         \ 'initializationOptions': {
-            \ 'cache': {
-                \ 'directory': '/tmp/ccls',
-            \ },
-            \ 'clang': {
-                \ 'extraArgs': ['-std=c17', '-Wall', '-Wextra', '-Wconversion'],
-            \ },
             \ 'completion': {
                 \ 'detailedLabel': v:false,
             \ },
         \ },
     \ }
 
-    let g:coc_user_config.languageserver.cpp = {
-        \ 'command': 'ccls',
-        \ 'filetypes': ['cpp'],
-        \ 'rootPatterns': ['compile_commands.json', '.ccls'],
-        \ 'initializationOptions': {
+    autocmd vimrc User Plug_coc_nvim autocmd vimrc FileType c,cpp call s:InitCclsBuffer()
+    function! s:InitCclsBuffer() abort
+        inoremap <buffer><expr> "
+            \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '"' ? '<C-Y>' : '"'
+        inoremap <buffer><expr> >
+            \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '>' ? '<C-Y>' : '>'
+
+        if exists('s:ccls_configured')
+            return
+        endif
+        let s:ccls_configured = 1
+        for l:pattern in g:coc_user_config.languageserver.c.rootPatterns
+            if !empty(findfile(l:pattern, expand('%:p').';'))
+                return
+            endif
+        endfor
+        call coc#config('languageserver.c.initializationOptions', {
             \ 'cache': {
-                \ 'directory': '/tmp/ccls',
+                \ 'directory': '',
             \ },
             \ 'clang': {
-                \ 'extraArgs': ['-std=c++20', '-Wall', '-Wextra', '-Wconversion', '-Wno-sign-conversion'],
+                \ 'extraArgs': [
+                    \ &filetype ==# 'c' ? '-std=c17' : '-std=c++20',
+                    \ '-Wall', '-Wextra', '-Wconversion', '-Wno-sign-conversion',
+                \ ],
             \ },
-            \ 'completion': {
-                \ 'detailedLabel': v:false,
-            \ },
-        \ },
-    \ }
-
-    autocmd vimrc FileType c,cpp inoremap <expr> "
-        \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '"' ? '<C-Y>' : '"'
-    autocmd vimrc FileType c,cpp inoremap <expr> >
-        \ pumvisible() && col('.') > 1 && getline('.')[col('.') - 2] == '>' ? '<C-Y>' : '>'
+        \ })
+    endfunction
 endif
 
 if executable('pyls')
