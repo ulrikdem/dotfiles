@@ -104,7 +104,7 @@ barLogHook = withWindowSet $ \s -> do
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
-    multiPP (pp "darkgreen") (pp "gray50")
+    multiPP (pp "green4") (pp "gray50")
 
 workspaceIcon w = do
     icons <- case W.stack w of
