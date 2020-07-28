@@ -135,6 +135,8 @@ function! s:RepeatBracket(bracket, restart) abort
     let l:char = type(l:char) == v:t_number ? nr2char(l:char) : l:char
     if l:char == "\<M-[>" || l:char == "\<M-]>"
         return l:char
+    elseif l:char =~ '^\d$'
+        return l:char.a:restart
     endif
     return a:bracket.l:char.'zz'.a:restart
 endfunction
