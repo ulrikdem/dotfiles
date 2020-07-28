@@ -1,0 +1,59 @@
+--- /usr/share/luakit/lib/completion.lua
++++ completion_patched.lua
+@@ -30,7 +30,7 @@
+ --- Return to command mode with original text and with original cursor position.
+ function _M.exit_completion(w)
+     local state = data[w]
+-    w:enter_cmd(state.orig_text)
++    w:enter_cmd(state.orig_text, { pos = state.orig_pos })
+ end
+ 
+ local parse_completion_format = function (fmt)
+@@ -45,8 +45,9 @@
+ end
+ 
+ local completers = {}
++_M.completers = completers
+ 
+-local function parse(buf)
++local function parse(buf, w)
+     local function match_step (state, matches)
+         local new_states = {}
+ 
+@@ -65,7 +66,7 @@
+                 end
+             elseif nup.grp then -- completion group name
+                 local cgroup = assert(completers[nup.grp], "No completion group '".. nup.grp .. "'")
+-                local cresults = assert(cgroup.func(s.buf))
++                local cresults = assert(cgroup.func(s.buf, w))
+ 
+                 for _, cr in ipairs(cresults) do
+                     local crf = type(cr) == "table" and cr.format or cr
+@@ -108,8 +109,8 @@
+     return matches
+ end
+ 
+-local function complete(buf)
+-    local matches, rows = parse(buf).partial, {}
++local function complete(buf, w)
++    local matches, rows = parse(buf, w).partial, {}
+     local pat2lit = function (p) return p == "%s+" and " " or p end
+     local prev_grp
+ 
+@@ -150,7 +151,7 @@
+     -- Update left and right strings
+     state.text, state.pos = text, pos
+ 
+-    local rows = complete(text)
++    local rows = complete(text, w)
+ 
+     if rows[2] then
+         -- Prevent callbacks triggering recursive updates.
+@@ -203,7 +204,6 @@
+         _M.update_completions(w)
+     end,
+ 
+-    changed = input_change_cb,
+     move_cursor = input_change_cb,
+ 
+     leave = function (w)

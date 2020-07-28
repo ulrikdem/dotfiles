@@ -22,7 +22,6 @@ local adblock = require("adblock")
 local adblock_chrome = require("adblock_chrome")
 local binds_chrome = require("binds_chrome")
 local cmdhist = require("cmdhist")
-local completion = require("completion")
 local downloads = require("downloads")
 local downloads_chrome = require("downloads_chrome")
 local editor = require("editor")
@@ -52,6 +51,14 @@ local view_source = require("view_source")
 local webinspector = require("webinspector")
 local webview = require("webview")
 local window = require("window")
+
+if not os.exists(luakit.config_dir.."/completion_patched.lua") then
+    luakit.spawn_sync(string.format("patch -o %q %q %q",
+        luakit.config_dir.."/completion_patched.lua",
+        luakit.install_paths.install_dir.."/lib/completion.lua",
+        luakit.config_dir.."/completion.patch"))
+end
+local completion = require("completion_patched")
 
 pcall(function()
     require("clear_data")
@@ -113,6 +120,7 @@ modes.add_binds("normal", {
     {"gS", "Change protocol to HTTP.", function(win)
         win.view.uri = win.view.uri:gsub("^https:", "http:")
     end},
+
     {"<control-shift-c>", "Copy the selected text.", function()
         luakit.selection.clipboard = luakit.selection.primary
     end},
@@ -139,28 +147,125 @@ cmdhist.history_next = "<control-n>"
 
 modes.get_mode("command").reset_on_navigation = false
 
-local detach_target = nil
-modes.add_cmds{
-    {":tabde[tach]", "Move the current tab into a new window.", function(win)
-        local close = win.tabs:count() == 1
-        settings.window.close_with_last_tab = false
-        if detach_target and detach_target.private == win.private then
-            view = win.view
-            win:detach_tab(view)
-            detach_target:attach_tab(view)
-            detach_target = nil
+-- Tabs {{{1
+
+modes.add_binds("normal", {
+    {"b", "Choose and switch to a tab.", function(win)
+        win:enter_cmd(":tabswitch ")
+        win:set_mode("completion")
+        win.menu:move_up()
+    end},
+})
+
+local function match_tabs(query, win, prefix, results)
+    query = query or ""
+    local index = tonumber(query:match("^%d+$"))
+    local words = lousy.util.string.split(query)
+
+    prefix = prefix or ""
+    results = results or {}
+    for i, view in ipairs(win.tabs.children) do
+        local id = prefix..i
+        local title = id..": "..(view.title or i)
+
+        local match = true
+        if index then
+            match = i == index
         else
-            window.new{win.view}
+            local text = (title.." "..view.uri):lower()
+            for _, word in ipairs(words) do
+                if not text:find(word:lower(), 1, true) then
+                    match = false
+                    break
+                end
+            end
         end
-        settings.window.close_with_last_tab = true
-        if close then
-            win:close_win()
+
+        if match then
+            table.insert(results, {
+                lousy.util.escape(title), lousy.util.escape(view.uri),
+                format = {{lit = id}}, buf = id,
+                win = win, view = view, index = i,
+            })
         end
-    end},
-    {":taba[ttach]", "Set the current window as the target for the next `:tabdetach`.", function(win)
-        detach_target = win
-    end},
+    end
+    return results
+end
+
+local function match_other_tabs(query, current_win)
+    query = query or ""
+    local win_id, index = query:match("^(%d+)%.?(%d*)$")
+    win_id = tonumber(win_id)
+    query = index and index or query
+
+    local wins = lousy.util.table.values(window.bywidget)
+    table.sort(wins, function(a, b)
+        return a.win.id < b.win.id
+    end)
+
+    local results = {}
+    for _, win in ipairs(wins) do
+        if win ~= current_win and win.private == current_win.private
+                and (not win_id or win.win.id == win_id) then
+            match_tabs(query, win, win.win.id..".", results)
+        end
+    end
+    return results
+end
+
+completion.completers.tab = {
+    header = {"Tab", "URI"},
+    func = match_tabs,
 }
+completion.completers.othertab = {
+    header = {"Tab", "URI"},
+    func = match_other_tabs,
+}
+
+modes.add_cmds{
+    {":tabs[witch]", "Switch to the nth or first matching tab.", {
+        format = "{tab}",
+        func = function(win, opts)
+            local tab = match_tabs(opts.arg, win)[1]
+            if not tab then
+                win:error("No matching tab")
+                return
+            end
+            win:goto_tab(tab.index)
+        end,
+    }},
+
+    {":tabde[tach]", "Move the current tab into a new window.", {
+        func = function(win)
+            if win.tabs:count() > 1 then
+                window.new{win.view}
+            end
+        end,
+    }},
+
+    {":taba[ttach]", "Move a tab into the current window.", {
+        format = "{othertab}",
+        func = function(win, opts)
+            local tab = match_other_tabs(opts.arg, win)[1]
+            if not tab then
+                win:error("No matching tab")
+                return
+            end
+
+            local close = tab.win.tabs:count() == 1
+            settings.window.close_with_last_tab = false
+            tab.win:detach_tab(tab.view)
+            win:attach_tab(tab.view)
+            win:goto_tab(-1)
+            settings.window.close_with_last_tab = true
+            if close then
+                tab.win:close_win()
+            end
+        end,
+    }},
+}
+
+lousy.widget.tab.label_format = "<span foreground='{index_fg}'>{index}</span>: {title}"
 
 -- Widgets {{{1
 
@@ -179,18 +284,22 @@ webview.add_signal("init", function(view)
             if not win then
                 return
             end
+
             local widget = win.sbar.l.layout.children[1]
             if widget.text:match("^<span color=") then
                 return
             end
+
             local scheme = widget.text:match("^%a[%a%d+%-.]*:") or ""
             local color = scheme == "Link:" and theme.scheme_fg
                 or win.view:ssl_trusted() and theme.trust_scheme_fg
                 or (win.view:ssl_trusted() == false or scheme == "http:") and theme.notrust_scheme_fg
                 or theme.scheme_fg
+
             widget.text = string.format("<span color=%q>%s</span>%s",
                 color, scheme, widget.text:sub(#scheme + 1))
         end
+
         for _, signal in ipairs{"property::uri", "switched-page", "link-hover", "link-unhover"} do
             view:add_signal(signal, update_uri)
         end
@@ -203,8 +312,6 @@ end)
 log_chrome.widget_format = "{errors}{warnings}"
 log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
 log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
-
-lousy.widget.tab.label_format = "<span foreground='{index_fg}'>{index}</span>: {title}"
 
 function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
@@ -278,6 +385,7 @@ function window.new(args)
         private = private or arg.private or arg == "--private"
         return arg ~= "--private"
     end)
+
     local function set_private(win)
         if private then
             win.private = true
@@ -287,6 +395,7 @@ function window.new(args)
             win.sbar.r.ebox.bg = theme.private_bg
         end
     end
+
     window.add_signal("init", set_private)
     win = new_window(args)
     window.remove_signal("init", set_private)
@@ -357,10 +466,12 @@ modes.add_binds("normal", {
     {"cc", "Use normal colors in the current tab.", function(win)
         win.view.stylesheets[dark_style] = false
     end},
+
     {"cd", "Use dark colors by inverting light pages.", function(win)
         win.view.stylesheets[dark_style] = true
         check_dark_wm:emit_signal(win.view, "check")
     end},
+
     {"cf", "Force all pages to be inverted.", function(win)
         win.view.stylesheets[dark_style] = true
         check_dark_wm:emit_signal(win.view, "ignore")
@@ -374,6 +485,7 @@ local function play_video(uris, referrer, win)
         win:error("Could not play video")
         return
     end
+
     local uri = table.remove(uris, 1)
     luakit.spawn(string.format("mpv --referrer=%q -- %q", referrer, uri), function(_, status)
         if status ~= 0 then
