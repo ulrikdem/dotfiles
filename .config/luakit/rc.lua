@@ -52,7 +52,9 @@ local webinspector = require("webinspector")
 local webview = require("webview")
 local window = require("window")
 
-if not os.exists(luakit.config_dir.."/completion_patched.lua") then
+local completion_mtime = lfs.attributes(luakit.config_dir.."/completion_patched.lua", "modification")
+if not completion_mtime
+        or completion_mtime < lfs.attributes(luakit.config_dir.."/completion.patch", "modification") then
     luakit.spawn_sync(string.format("patch -o %q %q %q",
         luakit.config_dir.."/completion_patched.lua",
         luakit.install_paths.install_dir.."/lib/completion.lua",
