@@ -153,7 +153,6 @@ modes.add_binds("normal", {
     {"b", "Choose and switch to a tab.", function(win)
         win:enter_cmd(":tabswitch ")
         win:set_mode("completion")
-        win.menu:move_up()
     end},
 })
 

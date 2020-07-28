@@ -49,6 +49,15 @@
  
      if rows[2] then
          -- Prevent callbacks triggering recursive updates.
+@@ -159,7 +160,7 @@
+         w.menu:show()
+         if not state.built then
+             state.built = true
+-            if rows[2] then w.menu:move_down() end
++            if #rows == 2 then w.menu:move_down() end
+         end
+         state.lock = false
+     else
 @@ -203,7 +204,6 @@
          _M.update_completions(w)
      end,
