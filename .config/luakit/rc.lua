@@ -222,15 +222,15 @@ completion.completers.othertab = {
 }
 
 modes.add_cmds{
-    {":tabs[witch]", "Switch to the nth or first matching tab.", {
+    {":tabs[witch]", "Switch to the matching tab.", {
         format = "{tab}",
         func = function(win, opts)
-            local tab = match_tabs(opts.arg, win)[1]
-            if not tab then
-                win:error("No matching tab")
+            local tabs = match_tabs(opts.arg, win)
+            if #tabs ~= 1 then
+                win:error("No unique matching tab")
                 return
             end
-            win:goto_tab(tab.index)
+            win:goto_tab(tabs[1].index)
         end,
     }},
 
@@ -245,11 +245,12 @@ modes.add_cmds{
     {":taba[ttach]", "Move a tab into the current window.", {
         format = "{othertab}",
         func = function(win, opts)
-            local tab = match_other_tabs(opts.arg, win)[1]
-            if not tab then
-                win:error("No matching tab")
+            local tabs = match_other_tabs(opts.arg, win)
+            if #tabs ~= 1 then
+                win:error("No unique matching tab")
                 return
             end
+            local tab = tabs[1]
 
             local close = tab.win.tabs:count() == 1
             settings.window.close_with_last_tab = false
