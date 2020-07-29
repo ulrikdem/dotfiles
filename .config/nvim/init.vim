@@ -410,10 +410,10 @@ autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
 tnoremap <C-\> <C-\><C-N>
-tnoremap <M-h> <C-\><C-N><C-W>h
-tnoremap <M-j> <C-\><C-N><C-W>j
-tnoremap <M-k> <C-\><C-N><C-W>k
-tnoremap <M-l> <C-\><C-N><C-W>l
+tnoremap <M-h> <Cmd>wincmd h<CR>
+tnoremap <M-j> <Cmd>wincmd j<CR>
+tnoremap <M-k> <Cmd>wincmd k<CR>
+tnoremap <M-l> <Cmd>wincmd l<CR>
 
 nnoremap <Leader>ot <Cmd>terminal<CR>
 nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'//'.&shell).'<CR>'
