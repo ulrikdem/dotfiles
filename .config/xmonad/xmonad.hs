@@ -250,8 +250,7 @@ data CollapseDecoration a = CollapseDecoration
     deriving (Read, Show)
 
 instance DecorationStyle CollapseDecoration Window where
-    decorate _ _ height _ stack _ (win, rect) =
-        bool Nothing (Just rect) . (&& rect_height rect <= height) <$> isCollapsed stack win
+    decorate _ _ _ _ stack _ (win, rect) = bool Nothing (Just rect) <$> isCollapsed stack win
     shrink _ _ = id
 
 isCollapsed stack win = (&& win /= W.focus stack) <$> hasTag "collapsible" win
@@ -273,13 +272,14 @@ data CustomLayout a
 
 instance LayoutClass CustomLayout Window where
     doLayout layout rect stack = do
-        let wins = W.integrate stack
-        collapsed <- mapM (isCollapsed stack) wins
-
         let (cols, collapsedHeight) = case layout of
                 CustomLayout c _ h -> (W.integrate c, h)
                 EmptyLayout c h -> (c, h)
-            cumLimits = scanl (+) 0 $ limit <$> init cols
+            wins = W.integrate stack
+
+        collapsedWins <- mapM (isCollapsed stack) wins
+        let collapsedWins' = M.fromList $ zip (map fst $ filter snd $ zip wins collapsedWins) $ repeat Nothing
+            allCollapsed = all (`M.member` collapsedWins')
 
             split rect weights = split' rect weights where
                 split' rect@Rectangle {rect_height = h} (Just weight : weights) =
@@ -293,14 +293,16 @@ instance LayoutClass CustomLayout Window where
                     Rectangle x y w h' : split' (Rectangle x (y + fromIntegral h') w (h - h')) weights
                 collapsedHeight' = min collapsedHeight $ rect_height rect `div` fromIntegral (length weights)
 
-            collapsedWins = M.fromList $ zip (map fst $ filter snd $ zip wins collapsed) $ repeat Nothing
-            layoutCol col rect wins = zip wins $ split rect $ map findWeight wins where
+            layoutCol col rect wins = if allCollapsed wins then [(head wins, rect)] else winRects where
+                winRects = zip wins $ split rect $ map findWeight wins
                 findWeight win = M.findWithDefault (Just 1) win $ M.union collapsedWins' winWeights'
-                collapsedWins' = if all (`M.member` collapsedWins) wins then M.empty else collapsedWins
                 winWeights' = M.map Just $ M.mapKeys (wins !!) $ M.takeWhileAntitone (< length wins) $ winWeights col
 
+            cumLimits = scanl (+) 0 $ limit <$> init cols
+
             colWins = takeWhile (not . null) $ zipWith take (map limit cols) $ zipWith drop cumLimits $ repeat wins
-            colRects = map mirrorRect $ split (mirrorRect rect) $ Just . colWeight <$> take (length colWins) cols
+            colWeight' col wins = if allCollapsed wins then Nothing else Just $ colWeight col
+            colRects = map mirrorRect $ split (mirrorRect rect) $ zipWith colWeight' cols colWins
             winRects = concat $ zipWith3 layoutCol cols colRects colWins
 
             colIndex = pred $ fromMaybe (length cols) $ findIndex (> length (W.up stack)) cumLimits
