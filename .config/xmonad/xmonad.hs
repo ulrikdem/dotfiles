@@ -159,10 +159,10 @@ extraKeys textHeight =
     , ("M-.", sendMessage $ ModifyLimit pred)
     , ("M--", sendMessage $ ModifyColWeight (/ weightFactor))
     , ("M-=", sendMessage $ ModifyColWeight (* weightFactor))
-    , ("M-<Backspace>", sendMessage $ ModifyColWeight $ const 1)
+    , ("M-<Backspace>", sendMessage ResetColWeights)
     , ("M-S--", sendMessage $ ModifyWinWeight (/ weightFactor))
     , ("M-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
-    , ("M-S-<Backspace>", sendMessage $ ModifyWinWeight $ const 1)
+    , ("M-S-<Backspace>", sendMessage ResetWinWeights)
     , ("M-c", withFocused $ \win -> do
         c <- hasTag "collapsible" win
         tagIff (not c) "collapsible" win)
@@ -321,7 +321,7 @@ instance LayoutClass CustomLayout Window where
     handleMessage (CustomLayout cols@W.Stack {W.focus = col} focus collapsedHeight) message =
         case fromMessage message of
             Just AddColumn -> fixFocus cols
-                { W.focus = def
+                { W.focus = def {colWeight = colWeight col}
                 , W.down = col : W.down cols
                 }
             Just DeleteColumn -> skipLastCol $ fixFocus cols
@@ -334,16 +334,25 @@ instance LayoutClass CustomLayout Window where
             Just (ModifyColWeight f) -> fixFocus cols
                 { W.focus = col {colWeight = f $ colWeight col}
                 }
+            Just ResetColWeights -> fixFocus W.Stack
+                { W.up = resetWeight <$> W.up cols
+                , W.focus = resetWeight col
+                , W.down = resetWeight <$> W.down cols
+                }
             Just (ModifyWinWeight f) -> fixFocus cols
                 { W.focus = col {winWeights = M.alter (mfilter (/= 1) . Just . f . fromMaybe 1) focus $ winWeights col}
                 }
+            Just ResetWinWeights -> fixFocus cols
+                { W.focus = col {winWeights = M.empty}
+                }
             Nothing -> return Nothing
         where
-            skipLastCol layout = if null (W.down cols) then return Nothing else layout
             fixFocus cols = do
                 let focus' = min focus $ pred $ limit $ W.focus cols
                 modifyWindowSet $ foldr (.) id $ replicate (focus - focus') W.focusUp
                 return $ Just $ CustomLayout cols focus' collapsedHeight
+            skipLastCol layout = if null (W.down cols) then return Nothing else layout
+            resetWeight col = col {colWeight = 1}
     handleMessage (EmptyLayout _ _) _ = return Nothing
 
 data LayoutMessage
@@ -351,7 +360,9 @@ data LayoutMessage
     | DeleteColumn
     | ModifyLimit (Int -> Int)
     | ModifyColWeight (Rational -> Rational)
+    | ResetColWeights
     | ModifyWinWeight (Rational -> Rational)
+    | ResetWinWeights
     deriving (Typeable)
 
 instance Message LayoutMessage
