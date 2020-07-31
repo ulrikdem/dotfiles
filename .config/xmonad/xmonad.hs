@@ -244,7 +244,7 @@ layout textHeight = addDecoration $ addGaps $ addNavigation $ customLayout where
     addNavigation = configurableNavigation noNavigateBorders
     customLayout = EmptyLayout [def, def {limit = maxBound}]
         $ textHeight + fromIntegral gapWidth * 2 :: CustomLayout Window
-    gapWidth = round $ fromIntegral textHeight / 3
+    gapWidth = round $ fromIntegral textHeight / 4
 
 data CollapseDecoration a = CollapseDecoration
     deriving (Read, Show)
