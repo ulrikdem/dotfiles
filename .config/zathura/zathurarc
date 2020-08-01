@@ -1,3 +1,4 @@
+set incremental-search true
 set recolor true
 set recolor-keephue true
 set scroll-page-aware true
