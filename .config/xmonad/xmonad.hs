@@ -171,7 +171,7 @@ extraKeys textHeight =
     , ("M-f", sendMessage $ JumpToLayout "full")
     , ("M-S-f", sendMessage $ JumpToLayout "fullscreen")
 
-    , ("M-<Tab>", toggleWS)
+    , ("M-<Tab>", toggleWS' ["NSP"])
     , ("M-S-,", moveTo Prev cycleWSType)
     , ("M-S-.", moveTo Next cycleWSType)
     ] ++
