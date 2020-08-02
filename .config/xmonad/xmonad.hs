@@ -238,7 +238,7 @@ instance XPrompt TerminalPrompt where
 
 -- Layout {{{1
 
-layout textHeight = addDecoration $ addGaps $ addNavigation $ customLayout where
+layout textHeight = addDecoration $ addGaps $ addNavigation customLayout where
     addDecoration = decoration shrinkText theme {decoHeight = textHeight} CollapseDecoration
     addGaps = spacingWithEdge gapWidth
     addNavigation = configurableNavigation noNavigateBorders
