@@ -5,7 +5,7 @@ xplugd
 
 export GDK_SCALE=$(cat ~/.config/dpi-scale || echo 1)
 export GDK_DPI_SCALE=$(bc <<<"scale=2; 1/$GDK_SCALE")
-echo "Xft.dpi: $((96*GDK_SCALE))" | xrdb -merge
+xrdb -merge <<<"Xft.dpi: $((96*GDK_SCALE))"
 
 xset s off
 xset dpms 0 0 0
