@@ -6,10 +6,10 @@ import Data.List
 import XMonad.ManageHook
 
 iconRules =
-    [ (return True, "\xfaae")
-    , (className =? "Luakit", "\xf484")
-    , (className =? "Termite", "\xe7a2")
-    , (className =? "Termite" <&&> title $? " - nvim", "\xe62b")
+    [ (return True, "\xfaae") -- 类
+    , (className =? "Luakit", "\xf484") -- 
+    , (className =? "Termite", "\xe7a2") -- 
+    , (className =? "Termite" <&&> title $? " - nvim", "\xe62b") -- 
     ]
 
 q ^? s = fmap (s `isPrefixOf`) q
