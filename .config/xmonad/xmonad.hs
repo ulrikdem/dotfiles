@@ -134,6 +134,7 @@ extraKeys textHeight =
     , ("M-S-p", terminalPrompt . promptConfig textHeight =<< initMatches)
 
     , ("M-s", scratchpadSpawnActionCustom $ terminalName ++ " --name scratchpad")
+    , ("M-S-s", spawn "spacer")
     , ("M-b", spawn "luakit")
     , ("M-S-b", spawn "luakit --private")
     , ("M-z", spawn "lock")
