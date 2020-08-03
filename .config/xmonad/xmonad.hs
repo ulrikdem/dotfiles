@@ -108,7 +108,12 @@ barLogHook = do
             , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
             , ppTitle = xmobarRaw . shorten 120
             , ppTitleSanitize = id
-            , ppOrder = \[workspaces, layout, title] -> [workspaces, title]
+            , ppExtras =
+                [ do
+                    collapsible <- withWindowSet $ mapM (hasTag "collapsible") . W.peek
+                    return $ Just $ if collapsible == Just True then " <fc=gray25>[collapse]</fc>" else ""
+                ]
+            , ppOrder = \[workspaces, layout, title, collapsible] -> [workspaces, title ++ collapsible]
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
@@ -166,7 +171,8 @@ extraKeys textHeight =
     , ("M-S-<Backspace>", sendMessage ResetWinWeights)
     , ("M-c", withFocused $ \win -> do
         c <- hasTag "collapsible" win
-        tagIff (not c) "collapsible" win)
+        tagIff (not c) "collapsible" win
+        barLogHook)
 
     , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
     , ("M-f", sendMessage $ JumpToLayout "full")
