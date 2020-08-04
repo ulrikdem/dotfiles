@@ -106,7 +106,7 @@ barLogHook = do
             , ppVisible = xmobarColor "black" "gray25" . wrapWorkspace
             , ppHidden = wrapWorkspace
             , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
-            , ppTitle = xmobarRaw . shorten 120
+            , ppTitle = xmobarRaw . shorten 100
             , ppTitleSanitize = id
             , ppExtras =
                 [ do
