@@ -47,6 +47,8 @@ function! FoldText() abort
         \ ' ('.(v:foldend - v:foldstart + 1).' lines) '
 endfunction
 
+command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
+
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
 autocmd vimrc VimResized * wincmd =
 
