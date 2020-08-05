@@ -267,14 +267,10 @@ let g:lightline = {
     \ 'tab_component_function': {
         \ 'wincount': 'TabWindowCount',
     \ },
-    \ 'separator': {
-        \ 'left': '',
-        \ 'right': '',
-    \ },
-    \ 'subseparator': {
-        \ 'left': '',
-        \ 'right': '',
-    \ },
+    \ 'separator': {'left': '', 'right': ''},
+    \ 'subseparator': {'left': '', 'right': ''},
+    \ 'tabline_separator': {'left': '▌', 'right': '▐'},
+    \ 'tabline_subseparator': {'left': '│', 'right': '│'},
 \ }
 
 function! StatusLineMode() abort
