@@ -239,7 +239,7 @@ let g:lightline = {
     \ },
     \ 'component': {
         \ 'filename': '
-            \%{substitute(expand("%:p:~"), ''\v^(/)$|(.*/)?(.+)/$|.*'', ''\1\3'', "")}%t
+            \%{substitute(expand("%:p:~"), ''\v(.*/)?(.*/)$|.*'', ''\2'', "")}%t
             \%{&modified ? " •" : ""}',
         \ 'truncate': '%<',
         \ 'space': ' ',
@@ -261,11 +261,11 @@ let g:lightline = {
         \ 'right': [],
     \ },
     \ 'tab': {
-        \ 'active': ['tabnum', 'filename', 'wincount'],
-        \ 'inactive': ['tabnum', 'filename', 'wincount'],
+        \ 'active': ['tab'],
+        \ 'inactive': ['tab'],
     \ },
     \ 'tab_component_function': {
-        \ 'wincount': 'TabWindowCount',
+        \ 'tab': 'TabFormat',
     \ },
     \ 'separator': {'left': '', 'right': ''},
     \ 'subseparator': {'left': '', 'right': ''},
@@ -295,9 +295,20 @@ function! s:NarrowWindow() abort
     return winwidth(0) < 60
 endfunction
 
-function! TabWindowCount(tab) abort
-    let l:count = len(tabpagebuflist(a:tab))
-    return l:count > 1 ? '(+'.(l:count - 1).')' : ''
+function! TabFormat(tab) abort
+    let l:win = tabpagewinnr(a:tab)
+    let l:buf = tabpagebuflist(a:tab)[l:win - 1]
+    let l:name = substitute(expand('#'.l:buf.':p:~'), '.*/\ze.', '', '')
+    let l:type = getbufvar(l:buf, '&buftype')
+    if l:type ==# 'terminal'
+        let l:name = substitute(l:name, '.*#\ze.', '', '')
+    elseif l:type ==# 'quickfix'
+        let l:name = getwininfo(win_getid(l:win, a:tab))[0].loclist ?
+            \ '[Location List]' : '[Quickfix List]'
+    endif
+    let l:name = empty(l:name) ? '[No Name]' : l:name
+    let l:buffers = len(uniq(sort(tabpagebuflist(a:tab))))
+    return a:tab.': '.l:name.(l:buffers > 1 ? ' (+'.(l:buffers - 1).')' : '')
 endfunction
 
 autocmd vimrc User Plug_lightline_vim set noshowmode
