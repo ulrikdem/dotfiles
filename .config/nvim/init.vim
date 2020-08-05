@@ -810,9 +810,8 @@ function! s:UpdateCocColors() abort
     for l:level in ['Error', 'Warning', 'Info', 'Hint']
         call s:Highlight('Coc'.l:level.'VirtualText', {'fg': 'Coc'.l:level.'Float', 'attr': 'italic'})
     endfor
-    highlight Bold cterm=bold gui=bold
-    highlight link CocHighlightText Bold
-    highlight link CocUnderline Bold
+    highlight link CocHighlightText CocBold
+    highlight link CocUnderline CocBold
     highlight link CocHoverRange NONE
 endfunction
 
