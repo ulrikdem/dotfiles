@@ -189,6 +189,15 @@ function! s:UpdateColorScheme() abort
     highlight! link SpellRare CocHintHighlight
 endfunction
 
+autocmd vimrc ColorScheme * call s:UpdateManColors()
+function! s:UpdateManColors() abort
+    highlight manBold cterm=bold gui=bold
+    highlight manItalic cterm=italic gui=italic
+    highlight link manUnderline manItalic
+    highlight link manTitle manSectionHeading
+    highlight link manOptionDesc NONE
+endfunction
+
 function! s:Highlight(group, args) abort
     if has_key(a:args, 'fg')
         let l:id = synIDtrans(hlID(a:args.fg))
