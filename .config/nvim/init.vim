@@ -285,7 +285,7 @@ function! StatusLineFileFormat() abort
     return s:NarrowWindow() || &fileformat ==# 'unix' ? '' : &fileformat
 endfunction
 function! StatusLineFileEncoding() abort
-    return s:NarrowWindow() || &fileencoding =~# '\v^(utf-8)?$' ? '' : &fileencoding
+    return s:NarrowWindow() || &fileencoding ==# 'utf-8' ? '' : &fileencoding
 endfunction
 function! StatusLineFileType() abort
     return s:NarrowWindow() ? '' : &filetype
