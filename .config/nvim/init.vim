@@ -1027,7 +1027,7 @@ if executable('ccls')
         endif
         let s:ccls_configured = 1
         for l:pattern in g:coc_user_config.languageserver.c.rootPatterns
-            if !empty(findfile(l:pattern, expand('%:p').';'))
+            if !empty(findfile(l:pattern, escape(expand('%:p'), ' ,;').';'))
                 return
             endif
         endfor
