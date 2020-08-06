@@ -78,7 +78,7 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:monospace:size=9"
+    , fontName = "xft:Hack Nerd Font Mono:size=9"
     }
 
 getTextHeight = do
@@ -95,12 +95,12 @@ getTextHeight = do
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ ",Symbols Nerd Font:size=11'"
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ "'"
 
 barLogHook = do
     icons <- withWindowSet $ fmap M.fromList . mapM workspaceIcon . W.workspaces
-    let wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1" $ pad
-            $ fromMaybe w $ wrap "<fn=1>" "</fn>" <$> M.findWithDefault Nothing w icons
+    let wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1"
+            $ pad $ fromMaybe w $ M.findWithDefault Nothing w icons
         pp color = namedScratchpadFilterOutWorkspacePP def
             { ppCurrent = xmobarColor "black" color . wrapWorkspace
             , ppVisible = xmobarColor "black" "gray25" . wrapWorkspace
