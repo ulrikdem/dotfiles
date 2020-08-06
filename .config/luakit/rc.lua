@@ -139,7 +139,7 @@ modes.add_binds({"normal", "insert"}, {
     end},
 })
 
-editor.editor_cmd = "termite -e 'nvim {file} +{line}'"
+editor.editor_cmd = "termite --name xmonad-custom-float -e 'nvim {file} +{line}'"
 modes.remap_binds("insert", {
     {"<mod1-e>", "<control-e>"},
 })
