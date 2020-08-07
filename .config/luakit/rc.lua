@@ -452,8 +452,11 @@ end
 
 local dark_style = stylesheet{
     source = [[
-        :root:not(.luakit-already-dark), iframe, frame,
-        :root:not(.luakit-already-dark) #luakit_select_overlay .hint_label {
+        :root:not(.luakit-already-dark),
+        :root:not(.luakit-already-dark) #luakit_select_overlay .hint_label,
+        :root:not(.luakit-already-dark).luakit-invert-images
+            :matches(img, video):not(:-webkit-full-screen, :root :-webkit-full-screen *),
+        frame, iframe {
             filter: invert(1) hue-rotate(180deg);
         }
     ]],
@@ -465,19 +468,28 @@ end)
 
 local check_dark_wm = require_web_module("check_dark_wm")
 
-modes.add_binds("normal", {
-    {"cc", "Use normal colors in the current tab.", function(win)
-        win.view.stylesheets[dark_style] = false
-    end},
+local function change_class(view, action, class)
+    view:eval_js(string.format("document.documentElement.classList.%s(%q)", action, class),
+        {no_return = true})
+end
 
-    {"cd", "Use dark colors by inverting light pages.", function(win)
-        win.view.stylesheets[dark_style] = true
+modes.add_binds("normal", {
+    {"ct", "Toggle dark mode.", function(win)
+        win.view.stylesheets[dark_style] = not win.view.stylesheets[dark_style]
         check_dark_wm:emit_signal(win.view, "check")
     end},
 
-    {"cf", "Force all pages to be inverted.", function(win)
-        win.view.stylesheets[dark_style] = true
-        check_dark_wm:emit_signal(win.view, "ignore")
+    {"cc", "Toggle whether the current page is inverted.", function(win)
+        if win.view.stylesheets[dark_style] then
+            change_class(win.view, "toggle", "luakit-already-dark")
+        else
+            win.view.stylesheets[dark_style] = true
+            change_class(win.view, "remove", "luakit-already-dark")
+        end
+    end},
+
+    {"ci", "Toggle whether images are inverted.", function(win)
+        change_class(win.view, "toggle", "luakit-invert-images")
     end},
 })
 

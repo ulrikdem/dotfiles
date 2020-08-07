@@ -1,11 +1,6 @@
 local ui = ipc_channel("check_dark_wm")
 
-local ignored = setmetatable({}, {__mode = "k"})
-
 local function check(page)
-    if ignored[page] then
-        return
-    end
     page:eval_js([[
         {
             const get_color = element => {
@@ -40,11 +35,5 @@ luakit.add_signal("page-created", function(page)
 end)
 
 ui:add_signal("check", function(_, page)
-    ignored[page] = nil
     check(page)
-end)
-
-ui:add_signal("ignore", function(_, page)
-    ignored[page] = true
-    page:eval_js("document.documentElement.classList.remove('luakit-already-dark')")
 end)
