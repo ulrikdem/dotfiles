@@ -169,6 +169,8 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
+    call s:Highlight('StatusLine', {'bg': 'SrceryXgray5'})
+    call s:Highlight('StatusLineNC', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
     call s:Highlight('CursorLine', {'bg': 'SrceryXgray1'})
     call s:Highlight('CursorLineNr', {'bg': 'SrceryXgray1'})
     call s:Highlight('Visual', {'bg': 'SrceryXgray4', 'attr': 'NONE'})
@@ -316,8 +318,6 @@ autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call light
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
-    call s:Highlight('StatusLine', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
-    call s:Highlight('StatusLineNC', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
     let l:common = s:GetSrceryColors('BrightWhite', 'Xgray5')
     let l:palette = {
         \ 'normal': {
