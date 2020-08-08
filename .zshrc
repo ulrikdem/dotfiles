@@ -37,9 +37,6 @@ if typeset -f isgrml >/dev/null; then
     abk[LC]='--color=always |& less -r'
 fi
 
-alias rmcdir-r='cd ..; rm -r -- $OLDPWD || cd -- $OLDPWD'
-alias rmcdir-rf='cd ..; rm -rf -- $OLDPWD || cd -- $OLDPWD'
-
 [[ -d ~/.dotfiles.git ]] && alias dotfiles='GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ zsh'
 
 type abduco >/dev/null && alias abduco="abduco -e '^_'"
