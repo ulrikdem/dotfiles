@@ -464,6 +464,7 @@ let g:fzf_layout = {
         \ 'highlight': 'VertSplit',
     \ },
 \ }
+autocmd vimrc FileType fzf mode
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
 autocmd vimrc User Plug_fzf nnoremap <Leader>fF <Cmd>call fzf#run(fzf#wrap({
