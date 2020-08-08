@@ -391,7 +391,6 @@ if executable('rg') && executable('igrep-format')
     autocmd vimrc User Plug_fzf nnoremap <Leader>fG <Cmd>IGrep -- %:p:.:h:S<CR>
     autocmd vimrc User Plug_fzf command! -nargs=* -complete=file IGrep call s:IGrep(<q-args>)
     function! s:IGrep(args) abort
-        cclose
         let l:cmd = 'rg --null --column --color=ansi --smart-case --regexp {q} '.a:args.
             \ ' | igrep-format '.&columns
         call s:CustomFzf(substitute(l:cmd, '{q}', "''", ''), [
