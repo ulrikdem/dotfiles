@@ -474,12 +474,12 @@ local function change_class(view, action, class)
 end
 
 modes.add_binds("normal", {
-    {"ct", "Toggle dark mode.", function(win)
+    {"C", "Toggle dark mode.", function(win)
         win.view.stylesheets[dark_style] = not win.view.stylesheets[dark_style]
         check_dark_wm:emit_signal(win.view, "check")
     end},
 
-    {"cc", "Toggle whether the current page is inverted.", function(win)
+    {"c", "Toggle whether the current page is inverted.", function(win)
         if win.view.stylesheets[dark_style] then
             change_class(win.view, "toggle", "luakit-already-dark")
         else
@@ -488,7 +488,7 @@ modes.add_binds("normal", {
         end
     end},
 
-    {"ci", "Toggle whether images are inverted.", function(win)
+    {"v", "Toggle whether images are inverted.", function(win)
         change_class(win.view, "toggle", "luakit-invert-images")
     end},
 })
