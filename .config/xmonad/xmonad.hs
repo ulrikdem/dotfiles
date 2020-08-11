@@ -40,7 +40,6 @@ import XMonad.Util.Cursor
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
-import XMonad.Util.Scratchpad
 import XMonad.Util.Stack
 
 -- Main {{{1
@@ -55,7 +54,7 @@ main = do
             let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
             withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
         , manageHook = let rect = W.RationalRect 0 (2 / 3) 1 (1 / 3) in composeAll
-            [ scratchpadManageHook rect
+            [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> customFloating rect
             , appName =? "xmonad-custom-float" --> customFloating rect
             , placeHook $ fixed (0.5, 0.5)
             , appName =? "xmonad-float" --> doFloat
@@ -101,6 +100,9 @@ barLogHook = do
     icons <- withWindowSet $ fmap M.fromList . mapM workspaceIcon . W.workspaces
     let wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1"
             $ pad $ fromMaybe w $ M.findWithDefault Nothing w icons
+        showTag tag = do
+            hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
+            return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
         pp color = namedScratchpadFilterOutWorkspacePP def
             { ppCurrent = xmobarColor "black" color . wrapWorkspace
             , ppVisible = xmobarColor "black" "gray25" . wrapWorkspace
@@ -108,12 +110,8 @@ barLogHook = do
             , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
             , ppTitle = xmobarRaw . shorten 100
             , ppTitleSanitize = id
-            , ppExtras =
-                [ do
-                    collapsible <- withWindowSet $ mapM (hasTag "collapsible") . W.peek
-                    return $ Just $ if collapsible == Just True then " <fc=gray25>[collapse]</fc>" else ""
-                ]
-            , ppOrder = \[workspaces, layout, title, collapsible] -> [workspaces, title ++ collapsible]
+            , ppExtras = [showTag "collapsible", showTag "scratchpad"]
+            , ppOrder = \(workspaces : layout : titleAndTags) -> [workspaces, concat titleAndTags]
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
@@ -138,10 +136,14 @@ extraKeys textHeight =
     , ("M-p", shellPrompt . promptConfig textHeight =<< initMatches)
     , ("M-S-p", terminalPrompt . promptConfig textHeight =<< initMatches)
 
-    , ("M-s", scratchpadSpawnActionCustom $ terminalName ++ " --name scratchpad")
-    , ("M-S-s", spawn "spacer")
+    , ("M-s", allNamedScratchpadAction
+        [ NS "" (terminalName ++ " --name xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        ] "")
+    , ("M-S-s", toggleTag "scratchpad")
+
     , ("M-b", spawn "luakit")
     , ("M-S-b", spawn "luakit --private")
+    , ("M-S-a", spawn "spacer")
     , ("M-z", spawn "lock")
 
     , ("<XF86AudioMute>", spawn "amixer set Master toggle")
@@ -169,10 +171,7 @@ extraKeys textHeight =
     , ("M-S--", sendMessage $ ModifyWinWeight (/ weightFactor))
     , ("M-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
     , ("M-S-<Backspace>", sendMessage ResetWinWeights)
-    , ("M-c", withFocused $ \win -> do
-        c <- hasTag "collapsible" win
-        tagIff (not c) "collapsible" win
-        barLogHook)
+    , ("M-c", toggleTag "collapsible")
 
     , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
     , ("M-f", sendMessage $ JumpToLayout "full")
@@ -194,6 +193,11 @@ extraKeys textHeight =
         ]
     , (key, index) <- zip "wer" [0..]
     ]
+
+toggleTag tag = withFocused $ \win -> do
+    hasTag' <- hasTag tag win
+    tagIff (not hasTag') tag win
+    barLogHook
 
 moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
