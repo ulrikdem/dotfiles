@@ -467,16 +467,12 @@ let g:fzf_layout = {
 \ }
 autocmd vimrc FileType fzf mode
 
-autocmd vimrc User Plug_fzf nnoremap <Leader>ff <Cmd>FZF<CR>
-autocmd vimrc User Plug_fzf nnoremap <Leader>fF <Cmd>call fzf#run(fzf#wrap({
-    \ 'dir': expand('%:p:h'),
-    \ 'options': [
-        \ '--prompt='.pathshorten(substitute(expand('%:p:~:h'), '/$', '', '')).'/',
-        \ '--multi',
-    \ ],
-\ }))<CR>
+autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>ff
+    \ '<Cmd>FZF '.fnameescape(fnamemodify(getcwd(), ':~')).'<CR>'
+autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>fF
+    \ '<Cmd>FZF '.fnameescape(expand('%:p:~:h')).'<CR>'
 autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), extend([
-        \ '--prompt='.pathshorten(substitute(fnamemodify(getcwd(), ':~'), '/$', '', '')).'/',
+    \ '--prompt='.substitute(fnamemodify(getcwd(), ':~'), '/\?$', '/', ''),
 \ ], executable('nvr') ? [
     \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
 \ ] : []), {l -> {'filename': l}})<CR>
