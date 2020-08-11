@@ -397,6 +397,7 @@ if executable('rg') && executable('igrep-format')
             \ '--with-nth=-1..',
             \ '--delimiter=\0',
             \ '--ansi',
+            \ '--layout=reverse-list',
             \ '--phony',
             \ '--bind=change:top+reload:'.l:cmd,
         \ ], function("\<SID>ParseIGrep"))
@@ -474,15 +475,11 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fF <Cmd>call fzf#run(fzf#wrap({
         \ '--multi',
     \ ],
 \ }))<CR>
-autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call fzf#run(fzf#wrap({
-    \ 'source': <SID>ListBuffers(),
-    \ 'options': extend([
+autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), extend([
         \ '--prompt='.pathshorten(substitute(fnamemodify(getcwd(), ':~'), '/$', '', '')).'/',
-        \ '--multi',
-    \ ], executable('nvr') ? [
-        \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
-    \ ] : []),
-\ }))<CR>
+\ ], executable('nvr') ? [
+    \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
+\ ] : []), {l -> {'filename': l}})<CR>
 function! s:ListBuffers() abort
     return map(filter(getbufinfo({'buflisted': 1}),
         \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
@@ -581,6 +578,8 @@ function! s:FzfFromQuickfix(options, items) abort
         \ '--with-nth=2..',
         \ '--delimiter= ',
         \ '--ansi',
+        \ '--layout=reverse-list',
+        \ '--tiebreak=begin',
     \ ], a:options), {l -> l:valid_items[split(l)[0]]})
     return funcref("\<SID>ProcessItems")
 endfunction
@@ -596,13 +595,18 @@ function! s:CustomFzf(source, options, parse) abort
                     continue
                 endif
                 let l:item = a:parse(l:line)
-                let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
-                if empty(l:key) && fnamemodify(l:file, ':p') ==# expand('%:p')
-                    normal! m'
+                let l:buf = has_key(l:item, 'bufnr') ? l:item.bufnr : bufadd(l:item.filename)
+                let l:lnum = get(l:item, 'lnum', 0)
+                if empty(l:key) && l:buf == bufnr()
+                    if l:lnum
+                        normal! m'
+                    endif
                 else
-                    execute g:fzf_action[l:key] fnameescape(l:file)
+                    execute g:fzf_action[l:key] '#'.l:buf
                 endif
-                call cursor(l:item.lnum, get(l:item, 'col', 1))
+                if l:lnum
+                    call cursor(l:lnum, get(l:item, 'col', 1))
+                endif
             endfor
         endif
     endfunction
@@ -610,8 +614,6 @@ function! s:CustomFzf(source, options, parse) abort
         \ 'source': a:source,
         \ 'sink*': funcref("\<SID>FzfSink"),
         \ 'options': extend([
-            \ '--layout=reverse-list',
-            \ '--tiebreak=begin',
             \ '--multi',
             \ '--expect=ctrl-x,ctrl-v,ctrl-t,ctrl-q',
         \ ], a:options),
