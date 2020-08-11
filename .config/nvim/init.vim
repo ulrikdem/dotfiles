@@ -294,7 +294,7 @@ function! StatusLineFileType() abort
 endfunction
 
 function! s:NarrowWindow() abort
-    return winwidth(0) < 60
+    return winwidth(0) < 80
 endfunction
 
 function! TabFormat(tab) abort
