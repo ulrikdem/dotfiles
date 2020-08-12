@@ -267,7 +267,7 @@ let g:lightline = {
         \ 'inactive': ['tab'],
     \ },
     \ 'tab_component_function': {
-        \ 'tab': 'TabFormat',
+        \ 'tab': 'TabLabel',
     \ },
     \ 'separator': {'left': '', 'right': ''},
     \ 'subseparator': {'left': '', 'right': ''},
@@ -297,7 +297,7 @@ function! s:NarrowWindow() abort
     return winwidth(0) < 80
 endfunction
 
-function! TabFormat(tab) abort
+function! TabLabel(tab) abort
     let l:win = tabpagewinnr(a:tab)
     let l:buf = tabpagebuflist(a:tab)[l:win - 1]
     let l:name = substitute(expand('#'.l:buf.':p:~'), '.*/\ze.', '', '')
