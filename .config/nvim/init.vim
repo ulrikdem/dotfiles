@@ -310,7 +310,7 @@ function! TabLabel(tab) abort
     endif
     let l:name = empty(l:name) ? '[No Name]' : l:name
     let l:buffers = len(uniq(sort(tabpagebuflist(a:tab))))
-    return a:tab.': '.l:name.(l:buffers > 1 ? ' (+'.(l:buffers - 1).')' : '')
+    return a:tab.': '.l:name.(l:buffers > 1 ? ' +'.(l:buffers - 1) : '')
 endfunction
 
 autocmd vimrc User Plug_lightline_vim set noshowmode
