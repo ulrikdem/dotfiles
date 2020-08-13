@@ -648,7 +648,7 @@ function! s:ToggleDiff() abort
         let l:wins = filter(gettabinfo(tabpagenr())[0].windows, {i, w -> getwinvar(w, '&diff')})
         diffoff!
         for l:win in l:wins
-            execute win_id2win(l:win) 'wincmd w'
+            call win_gotoid(l:win)
             if &foldmethod ==# 'manual'
                 normal! zE
             endif
@@ -656,7 +656,7 @@ function! s:ToggleDiff() abort
                 close
             end
         endfor
-        execute win_id2win(l:current_win) 'wincmd w'
+        call win_gotoid(l:current_win)
     elseif exists(':Gdiffsplit')
         Gdiffsplit!
     endif
