@@ -273,11 +273,12 @@ let g:lightline = {
     \ 'subseparator': {'left': '', 'right': ''},
     \ 'tabline_separator': {'left': '▌', 'right': '▐'},
     \ 'tabline_subseparator': {'left': '│', 'right': '│'},
+    \ '_mode_': {'f': 'fake'},
 \ }
 
 function! StatusLineMode() abort
     if exists('g:fake_mode')
-        call lightline#link('c')
+        call lightline#link('f')
     endif
     let l:mode = get(g:, 'fake_mode', lightline#mode())
     return s:NarrowWindow() ? l:mode[0] : l:mode
@@ -340,6 +341,7 @@ function! s:UpdateLightlineColors() abort
         \ ['replace', 'Red'],
         \ ['visual', 'Magenta'],
         \ ['command', 'Orange'],
+        \ ['fake', 'Yellow'],
     \ ]
         let l:palette[l:mode] = get(l:palette, l:mode, {})
         let l:palette[l:mode].left = [s:GetSrceryColors('Black', l:color), l:common]
