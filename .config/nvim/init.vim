@@ -1179,6 +1179,8 @@ if executable('gdb')
             return
         endif
 
+        delcommand Source
+
         let g:termdebugger = a:gdb
         execute (empty(a:args) ? 'Termdebug' : 'TermdebugCommand') a:args
         let s:gdb_buf = bufnr()
@@ -1250,6 +1252,8 @@ if executable('gdb')
             if exists('l:dashboard_buf')
                 execute 'bwipeout!' l:dashboard_buf
             endif
+
+            command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
         endfunction
 
         Program
