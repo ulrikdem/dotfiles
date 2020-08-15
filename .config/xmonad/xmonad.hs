@@ -130,36 +130,22 @@ workspaceIcon workspace = do
 removedKeys = ["M-?", "M-S-/", "M-S-<Tab>"]
 
 extraKeys textHeight =
-    [ ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
-    , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
+    [ ("M-<Return>", promote)
+    , ("M-C-j", rotAllDown)
+    , ("M-C-k", rotAllUp)
 
-    , ("M-p", shellPrompt . promptConfig textHeight =<< initMatches)
-    , ("M-S-p", terminalPrompt . promptConfig textHeight =<< initMatches)
+    , ("M-h", sendMessage $ Go L)
+    , ("M-l", sendMessage $ Go R)
+    , ("M-S-h", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
+    , ("M-S-l", sendMessage $ Apply (windows . W.modify' . moveRight) R)
+
+    , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
 
     , ("M-s", allNamedScratchpadAction
         [ NS "" (terminalName ++ " --name xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
-
-    , ("M-b", spawn "luakit")
-    , ("M-S-b", spawn "luakit --private")
-    , ("M-S-a", spawn "spacer")
-    , ("M-z", spawn "lock")
-
-    , ("<XF86AudioMute>", spawn "amixer set Master toggle")
-    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%-")
-    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+")
-    , ("<XF86MonBrightnessDown>", spawn "light -U 25")
-    , ("<XF86MonBrightnessUp>", spawn "light -A 25")
-
-    , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
-    , ("M-<Return>", promote)
-    , ("M-C-j", rotAllDown)
-    , ("M-C-k", rotAllUp)
-    , ("M-h", sendMessage $ Go L)
-    , ("M-l", sendMessage $ Go R)
-    , ("M-S-h", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
-    , ("M-S-l", sendMessage $ Apply (windows . W.modify' . moveRight) R)
+    , ("M-c", toggleTag "collapsible")
 
     , ("M-a", sendMessage AddColumn)
     , ("M-d", sendMessage DeleteColumn)
@@ -171,11 +157,26 @@ extraKeys textHeight =
     , ("M-S--", sendMessage $ ModifyWinWeight (/ weightFactor))
     , ("M-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
     , ("M-S-<Backspace>", sendMessage ResetWinWeights)
-    , ("M-c", toggleTag "collapsible")
 
     , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
     , ("M-f", sendMessage $ JumpToLayout "full")
     , ("M-S-f", sendMessage $ JumpToLayout "fullscreen")
+
+    , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
+    , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
+    , ("M-p", shellPrompt . promptConfig textHeight =<< initMatches)
+    , ("M-S-p", terminalPrompt . promptConfig textHeight =<< initMatches)
+
+    , ("M-b", spawn "luakit")
+    , ("M-S-b", spawn "luakit --private")
+    , ("M-S-a", spawn "spacer")
+    , ("M-z", spawn "lock")
+
+    , ("<XF86AudioMute>", spawn "amixer set Master toggle")
+    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%-")
+    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+")
+    , ("<XF86MonBrightnessDown>", spawn "light -U 25")
+    , ("<XF86MonBrightnessUp>", spawn "light -A 25")
 
     , ("M-<Tab>", toggleWS' ["NSP"])
     , ("M-S-,", moveTo Prev cycleWSType)
@@ -194,14 +195,14 @@ extraKeys textHeight =
     , (key, index) <- zip "wer" [0..]
     ]
 
+moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
+    (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
+moveRight win = reverseS . moveLeft win . reverseS
+
 toggleTag tag = withFocused $ \win -> do
     hasTag' <- hasTag tag win
     tagIff (not hasTag') tag win
     barLogHook
-
-moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
-    (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
-moveRight win = reverseS . moveLeft win . reverseS
 
 weightFactor = 1.26
 
