@@ -6,7 +6,9 @@ dashboard -style divider_fill_style_secondary 90
 dashboard -style divider_label_style_off_secondary 37
 
 dashboard -layout stack variables expressions
-dashboard variables -style compact False
+
+dashboard -style compact_values False
+dashboard -style max_value_length 250
 
 define hookpost-up
     dashboard
