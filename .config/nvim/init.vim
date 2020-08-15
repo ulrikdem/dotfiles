@@ -1224,10 +1224,11 @@ if executable('gdb')
             call TermDebugSendCommand('source ~/.config/gdb-dashboard')
             call TermDebugSendCommand('dashboard -output '.l:pty)
             call extend(l:maps, [
-                \ ['<M-w>', '<Cmd>call <SID>WatchExpression("watch")<CR>', 'nx'],
-                \ ['<M-W>', '<Cmd>call <SID>WatchExpression("unwatch")<CR>', 'nx'],
+                \ ['<M-w>', '<Cmd>call <SID>WatchExpression(0)<CR>', 'nx'],
+                \ ['<M-W>', '<Cmd>call <SID>WatchExpression(1)<CR>', 'nx'],
                 \ ['<M-C-W>', '<Cmd>call TermDebugSendCommand("dashboard expression clear")<CR>', 'nt'],
             \ ])
+            command! -bang -nargs=+ Watch call s:WatchExpression(<bang>0, <q-args>)
         endif
 
         for [l:lhs, l:rhs, l:modes] in l:maps
@@ -1253,6 +1254,7 @@ if executable('gdb')
                 execute 'bwipeout!' l:dashboard_buf
             endif
 
+            silent! delcommand Watch
             command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
         endfunction
 
@@ -1268,8 +1270,10 @@ if executable('gdb')
         stopinsert
     endfunction
 
-    function! s:WatchExpression(action) abort
-        if mode()[0] ==# 'n'
+    function! s:WatchExpression(unwatch, ...) abort
+        if a:0
+            let l:expr = a:1
+        elseif mode()[0] ==# 'n'
             let l:expr = expand('<cexpr>')
         else
             let l:reg = getreg('v', 1, 1)
@@ -1278,7 +1282,7 @@ if executable('gdb')
             let l:expr = @v
             call setreg('v', l:reg, l:type)
         endif
-        call TermDebugSendCommand('dashboard expression '.a:action.' '.l:expr)
+        call TermDebugSendCommand('dashboard expression '.(a:unwatch ? 'un' : '').'watch '.l:expr)
     endfunction
 
     function! s:OnDebugStdout(id, lines, event) abort
