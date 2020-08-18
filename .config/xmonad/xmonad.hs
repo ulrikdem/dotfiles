@@ -164,8 +164,8 @@ extraKeys textHeight =
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
-    , ("M-p", shellPrompt . promptConfig textHeight =<< initMatches)
-    , ("M-S-p", terminalPrompt . promptConfig textHeight =<< initMatches)
+    , ("M-p", shellPrompt . commandPromptConfig textHeight =<< initMatches)
+    , ("M-S-p", terminalPrompt . commandPromptConfig textHeight =<< initMatches)
 
     , ("M-b", spawn "luakit")
     , ("M-S-b", spawn "luakit --private")
@@ -226,7 +226,7 @@ windowPromptConfig textHeight = def
         ]) emacsLikeXPKeymap
     }
 
-promptConfig textHeight matches = def
+commandPromptConfig textHeight matches = def
     { promptBorderWidth = 0
     , height = textHeight
     , font = fontName theme
