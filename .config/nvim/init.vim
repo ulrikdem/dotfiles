@@ -75,6 +75,9 @@ nnoremap <M-j> <C-W>j
 nnoremap <M-k> <C-W>k
 nnoremap <M-l> <C-W>l
 
+nmap <C-LeftMouse> <LeftMouse><C-]>
+nnoremap <C-RightMouse> <C-O>
+
 cnoremap <C-A> <Home>
 cnoremap <C-B> <Left>
 cnoremap <C-F> <Right>
@@ -892,11 +895,8 @@ function! s:InitLspBuffer() abort
     xmap <buffer><silent> ac <Plug>(coc-classobj-a)
 
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
-
     nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
-    nmap <buffer> <C-LeftMouse> <LeftMouse><C-]>
 endfunction
-nnoremap <C-RightMouse> <C-O>
 
 function! s:FocusFloat(...) abort
     if !coc#util#has_float()
