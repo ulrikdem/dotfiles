@@ -1,0 +1,33 @@
+#!/bin/bash
+
+python3 - <(if [[ -r ~/.local/share/nerd-fonts/i_all.sh ]]; then
+    source ~/.local/share/nerd-fonts/i_all.sh
+    for name in "${!i_@}"; do
+        echo "$name ${!name}"
+    done
+fi) <<EOF | fzf --ansi --tabstop 3 --tiebreak index --bind 'ctrl-c:execute-silent:printf %s {2} | tee >(xsel) | xsel -b' | cut -f 2
+
+import sys
+
+def output(code, char, name):
+    print(f'\x1b[90m{code}\x1b[0m\t{char}\t{name} ')
+
+with open('/usr/share/unicode/UnicodeData.txt') as file:
+    for line in file:
+        code, name = line.split(';')[:2]
+        if name[0] == '<':
+            continue
+        char = chr(int(code, 16))
+        output(code, char, name)
+
+nerd = []
+with open(sys.argv[1]) as file:
+    for line in file:
+        name, char = line[2:].split()
+        nerd.append((char, name))
+for char, name in sorted(nerd):
+    code = hex(ord(char))[2:].upper()
+    name = 'NERD FONTS ' + name.upper().replace('_', ' ')
+    output(code, char, name)
+
+EOF
