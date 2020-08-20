@@ -5,7 +5,7 @@ python3 - <(if [[ -r ~/.local/share/nerd-fonts/i_all.sh ]]; then
     for name in "${!i_@}"; do
         echo "$name ${!name}"
     done
-fi) <<EOF | fzf --ansi --tabstop 3 --tiebreak index --bind "alt-enter:execute-silent(printf %s {2} >>$1)+refresh-preview,ctrl-c:execute-silent(printf '' >$1)+refresh-preview" --preview "cat $1" | cut -f 2 | head -c -1 >>$1
+fi) <<EOF | fzf --ansi --tabstop 3 --tiebreak index --bind "alt-enter:execute-silent(cut -f 2 <<<{} | head -c -1 >>$1)+refresh-preview,ctrl-c:execute-silent(printf '' >$1)+refresh-preview" --preview "cat $1" | cut -f 2 | head -c -1 >>$1
 
 import sys
 
