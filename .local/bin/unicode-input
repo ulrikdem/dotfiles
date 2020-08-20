@@ -1,5 +1,5 @@
 #!/bin/bash
 temp=$(mktemp -t unicode.XXXXXXXX)
-termite --name xmonad-custom-float -t unicode -e "sh -c 'unicode-fzf >$temp'"
+termite --name xmonad-custom-float -t unicode -e "unicode-input-helper $temp"
 xdotool type -- "$(<$temp)"
 rm $temp
