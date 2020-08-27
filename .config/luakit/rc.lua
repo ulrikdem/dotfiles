@@ -276,7 +276,6 @@ window.add_signal("build", function(win)
     win.sbar.l.layout:pack(lousy.widget.uri())
     win.sbar.l.layout:pack(lousy.widget.progress())
     win.sbar.r.layout:pack(lousy.widget.buf())
-    win.sbar.r.layout:pack(log_chrome.widget())
     win.sbar.r.layout:pack(lousy.widget.scroll())
 end)
 
@@ -311,10 +310,6 @@ webview.add_signal("init", function(view)
         end)
     end)
 end)
-
-log_chrome.widget_format = "{errors}{warnings}"
-log_chrome.widget_error_format = "<span color='red'>%d✕</span>"
-log_chrome.widget_warning_format = "<span color='orange'>%d⚠</span>"
 
 function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
