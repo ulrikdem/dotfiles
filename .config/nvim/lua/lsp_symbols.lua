@@ -60,6 +60,7 @@ function M.update(bufnr, symbols)
             local children = non_empty(symbol.children)
             symbol = {
                 name = symbol.name,
+                name_start = position.new(symbol.selectionRange.start),
                 start = symbol.range.start,
                 end_ = symbol.range["end"],
                 parent = symbol.parent,
@@ -115,10 +116,10 @@ function M.update(bufnr, symbols)
     end
 end
 
-function M.at_cursor()
+local function at_cursor(count)
     local node = segment_trees[vim.fn.bufnr()]
     if not node then
-        return " "
+        return
     end
 
     local cursor = position.new(vim.lsp.util.make_position_params().position)
@@ -136,6 +137,16 @@ function M.at_cursor()
         end
         node = cursor < node.right.start and node.left or node.right
     end
+
+    while symbol and symbol.parent and count and count > 1 do
+        symbol = symbol.parent
+        count = count - 1
+    end
+    return symbol
+end
+
+function M.statusline()
+    local symbol = at_cursor()
     if not symbol then
         return " "
     end
@@ -150,6 +161,34 @@ function M.at_cursor()
         result = symbol.parent_name .. separator .. result
     end
     return result
+end
+
+local function set_cursor(pos, before)
+    local lnum = pos.line + 1
+    local col = vim.str_byteindex(vim.fn.getline(lnum), pos.character, true) + 1
+    if before then
+        if col == 1 then
+            lnum = lnum - 1
+            col = "$"
+        else
+            col = col - 1
+        end
+    end
+    return lnum .. "G" .. vim.fn.virtcol({lnum, col}) .. "|"
+end
+
+function M.jump(count)
+    local symbol = at_cursor(count)
+    if symbol then
+        vim.cmd("normal! " .. set_cursor(symbol.name_start or symbol.start))
+    end
+end
+
+function M.select(mode, count)
+    local symbol = at_cursor(count)
+    if symbol then
+        vim.cmd("normal! " .. set_cursor(symbol.end_, true) .. mode .. set_cursor(symbol.start))
+    end
 end
 
 return M

@@ -671,8 +671,8 @@ set diffopt+=vertical,foldcolumn:1,algorithm:histogram,hiddenoff
 
 call insert(g:lightline.active.left[1], 'git')
 call insert(g:lightline.inactive.left[0], 'git')
-let g:lightline.component_function.git = 'GitStatusline'
-function! GitStatusline() abort
+let g:lightline.component_function.git = 'StatusLineGit'
+function! StatusLineGit() abort
     if !exists('*FugitiveStatusline')
         return ''
     endif
@@ -856,13 +856,21 @@ function! s:InitLspBuffer() abort
             \ 'text': d.message,
         \ }}))})<CR>
 
+    nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
+    nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
+
     nnoremap <buffer> <C-]> <Cmd>call CocActionAsync('jumpDefinition')<CR>
     nnoremap <buffer> <Leader>gd <Cmd>call CocActionAsync('jumpDeclaration')<CR>
     nnoremap <buffer> <Leader>gt <Cmd>call CocActionAsync('jumpTypeDefinition')<CR>
     nnoremap <buffer> <Leader>gi <Cmd>call CocActionAsync('jumpImplementation')<CR>
     nnoremap <buffer> <Leader>gr <Cmd>call CocActionAsync('jumpReferences')<CR>
 
-    autocmd CursorHold <buffer> call CocActionAsync('highlight')
+    nnoremap <buffer> <Leader>gy <Cmd>call v:lua.lsp_symbols.jump(v:count1)<CR>
+
+    onoremap <buffer> iy <Cmd>call v:lua.lsp_symbols.select('v', v:count1)<CR>
+    onoremap <buffer> ay <Cmd>call v:lua.lsp_symbols.select('V', v:count1)<CR>
+    xnoremap <buffer><silent> iy :<C-U>call v:lua.lsp_symbols.select('v', v:count1)<CR>
+    xnoremap <buffer><silent> ay :<C-U>call v:lua.lsp_symbols.select('V', v:count1)<CR>
 
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
@@ -871,6 +879,8 @@ function! s:InitLspBuffer() abort
             nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
         endif
     endif
+
+    autocmd CursorHold <buffer> call CocActionAsync('highlight')
 
     nmap <buffer> <Leader>gR <Cmd>call CocActionAsync('rename')<CR>
 
@@ -881,18 +891,6 @@ function! s:InitLspBuffer() abort
 
     nmap <buffer> <Leader>gq <Cmd>call CocActionAsync('format')<CR>
     setlocal formatexpr=CocActionAsync('formatSelected')
-
-    omap <buffer><silent> if <Plug>(coc-funcobj-i)
-    xmap <buffer><silent> if <Plug>(coc-funcobj-i)
-    omap <buffer><silent> af <Plug>(coc-funcobj-a)
-    xmap <buffer><silent> af <Plug>(coc-funcobj-a)
-    omap <buffer><silent> ic <Plug>(coc-classobj-i)
-    xmap <buffer><silent> ic <Plug>(coc-classobj-i)
-    omap <buffer><silent> ac <Plug>(coc-classobj-a)
-    xmap <buffer><silent> ac <Plug>(coc-classobj-a)
-
-    nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
-    nmap <buffer> <M-LeftMouse> <LeftMouse><Leader>gh
 endfunction
 
 function! s:FocusFloat(...) abort
@@ -929,8 +927,8 @@ autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
     \ call s:FzfFromQuickfix([], map(g:coc_jump_locations, function("\<SID>HighlightRange")))
 function! s:HighlightRange(index, item) abort
-    let l:start = v:lua.vim.str_byteindex(a:item.text, a:item.range.start.character)
-    let l:end = v:lua.vim.str_byteindex(a:item.text, a:item.range.end.character)
+    let l:start = v:lua.vim.str_byteindex(a:item.text, a:item.range.start.character, v:true)
+    let l:end = v:lua.vim.str_byteindex(a:item.text, a:item.range.end.character, v:true)
     let a:item.text = (l:start ? a:item.text[:(l:start - 1)] : '').s:match_start.
         \ (a:item.text[(l:start):(l:end - 1)]).s:match_end.(a:item.text[(l:end):])
     return a:item
@@ -942,7 +940,7 @@ function! s:SymbolToQuickfix(symbol) abort
         \ 'filename': get(a:symbol, 'filename', @%),
         \ 'lnum': a:symbol.lnum,
         \ 'col': empty(l:line) ? a:symbol.col :
-            \ v:lua.vim.str_byteindex(l:line[0], a:symbol.col - 1) + 1,
+            \ v:lua.vim.str_byteindex(l:line[0], a:symbol.col - 1, v:true) + 1,
         \ 'text': (a:symbol.text).s:match_start.' ['.(a:symbol.kind).']'.s:match_end,
     \ }
 endfunction
@@ -975,22 +973,22 @@ endfunction
 
 lua lsp_symbols = require("lsp_symbols")
 call add(g:lightline.active.left[2], 'lsp_symbol')
-let g:lightline.component_function.lsp_symbol = 'CurrentLspSymbol'
-function! CurrentLspSymbol() abort
-    return mode() =~# '^i' || mode() =~# '^R' ? ' ' : v:lua.lsp_symbols.at_cursor()
+let g:lightline.component_function.lsp_symbol = 'StatusLineLspSymbol'
+function! StatusLineLspSymbol() abort
+    return mode() =~# '^i' || mode() =~# '^R' ? ' ' : v:lua.lsp_symbols.statusline()
 endfunction
 
 call insert(g:lightline.active.right[2], 'errors')
 call insert(g:lightline.active.right[2], 'warnings')
 let g:lightline.component_type.errors = 'error'
 let g:lightline.component_type.warnings = 'warning'
-let g:lightline.component_expand.errors = 'LspErrorCount'
-let g:lightline.component_expand.warnings = 'LspWarningCount'
-function! LspErrorCount() abort
+let g:lightline.component_expand.errors = 'StatusLineLspErrors'
+let g:lightline.component_expand.warnings = 'StatusLineLspWarnings'
+function! StatusLineLspErrors() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
     return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
 endfunction
-function! LspWarningCount() abort
+function! StatusLineLspWarnings() abort
     let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
     return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
 endfunction
