@@ -782,9 +782,6 @@ endfunction
 
 let g:coc_user_config = {
     \ 'coc': {
-        \ 'preferences': {
-            \ 'currentFunctionSymbolAutoUpdate': v:true,
-        \ },
         \ 'source': {
             \ 'around': {'firstMatch': v:false, 'priority': 2},
             \ 'buffer': {'firstMatch': v:false},
@@ -976,11 +973,11 @@ function! s:FzfFromWorkspaceSymbols() abort
     endfunction
 endfunction
 
+lua lsp_symbols = require("lsp_symbols")
 call add(g:lightline.active.left[2], 'lsp_symbol')
 let g:lightline.component_function.lsp_symbol = 'CurrentLspSymbol'
 function! CurrentLspSymbol() abort
-    let l:symbol = get(b:, 'coc_current_function', '')
-    return empty(l:symbol) ? ' ' : l:symbol
+    return mode() =~# '^i' || mode() =~# '^R' ? ' ' : v:lua.lsp_symbols.at_cursor()
 endfunction
 
 call insert(g:lightline.active.right[2], 'errors')
