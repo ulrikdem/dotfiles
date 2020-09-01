@@ -102,9 +102,7 @@ let g:wordmotion_mappings = {
     \ 'iw': 'i<M-w>',
     \ 'aw': 'a<M-w>',
     \ '<C-R><C-W>': '<C-R><M-w>',
-    \ '<C-R><C-A>': '',
 \ }
-let g:wordmotion_prefix = '<SID>'
 
 Plug 'psliwka/vim-smoothie'
 let g:smoothie_no_default_mappings = 1
