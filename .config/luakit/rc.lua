@@ -644,9 +644,11 @@ luakit.spawn(string.format("%q/update-adblock.sh %q", luakit.config_dir, luakit.
     adblock.load(true)
 end)
 
-pcall(function()
-    require("userconf")
-end)
+if os.exists(luakit.config_dir.."/userconf.lua") then
+    xpcall(function()
+        require("userconf")
+    end, msg.error)
+end
 
 if not session.restore() or #uris ~= 0 then
     window.new(uris)
