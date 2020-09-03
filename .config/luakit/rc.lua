@@ -64,9 +64,7 @@ if not completion_mtime
 end
 local completion = require("completion_patched")
 
-pcall(function()
-    require("clear_data")
-end)
+pcall(require, "clear_data")
 
 -- Settings {{{1
 
