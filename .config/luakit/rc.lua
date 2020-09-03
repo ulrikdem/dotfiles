@@ -116,11 +116,8 @@ modes.remap_binds({"all", "passthrough"}, {
 modes.remove_binds("passthrough", {"<Escape>"})
 
 modes.add_binds("normal", {
-    {"gs", "Change protocol to HTTPS.", function(win)
-        win.view.uri = win.view.uri:gsub("^http:", "https:")
-    end},
-    {"gS", "Change protocol to HTTP.", function(win)
-        win.view.uri = win.view.uri:gsub("^https:", "http:")
+    {"gs", "Toggle between HTTP and HTTPS.", function(win)
+        win.view.uri = win.view.uri:gsub("^(https?):", {http = "https:", https = "http:"})
     end},
 
     {"<control-shift-c>", "Copy the selected text.", function()
