@@ -57,7 +57,7 @@ function! s:ResizeHelp() abort
     if exists('w:checked_help')
         return
     endif
-    let w:checked_help = 1
+    let w:checked_help = v:true
     if &buftype ==# 'help'
         wincmd L
         80 wincmd |
@@ -105,7 +105,7 @@ let g:wordmotion_mappings = {
 \ }
 
 Plug 'psliwka/vim-smoothie'
-let g:smoothie_no_default_mappings = 1
+let g:smoothie_no_default_mappings = v:true
 nnoremap <C-D> <Cmd>call smoothie#downwards()<CR>
 nnoremap <C-U> <Cmd>call smoothie#upwards()<CR>
 xnoremap <C-D> <Cmd>call smoothie#downwards()<CR>
@@ -164,8 +164,8 @@ Plug 'godlygeek/tabular'
 " Colorscheme {{{1
 
 Plug 'srcery-colors/srcery-vim'
-let g:srcery_transparent_background = 1
-let g:srcery_italic = 1
+let g:srcery_transparent_background = v:true
+let g:srcery_italic = v:true
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
@@ -249,7 +249,7 @@ let g:lightline = {
         \ 'ruler': '%p%% %l:%v',
     \ },
     \ 'component_visible_condition': {
-        \ 'truncate': '0',
+        \ 'truncate': 'v:false',
     \ },
     \ 'component_function': {
         \ 'mode': 'StatusLineMode',
@@ -480,7 +480,7 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>Li
     \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
 \ ] : []), {l -> {'filename': l}})<CR>
 function! s:ListBuffers() abort
-    return map(filter(getbufinfo({'buflisted': 1}),
+    return map(filter(getbufinfo({'buflisted': v:true}),
         \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
 endfunction
 function! DeleteBuffer(name) abort
@@ -521,7 +521,7 @@ function! s:InitQuickfixBuffer() abort
     call matchadd('Conceal', '\e\[\d*m')
     setlocal conceallevel=2 concealcursor=nvc
     setlocal nolist
-    let w:added_qf_matches = 1
+    let w:added_qf_matches = v:true
 endfunction
 autocmd vimrc ColorScheme * highlight QuickFixMatch ctermfg=Red guifg=Red
 autocmd vimrc ColorScheme srcery highlight! link QuickFixMatch SrceryRed
@@ -542,7 +542,7 @@ function! s:ToggleQuickfix() abort
     endif
 endfunction
 
-let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> {'filename': l, 'valid': 1}}))}
+let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> {'filename': l, 'valid': v:true}}))}
 
 function! s:SetQuickfix(items) abort
     call setqflist(a:items)
@@ -558,7 +558,7 @@ function! s:FzfFromQuickfix(options, items) abort
         let l:valid_items = []
         let l:lines = []
         for l:item in a:items
-            if !get(l:item, 'valid', 1)
+            if !get(l:item, 'valid', v:true)
                 continue
             endif
             let l:left = trim(substitute(l:item.text, "\t", ' ', 'g'), ' ')
@@ -734,9 +734,9 @@ function! s:CompletionFallback() abort
         autocmd vimrc User Plug_ncm2 let s:start_completion = "\<C-R>=ncm2#force_trigger()\<CR>"
     else
         Plug 'lifepillar/vim-mucomplete'
-        let g:mucomplete#enable_auto_at_startup = 1
-        let g:mucomplete#minimum_prefix_length = 1
-        let g:mucomplete#buffer_relative_paths = 1
+        let g:mucomplete#enable_auto_at_startup = v:true
+        let g:mucomplete#minimum_prefix_length = v:true
+        let g:mucomplete#buffer_relative_paths = v:true
         let g:mucomplete#chains = {
             \ 'default': ['path', 'omni', 'keyn'],
             \ 'vim': ['path', 'cmd', 'keyn'],
@@ -756,7 +756,7 @@ if executable('node')
         call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
-            \ ['coc#util#create_float_buf(a:bufnr)\zs', ' | call setbufvar(bufnr, "\&modifiable", 1)'],
+            \ ['coc#util#create_float_buf(a:bufnr)\zs', ' | call setbufvar(l:bufnr, "\&modifiable", v:true)'],
             \ ['let res = inputlist(\[a:title] + a:items)', 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
         call s:PatchFile(l:dir.'/bin/server.js', readfile(l:dir.'/build/index.js'), [
@@ -921,7 +921,7 @@ function! ChooseCodeAction(items, callback) abort
     endif
 endfunction
 
-autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = 0
+autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = v:false
 autocmd vimrc User Plug_fzf autocmd vimrc User CocLocationsChange ++nested
     \ call s:FzfFromQuickfix([], map(g:coc_jump_locations, function("\<SID>HighlightRange")))
 function! s:HighlightRange(index, item) abort
@@ -1018,7 +1018,7 @@ if executable('ccls')
         if exists('s:ccls_configured')
             return
         endif
-        let s:ccls_configured = 1
+        let s:ccls_configured = v:true
         for l:pattern in g:coc_user_config.languageserver.c.rootPatterns
             if !empty(findfile(l:pattern, escape(expand('%:p'), ' ,;').';'))
                 return
@@ -1079,8 +1079,8 @@ Plug 'neoclide/coc-neco'
 
 Plug 'sheerun/vim-polyglot'
 let g:polyglot_disabled = ['latex']
-let g:jsx_ext_required = 1
-let g:python_highlight_space_errors = 0
+let g:jsx_ext_required = v:true
+let g:python_highlight_space_errors = v:false
 
 autocmd vimrc FileType c,cpp setlocal commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
@@ -1104,18 +1104,18 @@ Plug 'neoclide/coc-vimtex'
 let g:tex_flavor = 'latex'
 let g:tex_conceal = 'agm'
 autocmd vimrc FileType tex setlocal conceallevel=2
-let g:vimtex_indent_on_ampersands = 0
-let g:vimtex_indent_bib_enabled = 0
+let g:vimtex_indent_on_ampersands = v:false
+let g:vimtex_indent_bib_enabled = v:false
 if executable('nvr')
     let g:vimtex_compiler_progname = 'nvr'
 endif
 if executable('zathura')
     let g:vimtex_view_method = 'zathura'
 endif
-let g:vimtex_fold_enabled = 1
+let g:vimtex_fold_enabled = v:true
 let g:vimtex_fold_types = {}
 for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
-    let g:vimtex_fold_types[s:key] = {'enabled': 0}
+    let g:vimtex_fold_types[s:key] = {'enabled': v:false}
 endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:InitVimtexBuffer()
 function! s:InitVimtexBuffer() abort
@@ -1133,7 +1133,7 @@ endfunction
 
 Plug 'iamcco/markdown-preview.nvim', {'do': {-> mkdp#util#install()}}
 let g:mkdp_page_title = '${name}'
-let g:mkdp_auto_close = 0
+let g:mkdp_auto_close = v:false
 autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
     \ nnoremap <buffer> <Leader>mv <Cmd>MarkdownPreview<CR>
 
@@ -1269,7 +1269,7 @@ if executable('gdb')
         elseif mode()[0] ==# 'n'
             let l:expr = expand('<cexpr>')
         else
-            let l:reg = getreg('v', 1, 1)
+            let l:reg = getreg('v', 1, v:true)
             let l:type = getregtype('v')
             normal! "vy
             let l:expr = @v
