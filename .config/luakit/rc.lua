@@ -330,8 +330,18 @@ local function setup_smooth_scroll(view)
             end,
 
             __newindex = function(_, axis, target)
-                target = math.min(math.max(target, 0), value[axis.."max"])
                 local targets = scroll_targets[axis]
+                target = math.max(target, 0)
+
+                local direction = axis == "x" and "Width" or "Height"
+                view:eval_js(string.format([[
+                    document.documentElement.scroll%s - window.inner%s
+                ]], direction, direction), {callback = function(max)
+                    if targets[view] then
+                        targets[view] = math.min(targets[view], math.max(max, 0))
+                    end
+                end})
+
                 if targets[view] then
                     targets[view] = target
                     return
