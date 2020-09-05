@@ -29,8 +29,12 @@ function update(bufnr) {
     timers[bufnr] = setTimeout(async () => {
         delete timers[bufnr];
 
+        const doc = workspace.getDocument(bufnr);
+        if (!doc)
+            return;
+
         const symbols = await languages.documentSymbolManager.provideDocumentSymbols(
-            workspace.getDocument(bufnr).textDocument,
+            doc.textDocument,
             tokens[bufnr] = languages.token,
         );
         delete tokens[bufnr];
