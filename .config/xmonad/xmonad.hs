@@ -252,7 +252,7 @@ instance XPrompt TerminalPrompt where
 -- Layout {{{1
 
 layout textHeight = addDecoration $ addGaps $ addNavigation customLayout where
-    addDecoration = decoration shrinkText theme {decoHeight = textHeight} CollapseDecoration
+    addDecoration = decoration EllipsisShrinker theme CollapseDecoration
     addGaps = spacingWithEdge gapWidth
     addNavigation = configurableNavigation noNavigateBorders
     customLayout = EmptyLayout [def, def {limit = maxBound}]
@@ -267,6 +267,12 @@ instance DecorationStyle CollapseDecoration Window where
     shrink _ _ = id
 
 isCollapsed stack win = (&& win /= W.focus stack) <$> hasTag "collapsible" win
+
+data EllipsisShrinker = EllipsisShrinker
+    deriving (Read, Show)
+
+instance Shrinker EllipsisShrinker where
+    shrinkIt _ s = s : map (++ "…") (reverse $ inits $ init s)
 
 data Column = Column
     { limit :: Int
