@@ -312,9 +312,9 @@ instance LayoutClass CustomLayout Window where
                     Rectangle x y w h' : split' (Rectangle x (y + fromIntegral h') w (h - h')) weights
                 collapsedHeight' = min collapsedHeight $ rect_height rect `div` fromIntegral (length weights)
 
-            layoutCol col rect wins = if allCollapsed wins then [(head wins, rect)] else winRects where
-                winRects = zip wins $ split rect $ map findWeight wins
-                findWeight win = M.findWithDefault (Just 1) win $ M.union collapsedWins' winWeights'
+            layoutCol col rect wins = zip wins $ split rect $ map findWeight wins where
+                findWeight win = M.findWithDefault (Just 1) win $ M.union collapsedWins'' winWeights'
+                collapsedWins'' = if allCollapsed wins then M.empty else collapsedWins'
                 winWeights' = M.map Just $ M.mapKeys (wins !!) $ M.takeWhileAntitone (< length wins) $ winWeights col
 
             cumLimits = scanl (+) 0 $ limit <$> init cols
