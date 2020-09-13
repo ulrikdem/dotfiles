@@ -116,6 +116,13 @@ modes.remap_binds({"all", "passthrough"}, {
 modes.remove_binds("passthrough", {"<Escape>"})
 
 modes.add_binds("normal", {
+    {"!", "Start bang search.", function(win)
+        win:enter_cmd(":open !")
+    end},
+    {"<control-1>", "Start bang search in a new tab.", function(win)
+        win:enter_cmd(":tabopen !")
+    end},
+
     {"gs", "Toggle between HTTP and HTTPS.", function(win)
         win.view.uri = win.view.uri:gsub("^(https?):", {http = "https:", https = "http:"})
     end},
