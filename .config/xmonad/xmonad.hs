@@ -5,25 +5,31 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 
 import Control.Monad
+
 import Data.Bool
 import Data.Char
 import Data.List
-import qualified Data.Map.Strict as M
 import Data.Maybe
+import qualified Data.Map.Strict as M
+
 import Graphics.X11.Xft
-import IconRules
+
 import XMonad hiding ((|||))
+import qualified XMonad.StackSet as W
+
 import XMonad.Actions.CycleWS
 import XMonad.Actions.PhysicalScreens
 import XMonad.Actions.Promote
 import XMonad.Actions.RotSlaves
 import XMonad.Actions.SwapWorkspaces
 import XMonad.Actions.TagWindows
+
 import XMonad.Hooks.DynamicBars
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
+
 import XMonad.Layout.Decoration
 import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.Named
@@ -31,16 +37,19 @@ import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
 import XMonad.Layout.StateFull
 import XMonad.Layout.WindowNavigation
+
 import XMonad.Prompt
 import XMonad.Prompt.FuzzyMatch
 import XMonad.Prompt.Shell
 import XMonad.Prompt.Window
-import qualified XMonad.StackSet as W
+
 import XMonad.Util.Cursor
 import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Stack
+
+import IconRules
 
 -- Main {{{1
 
