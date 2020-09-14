@@ -1,6 +1,7 @@
 Config
-    { fgColor = "gray50"
+    { font = "xft:Hack Nerd Font Mono:size=9"
     , additionalFonts = ["xft:Symbols Nerd Font:size=11"]
+    , fgColor = "gray50"
     , template = "%UnsafeStdinReader%}{%wi%%dynnetwork%%ip%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =
         [ Run UnsafeStdinReader

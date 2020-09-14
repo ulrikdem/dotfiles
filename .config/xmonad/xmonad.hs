@@ -86,7 +86,7 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:Hack Nerd Font Mono:size=9"
+    , fontName = "xft:monospace:size=9"
     }
 
 getTextHeight = do
@@ -103,7 +103,7 @@ getTextHeight = do
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i ++ " -f '" ++ fontName theme ++ "'"
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
     icons <- withWindowSet $ fmap M.fromList . mapM workspaceIcon . W.workspaces
