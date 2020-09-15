@@ -75,6 +75,10 @@ nnoremap <M-j> <C-W>j
 nnoremap <M-k> <C-W>k
 nnoremap <M-l> <C-W>l
 
+for s:i in range(1, 10)
+    execute 'nnoremap <M-'.(s:i % 10).'>' s:i.'gt'
+endfor
+
 nmap <C-LeftMouse> <LeftMouse><C-]>
 nnoremap <C-RightMouse> <C-O>
 
@@ -431,10 +435,15 @@ autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
 tnoremap <C-\> <C-\><C-N>
+
 tnoremap <M-h> <Cmd>wincmd h<CR>
 tnoremap <M-j> <Cmd>wincmd j<CR>
 tnoremap <M-k> <Cmd>wincmd k<CR>
 tnoremap <M-l> <Cmd>wincmd l<CR>
+
+for s:i in range(1, 10)
+    execute 'tnoremap <M-'.(s:i % 10).'> <Cmd>tabnext' s:i.'<CR>'
+endfor
 
 nnoremap <Leader>ot <Cmd>terminal<CR>
 nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'//'.&shell).'<CR>'
