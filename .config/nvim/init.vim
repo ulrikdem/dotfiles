@@ -314,9 +314,7 @@ function! TabLabel(tab) abort
         let l:name = getwininfo(win_getid(l:win, a:tab))[0].loclist ?
             \ '[Location List]' : '[Quickfix List]'
     endif
-    let l:name = empty(l:name) ? '[No Name]' : l:name
-    let l:buffers = len(uniq(sort(tabpagebuflist(a:tab))))
-    return a:tab.': '.l:name.(l:buffers > 1 ? ' +'.(l:buffers - 1) : '')
+    return a:tab.': '.(empty(l:name) ? '[No Name]' : l:name)
 endfunction
 
 autocmd vimrc User Plug_lightline_vim set noshowmode
