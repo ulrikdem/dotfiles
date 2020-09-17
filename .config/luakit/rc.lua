@@ -465,7 +465,7 @@ local dark_style = stylesheet{
         :root:not(.luakit-already-dark) #luakit_select_overlay .hint_label,
         :root:not(.luakit-already-dark).luakit-invert-images
             :matches(img, video):not(:-webkit-full-screen, :root :-webkit-full-screen *),
-        frame, iframe {
+        :matches(frame, iframe):not(:-webkit-full-screen) {
             filter: invert(1) hue-rotate(180deg);
         }
     ]],
