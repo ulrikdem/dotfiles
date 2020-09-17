@@ -1,0 +1,2 @@
+#!/bin/bash
+feh --no-fehbg --bg-fill -- "${1:-$(find -L ~/.local/share/backgrounds -type f | shuf -n 1)}"
