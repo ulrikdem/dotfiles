@@ -56,6 +56,7 @@ local window = require("window")
 
 local completion_mtime = lfs.attributes(luakit.config_dir.."/completion_patched.lua", "modification")
 if not completion_mtime
+        or completion_mtime < lfs.attributes(luakit.install_paths.install_dir.."/lib/completion.lua", "modification")
         or completion_mtime < lfs.attributes(luakit.config_dir.."/completion.patch", "modification") then
     luakit.spawn_sync(string.format("patch -o %q %q %q",
         luakit.config_dir.."/completion_patched.lua",
