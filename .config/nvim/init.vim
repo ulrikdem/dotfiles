@@ -188,7 +188,6 @@ function! s:UpdateColorScheme() abort
     highlight link PmenuSbar Pmenu
     highlight link QuickFixLine Visual
     highlight! link Directory SrceryGreen
-    highlight! link SpecialKey SrceryBrightBlack
     highlight! link Error SrceryRedBold
     highlight! link ErrorMsg SrceryRedBold
     highlight! link WarningMsg SrceryRed
