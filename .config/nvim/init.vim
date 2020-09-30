@@ -178,6 +178,7 @@ function! s:UpdateColorScheme() abort
     call s:Highlight('StatusLineNC', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
     call s:Highlight('CursorLine', {'bg': 'SrceryXgray1'})
     call s:Highlight('CursorLineNr', {'bg': 'SrceryXgray1'})
+    call s:Highlight('Folded', {'attr': 'NONE'})
     call s:Highlight('Visual', {'bg': 'SrceryXgray4', 'attr': 'NONE'})
     call s:Highlight('Search', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightYellow', 'attr': 'NONE'})
     call s:Highlight('IncSearch', {'fg': 'SrceryBlack', 'bg': 'SrceryYellow', 'attr': 'NONE'})
