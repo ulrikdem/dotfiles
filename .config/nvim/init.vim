@@ -764,7 +764,6 @@ if executable('node')
             \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
             \ ['coc#util#create_float_buf(a:bufnr)\zs', ' | call setbufvar(l:bufnr, "\&modifiable", v:true)'],
-            \ ['let res = inputlist(\[a:title] + a:items)', 'return ChooseCodeAction(a:items, a:cb)'],
         \ ])
         call s:PatchFile(l:dir.'/bin/server.js', readfile(l:dir.'/build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
@@ -909,23 +908,6 @@ endfunction
 
 function! s:CodeActionOperatorFunc(type) abort
     call CocActionAsync('codeAction', a:type)
-endfunction
-
-function! ChooseCodeAction(items, callback) abort
-    if isdirectory(g:plugs.fzf.dir)
-        call fzf#run({
-            \ 'source': a:items,
-            \ 'sink*': {r -> empty(r[0]) ? a:callback(v:null, r[1]) : a:callback(v:null, 0)},
-            \ 'options': [
-                \ '--with-nth=2..',
-                \ '--delimiter=\. ',
-                \ '--expect=esc,ctrl-c,ctrl-g,ctrl-q',
-            \ ],
-            \ 'window': g:fzf_layout.window,
-        \ })
-    else
-        call a:callback(v:null, inputlist(['Choose code action'] + a:items))
-    endif
 endfunction
 
 autocmd vimrc User Plug_fzf let g:coc_enable_locationlist = v:false
