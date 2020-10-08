@@ -129,7 +129,7 @@ barLogHook = do
 workspaceIcon workspace = do
     let applyRule win (query, icon) = bool Nothing (Just icon) <$> runQuery query win
     icons <- case W.stack workspace of
-        Just stack -> mapM (applyRule $ W.focus stack) iconRules
+        Just stack -> forM iconRules $ applyRule $ W.focus stack
         Nothing -> return []
     let lastIcon = foldr (flip maybe Just) Nothing icons
     return (W.tag workspace, lastIcon)
@@ -305,7 +305,7 @@ instance LayoutClass CustomLayout Window where
                 EmptyLayout c h -> (c, h)
             wins = W.integrate stack
 
-        collapsedWins <- mapM (isCollapsed stack) wins
+        collapsedWins <- forM wins $ isCollapsed stack
         let collapsedWins' = M.fromList $ zip (map fst $ filter snd $ zip wins collapsedWins) $ repeat Nothing
             allCollapsed = all (`M.member` collapsedWins')
 
