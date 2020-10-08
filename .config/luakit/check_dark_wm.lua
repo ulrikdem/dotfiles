@@ -25,7 +25,7 @@ local function check(page)
                 .map(row => sum([0, 1, 2].map(i => row[i] * color[i])))
                 .map(x => Math.min(Math.max(1 - x, 0), 1))
 
-            document.documentElement.classList.toggle('luakit-already-dark', sum(inverted) >= sum(color))
+            document.documentElement.classList.toggle('luakit-no-invert', sum(inverted) >= sum(color))
         }
     ]])
 end

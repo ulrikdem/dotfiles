@@ -462,9 +462,9 @@ end
 
 local dark_style = stylesheet{
     source = [[
-        :root:not(.luakit-already-dark),
-        :root:not(.luakit-already-dark) #luakit_select_overlay .hint_label,
-        :root:not(.luakit-already-dark).luakit-invert-images
+        :root:not(.luakit-no-invert),
+        :root:not(.luakit-no-invert) #luakit_select_overlay .hint_label,
+        :root:not(.luakit-no-invert).luakit-invert-images
             :matches(img, video):not(:-webkit-full-screen, :root :-webkit-full-screen *),
         :matches(frame, iframe):not(:-webkit-full-screen) {
             filter: invert(1) hue-rotate(180deg);
@@ -491,10 +491,10 @@ modes.add_binds("normal", {
 
     {"c", "Toggle whether the current page is inverted.", function(win)
         if win.view.stylesheets[dark_style] then
-            change_class(win.view, "toggle", "luakit-already-dark")
+            change_class(win.view, "toggle", "luakit-no-invert")
         else
             win.view.stylesheets[dark_style] = true
-            change_class(win.view, "remove", "luakit-already-dark")
+            change_class(win.view, "remove", "luakit-no-invert")
         end
     end},
 
