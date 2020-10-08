@@ -297,7 +297,7 @@ webview.add_signal("init", function(view)
                 return
             end
 
-            local scheme = widget.text:match("^%a[%a%d+%-.]*:") or ""
+            local scheme = widget.text:match("^%a[%w+%-.]*:") or ""
             local color = scheme == "Link:" and theme.scheme_fg
                 or win.view:ssl_trusted() and theme.trust_scheme_fg
                 or (win.view:ssl_trusted() == false or scheme == "http:") and theme.notrust_scheme_fg
@@ -503,59 +503,6 @@ modes.add_binds("normal", {
     end},
 })
 
--- Videos {{{1
-
-local function play_video(uris, referrer, win)
-    if #uris == 0 then
-        win:error("Could not play video")
-        return
-    end
-
-    local uri = table.remove(uris, 1)
-    luakit.spawn(string.format("mpv --referrer=%q -- %q", referrer, uri), function(_, status)
-        if status ~= 0 then
-            play_video(uris, referrer, win)
-        end
-    end)
-end
-
-follow.selectors.video = "video"
-modes.add_binds("ex-follow", {
-    {"v", "Hint all videos and play it with `mpv`.", function(win)
-        win:set_mode("follow", {
-            prompt = "mpv",
-            selector = "video",
-            evaluator = function(element)
-                local uris = {element.attr.src}
-                for _, source in ipairs(element:query("source")) do
-                    table.insert(uris, source.attr.src)
-                end
-                element:remove()
-                return uris
-            end,
-            func = function(uris)
-                table.insert(uris, win.view.uri)
-                play_video(uris, win.view.uri, win)
-            end,
-        })
-    end},
-
-    {"V", "Hint all links and play it with `mpv`.", function(win)
-        win:set_mode("follow", {
-            prompt = "mpv",
-            selector = "uri",
-            evaluator = "uri",
-            func = function(uri)
-                luakit.spawn(string.format("mpv -- %q", uri), function(_, status)
-                    if status ~= 0 then
-                        win:error("Could not play video")
-                    end
-                end)
-            end,
-        })
-    end},
-})
-
 -- Downloads {{{1
 
 local add_download = downloads.add
@@ -652,6 +599,82 @@ history.add_signal("add", function(uri)
         return false
     end
 end)
+
+local function resolve_uri(uri, base)
+    if not uri or uri:match("^%a[%w+%-.]*:") then
+        return uri
+    end
+    local parts = soup.parse_uri(base)
+    if uri:match("^//") then
+        return parts.scheme..":"..uri
+    end
+    parts.fragment = uri:match("^#(.*)")
+    if not parts.fragment then
+        parts.query = uri:match("^%?(.*)")
+        if uri:match("^/") then
+            parts.path = uri
+        elseif not parts.query then
+            parts.path = parts.path:match(".*/")..uri
+        end
+    end
+    return soup.uri_tostring(parts)
+end
+
+-- Videos {{{1
+
+local function play_video(uris, referrer, win)
+    if #uris == 0 then
+        win:error("Could not play video")
+        return
+    end
+
+    local uri = table.remove(uris, 1)
+    luakit.spawn(string.format("mpv --referrer=%q -- %q", referrer, uri), function(_, status)
+        if status ~= 0 then
+            msg.warn("Could not play video: "..uri)
+            play_video(uris, referrer, win)
+        end
+    end)
+end
+
+follow.selectors.video = "video"
+modes.add_binds("ex-follow", {
+    {"v", "Hint all videos and play it with `mpv`.", function(win)
+        win:set_mode("follow", {
+            prompt = "mpv",
+            selector = "video",
+            evaluator = function(element, page)
+                local uris = {resolve_uri(element.attr.src, page.uri)}
+                for _, source in ipairs(element:query("source")) do
+                    table.insert(uris, resolve_uri(source.attr.src, page.uri))
+                end
+                if #uris ~= 0 then
+                    element:remove()
+                end
+                return uris
+            end,
+            func = function(uris)
+                table.insert(uris, win.view.uri)
+                play_video(uris, win.view.uri, win)
+            end,
+        })
+    end},
+
+    {"V", "Hint all links and play it with `mpv`.", function(win)
+        win:set_mode("follow", {
+            prompt = "mpv",
+            selector = "uri",
+            evaluator = "uri",
+            func = function(uri)
+                luakit.spawn(string.format("mpv -- %q", uri), function(_, status)
+                    if status ~= 0 then
+                        win:error("Could not play video")
+                    end
+                end)
+            end,
+        })
+    end},
+})
 
 -- Initialization {{{1
 
