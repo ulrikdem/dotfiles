@@ -174,18 +174,18 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
-    call s:Highlight('StatusLine', {'bg': 'SrceryXgray5'})
-    call s:Highlight('StatusLineNC', {'bg': 'SrceryXgray5', 'attr': 'NONE'})
-    call s:Highlight('CursorLine', {'bg': 'SrceryXgray1'})
-    call s:Highlight('CursorLineNr', {'bg': 'SrceryXgray1'})
-    call s:Highlight('Folded', {'attr': 'NONE'})
-    call s:Highlight('Visual', {'bg': 'SrceryXgray4', 'attr': 'NONE'})
-    call s:Highlight('Search', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightYellow', 'attr': 'NONE'})
-    call s:Highlight('IncSearch', {'fg': 'SrceryBlack', 'bg': 'SrceryYellow', 'attr': 'NONE'})
-    call s:Highlight('DiffAdd', {'fg': 'SrceryBlack', 'bg': 'SrceryGreen'})
-    call s:Highlight('DiffChange', {'fg': 'SrceryBlack', 'bg': 'SrceryBlue'})
-    call s:Highlight('DiffText', {'fg': 'SrceryBlack', 'bg': 'SrceryBrightBlue'})
-    call s:Highlight('PmenuThumb', {'bg': 'SrceryXgray5'})
+    call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
+    call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
+    call s:Highlight('CursorLine', #{bg: 'SrceryXgray1'})
+    call s:Highlight('CursorLineNr', #{bg: 'SrceryXgray1'})
+    call s:Highlight('Folded', #{attr: 'NONE'})
+    call s:Highlight('Visual', #{bg: 'SrceryXgray4', attr: 'NONE'})
+    call s:Highlight('Search', #{fg: 'SrceryBlack', bg: 'SrceryBrightYellow', attr: 'NONE'})
+    call s:Highlight('IncSearch', #{fg: 'SrceryBlack', bg: 'SrceryYellow', attr: 'NONE'})
+    call s:Highlight('DiffAdd', #{fg: 'SrceryBlack', bg: 'SrceryGreen'})
+    call s:Highlight('DiffChange', #{fg: 'SrceryBlack', bg: 'SrceryBlue'})
+    call s:Highlight('DiffText', #{fg: 'SrceryBlack', bg: 'SrceryBrightBlue'})
+    call s:Highlight('PmenuThumb', #{bg: 'SrceryXgray5'})
     highlight link PmenuSbar Pmenu
     highlight link QuickFixLine Visual
     highlight! link Directory SrceryGreen
@@ -235,50 +235,50 @@ endfunction
 " Statusline {{{1
 
 Plug 'itchyny/lightline.vim'
-let g:lightline = {
-    \ 'active': {
-        \ 'left': [['mode'], ['filename'], ['truncate']],
-        \ 'right': [['ruler'], ['fileformat', 'fileencoding', 'filetype'], []],
+let g:lightline = #{
+    \ active: #{
+        \ left: [['mode'], ['filename'], ['truncate']],
+        \ right: [['ruler'], ['fileformat', 'fileencoding', 'filetype'], []],
     \ },
-    \ 'inactive': {
-        \ 'left': [['filename'], ['truncate', 'space']],
-        \ 'right': [['ruler']],
+    \ inactive: #{
+        \ left: [['filename'], ['truncate', 'space']],
+        \ right: [['ruler']],
     \ },
-    \ 'component': {
-        \ 'filename': '
+    \ component: #{
+        \ filename: '
             \%{substitute(expand("%:p:~"), ''\v(.*/)?(.*/)$|.*'', ''\2'', "")}%t
             \%{&modified ? " •" : ""}',
-        \ 'truncate': '%<',
-        \ 'space': ' ',
-        \ 'ruler': '%p%% %l:%v',
+        \ truncate: '%<',
+        \ space: ' ',
+        \ ruler: '%p%% %l:%v',
     \ },
-    \ 'component_visible_condition': {
-        \ 'truncate': 'v:false',
+    \ component_visible_condition: #{
+        \ truncate: 'v:false',
     \ },
-    \ 'component_function': {
-        \ 'mode': 'StatusLineMode',
-        \ 'fileformat': 'StatusLineFileFormat',
-        \ 'fileencoding': 'StatusLineFileEncoding',
-        \ 'filetype': 'StatusLineFileType',
+    \ component_function: #{
+        \ mode: 'StatusLineMode',
+        \ fileformat: 'StatusLineFileFormat',
+        \ fileencoding: 'StatusLineFileEncoding',
+        \ filetype: 'StatusLineFileType',
     \ },
-    \ 'component_expand': {},
-    \ 'component_type': {},
-    \ 'tabline': {
-        \ 'left': [['tabs']],
-        \ 'right': [],
+    \ component_expand: {},
+    \ component_type: {},
+    \ tabline: #{
+        \ left: [['tabs']],
+        \ right: [],
     \ },
-    \ 'tab': {
-        \ 'active': ['tab'],
-        \ 'inactive': ['tab'],
+    \ tab: #{
+        \ active: ['tab'],
+        \ inactive: ['tab'],
     \ },
-    \ 'tab_component_function': {
-        \ 'tab': 'TabLabel',
+    \ tab_component_function: #{
+        \ tab: 'TabLabel',
     \ },
-    \ 'separator': {'left': '', 'right': ''},
-    \ 'subseparator': {'left': '', 'right': ''},
-    \ 'tabline_separator': {'left': '▌', 'right': '▐'},
-    \ 'tabline_subseparator': {'left': '│', 'right': '│'},
-    \ '_mode_': {'f': 'fake'},
+    \ separator: #{left: '', right: ''},
+    \ subseparator: #{left: '', right: ''},
+    \ tabline_separator: #{left: '▌', right: '▐'},
+    \ tabline_subseparator: #{left: '│', right: '│'},
+    \ _mode_: #{f: 'fake'},
 \ }
 
 function! StatusLineMode() abort
@@ -323,19 +323,19 @@ autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call light
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
     let l:common = s:GetSrceryColors('BrightWhite', 'Xgray5')
-    let l:palette = {
-        \ 'normal': {
-            \ 'middle': [s:GetSrceryColors('BrightWhite', 'Xgray3')],
-            \ 'error': [s:GetSrceryColors('Black', 'Red')],
-            \ 'warning': [s:GetSrceryColors('Black', 'BrightOrange')],
+    let l:palette = #{
+        \ normal: #{
+            \ middle: [s:GetSrceryColors('BrightWhite', 'Xgray3')],
+            \ error: [s:GetSrceryColors('Black', 'Red')],
+            \ warning: [s:GetSrceryColors('Black', 'BrightOrange')],
         \ },
-        \ 'inactive': {
-            \ 'left': [l:common],
-            \ 'right': [l:common],
+        \ inactive: #{
+            \ left: [l:common],
+            \ right: [l:common],
         \ },
-        \ 'tabline': {
-            \ 'left': [l:common],
-            \ 'tabsel': [s:GetSrceryColors('Black', 'Blue')],
+        \ tabline: #{
+            \ left: [l:common],
+            \ tabsel: [s:GetSrceryColors('Black', 'Blue')],
         \ },
     \ }
     for [l:mode, l:color] in [
@@ -382,9 +382,9 @@ autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mm <Cmd>silent update \| Ma
 autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
 
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
-    \ cclose | call asyncdo#run(<bang>0, {
-        \ 'job': substitute(&grepprg, '\\|', '|', 'g'),
-        \ 'errorformat': &grepformat,
+    \ cclose | call asyncdo#run(<bang>0, #{
+        \ job: substitute(&grepprg, '\\|', '|', 'g'),
+        \ errorformat: &grepformat,
     \ }, <q-args>)
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file RGrep
     \ Grep<bang> <args> %:p:.:h:S
@@ -409,11 +409,11 @@ if executable('rg') && executable('igrep-format')
     endfunction
     function! s:ParseIGrep(line) abort
         let [l:file, l:line, l:col; l:text] = split(a:line, '\n')[:-2]
-        return {
-            \ 'filename': l:file,
-            \ 'lnum': str2nr(l:line),
-            \ 'col': str2nr(l:col),
-            \ 'text': join(l:text, "\e"),
+        return #{
+            \ filename: l:file,
+            \ lnum: str2nr(l:line),
+            \ col: str2nr(l:col),
+            \ text: join(l:text, "\e"),
         \ }
     endfunction
 endif
@@ -459,20 +459,20 @@ if $RANGER_LEVEL
         \ !v:count && bufnr('$') * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
 
-Plug 'junegunn/fzf', {'do': './install --bin'}
+Plug 'junegunn/fzf', #{do: './install --bin'}
 let g:fzf_action = {
     \ '': 'edit',
     \ 'ctrl-x': 'split',
     \ 'ctrl-v': 'vsplit',
     \ 'ctrl-t': 'tab split',
 \ }
-let g:fzf_layout = {
-    \ 'window': {
-        \ 'width': 1,
-        \ 'height': 0.25,
-        \ 'yoffset': 1,
-        \ 'border': 'top',
-        \ 'highlight': 'VertSplit',
+let g:fzf_layout = #{
+    \ window: #{
+        \ width: 1,
+        \ height: 0.25,
+        \ yoffset: 1,
+        \ border: 'top',
+        \ highlight: 'VertSplit',
     \ },
 \ }
 autocmd vimrc FileType fzf mode
@@ -485,9 +485,9 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>Li
     \ '--prompt='.substitute(fnamemodify(getcwd(), ':~'), '/\?$', '/', ''),
 \ ], executable('nvr') ? [
     \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
-\ ] : []), {l -> {'filename': l}})<CR>
+\ ] : []), {l -> #{filename: l}})<CR>
 function! s:ListBuffers() abort
-    return map(filter(getbufinfo({'buflisted': v:true}),
+    return map(filter(getbufinfo(#{buflisted: v:true}),
         \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
 endfunction
 function! DeleteBuffer(name) abort
@@ -504,12 +504,12 @@ function! s:BufferJump(dir, key) abort
     let l:i = l:current + a:dir
     let l:buf = bufnr()
     for l:j in range(v:count1)
-        while get(l:jumps, l:i, {'bufnr': -1}).bufnr == l:buf
+        while get(l:jumps, l:i, #{bufnr: -1}).bufnr == l:buf
             let l:i += a:dir
         endwhile
-        let l:buf = get(l:jumps, l:i, {'bufnr': -2}).bufnr
+        let l:buf = get(l:jumps, l:i, #{bufnr: -2}).bufnr
     endfor
-    while get(l:jumps, l:i + 1, {'bufnr': -1}).bufnr == l:buf
+    while get(l:jumps, l:i + 1, #{bufnr: -1}).bufnr == l:buf
         let l:i += 1
     endwhile
     if l:i >= 0 && l:i < len(l:jumps)
@@ -549,7 +549,7 @@ function! s:ToggleQuickfix() abort
     endif
 endfunction
 
-let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> {'filename': l, 'valid': v:true}}))}
+let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> #{filename: l, valid: v:true}}))}
 
 function! s:SetQuickfix(items) abort
     call setqflist(a:items)
@@ -715,7 +715,7 @@ cnoremap <expr> /
     \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? '<C-Y>' : '/'
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
-    \ map(getbufline('%', 1, '$'), {i, l -> {'bufnr': bufnr(), 'lnum': i + 1, 'text': l}}))<CR>
+    \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
 
 set dictionary=/usr/share/dict/words
 set completeopt=menuone,noselect,noinsert shortmess+=c
@@ -744,9 +744,9 @@ function! s:CompletionFallback() abort
         let g:mucomplete#enable_auto_at_startup = v:true
         let g:mucomplete#minimum_prefix_length = v:true
         let g:mucomplete#buffer_relative_paths = v:true
-        let g:mucomplete#chains = {
-            \ 'default': ['path', 'omni', 'keyn'],
-            \ 'vim': ['path', 'cmd', 'keyn'],
+        let g:mucomplete#chains = #{
+            \ default: ['path', 'omni', 'keyn'],
+            \ vim: ['path', 'cmd', 'keyn'],
         \ }
         autocmd vimrc User Plug_vim_mucomplete iunmap <Tab>
         autocmd vimrc User Plug_vim_mucomplete iunmap <S-Tab>
@@ -770,7 +770,7 @@ if executable('node')
         \ ])
         call s:PatchFile(l:dir.'/lib/attach.js', [], [])
     endfunction
-    Plug 'neoclide/coc.nvim', {'branch': 'release', 'do': function('PatchCoc')}
+    Plug 'neoclide/coc.nvim', #{branch: 'release', do: function('PatchCoc')}
 else
     call s:CompletionFallback()
 endif
@@ -784,44 +784,44 @@ function! s:PatchFile(path, lines, subs) abort
     call writefile(l:lines, a:path)
 endfunction
 
-let g:coc_user_config = {
-    \ 'coc': {
-        \ 'source': {
-            \ 'around': {'firstMatch': v:false, 'priority': 2},
-            \ 'buffer': {'firstMatch': v:false},
+let g:coc_user_config = #{
+    \ coc: #{
+        \ source: #{
+            \ around: #{firstMatch: v:false, priority: 2},
+            \ buffer: #{firstMatch: v:false},
         \ },
     \ },
-    \ 'suggest': {
-        \ 'invalidInsertCharacters': split(' (/:<', '\zs'),
-        \ 'snippetIndicator': '',
-        \ 'detailField': 'preview',
-        \ 'maxCompleteItemCount': 1000,
+    \ suggest: #{
+        \ invalidInsertCharacters: split(' (/:<', '\zs'),
+        \ snippetIndicator: '',
+        \ detailField: 'preview',
+        \ maxCompleteItemCount: 1000,
     \ },
-    \ 'signature': {
-        \ 'floatMaxWidth': 80,
-        \ 'maxWindowHeight': 100,
+    \ signature: #{
+        \ floatMaxWidth: 80,
+        \ maxWindowHeight: 100,
     \ },
-    \ 'diagnostic': {
-        \ 'maxWindowHeight': 100,
-        \ 'checkCurrentLine': v:true,
-        \ 'format': '%message',
-        \ 'enableMessage': 'never',
-        \ 'virtualText': v:true,
-        \ 'virtualTextLines': 1,
-        \ 'separateRelatedInformationAsDiagnostics': v:true,
-        \ 'enableHighlightLineNumber': v:false,
-        \ 'errorSign': '✕',
-        \ 'warningSign': '⚠',
-        \ 'infoSign': 'ℹ',
-        \ 'hintSign': 'ℹ',
+    \ diagnostic: #{
+        \ maxWindowHeight: 100,
+        \ checkCurrentLine: v:true,
+        \ format: '%message',
+        \ enableMessage: 'never',
+        \ virtualText: v:true,
+        \ virtualTextLines: 1,
+        \ separateRelatedInformationAsDiagnostics: v:true,
+        \ enableHighlightLineNumber: v:false,
+        \ errorSign: '✕',
+        \ warningSign: '⚠',
+        \ infoSign: 'ℹ',
+        \ hintSign: 'ℹ',
     \ },
 \ }
-autocmd vimrc User CocNvimInit call coc#config('', {'coc': {}})
+autocmd vimrc User CocNvimInit call coc#config('', #{coc: {}})
 
 autocmd vimrc ColorScheme * call s:UpdateCocColors()
 function! s:UpdateCocColors() abort
     for l:level in ['Error', 'Warning', 'Info', 'Hint']
-        call s:Highlight('Coc'.l:level.'VirtualText', {'fg': 'Coc'.l:level.'Float', 'attr': 'italic'})
+        call s:Highlight('Coc'.l:level.'VirtualText', #{fg: 'Coc'.l:level.'Float', attr: 'italic'})
     endfor
     highlight link CocHighlightText CocBold
     highlight link CocUnderline CocBold
@@ -852,12 +852,12 @@ function! s:InitLspBuffer() abort
     nmap <buffer> <Leader>ge
         \ <Cmd>call CocActionAsync('diagnosticInfo', function('<SID>FocusFloat'))<CR>
     nnoremap <buffer> <Leader>gE
-        \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>SetQuickfix(map(d, {i, d -> {
-            \ 'filename': fnamemodify(d.file, ':p:~:.'),
-            \ 'lnum': d.lnum,
-            \ 'col': d.col,
-            \ 'type': d.severity[0],
-            \ 'text': d.message,
+        \ <Cmd>call CocActionAsync('diagnosticList', {e, d -> <SID>SetQuickfix(map(d, {i, d -> #{
+            \ filename: fnamemodify(d.file, ':p:~:.'),
+            \ lnum: d.lnum,
+            \ col: d.col,
+            \ type: d.severity[0],
+            \ text: d.message,
         \ }}))})<CR>
 
     nnoremap <buffer> <Leader>gh <Cmd>call CocActionAsync('doHover', function('<SID>FocusFloat'))<CR>
@@ -923,12 +923,12 @@ endfunction
 
 function! s:SymbolToQuickfix(symbol) abort
     let l:line = getbufline(get(a:symbol, 'filename', '%'), a:symbol.lnum)
-    return {
-        \ 'filename': get(a:symbol, 'filename', @%),
-        \ 'lnum': a:symbol.lnum,
-        \ 'col': empty(l:line) ? a:symbol.col :
+    return #{
+        \ filename: get(a:symbol, 'filename', @%),
+        \ lnum: a:symbol.lnum,
+        \ col: empty(l:line) ? a:symbol.col :
             \ v:lua.vim.str_byteindex(l:line[0], a:symbol.col - 1, v:true) + 1,
-        \ 'text': (a:symbol.text).s:match_start.' ['.(a:symbol.kind).']'.s:match_end,
+        \ text: (a:symbol.text).s:match_start.' ['.(a:symbol.kind).']'.s:match_end,
     \ }
 endfunction
 
@@ -945,12 +945,12 @@ function! s:FzfFromWorkspaceSymbols() abort
         if l:words[0] ==# l:last_query
             return l:results
         endif
-        let l:symbols = map(CocAction('getWorkspaceSymbols', l:words[0]), {i, s -> s:SymbolToQuickfix({
-            \ 'filename': v:lua.vim.uri_to_fname(s.location.uri),
-            \ 'lnum': s.location.range.start.line + 1,
-            \ 'col': s.location.range.start.character + 1,
-            \ 'text': s.name,
-            \ 'kind': v:lua.vim.lsp.util._get_symbol_kind_name(s.kind),
+        let l:symbols = map(CocAction('getWorkspaceSymbols', l:words[0]), {i, s -> s:SymbolToQuickfix(#{
+            \ filename: v:lua.vim.uri_to_fname(s.location.uri),
+            \ lnum: s.location.range.start.line + 1,
+            \ col: s.location.range.start.character + 1,
+            \ text: s.name,
+            \ kind: v:lua.vim.lsp.util._get_symbol_kind_name(s.kind),
         \ })})
         let l:last_query = l:words[0]
         let l:results = "\n".join(l:ProcessItems(l:symbols), "\n")."\n"
@@ -972,11 +972,11 @@ let g:lightline.component_type.warnings = 'warning'
 let g:lightline.component_expand.errors = 'StatusLineLspErrors'
 let g:lightline.component_expand.warnings = 'StatusLineLspWarnings'
 function! StatusLineLspErrors() abort
-    let l:count = get(b:, 'coc_diagnostic_info', {'error': 0}).error
+    let l:count = get(b:, 'coc_diagnostic_info', #{error: 0}).error
     return l:count ? l:count.(g:coc_user_config.diagnostic.errorSign) : ''
 endfunction
 function! StatusLineLspWarnings() abort
-    let l:count = get(b:, 'coc_diagnostic_info', {'warning': 0}).warning
+    let l:count = get(b:, 'coc_diagnostic_info', #{warning: 0}).warning
     return l:count ? l:count.(g:coc_user_config.diagnostic.warningSign) : ''
 endfunction
 autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange call lightline#update()
@@ -986,13 +986,13 @@ autocmd vimrc User Plug_lightline_vim autocmd vimrc User CocDiagnosticChange cal
 let g:coc_user_config.languageserver = {}
 
 if executable('ccls')
-    let g:coc_user_config.languageserver.c = {
-        \ 'command': 'ccls',
-        \ 'filetypes': ['c', 'cpp'],
-        \ 'rootPatterns': ['compile_commands.json', '.ccls'],
-        \ 'initializationOptions': {
-            \ 'completion': {
-                \ 'detailedLabel': v:false,
+    let g:coc_user_config.languageserver.c = #{
+        \ command: 'ccls',
+        \ filetypes: ['c', 'cpp'],
+        \ rootPatterns: ['compile_commands.json', '.ccls'],
+        \ initializationOptions: #{
+            \ completion: #{
+                \ detailedLabel: v:false,
             \ },
         \ },
     \ }
@@ -1013,12 +1013,12 @@ if executable('ccls')
                 return
             endif
         endfor
-        call coc#config('languageserver.c.initializationOptions', {
-            \ 'cache': {
-                \ 'directory': '',
+        call coc#config('languageserver.c.initializationOptions', #{
+            \ cache: #{
+                \ directory: '',
             \ },
-            \ 'clang': {
-                \ 'extraArgs': [
+            \ clang: #{
+                \ extraArgs: [
                     \ &filetype ==# 'c' ? '-std=c17' : '-std=c++20',
                     \ '-Wall', '-Wextra', '-Wconversion', '-Wno-sign-conversion',
                 \ ],
@@ -1028,31 +1028,31 @@ if executable('ccls')
 endif
 
 if executable('pyls')
-    let g:coc_user_config.languageserver.python = {
-        \ 'command': 'pyls',
-        \ 'filetypes': ['python'],
+    let g:coc_user_config.languageserver.python = #{
+        \ command: 'pyls',
+        \ filetypes: ['python'],
     \ }
 endif
 
 if executable('rust-analyzer')
-    let g:coc_user_config.languageserver.rust = {
-        \ 'command': 'rust-analyzer',
-        \ 'filetypes': ['rust'],
-        \ 'rootPatterns': ['Cargo.toml'],
-        \ 'settings': {
-            \ 'rust-analyzer': {
-                \ 'checkOnSave': {'enable': v:false},
+    let g:coc_user_config.languageserver.rust = #{
+        \ command: 'rust-analyzer',
+        \ filetypes: ['rust'],
+        \ rootPatterns: ['Cargo.toml'],
+        \ settings: #{
+            \ rust-analyzer: #{
+                \ checkOnSave: #{enable: v:false},
             \ },
         \ },
     \ }
 endif
 
 if executable('typescript-language-server')
-    let g:coc_user_config.languageserver.typescript = {
-        \ 'command': 'typescript-language-server',
-        \ 'args': ['--stdio'],
-        \ 'filetypes': ['typescript', 'javascript'],
-        \ 'rootPatterns': ['package.json'],
+    let g:coc_user_config.languageserver.typescript = #{
+        \ command: 'typescript-language-server',
+        \ args: ['--stdio'],
+        \ filetypes: ['typescript', 'javascript'],
+        \ rootPatterns: ['package.json'],
     \ }
 endif
 
@@ -1104,7 +1104,7 @@ endif
 let g:vimtex_fold_enabled = v:true
 let g:vimtex_fold_types = {}
 for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
-    let g:vimtex_fold_types[s:key] = {'enabled': v:false}
+    let g:vimtex_fold_types[s:key] = #{enabled: v:false}
 endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:InitVimtexBuffer()
 function! s:InitVimtexBuffer() abort
@@ -1120,7 +1120,7 @@ function! s:CleanTexFiles() abort
     endfor
 endfunction
 
-Plug 'iamcco/markdown-preview.nvim', {'do': {-> mkdp#util#install()}}
+Plug 'iamcco/markdown-preview.nvim', #{do: {-> mkdp#util#install()}}
 let g:mkdp_page_title = '${name}'
 let g:mkdp_auto_close = v:false
 autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
@@ -1242,9 +1242,9 @@ if executable('gdb')
 
         Program
         set nomodified
-        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null # /io', {
-            \ 'on_stdout': function("\<SID>OnDebugStdout"),
-            \ 'on_exit': funcref("\<SID>OnDebugExit"),
+        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null # /io', #{
+            \ on_stdout: function("\<SID>OnDebugStdout"),
+            \ on_exit: funcref("\<SID>OnDebugExit"),
         \ })).pty
         call TermDebugSendCommand('tty '.l:pty)
 
