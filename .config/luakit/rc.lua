@@ -484,7 +484,7 @@ local function change_class(view, action, class)
 end
 
 modes.add_binds("normal", {
-    {"C", "Toggle dark mode.", function(win)
+    {"C", "Toggle dark mode for the current tab.", function(win)
         win.view.stylesheets[dark_style] = not win.view.stylesheets[dark_style]
         check_dark_wm:emit_signal(win.view, "check")
     end},
@@ -498,7 +498,7 @@ modes.add_binds("normal", {
         end
     end},
 
-    {"v", "Toggle whether images are inverted.", function(win)
+    {"v", "Toggle whether images are inverted on the current page.", function(win)
         change_class(win.view, "toggle", "luakit-invert-images")
     end},
 })
@@ -639,7 +639,7 @@ end
 
 follow.selectors.video = "video"
 modes.add_binds("ex-follow", {
-    {"v", "Hint all videos and play it with `mpv`.", function(win)
+    {"v", "Hint all videos and play the matched video with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
             selector = "video",
@@ -660,7 +660,7 @@ modes.add_binds("ex-follow", {
         })
     end},
 
-    {"V", "Hint all links and play it with `mpv`.", function(win)
+    {"V", "Hint all links and play the matched video with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
             selector = "uri",
