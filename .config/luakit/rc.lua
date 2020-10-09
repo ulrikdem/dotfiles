@@ -149,6 +149,31 @@ modes.remap_binds("insert", {
     {"<mod1-e>", "<control-e>"},
 })
 
+modes.add_binds("ex-follow", {
+    {"<control-y>", "Hint all elements and yank the text of the matched element.", function(win)
+        win:set_mode("follow", {
+            prompt = "yank text",
+            selector_func = "*",
+            evaluator = function(element)
+                return element.text_content
+            end,
+            func = function(text)
+                luakit.selection.primary = text
+            end,
+        })
+    end},
+
+    {"d", "Hint all elements and delete the matched element.", function(win)
+        win:set_mode("follow", {
+            prompt = "delete",
+            selector_func = "*",
+            evaluator = function(element)
+                element:remove()
+            end,
+        })
+    end},
+})
+
 cmdhist.history_prev = "<control-p>"
 cmdhist.history_next = "<control-n>"
 
@@ -637,12 +662,11 @@ local function play_video(uris, referrer, win)
     end)
 end
 
-follow.selectors.video = "video"
 modes.add_binds("ex-follow", {
     {"v", "Hint all videos and play the matched video with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
-            selector = "video",
+            selector_func = "video",
             evaluator = function(element, page)
                 local uris = {resolve_uri(element.attr.src, page.uri)}
                 for _, source in ipairs(element:query("source")) do
