@@ -107,6 +107,9 @@ image_css.stylesheet.source = [[
             display: grid;
         }
     }
+    :root, img {
+        filter: none !important;
+    }
 ]]
 
 -- Bindings {{{1
