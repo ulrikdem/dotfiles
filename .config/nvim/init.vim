@@ -791,12 +791,6 @@ let g:coc_user_config = #{
             \ buffer: #{firstMatch: v:false},
         \ },
     \ },
-    \ suggest: #{
-        \ invalidInsertCharacters: split(' (/:<', '\zs'),
-        \ snippetIndicator: '',
-        \ detailField: 'preview',
-        \ maxCompleteItemCount: 1000,
-    \ },
     \ signature: #{
         \ floatMaxWidth: 80,
         \ maxWindowHeight: 100,
@@ -816,7 +810,12 @@ let g:coc_user_config = #{
         \ hintSign: 'ℹ',
     \ },
 \ }
-autocmd vimrc User CocNvimInit call coc#config('', #{coc: {}})
+autocmd vimrc User CocNvimInit call coc#config('suggest', #{
+    \ invalidInsertCharacters: split(' (/:<', '\zs'),
+    \ snippetIndicator: '',
+    \ detailField: 'preview',
+    \ maxCompleteItemCount: 1000,
+\ })
 
 autocmd vimrc ColorScheme * call s:UpdateCocColors()
 function! s:UpdateCocColors() abort
