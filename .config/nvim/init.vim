@@ -1066,9 +1066,7 @@ Plug 'Shougo/neco-vim'
 Plug 'neoclide/coc-neco'
 
 Plug 'sheerun/vim-polyglot'
-let g:polyglot_disabled = ['latex']
-let g:jsx_ext_required = v:true
-let g:python_highlight_space_errors = v:false
+let g:polyglot_disabled = ['tex']
 
 autocmd vimrc FileType c,cpp setlocal commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
