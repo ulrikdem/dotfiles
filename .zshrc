@@ -39,7 +39,7 @@ fi
 
 [[ -d ~/.dotfiles.git ]] && alias dotfiles='GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ zsh'
 
-type abduco >/dev/null && alias abduco="abduco -e '^_'"
+type abduco >/dev/null && alias abduco="abduco -e '^H'"
 type diff >/dev/null && alias diff='diff --color=auto'
 type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
