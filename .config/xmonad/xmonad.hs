@@ -183,10 +183,10 @@ extraKeys textHeight =
     , ("M-z", spawn "lock")
 
     , ("<XF86AudioMute>", spawn "amixer set Master toggle")
-    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 5%-")
-    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 5%+")
-    , ("<XF86MonBrightnessDown>", spawn "light -U 25")
-    , ("<XF86MonBrightnessUp>", spawn "light -A 25")
+    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 2%-")
+    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 2%+")
+    , ("<XF86MonBrightnessDown>", spawn "light -U 10")
+    , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
     , ("M-<Tab>", toggleWS' ["NSP"])
     , ("M-S-,", moveTo Prev cycleWSType)
