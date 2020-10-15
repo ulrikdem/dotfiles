@@ -12,6 +12,8 @@ xset s off
 xset dpms 0 0 0
 xss-lock -- sh -c 'xset dpms 5; i3lock -nec 000000 && killall -q i3lock; xset dpms 0' &
 
+numlockx
+
 feh --no-fehbg --bg-fill ~/.config/wallpaper
 picom -b
 

@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [[ $1 = xinit || $1:$3 = keyboard:connected ]]; then
-    setxkbmap -option ctrl:nocaps -option numpad:mac -option parens:swap_brackets -print | xkbcomp -I"$HOME/.config/xkb" - "$DISPLAY"
+    setxkbmap -option ctrl:nocaps -option parens:swap_brackets -print | xkbcomp -I"$HOME/.config/xkb" - "$DISPLAY"
 fi
 
 if [[ $1 = xinit || $1:$3 = display:connected ]]; then
