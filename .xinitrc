@@ -1,6 +1,6 @@
 #!/bin/bash
 
-~/.config/xplugrc xinit
+~/.config/xplugrc
 xplugd
 
 export GDK_SCALE=$(cat ~/.config/dpi-scale || echo 1)

@@ -1,16 +1,17 @@
 #!/bin/bash
 
-if [[ $1 = xinit || $1:$3 = keyboard:connected ]]; then
-    setxkbmap -option ctrl:nocaps -option parens:swap_brackets -print | xkbcomp -I"$HOME/.config/xkb" - "$DISPLAY"
+if ((!$#)) || [[ $1:$3 = keyboard:connected ]]; then
+    setxkbmap -option ctrl:nocaps -option parens:swap_brackets -print | xkbcomp -I"$HOME/.config/xkb" - "$DISPLAY" 2>/dev/null
 fi
 
-if [[ $1 = xinit || $1:$3 = display:connected ]]; then
+if ((!$#)) || [[ $1:$3 = display:connected ]]; then
     if [[ -r $0.displays ]]; then
         connected=$2
         display() {
-            [[ -z $connected || $1 = $connected ]] && xrandr --output "$@"
+            [[ -z $connected ]] && xrandr | grep -q "^$1 connected" || [[ $connected = $1 ]] && xrandr --output "$@"
         }
-        . "$0.displays"
+        source "$0.displays"
+        true
     else
         xrandr ${2:+--output "$2"} --auto
     fi
