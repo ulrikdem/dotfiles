@@ -1066,7 +1066,7 @@ Plug 'Shougo/neco-vim'
 Plug 'neoclide/coc-neco'
 
 Plug 'sheerun/vim-polyglot'
-let g:polyglot_disabled = ['tex']
+let g:polyglot_disabled = ['autoindent', 'sensible', 'tex']
 
 autocmd vimrc FileType c,cpp setlocal commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
