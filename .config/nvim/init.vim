@@ -1065,9 +1065,6 @@ endfor
 Plug 'Shougo/neco-vim'
 Plug 'neoclide/coc-neco'
 
-Plug 'sheerun/vim-polyglot'
-let g:polyglot_disabled = ['autoindent', 'sensible', 'tex']
-
 autocmd vimrc FileType c,cpp setlocal commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oH <Cmd>edit %:r.hpp<CR>
@@ -1136,6 +1133,9 @@ endif
 if executable('xdg-open')
     autocmd vimrc FileType dot nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
 endif
+
+Plug 'sheerun/vim-polyglot'
+let g:polyglot_disabled = ['autoindent', 'sensible']
 
 " Debugging {{{1
 
