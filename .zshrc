@@ -10,6 +10,8 @@ type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 setopt list_packed no_list_types
 
+zle_highlight=(suffix:fg=8)
+
 if typeset -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
