@@ -53,6 +53,19 @@ stty -ixon
 
 [[ -r /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
 
+if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
+    ZSH_HIGHLIGHT_STYLES+=(
+        single-hyphen-option fg=green
+        double-hyphen-option fg=green
+        comment fg=8
+        bracket-level-1 fg=8,bold
+    )
+    noglob unset ZSH_HIGHLIGHT_STYLES[path] ZSH_HIGHLIGHT_STYLES[precommand] \
+        ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
+fi
+
 if [[ -r ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
     source ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh
 
