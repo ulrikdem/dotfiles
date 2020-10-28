@@ -453,6 +453,7 @@ set suffixes-=.h
 autocmd vimrc FileType dirvish nnoremap <buffer> C <Cmd>cd % \| pwd<CR>
 autocmd vimrc ColorScheme srcery highlight link DirvishArg SrceryOrangeBold
 autocmd vimrc ColorScheme srcery highlight link DirvishPathTail SrceryBlue
+autocmd vimrc ColorScheme srcery highlight link DirvishSuffix SrceryBrightBlack
 highlight link DirvishPathHead NonText
 if $RANGER_LEVEL
     autocmd vimrc User Plug_vim_dirvish nmap <expr> -
