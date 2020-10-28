@@ -57,8 +57,10 @@ if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
     ZSH_HIGHLIGHT_STYLES+=(
+        default fg=15
         single-hyphen-option fg=green
         double-hyphen-option fg=green
+        assign fg=cyan
         comment fg=8
         bracket-level-1 fg=8,bold
     )
