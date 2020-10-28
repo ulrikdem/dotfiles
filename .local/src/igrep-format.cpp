@@ -39,6 +39,8 @@ int main(int argc, char **argv) {
         auto i = line.find('\0', filename_prefix + 1 + filename_suffix);
         auto j = line.find(':', i + line_no_prefix + 1 + line_no_suffix);
         auto k = line.find(':', j + column_no_prefix + 1 + column_no_suffix);
+        if (i == std::string::npos || j == std::string::npos || k == std::string::npos)
+            continue;
 
         line.resize(std::remove(line.begin() + k + text_prefix, line.end() - text_suffix, 0) - line.begin());
 
