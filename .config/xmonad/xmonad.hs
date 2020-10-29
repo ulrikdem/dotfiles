@@ -56,8 +56,8 @@ import IconRules
 main = do
     textHeight <- getTextHeight
     xmonad $ ewmh $ docks $ def
-        { startupHook = setDefaultCursor xC_left_ptr >> barStartupHook
-        , handleEventHook = barEventHook
+        { startupHook = barStartupHook <> setDefaultCursor xC_left_ptr
+        , handleEventHook = barEventHook <> workspaceEventHook
         , logHook = do
             barLogHook
             let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
@@ -107,8 +107,11 @@ spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
     icons <- withWindowSet $ fmap M.fromList . mapM workspaceIcon . W.workspaces
-    let wrapWorkspace w = xmobarAction ("xdotool key Control_R super+" ++ w) "1"
+    let wrapWorkspace w = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
             $ pad $ fromMaybe w $ M.findWithDefault Nothing w icons
+        getScreen = do
+            S i <- withWindowSet $ return . W.screen . W.current
+            return $ Just $ show i
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
@@ -119,8 +122,9 @@ barLogHook = do
             , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
             , ppTitle = xmobarRaw . shorten 100
             , ppTitleSanitize = id
-            , ppExtras = [showTag "collapsible", showTag "scratchpad"]
-            , ppOrder = \(workspaces : layout : titleAndTags) -> [workspaces, concat titleAndTags]
+            , ppExtras = [getScreen, showTag "collapsible", showTag "scratchpad"]
+            , ppOrder = \(workspaces : layout : title : screen : tags)
+                -> [intercalate screen $ lines workspaces, title ++ concat tags]
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
@@ -133,6 +137,13 @@ workspaceIcon workspace = do
         Nothing -> return []
     let lastIcon = foldr (flip maybe Just) Nothing icons
     return (W.tag workspace, lastIcon)
+
+workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} = do
+    atom <- getAtom "_NET_DESKTOP_VIEWPORT"
+    when (ev_message_type event == atom) $ screenWorkspace (fromIntegral screen)
+        >>= flip whenJust (\w -> windows $ W.greedyView (show workspace) . W.view w)
+    mempty
+workspaceEventHook _ = mempty
 
 -- Keys {{{1
 
