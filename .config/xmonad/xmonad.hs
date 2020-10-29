@@ -107,7 +107,7 @@ spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
     icons <- withWindowSet $ fmap M.fromList . mapM workspaceIcon . W.workspaces
-    let wrapWorkspace w = xmobarAction ("xdotool key super+" ++ w) "1"
+    let wrapWorkspace w = xmobarAction ("xdotool key Control_R super+" ++ w) "1"
             $ pad $ fromMaybe w $ M.findWithDefault Nothing w icons
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
