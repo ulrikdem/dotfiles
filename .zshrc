@@ -59,8 +59,10 @@ if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
     ZSH_HIGHLIGHT_STYLES+=(
         default fg=15
         assign fg=cyan
+        unknown-token fg=red
+        bracket-error fg=red
+        bracket-level-1 fg=8
         comment fg=8
-        bracket-level-1 fg=8,bold
     )
     noglob unset ZSH_HIGHLIGHT_STYLES[path] ZSH_HIGHLIGHT_STYLES[precommand] \
         ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
