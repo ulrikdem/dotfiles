@@ -4,7 +4,6 @@ setopt no_check_jobs
 setopt rc_quotes
 
 zstyle ':completion:*' menu select
-zstyle ':completion:*:manuals.*' insert-sections false
 
 type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
