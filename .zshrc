@@ -1,9 +1,7 @@
-setopt chase_links
-setopt no_bg_nice
-setopt no_check_jobs
-setopt rc_quotes
-
 zstyle ':completion:*' menu select
+
+type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
+zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 zstyle ':completion:*:*:git-*:*:files' command '-git-ls-files-directory'
 git-ls-files-directory() {
@@ -11,11 +9,43 @@ git-ls-files-directory() {
     git ls-files --directory "$@"
 }
 
-type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
-setopt list_packed no_list_types
+[[ -d ~/.dotfiles.git ]] && alias dotfiles='GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ zsh'
+
+type abduco >/dev/null && alias abduco="abduco -e '^H'"
+type diff >/dev/null && alias diff='diff --color=auto'
+type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
+type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
+type nvim >/dev/null && alias vim=nvim
+type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
+type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
+
+setopt no_bg_nice
+setopt chase_links
+setopt no_check_jobs
+setopt list_packed
+setopt no_list_types
+setopt rc_quotes
+
+stty -ixon
 
 zle_highlight=(suffix:fg=8)
+
+if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
+    ZSH_HIGHLIGHT_STYLES+=(
+        default fg=15
+        assign fg=cyan
+        unknown-token fg=red
+        bracket-error fg=red
+        bracket-level-1 fg=8
+        comment fg=8
+    )
+    noglob unset ZSH_HIGHLIGHT_STYLES[path] ZSH_HIGHLIGHT_STYLES[precommand] \
+        ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
+fi
+
+[[ -r /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
 
 if typeset -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs rc newline arrow
@@ -42,35 +72,6 @@ if typeset -f isgrml >/dev/null; then
 
     bindkey -s '^S' '^X.'
     abk[LC]='--color=always |& less -r'
-fi
-
-[[ -d ~/.dotfiles.git ]] && alias dotfiles='GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ zsh'
-
-type abduco >/dev/null && alias abduco="abduco -e '^H'"
-type diff >/dev/null && alias diff='diff --color=auto'
-type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
-type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
-type nvim >/dev/null && alias vim=nvim
-type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
-type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
-
-stty -ixon
-
-[[ -r /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
-
-if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-    ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
-    ZSH_HIGHLIGHT_STYLES+=(
-        default fg=15
-        assign fg=cyan
-        unknown-token fg=red
-        bracket-error fg=red
-        bracket-level-1 fg=8
-        comment fg=8
-    )
-    noglob unset ZSH_HIGHLIGHT_STYLES[path] ZSH_HIGHLIGHT_STYLES[precommand] \
-        ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
 fi
 
 if [[ -r ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
