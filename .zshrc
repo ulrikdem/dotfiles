@@ -5,6 +5,12 @@ setopt rc_quotes
 
 zstyle ':completion:*' menu select
 
+zstyle ':completion:*:*:git-*:*:files' command '-git-ls-files-directory'
+git-ls-files-directory() {
+    shift 2
+    git ls-files --directory "$@"
+}
+
 type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 setopt list_packed no_list_types
