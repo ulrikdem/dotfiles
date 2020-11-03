@@ -82,35 +82,29 @@ if [[ -r ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
     source ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh
 
     if type fzf >/dev/null && type fd >/dev/null; then
-        fzf-file-widget-helper() {
-            local query=${1##*/}
-            local dir=${1:0:$#1-$#query}
-            while [[ -n $dir && ! -d $~dir ]]; do
-                dir=${dir%/}
-                query=${dir##*/}/$query
-                dir=${1:0:$#1-$#query}
-            done
-            cd -- ${~dir:-.}
-            unset REPORTTIME
-            local item
-            fd -L0 | fzf --read0 --height 40% --reverse --prompt ${dir:-./} -q "$query" -m --print0 |
-                while read -rd $'\0' item; do
-                    echo -n "$dir${(q)item} "
-                done
-        }
-
         fzf-file-widget() {
-            local tokens=(${(z)LBUFFER})
-            [[ $LBUFFER[-1] =~ '\s' ]] && tokens+=
-            local results=$(fzf-file-widget-helper $tokens[-1])
-            [[ -n $results ]] && LBUFFER=${LBUFFER:0:$#LBUFFER-$#tokens[-1]}$results
+            local words=(${(z)LBUFFER})
+            [[ $LBUFFER =~ '\s$' ]] && local word= || local word=$words[-1]
+            local query=${word##*/}
+            local dir=${word:0:$#word-$#query}
+            while [[ -n $dir && ! -d $~dir ]]; do
+                query=${${dir%/}##*/}/$query
+                dir=${word:0:$#word-$#query}
+            done
+            local results=$(
+                cd -- ${~dir:-.}
+                unset REPORTTIME
+                fd -L0 | fzf --read0 --height 40% --reverse --prompt ${dir:-./} -q "$query" -m --print0 |
+                    while read -rd $'\0' item; do
+                        echo -nE "$dir${(q)item} "
+                    done
+            )
+            [[ -n $results ]] && LBUFFER=${LBUFFER:0:$#LBUFFER-$#word}$results
             zle reset-prompt
         }
 
         fzf-cd-widget() {
-            unset REPORTTIME
-            cd -- "$(fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
-            REPORTTIME=5
+            cd -- "$(unset REPORTTIME; fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ')"
             zle fzf-redraw-prompt
         }
     fi
