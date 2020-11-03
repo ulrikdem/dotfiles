@@ -3,10 +3,14 @@ zstyle ':completion:*' menu select
 type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
-zstyle ':completion:*:*:git-*:*:files' command '-git-ls-files-directory'
-git-ls-files-directory() {
-    shift 2
-    git ls-files --directory "$@"
+zstyle ':completion:*:*:git-*:*:files' command '-git-files-wrapper'
+git-files-wrapper() {
+    if [[ "$1 $2" = 'git ls-files' ]]; then
+        shift 2
+        git ls-files --directory "$@"
+    else
+        "$@"
+    fi
 }
 
 [[ -d ~/.dotfiles.git ]] && alias dotfiles='GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ zsh'
