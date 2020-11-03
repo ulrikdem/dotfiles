@@ -1,4 +1,5 @@
 zstyle ':completion:*' menu select
+zstyle ':completion:*:descriptions' format '%8F%d:%f'
 
 type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
