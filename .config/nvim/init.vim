@@ -760,11 +760,9 @@ endfunction
 if executable('node')
     function! PatchCoc(...) abort
         let l:dir = g:plugs['coc.nvim'].dir
-        let l:util = '/autoload/coc/util.vim'
-        call s:PatchFile(stdpath('config').l:util, readfile(l:dir.l:util), [
-            \ ['let s:root = \zs.*', 'g:plugs["coc.nvim"].dir'],
+        let l:float = '/autoload/coc/float.vim'
+        call s:PatchFile(stdpath('config').l:float, readfile(l:dir.l:float), [
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
-            \ ['coc#util#create_float_buf(a:bufnr)\zs', ' | call setbufvar(l:bufnr, "\&modifiable", v:true)'],
         \ ])
         call s:PatchFile(l:dir.'/bin/server.js', readfile(l:dir.'/build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
@@ -898,10 +896,10 @@ function! s:InitLspBuffer() abort
 endfunction
 
 function! s:FocusFloat(...) abort
-    if !coc#util#has_float()
+    if !coc#float#has_float()
         return
     endif
-    call coc#util#float_jump()
+    call coc#float#jump()
     setlocal nomodifiable concealcursor=nvc
     nnoremap <buffer> <Esc> <C-W>c
 endfunction
