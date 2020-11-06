@@ -14,7 +14,13 @@ git-files-wrapper() {
     fi
 }
 
-[[ -d ~/.dotfiles.git ]] && alias dotfiles='GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ zsh'
+if [[ -d ~/.dotfiles.git ]]; then
+    dotfiles() {
+        (($#)) || set zsh
+        GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ "$@"
+    }
+    typeset -f compdef >/dev/null && compdef 'dotfiles _precommand' dotfiles
+fi
 
 type abduco >/dev/null && alias abduco="abduco -e '^H'"
 type diff >/dev/null && alias diff='diff --color=auto'
