@@ -485,15 +485,16 @@ autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>fF
 autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), extend([
     \ '--prompt='.substitute(fnamemodify(getcwd(), ':~'), '/\?$', '/', ''),
 \ ], executable('nvr') ? [
-    \ '--bind=ctrl-z:reload:nvr --remote-expr "DeleteBuffer(''$(echo {} \| sed "s/''/''''/g")'')"',
+    \ '--bind=ctrl-c:reload:nvr --remote-expr "DeleteBuffer(''$(printf %s {} \| sed "s/''/''''/g")'')"',
 \ ] : []), {l -> #{filename: l}})<CR>
 function! s:ListBuffers() abort
     return map(filter(getbufinfo(#{buflisted: v:true}),
         \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
 endfunction
 function! DeleteBuffer(name) abort
-    if bufwinnr(a:name) == -1
-        silent! execute 'bdelete' fnameescape(a:name)
+    let l:buf = bufadd(a:name)
+    if bufwinnr(l:buf) == -1
+        silent! execute 'bdelete' l:buf
     endif
     return join(s:ListBuffers(), "\n")
 endfunction
@@ -932,7 +933,7 @@ endfunction
 
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:
-        \nvr --remote-expr "WorkspaceSymbolQuery(''$(echo {q} | sed "s/''/''''/g")'')" | tail -c +2'], [])
+        \nvr --remote-expr "WorkspaceSymbolQuery(''$(printf %s {q} | sed "s/''/''''/g")'')" | tail -c +2'], [])
     let l:last_query = ''
     let l:results = ''
     function! WorkspaceSymbolQuery(query) abort closure
