@@ -1,0 +1,9 @@
+#!/bin/bash
+while (($#)) && [[ $1 != -e ]]; do
+    shift
+done
+if (($#)); then
+    shift
+    set -- -e "${*@Q}"
+fi
+exec termite "$@"
