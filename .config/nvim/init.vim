@@ -764,6 +764,7 @@ if executable('node')
         let l:float = '/autoload/coc/float.vim'
         call s:PatchFile(stdpath('config').l:float, readfile(l:dir.l:float), [
             \ ['call feedkeys("\\<C-g>u", ''n'')', ''],
+            \ ['let bufnr = a:bufnr\zs', ' | call setbufvar(bufnr, "\&modifiable", v:true)'],
         \ ])
         call s:PatchFile(l:dir.'/bin/server.js', readfile(l:dir.'/build/index.js'), [
             \ ['score = \zs\l\+ == [a-z[\]]\+ ? \([0-9.]\+\) : [0-9.]\+', '\1'],
