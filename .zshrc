@@ -22,13 +22,13 @@ if [[ -d ~/.dotfiles.git ]]; then
     typeset -f compdef >/dev/null && compdef 'dotfiles _precommand' dotfiles
 fi
 
-type abduco >/dev/null && alias abduco="abduco -e '^H'"
-type diff >/dev/null && alias diff='diff --color=auto'
-type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
-type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
-type nvim >/dev/null && alias vim=nvim
-type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
-type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
+type -p abduco >/dev/null && alias abduco="abduco -e '^H'"
+type -p diff >/dev/null && alias diff='diff --color=auto'
+type -p gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
+type -p g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
+type -p nvim >/dev/null && alias vim=nvim
+type -p nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
+type -p ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
 
 setopt no_bg_nice
 setopt chase_links
