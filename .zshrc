@@ -1,7 +1,7 @@
 zstyle ':completion:*' menu select
 zstyle ':completion:*:descriptions' format '%8F%d:%f'
 
-type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
+type -f dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 zstyle ':completion:*:*:git-*:*:files' command '-git-files-wrapper'
@@ -41,7 +41,7 @@ stty -ixon
 
 zle_highlight=(suffix:fg=8)
 
-if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
     ZSH_HIGHLIGHT_STYLES+=(
@@ -56,7 +56,7 @@ if [[ -r /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
         ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
 fi
 
-[[ -r /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
+[[ -f /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
 
 if typeset -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs rc newline arrow
@@ -85,7 +85,7 @@ if typeset -f isgrml >/dev/null; then
     abk[LC]='--color=always |& less -r'
 fi
 
-if [[ -r ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
+if [[ -f ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
     source ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh
 
     if type fzf >/dev/null && type fd >/dev/null; then

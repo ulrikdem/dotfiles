@@ -22,4 +22,4 @@ while true; do
             [[ -n ${result[0]} ]] && echo "${PWD%/}/${result[0]}" || echo "${PWD%/}/$1"
             exit;;
     esac
-done >$2
+done >"$2"

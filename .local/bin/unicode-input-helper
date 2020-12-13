@@ -4,15 +4,15 @@ fzf_args=(
     --ansi
     --tabstop 3
     --tiebreak index
-    --bind "tab:execute-silent(cut -f 2 <<<{} | head -c -1 >>$1)+refresh-preview"
-    --bind "ctrl-c:execute-silent(printf '' >$1)+refresh-preview"
-    --preview "cat $1"
+    --bind "tab:execute-silent(cut -f 2 <<<{} | head -c -1 >>'$1')+refresh-preview"
+    --bind "ctrl-c:execute-silent(printf '' >'$1')+refresh-preview"
+    --preview "cat -- '$1'"
     --preview-window down:1:noborder
 )
 
 char=$(
     set -o pipefail
-    python3 - <(if [[ -r ~/.local/share/nerd-fonts/i_all.sh ]]; then
+    python3 - <(if [[ -f ~/.local/share/nerd-fonts/i_all.sh ]]; then
         source ~/.local/share/nerd-fonts/i_all.sh
         for name in "${!i_@}"; do
             echo "$name ${!name}"
@@ -46,7 +46,7 @@ EOF
 )
 
 if (($?)); then
-    printf '' >$1
-elif (($(wc -c <$1) == 0)); then
-    printf %s "$char" >$1
+    printf '' >"$1"
+elif (($(wc -c <"$1") == 0)); then
+    printf %s "$char" >"$1"
 fi
