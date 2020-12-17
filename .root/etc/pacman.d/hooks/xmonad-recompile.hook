@@ -2,9 +2,8 @@
 Operation = Install
 Operation = Upgrade
 Type = Package
-Target = xmonad
 Target = xmonad-contrib
 
 [Action]
 When = PostTransaction
-Exec = /usr/bin/sudo -u ulrikdem xmonad --recompile
+Exec = /usr/bin/sudo -u #1000 xmonad --recompile
