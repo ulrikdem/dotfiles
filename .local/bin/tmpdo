@@ -8,7 +8,8 @@ if [[ ! -d ~tmpuser ]]; then
 EOF
 
     git --git-dir ~/.dotfiles.git archive HEAD | sudo -u tmpuser tar -xC ~tmpuser
-    tar -cC ~ .local/share/nvim/plugged | sudo -u tmpuser tar -xC ~tmpuser
+    tar -cC ~ .config/{mimeapps.list,highlight/themes/vim.theme} .local/share/nvim/plugged |
+        sudo -u tmpuser tar -xC ~tmpuser
 fi
 
 cat ~/.Xauthority | sudo -u tmpuser tee ~tmpuser/.Xauthority >/dev/null
