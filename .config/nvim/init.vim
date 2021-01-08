@@ -1056,11 +1056,6 @@ if executable('typescript-language-server')
     \ }
 endif
 
-let s:lsp_filetypes = []
-for s:ls in values(g:coc_user_config.languageserver)
-    call extend(s:lsp_filetypes, s:ls.filetypes)
-endfor
-
 " Filetypes {{{1
 
 Plug 'Shougo/neco-vim'
