@@ -177,6 +177,7 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
+    call s:Highlight('Normal', #{bg: 'SrceryBlack'})
     call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
     call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
     call s:Highlight('CursorLine', #{bg: 'SrceryXgray1'})
@@ -189,8 +190,10 @@ function! s:UpdateColorScheme() abort
     call s:Highlight('DiffChange', #{fg: 'SrceryBlack', bg: 'SrceryBlue'})
     call s:Highlight('DiffText', #{fg: 'SrceryBlack', bg: 'SrceryBrightBlue'})
     call s:Highlight('PmenuThumb', #{bg: 'SrceryXgray5'})
-    highlight link PmenuSbar Pmenu
-    highlight link QuickFixLine Visual
+    highlight! link PmenuSbar Pmenu
+    highlight! link Operator SrceryBrightWhite
+    highlight! link vimUserFunc SrceryBrightWhite
+    highlight! link QuickFixLine Visual
     highlight! link Directory SrceryGreen
     highlight! link Error SrceryRedBold
     highlight! link ErrorMsg SrceryRedBold
