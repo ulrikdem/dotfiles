@@ -648,28 +648,28 @@ local function resolve_uri(uri, base)
     return soup.uri_tostring(parts)
 end
 
--- Videos {{{1
+-- Media {{{1
 
-local function play_video(uris, referrer, win)
+local function play_media(uris, referrer, win)
     if #uris == 0 then
-        win:error("Could not play video")
+        win:error("Could not play media")
         return
     end
 
     local uri = table.remove(uris, 1)
     luakit.spawn(string.format("mpv --referrer=%q -- %q", referrer, uri), function(_, status)
         if status ~= 0 then
-            msg.warn("Could not play video: "..uri)
-            play_video(uris, referrer, win)
+            msg.warn("Could not play media: "..uri)
+            play_media(uris, referrer, win)
         end
     end)
 end
 
 modes.add_binds("ex-follow", {
-    {"v", "Hint all videos and play the matched video with `mpv`.", function(win)
+    {"v", "Hint all audio and video elements and play the matched media with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
-            selector_func = "video",
+            selector_func = "audio, video",
             evaluator = function(element, page)
                 local uris = {resolve_uri(element.attr.src, page.uri)}
                 for _, source in ipairs(element:query("source")) do
@@ -682,12 +682,12 @@ modes.add_binds("ex-follow", {
             end,
             func = function(uris)
                 table.insert(uris, win.view.uri)
-                play_video(uris, win.view.uri, win)
+                play_media(uris, win.view.uri, win)
             end,
         })
     end},
 
-    {"V", "Hint all links and play the matched video with `mpv`.", function(win)
+    {"V", "Hint all links and play the matched media with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
             selector = "uri",
@@ -695,7 +695,7 @@ modes.add_binds("ex-follow", {
             func = function(uri)
                 luakit.spawn(string.format("mpv -- %q", uri), function(_, status)
                     if status ~= 0 then
-                        win:error("Could not play video")
+                        win:error("Could not play media")
                     end
                 end)
             end,
