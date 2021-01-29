@@ -487,6 +487,8 @@ end
 
 -- Dark mode {{{1
 
+settings.application.prefer_dark_mode = true
+
 local dark_style = stylesheet{
     source = [[
         :root:not(.luakit-no-invert),
