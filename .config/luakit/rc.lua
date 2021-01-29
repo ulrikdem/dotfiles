@@ -21,6 +21,7 @@ local theme = lousy.theme.get()
 local adblock = require("adblock")
 local adblock_chrome = require("adblock_chrome")
 local binds_chrome = require("binds_chrome")
+local clear_data = require("clear_data")
 local cmdhist = require("cmdhist")
 local downloads = require("downloads")
 local downloads_chrome = require("downloads_chrome")
@@ -64,8 +65,6 @@ if not completion_mtime
         luakit.config_dir.."/completion.patch"))
 end
 local completion = require("completion_patched")
-
-pcall(require, "clear_data")
 
 -- Settings {{{1
 
