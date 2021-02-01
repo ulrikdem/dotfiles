@@ -658,7 +658,7 @@ local function play_media(uris, referrer, win)
     end
 
     local uri = table.remove(uris, 1)
-    luakit.spawn(string.format("mpv --referrer=%q -- %q", referrer, uri), function(_, status)
+    luakit.spawn(string.format("mpv --force-window --referrer=%q -- %q", referrer, uri), function(_, status)
         if status ~= 0 then
             msg.warn("Could not play media: "..uri)
             play_media(uris, referrer, win)
@@ -694,7 +694,7 @@ modes.add_binds("ex-follow", {
             selector = "uri",
             evaluator = "uri",
             func = function(uri)
-                luakit.spawn(string.format("mpv -- %q", uri), function(_, status)
+                luakit.spawn(string.format("mpv --force-window -- %q", uri), function(_, status)
                     if status ~= 0 then
                         win:error("Could not play media")
                     end
