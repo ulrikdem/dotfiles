@@ -69,8 +69,8 @@ local completion = require("completion_patched")
 -- Settings {{{1
 
 settings.window.home_page = settings.window.new_tab_page
-settings.window.search_engines = {[""] = "https://duckduckgo.com/?q=%s"}
-settings.window.default_search_engine = ""
+settings.window.search_engines = {["!ddg"] = "https://duckduckgo.com/?q=%s"}
+settings.window.default_search_engine = "!ddg"
 settings.window.check_filepath = false
 settings.window.close_with_last_tab = true
 
