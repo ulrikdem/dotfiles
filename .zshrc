@@ -59,7 +59,7 @@ fi
 [[ -f /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
 
 if typeset -f isgrml >/dev/null; then
-    zstyle :prompt:grml:left:setup items user at host fullpath vcs rc newline arrow
+    zstyle :prompt:grml:left:setup items user at host fullpath vcs venv rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
     zstyle :prompt:grml:left:items:at pre %F{white}
@@ -74,6 +74,11 @@ if typeset -f isgrml >/dev/null; then
     zstyle ':vcs_info:*' stagedstr %8F:%F{green}S
     zstyle ':vcs_info:*' unstagedstr %8F:%F{red}U
     zstyle ':vcs_info:*' check-for-changes true
+
+    grml_theme_add_token venv -f prompt-venv
+    prompt-venv() {
+        REPLY=${VIRTUAL_ENV+%8F\[%F\{blue\}venv%8F\] %f}
+    }
 
     grml_theme_add_token arrow '%F{blue}» %f'
     PS2='%8F%_ %F{blue}» %f'
