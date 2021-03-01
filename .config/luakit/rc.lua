@@ -667,7 +667,7 @@ local function play_media(uris, referrer, win)
 end
 
 modes.add_binds("ex-follow", {
-    {"v", "Hint all audio and video elements and play the matched media with `mpv`.", function(win)
+    {"M", "Hint all audio and video elements and play the matched media with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
             selector_func = "audio, video",
@@ -688,7 +688,7 @@ modes.add_binds("ex-follow", {
         })
     end},
 
-    {"V", "Hint all links and play the matched media with `mpv`.", function(win)
+    {"m", "Hint all links and play the matched media with `mpv`.", function(win)
         win:set_mode("follow", {
             prompt = "mpv",
             selector = "uri",
