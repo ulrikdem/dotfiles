@@ -1,0 +1,30 @@
+#!/usr/bin/env python3
+
+import re
+import subprocess
+import sys
+
+try:
+    import Mimeo
+except ModuleNotFoundError:
+    sys.exit(subprocess.run(['/usr/bin/xdg-open'] + sys.argv[1:]).returncode)
+
+file_mimetype_by_content = Mimeo.file_mimetype_by_content
+def file_mimetype_by_content_override(path):
+    mimetype = file_mimetype_by_content(path)
+    if mimetype != 'inode/symlink':
+        return mimetype
+    return subprocess.run(['file', '-Lb', '--mime-type', path], stdout=subprocess.PIPE, check=True).stdout.strip().decode()
+Mimeo.file_mimetype_by_content = file_mimetype_by_content_override
+
+exec_field_to_cmds = Mimeo.exec_field_to_cmds
+def exec_field_to_cmds_override(exe, *args, **kwargs):
+    if not re.search('%[fuFU]', exe.replace('%%', '')):
+        exe += ' %f'
+    return exec_field_to_cmds(exe, *args, **kwargs)
+Mimeo.exec_field_to_cmds = exec_field_to_cmds_override
+
+args = ['-q', '--'] + sys.argv[1:]
+if not (sys.stdin.isatty() and sys.stdout.isatty()):
+    args = ['--term', 'xterm -e %s'] + args
+Mimeo.run_main(args)
