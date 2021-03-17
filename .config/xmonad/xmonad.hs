@@ -302,7 +302,7 @@ data Column = Column
     deriving (Read, Show)
 
 instance Default Column where
-    def = Column {limit = 1, colWeight = 1, winWeights = M.empty}
+    def = Column 1 1 M.empty
 
 data CustomLayout a
     = CustomLayout (W.Stack Column) Int Dimension
