@@ -68,7 +68,8 @@ main = do
             , placeHook $ fixed (0.5, 0.5)
             , appName =? "xmonad-float" --> doFloat
             ]
-        , layoutHook = named "tiled" (avoidStruts $ layout textHeight)
+        , layoutHook = resetEmpty
+            $ named "tiled" (avoidStruts $ layout textHeight)
             ||| named "full" (avoidStruts $ noBorders StateFull)
             ||| named "fullscreen" (noBorders StateFull)
         , normalBorderColor = "black"
@@ -405,3 +406,18 @@ data LayoutMessage
     deriving (Typeable)
 
 instance Message LayoutMessage
+
+resetEmpty layout = ResetEmpty layout layout
+
+data ResetEmpty l a = ResetEmpty (l a) (l a)
+    deriving (Read, Show)
+
+instance (LayoutClass l a) => LayoutClass (ResetEmpty l) a where
+    runLayout (W.Workspace tag (ResetEmpty reset _) Nothing) rect = do
+        (rects, layout') <- runLayout (W.Workspace tag reset Nothing) rect
+        return (rects, Just $ ResetEmpty reset $ fromMaybe reset layout')
+    runLayout (W.Workspace tag (ResetEmpty reset layout) stack) rect = do
+        (rects, layout') <- runLayout (W.Workspace tag layout stack) rect
+        return (rects, fmap (ResetEmpty reset) layout')
+    handleMessage (ResetEmpty reset layout) message = fmap (ResetEmpty reset) <$> handleMessage layout message
+    description (ResetEmpty _ layout) = description layout
