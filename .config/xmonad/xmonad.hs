@@ -2,7 +2,7 @@
 
 -- vim: foldmethod=marker
 
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TupleSections #-}
 
 import Control.Monad
 
@@ -49,7 +49,7 @@ import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Stack
 
-import IconRules
+import IconQuery
 
 -- Main {{{1
 
@@ -107,7 +107,8 @@ barEventHook = dynStatusBarEventHook spawnBar $ return ()
 spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
-    icons <- withWindowSet $ fmap M.fromList . mapM workspaceIcon . W.workspaces
+    let getIcon w = fmap (W.tag w,) $ maybe mempty (runQuery iconQuery . W.focus) $ W.stack w
+    icons <- withWindowSet $ fmap M.fromList . mapM getIcon . W.workspaces
     let wrapWorkspace w = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
             $ pad $ fromMaybe w $ M.findWithDefault Nothing w icons
         getScreen = do
@@ -130,14 +131,6 @@ barLogHook = do
             , ppWsSep = ""
             }
     multiPP (pp "green4") (pp "gray50")
-
-workspaceIcon workspace = do
-    let applyRule win (query, icon) = bool Nothing (Just icon) <$> runQuery query win
-    icons <- case W.stack workspace of
-        Just stack -> forM iconRules $ applyRule $ W.focus stack
-        Nothing -> return []
-    let lastIcon = foldr (flip maybe Just) Nothing icons
-    return (W.tag workspace, lastIcon)
 
 workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} = do
     atom <- getAtom "_NET_DESKTOP_VIEWPORT"
@@ -340,7 +333,7 @@ instance LayoutClass CustomLayout Window where
 
             cumLimits = scanl (+) 0 $ limit <$> init cols
 
-            colWins = takeWhile (not . null) $ zipWith take (map limit cols) $ zipWith drop cumLimits $ repeat wins
+            colWins = takeWhile (not . null) $ zipWith take (map limit cols) $ map (`drop` wins) cumLimits
             colWeight' col wins = if allCollapsed wins then Nothing else Just $ colWeight col
             colRects = map mirrorRect $ split (mirrorRect rect) $ zipWith colWeight' cols colWins
             winRects = concat $ zipWith3 layoutCol cols colRects colWins
