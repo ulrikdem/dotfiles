@@ -90,8 +90,8 @@ if typeset -f isgrml >/dev/null; then
     abk[LC]='--color=always |& less -r'
 fi
 
-if [[ -f ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh ]]; then
-    source ~/.local/share/nvim/plugged/fzf/shell/key-bindings.zsh
+if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
+    source /usr/share/fzf/key-bindings.zsh
 
     if type fzf >/dev/null && type fd >/dev/null; then
         fzf-file-widget() {
