@@ -19,7 +19,7 @@ if [[ -d ~/.dotfiles.git ]]; then
         (($#)) || set zsh
         GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ "$@"
     }
-    typeset -f compdef >/dev/null && compdef 'dotfiles _precommand' dotfiles
+    compdef 'dotfiles _precommand' dotfiles 2>/dev/null
 fi
 
 type -p abduco >/dev/null && alias abduco="abduco -e '^H'"
@@ -58,7 +58,7 @@ fi
 
 [[ -f /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
 
-if typeset -f isgrml >/dev/null; then
+if declare -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs venv rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 

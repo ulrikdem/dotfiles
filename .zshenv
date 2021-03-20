@@ -1,4 +1,4 @@
-typeset -U path
+declare -U path
 path=(~/.local/bin $path)
 
 [[ -x /usr/bin/luakit ]] && export BROWSER=luakit
