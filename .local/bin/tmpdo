@@ -12,7 +12,7 @@ EOF
         sudo -u tmpuser tar -xC ~tmpuser
 fi
 
-cat ~/.Xauthority | sudo -u tmpuser tee ~tmpuser/.Xauthority >/dev/null
+sudo -u tmpuser tee ~tmpuser/.Xauthority <~/.Xauthority >/dev/null
 export XAUTHORITY=~tmpuser/.Xauthority
 
 if (($#)); then
