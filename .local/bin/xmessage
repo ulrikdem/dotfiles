@@ -1,5 +1,5 @@
 #!/bin/bash
-if command -v gxmessage >/dev/null; then
+if type gxmessage >/dev/null; then
     exec gxmessage -name xmonad-float -title gxmessage -font monospace "$@"
 else
     exec /usr/bin/xmessage "$@"

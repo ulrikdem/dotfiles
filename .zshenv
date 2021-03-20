@@ -4,7 +4,7 @@ path=(~/.local/bin $path)
 [[ -x /usr/bin/luakit ]] && export BROWSER=luakit
 [[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim MANPAGER='nvim +Man!' ABDUCO_CMD='nvim +terminal'
 
-type -p fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L'
+type fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L'
 export FZF_DEFAULT_OPTS='--color 16,info:8 --marker * --tiebreak end,length --bind change:top,tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all'
 
 [[ -f ~/.config/ripgreprc ]] && export RIPGREP_CONFIG_PATH=~/.config/ripgreprc
