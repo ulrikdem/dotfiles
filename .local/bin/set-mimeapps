@@ -3,7 +3,7 @@
 declare -A mimeapps
 set-mimeapp() {
     if [[ -n ${mimeapps[$1]} ]]; then
-        [[ ${mimeapps[$1]} != $2 ]] && echo "prefer ${mimeapps[$1]} to $2 for $1" >&2
+        [[ ${mimeapps[$1]} != "$2" ]] && echo "prefer ${mimeapps[$1]} to $2 for $1" >&2
         return
     fi
     mimeapps[$1]=$2
@@ -11,7 +11,7 @@ set-mimeapp() {
             $(sed -n "s;\(.*\) $1\$;\1;p" {/usr,~/.local}/share/mime/subclasses 2>/dev/null) \
             $([[ $1 = text/plain ]] && grep -h ^text/ {/usr,~/.local}/share/mime/types 2>/dev/null) \
             $([[ $1 = text/plain ]] && echo inode/x-empty); do
-        set-mimeapp $mime "$2"
+        set-mimeapp "$mime" "$2"
     done
 }
 
@@ -25,10 +25,10 @@ for app; do
         continue
     fi
     for mime in $(sed -n 's/;/ /g;s/^MimeType\s*=//p' "$path"); do
-        set-mimeapp $mime "$app"
+        set-mimeapp "$mime" "$app"
     done
 done
 
 cat <(printf '# set-mimeapps %s\n[Default Applications]\n' "$*") <(for mime in "${!mimeapps[@]}"; do
-    printf '%s=%s.desktop\n' $mime "${mimeapps[$mime]}"
+    printf '%s=%s.desktop\n' "$mime" "${mimeapps[$mime]}"
 done | sort) >~/.config/mimeapps.list
