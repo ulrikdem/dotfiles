@@ -6,14 +6,13 @@ import Data.List
 import Data.Monoid
 import XMonad.ManageHook
 
-iconQuery = getLast <$> composeAll
-    [ icon "\xfaae" -- 类
-    , className =? "Luakit" --> icon "\xf484" -- 
-    , className =? "Termite" --> icon "\xe7a2" -- 
+iconQuery = getFirst <$> composeAll
+    [ className =? "Luakit" --> icon "\xf484" -- 
     , className =? "Termite" <&&> title $? " - nvim" --> icon "\xe62b" -- 
+    , className =? "Termite" --> icon "\xe7a2" -- 
     ]
 
-icon = return . Last . Just
+icon = return . First . Just
 
 q ^? s = fmap (s `isPrefixOf`) q
 q $? s = fmap (s `isSuffixOf`) q

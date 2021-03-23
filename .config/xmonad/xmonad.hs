@@ -107,10 +107,13 @@ barEventHook = dynStatusBarEventHook spawnBar $ return ()
 spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
-    let getIcon w = fmap (W.tag w,) $ maybe mempty (runQuery iconQuery . W.focus) $ W.stack w
-    icons <- withWindowSet $ fmap M.fromList . mapM getIcon . W.workspaces
-    let wrapWorkspace w = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
-            $ pad $ fromMaybe w $ M.findWithDefault Nothing w icons
+    let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
+            . fromMaybe "\xfaae" <$> runQuery iconQuery win
+        getIcons w = fmap ((W.tag w,) . concat . W.integrate) . onFocusedZ (xmobarColor "gray50" "")
+            <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
+    icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
+    let rename w = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
+            $ xmobarColor "gray25" "" $ pad $ fromMaybe w $ M.lookup w icons
         getScreen = do
             S i <- withWindowSet $ return . W.screen . W.current
             return $ Just $ show i
@@ -118,10 +121,10 @@ barLogHook = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
         pp color = namedScratchpadFilterOutWorkspacePP def
-            { ppCurrent = xmobarColor "black" color . wrapWorkspace
-            , ppVisible = xmobarColor "black" "gray25" . wrapWorkspace
-            , ppHidden = wrapWorkspace
-            , ppHiddenNoWindows = xmobarColor "gray25" "" . wrapWorkspace
+            { ppCurrent = wrap ("<box type=Bottom width=2 color=" ++ color ++ ">") "</box>" . rename
+            , ppVisible = wrap "<box type=Bottom width=2 color=gray25>" "</box>" . rename
+            , ppHidden = rename
+            , ppHiddenNoWindows = rename
             , ppTitle = xmobarRaw . shorten 100
             , ppTitleSanitize = id
             , ppExtras = [getScreen, showTag "collapsible", showTag "scratchpad"]
