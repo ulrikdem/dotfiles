@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if ((!$#)) || [[ $1:$3 = keyboard:connected ]]; then
-    setxkbmap -option ctrl:nocaps -option parens:swap_brackets -print | xkbcomp -I"$HOME/.config/xkb" - "$DISPLAY" 2>/dev/null
+    setxkbmap -option ctrl:nocaps -option altwin:swap_alt_win
 fi
 
 if ((!$#)) || [[ $1:$3 = display:connected ]]; then
