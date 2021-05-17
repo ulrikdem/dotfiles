@@ -1089,7 +1089,6 @@ if executable('cargo')
 endif
 
 autocmd vimrc FileType mail,markdown,tex setlocal spell
-autocmd vimrc SourcePost init.vim autocmd vimrc FileType mail setlocal formatoptions-=tc
 
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
