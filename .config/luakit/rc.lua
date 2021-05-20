@@ -485,6 +485,48 @@ function session.save(...)
     window.bywidget = wins
 end
 
+-- Sessions {{{1
+
+completion.completers.session = {
+    header = {"Saved Session"},
+    func = function(prefix)
+        local results = {}
+        for file in lfs.dir(luakit.data_dir) do
+            local name = file:match("^session%.(.+)")
+            if name and name:find(prefix, 1, true) == 1 then
+                table.insert(results, {lousy.util.escape(name), format = {{lit = name}}, buf = name})
+            end
+        end
+        return results
+    end,
+}
+
+modes.add_cmds{
+    {":write", "Save current session.", {
+        format = "{session}",
+        func = function(win, opts)
+            session.save(opts.arg and luakit.data_dir.."/session."..opts.arg:gsub("/", "_"))
+        end,
+    }},
+
+    {":restore", "Restore a saved session.", {
+        format = "{session}",
+        func = function(win, opts)
+            local session_file = session.session_file
+            local recovery_file = session.recovery_file
+            session.recovery_file = nil
+            if opts.arg then
+                session.session_file = luakit.data_dir.."/session."..opts.arg
+            end
+            if not session.restore() then
+                win:error("Could not restore session")
+            end
+            session.session_file = session_file
+            session.recovery_file = recovery_file
+        end,
+    }},
+}
+
 -- Dark mode {{{1
 
 settings.application.prefer_dark_mode = true
