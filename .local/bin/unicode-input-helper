@@ -17,7 +17,7 @@ char=$(
         for name in "${!i_@}"; do
             echo "$name ${!name}"
         done
-    fi) <<EOF | fzf "${fzf_args[@]}" | cut -f 2
+    fi) <<'EOF' | fzf "${fzf_args[@]}" | cut -f 2
 
 import sys
 
