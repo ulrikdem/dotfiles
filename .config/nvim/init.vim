@@ -1074,7 +1074,7 @@ Plug 'neoclide/coc-neco'
 Plug 'sheerun/vim-polyglot'
 let g:polyglot_disabled = ['autoindent', 'sensible']
 
-autocmd vimrc FileType c,cpp setlocal commentstring=//%s
+autocmd vimrc User Plug_vim_polyglot autocmd vimrc FileType c,cpp setlocal commentstring=//%s
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oh <Cmd>edit %:r.h<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oH <Cmd>edit %:r.hpp<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oc <Cmd>edit %:r.c<CR>
