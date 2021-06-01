@@ -555,12 +555,12 @@ local function change_class(view, action, class)
 end
 
 modes.add_binds("normal", {
-    {"C", "Toggle dark mode for the current tab.", function(win)
+    {"<control-v>", "Toggle dark mode for the current tab.", function(win)
         win.view.stylesheets[dark_style] = not win.view.stylesheets[dark_style]
         check_dark_wm:emit_signal(win.view, "check")
     end},
 
-    {"c", "Toggle whether the current page is inverted.", function(win)
+    {"V", "Toggle whether the current page is inverted.", function(win)
         if win.view.stylesheets[dark_style] then
             change_class(win.view, "toggle", "luakit-no-invert")
         else
