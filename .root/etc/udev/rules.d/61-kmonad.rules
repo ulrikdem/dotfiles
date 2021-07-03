@@ -1,0 +1,1 @@
+ACTION=="add", SYMLINK=="input/by-id/ID-event-kbd", TAG+="systemd", PROGRAM="/usr/bin/systemd-escape --template kmonad@.service -p %N", ENV{SYSTEMD_WANTS}+="%c"

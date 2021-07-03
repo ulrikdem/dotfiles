@@ -1,0 +1,8 @@
+[Unit]
+Description=KMonad %f
+
+[Service]
+ExecStart=/usr/bin/kmonad -i 'device-file "%f"' -o 'uinput-sink "KMonad %f"' %E/kmonad.kbd
+
+[Install]
+WantedBy=multi-user.target
