@@ -70,10 +70,10 @@ endfunction
 nnoremap <C-S> <Cmd>update<CR>
 nnoremap ZT <Cmd>silent only \| quit<CR>
 
-nnoremap <M-h> <C-W>h
-nnoremap <M-j> <C-W>j
-nnoremap <M-k> <C-W>k
-nnoremap <M-l> <C-W>l
+nnoremap <M-Left> <C-W>h
+nnoremap <M-Down> <C-W>j
+nnoremap <M-Up> <C-W>k
+nnoremap <M-Right> <C-W>l
 
 for s:i in range(1, 10)
     execute 'nnoremap <M-'.(s:i % 10).'>' s:i.'gt'
@@ -81,12 +81,6 @@ endfor
 
 nmap <C-LeftMouse> <LeftMouse><C-]>
 nnoremap <C-RightMouse> <C-O>
-
-cnoremap <C-A> <Home>
-cnoremap <C-B> <Left>
-cnoremap <C-F> <Right>
-cnoremap <M-b> <S-Left>
-cnoremap <M-f> <S-Right>
 
 let g:mapleader = ' '
 set notimeout
@@ -440,10 +434,10 @@ autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
 tnoremap <C-\> <C-\><C-N>
 
-tnoremap <M-h> <Cmd>wincmd h<CR>
-tnoremap <M-j> <Cmd>wincmd j<CR>
-tnoremap <M-k> <Cmd>wincmd k<CR>
-tnoremap <M-l> <Cmd>wincmd l<CR>
+tnoremap <M-Left> <Cmd>wincmd h<CR>
+tnoremap <M-Down> <Cmd>wincmd j<CR>
+tnoremap <M-Up> <Cmd>wincmd k<CR>
+tnoremap <M-Right> <Cmd>wincmd l<CR>
 
 for s:i in range(1, 10)
     execute 'tnoremap <M-'.(s:i % 10).'> <Cmd>tabnext' s:i.'<CR>'
