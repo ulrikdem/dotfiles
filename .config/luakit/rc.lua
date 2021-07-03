@@ -94,7 +94,7 @@ soup.cookies_storage = luakit.data_dir.."/cookies.db"
 session.recovery_file = luakit.data_dir.."/recovery"..instance_suffix
 
 function select.label_maker()
-    return trim(sort(reverse(charset("asdfghjkl"))))
+    return trim(sort(reverse(charset("arstneio"))))
 end
 follow.pattern_maker = follow.pattern_styles.match_label
 
@@ -121,9 +121,6 @@ modes.remove_binds("passthrough", {"<Escape>"})
 modes.add_binds("normal", {
     {"!", "Start bang search.", function(win)
         win:enter_cmd(":open !")
-    end},
-    {"<control-1>", "Start bang search in a new tab.", function(win)
-        win:enter_cmd(":tabopen !")
     end},
 
     {"gs", "Toggle between HTTP and HTTPS.", function(win)
