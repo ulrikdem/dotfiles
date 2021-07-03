@@ -151,10 +151,14 @@ extraKeys textHeight =
     , ("M-C-j", rotAllDown)
     , ("M-C-k", rotAllUp)
 
-    , ("M-h", sendMessage $ Go L)
-    , ("M-l", sendMessage $ Go R)
-    , ("M-S-h", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
-    , ("M-S-l", sendMessage $ Apply (windows . W.modify' . moveRight) R)
+    , ("M-<Up>", sendMessage $ Go U)
+    , ("M-<Down>", sendMessage $ Go D)
+    , ("M-<Left>", sendMessage $ Go L)
+    , ("M-<Right>", sendMessage $ Go R)
+    , ("M-S-<Up>", sendMessage $ Swap U)
+    , ("M-S-<Down>", sendMessage $ Swap D)
+    , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
+    , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
     , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
 
@@ -169,11 +173,11 @@ extraKeys textHeight =
     , ("M-,", sendMessage $ ModifyLimit succ)
     , ("M-.", sendMessage $ ModifyLimit pred)
     , ("M--", sendMessage $ ModifyColWeight (/ weightFactor))
-    , ("M-=", sendMessage $ ModifyColWeight (* weightFactor))
-    , ("M-<Backspace>", sendMessage ResetColWeights)
-    , ("M-S--", sendMessage $ ModifyWinWeight (/ weightFactor))
-    , ("M-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
-    , ("M-S-<Backspace>", sendMessage ResetWinWeights)
+    , ("M-S-=", sendMessage $ ModifyColWeight (* weightFactor))
+    , ("M-=", sendMessage ResetColWeights)
+    , ("M-C--", sendMessage $ ModifyWinWeight (/ weightFactor))
+    , ("M-C-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
+    , ("M-C-=", sendMessage ResetWinWeights)
 
     , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
     , ("M-f", sendMessage $ JumpToLayout "full")
@@ -210,7 +214,8 @@ extraKeys textHeight =
         , ("M-S-", sendToScreen def)
         , ("M-C-", getScreen def >=> flip whenJust (screenWorkspace >=> flip whenJust (windows . W.greedyView)))
         ]
-    , (key, index) <- zip "wer" [0..]
+    , (keys, index) <- zip ["wn", "e", "ri"] [0..]
+    , key <- keys
     ]
 
 moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
@@ -241,6 +246,8 @@ windowPromptConfig textHeight = def
         [ ((controlMask, xK_u), killBefore)
         , ((controlMask, xK_w), killWord Prev)
         , ((mod1Mask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
+        , ((controlMask, xK_Left), moveCursor Prev >> moveWord Prev)
+        , ((controlMask, xK_Right), moveWord Next >> moveCursor Next)
         ]) emacsLikeXPKeymap
     }
 
