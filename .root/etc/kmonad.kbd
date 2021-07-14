@@ -17,10 +17,10 @@
 )
 
 (deflayer num
-    f1   f2   f3   f4   ssrq      XX   7    8    9    XX
-    @f5  @f6  @f7  @f8  slck      @kp  @4   @5   @6   @0
-    f9   f10  f11  f12 pause _    XX   1    2    3    @met
-    f9             _    tab  spc  ret  _              _
+    f12  f9   f8   f7   ssrq      XX   7    8    9    XX
+    @f11 @f6  @f5  @f4  slck      @kp  @4   @5   @6   @0
+    f10  f3   f2   f1  pause _    XX   1    2    3    @met
+    f10            _    tab  spc  ret  _              _
 )
 
 (deflayer kp
@@ -84,10 +84,10 @@
     - (tap-hold-next-release 200 #(- (layer-delay 200 -)) rmet)
     : (tap-hold-next-release 200 #(: (layer-delay 200 :)) lalt)
 
-    f5 (tap-hold-next-release 200 #(f5 (layer-delay 200 f5)) lalt)
+    f11 (tap-hold-next-release 200 #(f11 (layer-delay 200 f11)) lalt)
     f6 (tap-hold-next-release 200 #(f6 (layer-delay 200 f6)) lmet)
-    f7 (tap-hold-next-release 200 #(f7 (layer-delay 200 f7)) lsft)
-    f8 (tap-hold-next-release 200 #(f8 (layer-delay 200 f8)) lctl)
+    f5 (tap-hold-next-release 200 #(f5 (layer-delay 200 f5)) lsft)
+    f4 (tap-hold-next-release 200 #(f4 (layer-delay 200 f4)) lctl)
     4 (tap-hold-next-release 200 #(4 (layer-delay 200 4)) rctl)
     5 (tap-hold-next-release 200 #(5 (layer-delay 200 5)) rsft)
     6 (tap-hold-next-release 200 #(6 (layer-delay 200 6)) rmet)
@@ -194,9 +194,9 @@
     _              _    _    _    _    _              _
 )
 
-(deflayer f5
+(deflayer f11
     _    _    _    _    _         _    _    _    _    _
-    f5   _    _    _    _         _    _    _    _    _
+    f11  _    _    _    _         _    _    _    _    _
     _    _    _    _    _    _    _    _    _    _    _
     _              _    _    _    _    _              _
 )
@@ -206,15 +206,15 @@
     _    _    _    _    _    _    _    _    _    _    _
     _              _    _    _    _    _              _
 )
-(deflayer f7
+(deflayer f5
     _    _    _    _    _         _    _    _    _    _
-    _    _    f7   _    _         _    _    _    _    _
+    _    _    f5   _    _         _    _    _    _    _
     _    _    _    _    _    _    _    _    _    _    _
     _              _    _    _    _    _              _
 )
-(deflayer f8
+(deflayer f4
     _    _    _    _    _         _    _    _    _    _
-    _    _    _    f8   _         _    _    _    _    _
+    _    _    _    f4   _         _    _    _    _    _
     _    _    _    _    _    _    _    _    _    _    _
     _              _    _    _    _    _              _
 )
