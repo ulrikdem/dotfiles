@@ -94,7 +94,7 @@ soup.cookies_storage = luakit.data_dir.."/cookies.db"
 session.recovery_file = luakit.data_dir.."/recovery"..instance_suffix
 
 function select.label_maker()
-    return trim(sort(reverse(charset("ntesiroa"))))
+    return trim(reverse(charset("ntesiroahdufyw")))
 end
 follow.pattern_maker = follow.pattern_styles.match_label
 
