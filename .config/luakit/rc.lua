@@ -132,6 +132,11 @@ modes.add_binds("normal", {
     end},
 })
 
+modes.remap_binds("normal", {
+    {"<Mouse8>", "<Back>", true},
+    {"<Mouse9>", "<Forward>", true},
+})
+
 settings.window.act_on_synthetic_keys = true
 modes.add_binds({"normal", "insert"}, {
     {"<control-q>", "Send the next keypress directly to the webpage.", function(win)
