@@ -17,9 +17,9 @@
 )
 
 (deflayer num
-    f12  f9   f8   f7   ssrq      XX   7    8    9    XX
+    f12  f9   f8   f7   ssrq      XX   7    8    9    rmet
     @f11 @f6  @f5  @f4  slck      @kp  @4   @5   @6   @0
-    f10  f3   f2   f1  pause _    XX   1    2    3    @met
+    f10  f3   f2   f1  pause _    XX   1    2    3    rmet
     f10            _    tab  spc  ret  _              _
 )
 
@@ -92,8 +92,6 @@
     rp (tap-hold-next-release 200 #(\) (layer-delay 200 rp)) rsft)
     - (tap-hold-next-release 200 #(- (layer-delay 200 -)) rmet)
     : (tap-hold-next-release 200 #(: (layer-delay 200 :)) lalt)
-
-    met (tap-hold-next-release 200 (around-next lmet) lmet)
 )
 
 (deflayer a
