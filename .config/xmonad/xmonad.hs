@@ -407,7 +407,6 @@ data LayoutMessage
     | ResetColWeights
     | ModifyWinWeight (Rational -> Rational)
     | ResetWinWeights
-    deriving (Typeable)
 
 instance Message LayoutMessage
 
