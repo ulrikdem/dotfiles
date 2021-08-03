@@ -114,7 +114,7 @@ barLogHook = do
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
             $ xmobarAction ("xdotool getactivewindow set_desktop_for_window " ++ show (read w - 1)) "3"
-            $ xmobarColor "gray25" "" $ pad $ fromMaybe w $ M.lookup w icons
+            $ xmobarColor "gray25" "" $ pad $ (w ++) $ M.findWithDefault "" w icons
         getScreen = do
             S i <- withWindowSet $ return . W.screen . W.current
             return $ Just $ show i
