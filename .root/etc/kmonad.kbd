@@ -38,9 +38,9 @@
 )
 
 (deflayer nav
-    XX   XX   XX   XX   XX        pgup home up   end  volu
-    lalt lmet lsft lctl XX        pgdn left down rght vold
-    XX   XX   XX   XX   XX   _    del  ins  caps cmp  mute
+    XX   XX   XX   XX   XX        volu home up   end  pgup
+    lalt lmet lsft lctl XX        vold left down rght pgdn
+    XX   XX   XX   XX   XX   _    mute ins  caps cmp  del
     XX             _    _    spc  _    _              _
 )
 
