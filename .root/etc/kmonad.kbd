@@ -24,8 +24,8 @@
 )
 
 (deflayer kp
-    _    _    _    _    _         kp*  kp7  kp8  kp9  kp.
-    _    _    _    _    nlck      kp-  kp4  kp5  kp6  kp0
+    _    _    _    _    _         kp-  kp7  kp8  kp9  kp.
+    _    _    _    _    nlck      kp*  kp4  kp5  kp6  kp0
     _    _    _    _    _    _    kp+  kp1  kp2  kp3  kp/
     _              _    _    _    kprt _              _
 )
