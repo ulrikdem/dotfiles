@@ -202,8 +202,8 @@ extraKeys textHeight =
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
     , ("M-<Tab>", toggleWS' ["NSP"])
-    , ("M-S-,", moveTo Prev cycleWSType)
-    , ("M-S-.", moveTo Next cycleWSType)
+    , ("M-h", moveTo Prev cycleWSType)
+    , ("M-l", moveTo Next cycleWSType)
     ] ++
     [ ("M-C-" ++ [key], windows $ swapWithCurrent workspace)
     | (key, workspace) <- zip ['1'..] $ workspaces def
