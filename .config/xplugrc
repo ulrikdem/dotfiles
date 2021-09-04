@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if ((!$#)) || [[ $1:$3 = keyboard:connected ]]; then
-    setxkbmap -option compose:ralt -option altwin:menu
+    setxkbmap us symbolic compose:102 altwin:menu
 fi
 
 if ((!$#)) || [[ $1:$3 = display:connected ]]; then
