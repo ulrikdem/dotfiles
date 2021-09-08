@@ -16,6 +16,13 @@
                              @tab @spc @ret
 )
 
+(deflayer sym
+         @#   S-2  [    ]    ^         !    <    >    =    @&
+    _    @\   \_   @{   @}   @*        @?   @lp  @rp  -    @:   _
+    102d 102d $    |    ~    `    _    +    %    "    '    102d
+                             _    _    _
+)
+
 (deflayer num
          @f12 f9   f8   f7   pause     XX   7    8    9    ralt
     _    @f11 @f6  @f5  @f4  @slck     lalt @4   @5   @6   @0   _
@@ -28,13 +35,6 @@
     _    _    _    _    _    @nlck     kp*  kp4  kp5  kp6  kp0  _
     _    _    _    _    _    _    _    kp+  kp1  kp2  kp3  kp/
                              _    _    kprt
-)
-
-(deflayer sym
-         @#   S-2  [    ]    ^         !    <    >    =    @&
-    _    @\   \_   @{   @}   @*        @?   @lp  @rp  -    @:   _
-    102d 102d $    |    ~    `    _    +    %    "    '    102d
-                             _    _    _
 )
 
 (deflayer nav
@@ -64,9 +64,9 @@
     lalt (around lalt (layer-toggle alt))
     ralt (around ralt (layer-toggle alt))
 
+    sym (layer-toggle sym)
     num (around (layer-toggle kp) (layer-toggle num))
     kp (layer-add kp)
-    sym (layer-toggle sym)
     nav (layer-toggle nav)
 
     tab (tap-hold-next-release 200 tab @num)
@@ -86,6 +86,17 @@
     o (tap-hold-next-release 200 #(o (layer-delay 200 o)) rmet)
     ; (tap-hold-next-release 200 #(; (layer-delay 200 ;)) ralt)
 
+    # (tap-hold-next-release 200 #(# (layer-delay 200 #)) ralt)
+    \ (tap-hold-next-release 200 #(\\ (layer-delay 200 \)) lmet)
+    { (tap-hold-next-release 200 #({ (layer-delay 200 {)) lsft)
+    } (tap-hold-next-release 200 #(} (layer-delay 200 })) lctl)
+    * (tap-hold-next-release 200 #(* (layer-delay 200 *)) lalt)
+    ? (tap-hold-next-release 200 #(? (layer-delay 200 ?)) lalt)
+    lp (tap-hold-next-release 200 #(\( (layer-delay 200 lp)) rctl)
+    rp (tap-hold-next-release 200 #(\) (layer-delay 200 rp)) rsft)
+    : (tap-hold-next-release 200 #(: (layer-delay 200 :)) rmet)
+    & (tap-hold-next-release 200 #(& (layer-delay 200 &)) ralt)
+
     f12 (tap-hold-next-release 200 #(f12 (layer-delay 200 f12)) ralt)
     f11 (tap-hold-next-release 200 #(f11 (layer-delay 200 f11)) lmet)
     f6 (tap-hold-next-release 200 #(f6 (layer-delay 200 f6)) @sym)
@@ -97,17 +108,6 @@
     5 (tap-hold-next-release 200 #(5 (layer-delay 200 5)) rsft)
     6 (tap-hold-next-release 200 #(6 (layer-delay 200 6)) @sym)
     0 (tap-hold-next-release 200 #(0 (layer-delay 200 0)) rmet)
-
-    # (tap-hold-next-release 200 #(# (layer-delay 200 #)) ralt)
-    \ (tap-hold-next-release 200 #(\\ (layer-delay 200 \)) lmet)
-    { (tap-hold-next-release 200 #({ (layer-delay 200 {)) lsft)
-    } (tap-hold-next-release 200 #(} (layer-delay 200 })) lctl)
-    * (tap-hold-next-release 200 #(* (layer-delay 200 *)) lalt)
-    ? (tap-hold-next-release 200 #(? (layer-delay 200 ?)) lalt)
-    lp (tap-hold-next-release 200 #(\( (layer-delay 200 lp)) rctl)
-    rp (tap-hold-next-release 200 #(\) (layer-delay 200 rp)) rsft)
-    : (tap-hold-next-release 200 #(: (layer-delay 200 :)) rmet)
-    & (tap-hold-next-release 200 #(& (layer-delay 200 &)) ralt)
 )
 
 (deflayer q
@@ -183,6 +183,67 @@
                              _    _    _
 )
 
+(deflayer #
+         #    _    _    _    _         _    _    _    _    _
+    _    _    _    _    _    _         _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer \
+         _    _    _    _    _         _    _    _    _    _
+    _    \\   _    _    _    _         _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer {
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    {    _    _         _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer }
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    _    }    _         _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer *
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    _    _    *         _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer ?
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    _    _    _         ?    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer lp
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    _    _    _         _    \(   _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer rp
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    _    _    _         _    _    \)   _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer :
+         _    _    _    _    _         _    _    _    _    _
+    _    _    _    _    _    _         _    _    _    _    :    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+(deflayer &
+         _    _    _    _    _         _    _    _    _    &
+    _    _    _    _    _    _         _    _    _    _    _    _
+    _    _    _    _    _    _    _    _    _    _    _    _
+                             _    _    _
+)
+
 (deflayer f12
          f12  _    _    _    _         _    _    _    _    _
     _    _    _    _    _    _         _    _    _    _    _    _
@@ -246,67 +307,6 @@
 (deflayer 0
          _    _    _    _    _         _    _    _    _    _
     _    _    _    _    _    _         _    _    _    _    0    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-
-(deflayer #
-         #    _    _    _    _         _    _    _    _    _
-    _    _    _    _    _    _         _    _    _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer \
-         _    _    _    _    _         _    _    _    _    _
-    _    \\   _    _    _    _         _    _    _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer {
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    {    _    _         _    _    _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer }
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    _    }    _         _    _    _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer *
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    _    _    *         _    _    _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer ?
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    _    _    _         ?    _    _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer lp
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    _    _    _         _    \(   _    _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer rp
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    _    _    _         _    _    \)   _    _    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer :
-         _    _    _    _    _         _    _    _    _    _
-    _    _    _    _    _    _         _    _    _    _    :    _
-    _    _    _    _    _    _    _    _    _    _    _    _
-                             _    _    _
-)
-(deflayer &
-         _    _    _    _    _         _    _    _    _    &
-    _    _    _    _    _    _         _    _    _    _    _    _
     _    _    _    _    _    _    _    _    _    _    _    _
                              _    _    _
 )
