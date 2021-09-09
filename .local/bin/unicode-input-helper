@@ -19,18 +19,36 @@ char=$(
         done
     fi) <<'EOF' | fzf "${fzf_args[@]}" | cut -f 2
 
+import re
 import sys
 
-def output(code, char, name):
-    print(f'\x1b[90m{code}\x1b[0m\t{char}\t{name} ')
+def output(code, char, name, seqs=''):
+    print(f'\x1b[90m{code}\x1b[0m\t{char}\t{name} \x1b[90m{seqs}\x1b[0m ')
+
+keysyms = {}
+with open('/usr/include/X11/keysymdef.h') as file:
+    pattern = r'^#define XK_(\w+)\s+0x[0-9a-f]+\s*/\*[ (]U\+([0-9A-F]{4,6}) .*[ )]\*/\s*$'
+    for match in re.finditer(pattern, file.read(), re.MULTILINE):
+        keysyms[match[1]] = chr(int(match[2], 16))
+keysyms['space'] = '␣'
+
+compose = {}
+with open('/usr/share/X11/locale/en_US.UTF-8/Compose') as file:
+    pattern = r'^\s*<Multi_key>((?:\s*<\w+>)+)\s*:\s*"([^\\]|\\.)"'
+    for match in re.finditer(pattern, file.read(), re.MULTILINE):
+        if '<dead_' in match[1] or '<KP_' in match[1]:
+            continue
+        seq = ''.join(keysyms.get(key.strip('<>'), key) for key in match[1].split())
+        compose.setdefault(match[2][-1], []).append(seq)
 
 with open('/usr/share/unicode/UnicodeData.txt') as file:
     for line in file:
         code, name = line.split(';')[:2]
-        if name[0] == '<':
+        if name.startswith('<'):
             continue
         char = chr(int(code, 16))
-        output(code, char, name)
+        seqs = ' '.join(compose.get(char, []))
+        output(code, char, name, seqs)
 
 nerd = []
 with open(sys.argv[1]) as file:
