@@ -2,13 +2,26 @@ local ui = ipc_channel("check_dark_wm")
 
 local function check(page)
     page:eval_js([[
-        {
+        (function check() {
+            const check_css = css => {
+                try {
+                    return css.media && css.media.mediaText.includes('prefers-color-scheme')
+                        || css.cssRules && Array.from(css.cssRules).find(check_css)
+                        || css.styleSheet && check_css(css.styleSheet)
+                } catch {
+                    return false
+                }
+            }
+            if (Array.from(document.styleSheets).find(check_css)) {
+                document.documentElement.classList.add('luakit-no-invert')
+                return
+            }
+
             const get_color = element => {
                 const color = getComputedStyle(element).backgroundColor
                 const rgba = color.split(/[(,]/).slice(1).map(parseFloat).concat([1])
                 return rgba[3] && rgba.slice(0, 3).map(x => x / 255 * rgba[3] + (1 - rgba[3]))
             }
-
             const color = get_color(document.documentElement)
                 || document.body && get_color(document.body)
                 || [1, 1, 1]
@@ -18,15 +31,15 @@ local function check(page)
                 [0.426, 0.43, 0.144],
                 [0.426, 1.43, -0.856],
             ]
-
             const sum = a => a.reduce((x, y) => x + y)
-
             const inverted = matrix
                 .map(row => sum([0, 1, 2].map(i => row[i] * color[i])))
                 .map(x => Math.min(Math.max(1 - x, 0), 1))
-
             document.documentElement.classList.toggle('luakit-no-invert', sum(inverted) >= sum(color))
-        }
+
+            if (document.readyState !== 'complete')
+                document.addEventListener('readystatechange', check)
+        })()
     ]])
 end
 
