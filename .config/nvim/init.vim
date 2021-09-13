@@ -165,7 +165,7 @@ Plug 'godlygeek/tabular'
 " Colorscheme {{{1
 
 Plug 'srcery-colors/srcery-vim'
-let g:srcery_transparent_background = v:true
+let g:srcery_bg_passthrough = v:true
 let g:srcery_italic = v:true
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
