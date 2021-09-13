@@ -7,7 +7,7 @@ fzf_args=(
     --bind "tab:execute-silent(cut -f 2 <<<{} | head -c -1 >>'$1')+refresh-preview"
     --bind "ctrl-c:execute-silent(printf '' >'$1')+refresh-preview"
     --preview "cat -- '$1'"
-    --preview-window down:1:noborder
+    --preview-window down,1,noborder
 )
 
 char=$(
