@@ -421,7 +421,6 @@ endif
 Plug 'tpope/vim-eunuch'
 
 Plug 'lambdalisue/suda.vim'
-autocmd vimrc User Plug_suda_vim command! WriteSudo write suda://% | set noreadonly
 
 " Terminal {{{1
 
@@ -450,7 +449,6 @@ nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'/
 
 Plug 'justinmk/vim-dirvish'
 set suffixes-=.h
-autocmd vimrc FileType dirvish nnoremap <buffer> C <Cmd>cd % \| pwd<CR>
 autocmd vimrc ColorScheme srcery highlight link DirvishArg SrceryOrangeBold
 autocmd vimrc ColorScheme srcery highlight link DirvishPathTail SrceryBlue
 autocmd vimrc ColorScheme srcery highlight link DirvishSuffix SrceryBrightBlack
