@@ -814,7 +814,7 @@ let g:coc_user_config = #{
     \ },
 \ }
 autocmd vimrc User CocNvimInit call coc#config('suggest', #{
-    \ invalidInsertCharacters: split(' (/:<', '\zs'),
+    \ invalidInsertCharacters: split(' (/:;<', '\zs'),
     \ snippetIndicator: '',
     \ detailField: 'preview',
     \ maxCompleteItemCount: 1000,
