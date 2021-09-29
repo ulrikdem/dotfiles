@@ -122,6 +122,9 @@ modes.add_binds("normal", {
     {"!", "Start bang search.", function(win)
         win:enter_cmd(":open !")
     end},
+    {"<control-!>", "Start bang search in a new tab.", function(win)
+        win:enter_cmd(":tabopen !")
+    end},
 
     {"gs", "Toggle between HTTP and HTTPS.", function(win)
         win.view.uri = win.view.uri:gsub("^(https?):", {http = "https:", https = "http:"})
