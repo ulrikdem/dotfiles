@@ -86,7 +86,7 @@ if declare -f isgrml >/dev/null; then
     bindkey '^N' history-beginning-search-forward-end
 
     bindkey -s '^S' '^X.'
-    abk[LC]='--color=always |& less -r'
+    abk[LC]='--color=always |& less -R'
 fi
 
 if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
