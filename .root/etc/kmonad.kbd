@@ -47,7 +47,7 @@
     _     XX    @qwer XX    XX    XX          volu  home  up    end   pgup  _
     _     lmet  lalt  @lsft lctl  XX          vold  left  down  rght  pgdn  _
     XX    XX    ralt  XX    XX    XX          mute  ins   caps  cmps  del
-                                  _     _     _
+                                  esc   spc   ret
 )
 
 (deflayer qwerty
