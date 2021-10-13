@@ -276,9 +276,9 @@ instance XPrompt TerminalPrompt where
 
 -- Layout {{{1
 
-layout textHeight = addDecoration $ addGaps $ addNavigation customLayout where
+layout textHeight = addDecoration $ addSmartBorderSpacing $ addNavigation customLayout where
     addDecoration = decoration EllipsisShrinker theme CollapseDecoration
-    addGaps = spacingWithEdge gapWidth
+    addSmartBorderSpacing = lessBorders Screen . smartSpacingWithEdge gapWidth
     addNavigation = configurableNavigation noNavigateBorders
     customLayout = EmptyLayout [def, def {limit = maxBound}]
         $ textHeight + fromIntegral gapWidth * 2 :: CustomLayout Window
