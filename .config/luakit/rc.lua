@@ -506,11 +506,15 @@ completion.completers.session = {
     end,
 }
 
+local function session_path(name)
+    return name and luakit.data_dir.."/session."..name:gsub("/", "_") or session.session_file
+end
+
 modes.add_cmds{
     {":write", "Save current session.", {
         format = "{session}",
         func = function(win, opts)
-            session.save(opts.arg and luakit.data_dir.."/session."..opts.arg:gsub("/", "_"))
+            session.save(session_path(opts.arg))
         end,
     }},
 
@@ -519,15 +523,22 @@ modes.add_cmds{
         func = function(win, opts)
             local session_file = session.session_file
             local recovery_file = session.recovery_file
+            session.session_file = session_path(opts.arg)
             session.recovery_file = nil
-            if opts.arg then
-                session.session_file = luakit.data_dir.."/session."..opts.arg
-            end
-            if not session.restore() then
+            if not session.restore(false) then
                 win:error("Could not restore session")
             end
             session.session_file = session_file
             session.recovery_file = recovery_file
+        end,
+    }},
+
+    {":delete", "Delete a saved session.", {
+        format = "{session}",
+        func = function(win, opts)
+            if not os.remove(session_path(opts.arg)) then
+                win:error("Could not delete session")
+            end
         end,
     }},
 }
