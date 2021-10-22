@@ -658,7 +658,7 @@ function window.methods.search_open(win, s)
         return s
     end
     local uri = search_open(win, s)
-    if not uri:match("^%a[%a%d+%-.]*:") then
+    if not uri:match("^%a[%w+%-.]*:") then
         uri = "https://"..uri
     end
     return uri
@@ -686,6 +686,14 @@ history.add_signal("add", function(uri)
         return false
     end
 end)
+
+local redirect_wm = require_web_module("redirect_wm")
+modes.add_binds("normal", {
+    {"<control-r>", "Reverse redirects in current tab.", function(win)
+        redirect_wm:emit_signal(win.view, "reverse")
+        win:reload()
+    end},
+})
 
 local function resolve_uri(uri, base)
     if not uri or uri:match("^%a[%w+%-.]*:") then
