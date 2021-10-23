@@ -7,7 +7,7 @@ Config
         [ Run UnsafeStdinReader
         , Run Wireless ""
             [ "-t", "<ssid> <fn=1>直</fn> <quality>% <fc=gray25>│<raw=1: /></fc>"
-            , "-x", "<fc=black><raw=37:"
+            , "-x", "<fc=black><raw=36:"
             , "-h", "green4"
             , "-n", "orange3"
             , "-l", "red3"
