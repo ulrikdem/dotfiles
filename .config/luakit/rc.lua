@@ -129,10 +129,6 @@ modes.add_binds("normal", {
         win:enter_cmd(":tabopen !")
     end},
 
-    {"gs", "Toggle between HTTP and HTTPS.", function(win)
-        win.view.uri = win.view.uri:gsub("^(https?):", {http = "https:", https = "http:"})
-    end},
-
     {"<control-shift-c>", "Copy the selected text.", function()
         luakit.selection.clipboard = luakit.selection.primary
     end},
@@ -660,11 +656,7 @@ function window.methods.search_open(win, s)
     if s:match("[%./]") and os.exists(s) then
         return s
     end
-    local uri = search_open(win, s)
-    if not uri:match("^%a[%w+%-.]*:") then
-        uri = "https://"..uri
-    end
-    return uri
+    return search_open(win, s)
 end
 
 webview.add_signal("init", function(view)
@@ -692,8 +684,12 @@ end)
 
 local redirect_wm = require_web_module("redirect_wm")
 modes.add_binds("normal", {
-    {"<control-r>", "Reverse redirects in current tab.", function(win)
-        redirect_wm:emit_signal(win.view, "reverse")
+    {"gr", "Toggle host redirects in current tab.", function(win)
+        redirect_wm:emit_signal(win.view, "toggle_host")
+        win:reload()
+    end},
+    {"gs", "Toggle scheme redirects in current tab.", function(win)
+        redirect_wm:emit_signal(win.view, "toggle_scheme")
         win:reload()
     end},
 })
