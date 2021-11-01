@@ -1,11 +1,10 @@
 local ui = ipc_channel("redirect_wm")
 
-local success, reverse_redirects = pcall(function()
+local _, reverse_redirects = xpcall(function()
     return require("redirects")
+end, function()
+    return {}
 end)
-if not success then
-    reverse_redirects = {}
-end
 
 local redirects = {}
 for target, sources in pairs(reverse_redirects) do
@@ -20,8 +19,9 @@ local keep_scheme = setmetatable({}, {__mode = "k"})
 local reverse_scheme = setmetatable({}, {__mode = "k"})
 
 luakit.add_signal("page-created", function(page)
-    page:add_signal("send-request", function(_, uri)
-        uri = soup.parse_uri(uri)
+    page:add_signal("send-request", function(_, old_uri)
+        local uri = soup.parse_uri(old_uri)
+        local changed = false
 
         if not keep_host[page] or reverse_host[page] then
             local redirects = reverse_host[page] and reverse_redirects or redirects
@@ -29,6 +29,7 @@ luakit.add_signal("page-created", function(page)
             while host and host:match("%.") do
                 if redirects[host] then
                     uri.host = redirects[host][1]
+                    changed = true
                     break
                 end
                 host = host:match("%.(.+)")
@@ -39,13 +40,19 @@ luakit.add_signal("page-created", function(page)
         if not keep_scheme[page] and uri.scheme == "http" and uri.port == 80 then
             uri.scheme = "https"
             uri.port = 443
+            changed = true
         elseif reverse_scheme[page] and uri.scheme == "https" and uri.port == 443 then
             uri.scheme = "http"
             uri.port = 80
+            changed = true
             reverse_scheme[page] = false
         end
 
-        return soup.uri_tostring(uri)
+        if changed then
+            uri = soup.uri_tostring(uri)
+            msg.info("Redirecting %s to %s", old_uri, uri)
+            return uri
+        end
     end)
 end)
 

@@ -13,6 +13,7 @@ local function check(page)
                 }
             }
             if (Array.from(document.styleSheets).find(check_css)) {
+                console.log("Found prefers-color-scheme media query")
                 document.documentElement.classList.add('luakit-no-invert')
                 return
             }

@@ -725,7 +725,7 @@ local function play_media(uris, referrer, win)
     local uri = table.remove(uris, 1)
     luakit.spawn(string.format("mpv --force-window --referrer=%q -- %q", referrer, uri), function(_, status)
         if status ~= 0 then
-            msg.warn("Could not play media: "..uri)
+            msg.warn("Could not play media: %s", uri)
             play_media(uris, referrer, win)
         end
     end)
@@ -778,7 +778,9 @@ end)
 if os.exists(luakit.config_dir.."/userconf.lua") then
     xpcall(function()
         require("userconf")
-    end, msg.error)
+    end, function(error)
+        msg.error("%s", error)
+    end)
 end
 
 if not session.restore() or #uris ~= 0 then
