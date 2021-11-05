@@ -1,0 +1,17 @@
+#!/bin/bash
+
+(($# < 2)) && echo "metapkg <name> <depends>..." >&2 && exit 1
+name=$1
+shift
+
+temp=$(mktemp -td metapkg.XXXXXXXX)
+cd -- "$temp"
+cat >PKGBUILD <<EOF
+pkgname=$name
+pkgver=1
+pkgrel=1
+arch=(any)
+depends=($@)
+EOF
+makepkg -si
+rm -r -- "$temp"
