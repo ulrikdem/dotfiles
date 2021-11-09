@@ -549,13 +549,16 @@ settings.application.prefer_dark_mode = true
 local dark_style = stylesheet{
     source = [[
         :root:not(.luakit-no-invert),
-        :root:not(.luakit-no-invert) #luakit_select_overlay .hint_label,
-        :root:not(.luakit-no-invert).luakit-invert-images
-            :matches(img, video):not(:-webkit-full-screen, :root :-webkit-full-screen *),
-        :matches(frame, iframe):not(:-webkit-full-screen) {
+        :root:not(.luakit-no-invert) :matches(
+            #luakit_select_overlay .hint_label,
+            :root.luakit-invert-images img,
+            img[src$=".jpg"i], img[src$=".jpeg"i], img[src*=".jpg?"i], img[src*=".jpeg?"i],
+            video
+        ):not(:-webkit-full-screen, :root :-webkit-full-screen *) {
             filter: invert(1) hue-rotate(180deg);
         }
     ]],
+    top_frame_only = true,
 }
 
 webview.add_signal("init", function(view)
