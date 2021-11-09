@@ -87,7 +87,7 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:monospace:size=9"
+    , fontName = "xft:Iosevka Term SS04 Extended:size=9"
     }
 
 getTextHeight = do
@@ -108,7 +108,7 @@ spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
-            . fromMaybe "\xfaae" <$> runQuery iconQuery win
+            . wrap "<fn=1>" "</fn>" . fromMaybe "\xfaae" <$> runQuery iconQuery win
         getIcons w = fmap ((W.tag w,) . concat . W.integrate) . onFocusedZ (xmobarColor "gray50" "")
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
