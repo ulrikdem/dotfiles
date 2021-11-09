@@ -9,7 +9,7 @@ import XMonad.ManageHook
 iconQuery = getFirst <$> composeAll
     [ className =? "Luakit" --> icon "\xf484" -- 
     , className =? "Termite" <&&> title $? " - nvim" --> icon "\xe62b" -- 
-    , className =? "Termite" --> icon "\xe795" -- 
+    , className =? "Termite" --> icon "\xf489" -- 
     ]
 
 icon = return . First . Just
