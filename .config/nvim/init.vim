@@ -274,12 +274,18 @@ let g:lightline = #{
     \ tab_component_function: #{
         \ tab: 'TabLabel',
     \ },
-    \ separator: #{left: '', right: ''},
-    \ subseparator: #{left: '', right: ''},
-    \ tabline_separator: #{left: '▌', right: '▐'},
-    \ tabline_subseparator: #{left: '│', right: '│'},
     \ _mode_: #{f: 'fake'},
 \ }
+
+if $POWERLINE == '0' || $TERM ==# 'linux'
+    let g:lightline.subseparator = #{left: '│', right: '│'}
+elseif $POWERLINE == '1'
+    let g:lightline.separator = #{left: '', right: ''}
+    let g:lightline.subseparator = #{left: '', right: ''}
+else
+    let g:lightline.separator = #{left: '', right: ''}
+    let g:lightline.subseparator = #{left: '', right: ''}
+endif
 
 function! StatusLineMode() abort
     if exists('g:fake_mode')
