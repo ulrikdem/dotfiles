@@ -2,18 +2,50 @@ font:
   size: 9
 
 colors:
+  normal:
+    black: &black '#1c1b19'
+    red: &red '#ef2f27'
+    green: &green '#519f50'
+    yellow: &yellow '#fbb829'
+    blue: &blue '#2c78bf'
+    magenta: &magenta '#e02c6d'
+    cyan: &cyan '#0aaeb3'
+    white: &white '#baa67f'
+
+  bright:
+    black: &bright_black '#918175'
+    red: &bright_red '#f75341'
+    green: &bright_green '#98bc37'
+    yellow: &bright_yellow '#fed06e'
+    blue: &bright_blue '#68a8e4'
+    magenta: &bright_magenta '#ff5c8f'
+    cyan: &bright_cyan '#2be4d0'
+    white: &bright_white '#fce8c3'
+
+  primary:
+    background: *black
+    foreground: *bright_white
+
   cursor: &cursor
-    background: '#c5c8c6'
-    text: &black '#1d1f21'
+    background: *bright_white
+    text: *black
   vi_mode_cursor: *cursor
 
   search:
     matches:
-      background: '#e7c547'
+      background: *bright_yellow
       foreground: *black
     focused_match:
-      background: '#f0c674'
+      background: *yellow
       foreground: *black
+
+  hints:
+    start:
+      background: *red
+      foreground: *black
+    end:
+      background: *black
+      foreground: *red
 
 hints:
   alphabet: ntesiroahdufyw
