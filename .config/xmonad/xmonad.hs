@@ -87,7 +87,7 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:monospace:size=9"
+    , fontName = "xft:Iosevka Term SS04 Extended:size=9"
     }
 
 getTextHeight = do
@@ -104,7 +104,7 @@ getTextHeight = do
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
+spawnBar (S i) = spawnPipe $ "xmobar -f '" ++ fontName theme ++ "' -x " ++ show i
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
