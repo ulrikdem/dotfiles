@@ -1,2 +1,0 @@
-#!/bin/bash
-exec termite --class spacer -t spacer -c ~/.config/termite/spacer -e 'tput civis' --hold
