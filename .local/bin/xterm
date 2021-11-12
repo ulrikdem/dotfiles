@@ -1,15 +1,10 @@
 #!/bin/bash
 
-if ! type termite &>/dev/null; then
+if ! type alacritty &>/dev/null; then
     exec /usr/bin/xterm "$@"
 fi
 
 while (($#)) && [[ $1 != -e ]]; do
     shift
 done
-if (($#)); then
-    shift
-    set -- -e "${*@Q}"
-fi
-
-exec termite "$@"
+exec alacritty "$@"

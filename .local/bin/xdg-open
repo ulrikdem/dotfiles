@@ -26,5 +26,5 @@ Mimeo.exec_field_to_cmds = exec_field_to_cmds_override
 
 args = ['-q', '--'] + sys.argv[1:]
 if not (sys.stdin.isatty() and sys.stdout.isatty()):
-    args = ['--term', 'xterm -e %s'] + args
+    args = ['--term', 'alacritty -e %s'] + args
 Mimeo.run_main(args)

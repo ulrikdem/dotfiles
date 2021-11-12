@@ -55,8 +55,6 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
         ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
 fi
 
-[[ -f /etc/profile.d/vte.sh ]] && source /etc/profile.d/vte.sh
-
 if declare -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs venv rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false

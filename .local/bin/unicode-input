@@ -1,6 +1,6 @@
 #!/bin/bash
 temp=$(mktemp -t unicode.XXXXXXXX)
-termite --name xmonad-custom-float -t unicode -e "unicode-input-helper '$temp'"
+alacritty --class xmonad-custom-float -t unicode -e unicode-input-helper "$temp"
 xdotool type -- "$(<"$temp")"
 xsel <"$temp"
 xsel -b <"$temp"

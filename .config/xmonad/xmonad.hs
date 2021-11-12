@@ -78,7 +78,7 @@ main = do
         , modMask = mod4Mask
         } `additionalKeysP` extraKeys textHeight `removeKeysP` removedKeys
 
-terminalName = "termite"
+terminalName = "alacritty"
 
 tagIff = bool delTag addTag
 
@@ -164,7 +164,7 @@ extraKeys textHeight =
     , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
 
     , ("M-s", allNamedScratchpadAction
-        [ NS "" (terminalName ++ " --name xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        [ NS "" (terminalName ++ " --class xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
     , ("M-c", toggleTag "collapsible")
@@ -191,7 +191,6 @@ extraKeys textHeight =
 
     , ("M-b", spawn "luakit")
     , ("M-S-b", spawn "luakit --private")
-    , ("M-S-a", spawn "spacer")
     , ("M-u", spawn "unicode-input")
     , ("M-z", spawn "lock")
 
@@ -265,8 +264,7 @@ commandPromptConfig textHeight matches = def
 
 terminalPrompt config = do
     cmds <- io getCommands
-    mkXPrompt TerminalPrompt config (getShellCompl cmds $ searchPredicate config)
-        $ \c -> safeSpawn terminalName ["-e", c]
+    mkXPrompt TerminalPrompt config (getShellCompl cmds $ searchPredicate config) $ runInTerm ""
 
 data TerminalPrompt = TerminalPrompt
 

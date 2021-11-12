@@ -150,7 +150,7 @@ modes.add_binds({"normal", "insert"}, {
     end},
 })
 
-editor.editor_cmd = "termite --name xmonad-custom-float -e 'nvim {file} +{line}'"
+editor.editor_cmd = "alacritty --class xmonad-custom-float -e nvim {file} +{line}"
 modes.remap_binds("insert", {
     {"<mod1-e>", "<control-e>"},
 })
@@ -673,7 +673,7 @@ webview.add_signal("init", function(view)
             add_torrent(uri, webview.window(view))
             return false
         elseif uri:match("^mailto:") then
-            luakit.spawn(string.format("termite -e 'alot compose %q'", uri))
+            luakit.spawn(string.format("alacritty -e alot compose %q", uri))
             return false
         end
     end)
