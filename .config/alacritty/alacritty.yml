@@ -1,0 +1,54 @@
+font:
+  size: 9
+
+colors:
+  cursor: &cursor
+    background: '#c5c8c6'
+    text: &black '#1d1f21'
+  vi_mode_cursor: *cursor
+
+  search:
+    matches:
+      background: '#e7c547'
+      foreground: *black
+    focused_match:
+      background: '#f0c674'
+      foreground: *black
+
+hints:
+  alphabet: ntesiroahdufyw
+
+  enabled:
+    - regex: &uri '(file|https?)://[[:graph:]--"<>\\^`{|}]+'
+      post_processing: true
+      command: xdg-open
+      mouse:
+        enabled: true
+        mods: Control|Shift
+      binding:
+        key: U
+        mods: Control|Shift
+
+    - regex: *uri
+      post_processing: true
+      action: Select
+      mouse:
+        enabled: true
+        mods: Shift
+      binding:
+        key: Y
+        mods: Control|Shift
+
+    - regex: '[[:xdigit:]]{6,}'
+      action: Paste
+      mouse:
+        enabled: true
+        mods: Shift
+      binding:
+        key: H
+        mods: Control|Shift
+
+key_bindings:
+  - action: SpawnNewInstance
+    key: Return
+    mods: Control|Shift
