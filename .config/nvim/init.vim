@@ -283,8 +283,8 @@ elseif $POWERLINE == '1'
     let g:lightline.separator = #{left: '', right: ''}
     let g:lightline.subseparator = #{left: '', right: ''}
 else
-    let g:lightline.separator = #{left: '', right: ''}
-    let g:lightline.subseparator = #{left: '', right: ''}
+    let g:lightline.separator = #{left: '', right: ''}
+    let g:lightline.subseparator = #{left: '', right: ''}
 endif
 
 function! StatusLineMode() abort
@@ -813,7 +813,7 @@ let g:coc_user_config = #{
         \ virtualTextLines: 1,
         \ separateRelatedInformationAsDiagnostics: v:true,
         \ enableHighlightLineNumber: v:false,
-        \ errorSign: '✕',
+        \ errorSign: '✖',
         \ warningSign: '⚠',
         \ infoSign: 'ℹ',
         \ hintSign: 'ℹ',
