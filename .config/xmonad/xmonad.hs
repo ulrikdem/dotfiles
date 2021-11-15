@@ -87,7 +87,7 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:Iosevka Term SS04 Extended:size=9"
+    , fontName = "xft:Iosevka Term SS04 Extended-9"
     }
 
 getTextHeight = do
