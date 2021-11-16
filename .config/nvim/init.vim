@@ -279,12 +279,9 @@ let g:lightline = #{
 
 if $POWERLINE == '0' || $TERM ==# 'linux'
     let g:lightline.subseparator = #{left: '│', right: '│'}
-elseif $POWERLINE == '1'
+else
     let g:lightline.separator = #{left: '', right: ''}
     let g:lightline.subseparator = #{left: '', right: ''}
-else
-    let g:lightline.separator = #{left: '', right: ''}
-    let g:lightline.subseparator = #{left: '', right: ''}
 endif
 
 function! StatusLineMode() abort
