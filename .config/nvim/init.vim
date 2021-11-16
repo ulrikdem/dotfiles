@@ -813,7 +813,7 @@ let g:coc_user_config = #{
         \ virtualTextLines: 1,
         \ separateRelatedInformationAsDiagnostics: v:true,
         \ enableHighlightLineNumber: v:false,
-        \ errorSign: '×',
+        \ errorSign: '✖',
         \ warningSign: '⚠',
         \ infoSign: 'ℹ',
         \ hintSign: 'ℹ',
