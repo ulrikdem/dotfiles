@@ -28,6 +28,7 @@ type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
 type nvim >/dev/null && alias vim=nvim
 type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
+type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
 
 setopt no_bg_nice
 setopt chase_links
