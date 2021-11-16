@@ -87,7 +87,7 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:Iosevka Term SS04 Extended-9"
+    , fontName = "xft:monospace-9"
     }
 
 getTextHeight = do
@@ -96,7 +96,7 @@ getTextHeight = do
     height <- xftfont_height font
     xftFontClose display font
     closeDisplay display
-    return $ fromIntegral $ height + 2
+    return $ fromIntegral $ height
 
 -- Bar {{{1
 
