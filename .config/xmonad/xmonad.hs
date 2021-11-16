@@ -92,12 +92,11 @@ theme = def
 
 getTextHeight = do
     display <- openDisplay ""
-    font <- xftFontOpen display (defaultScreenOfDisplay display) $ fontName theme
-    ascent <- xftfont_ascent font
-    descent <- xftfont_descent font
+    font <- xftFontOpen display (defaultScreenOfDisplay display) $ drop 4 $ fontName theme
+    height <- xftfont_height font
     xftFontClose display font
     closeDisplay display
-    return $ fromIntegral $ ascent + descent + 2
+    return $ fromIntegral $ height + 2
 
 -- Bar {{{1
 
