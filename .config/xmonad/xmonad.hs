@@ -3,6 +3,7 @@
 -- vim: foldmethod=marker
 
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TupleSections #-}
+{-# OPTIONS_GHC -Wno-deprecations #-}
 
 import Control.Monad
 
@@ -14,7 +15,7 @@ import qualified Data.Map.Strict as M
 
 import Graphics.X11.Xft
 
-import XMonad hiding ((|||))
+import XMonad
 import qualified XMonad.StackSet as W
 
 import XMonad.Actions.CycleWS
@@ -25,13 +26,12 @@ import XMonad.Actions.SwapWorkspaces
 import XMonad.Actions.TagWindows
 
 import XMonad.Hooks.DynamicBars
-import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
+import XMonad.Hooks.StatusBar.PP
 
 import XMonad.Layout.Decoration
-import XMonad.Layout.LayoutCombinators
 import XMonad.Layout.Named
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
@@ -107,11 +107,11 @@ spawnBar (S i) = spawnPipe $ "xmobar -f '" ++ fontName theme ++ "' -x " ++ show 
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
-            . wrap "<fn=1>" "</fn>" . fromMaybe "\xfaae" <$> runQuery iconQuery win
-        getIcons w = fmap ((W.tag w,) . concat . W.integrate) . onFocusedZ (xmobarColor "gray50" "")
+            . xmobarFont 1 <$> runQuery iconQuery win
+        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "")
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
-    let rename w = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
+    let rename w _ = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
             $ xmobarAction ("xdotool getactivewindow set_desktop_for_window " ++ show (read w - 1)) "3"
             $ xmobarColor "gray25" "" $ pad $ (w ++) $ M.findWithDefault "" w icons
         getScreen = do
@@ -120,11 +120,11 @@ barLogHook = do
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
-        pp color = namedScratchpadFilterOutWorkspacePP def
-            { ppCurrent = wrap ("<box type=Bottom width=2 color=" ++ color ++ ">") "</box>" . rename
-            , ppVisible = wrap "<box type=Bottom width=2 color=gray25>" "</box>" . rename
-            , ppHidden = rename
-            , ppHiddenNoWindows = rename
+        pp color = filterOutWsPP [scratchpadWorkspaceTag] def
+            { ppCurrent = xmobarBorder "Bottom" color 2
+            , ppVisible = xmobarBorder "Bottom" "gray25" 2
+            , ppHiddenNoWindows = id
+            , ppRename = rename
             , ppTitle = xmobarRaw . shorten 100
             , ppTitleSanitize = id
             , ppExtras = [getScreen, showTag "collapsible", showTag "scratchpad"]
@@ -185,8 +185,8 @@ extraKeys textHeight =
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
-    , ("M-p", shellPrompt . commandPromptConfig textHeight =<< initMatches)
-    , ("M-S-p", terminalPrompt . commandPromptConfig textHeight =<< initMatches)
+    , ("M-p", commandPrompt textHeight Shell spawn)
+    , ("M-S-p", commandPrompt textHeight Terminal $ runInTerm "")
 
     , ("M-b", spawn "luakit")
     , ("M-S-b", spawn "luakit --private")
@@ -199,7 +199,7 @@ extraKeys textHeight =
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
-    , ("M-<Tab>", toggleWS' ["NSP"])
+    , ("M-<Tab>", toggleWS' [scratchpadWorkspaceTag])
     , ("M-S-,", moveTo Prev cycleWSType)
     , ("M-S-.", moveTo Next cycleWSType)
     ] ++
@@ -228,9 +228,7 @@ toggleTag tag = withFocused $ \win -> do
 
 weightFactor = 1.26
 
-cycleWSType = WSIs $ do
-    hidden <- gets $ map W.tag . W.hidden . windowset
-    return $ (\w -> w `elem` hidden && w /= "NSP") . W.tag
+cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
 
 -- Prompt {{{1
 
@@ -238,6 +236,7 @@ windowPromptConfig textHeight = def
     { promptBorderWidth = 0
     , height = textHeight
     , font = fontName theme
+    , maxComplColumns = Just 1
     , searchPredicate = fuzzyMatch
     , sorter = fuzzySort
     , historySize = 0
@@ -261,13 +260,15 @@ commandPromptConfig textHeight matches = def
         ]) $ promptKeymap $ windowPromptConfig textHeight
     }
 
-terminalPrompt config = do
+commandPrompt textHeight prompt action = do
+    matches <- initMatches
+    let config = commandPromptConfig textHeight matches
     cmds <- io getCommands
-    mkXPrompt TerminalPrompt config (getShellCompl cmds $ searchPredicate config) $ runInTerm ""
+    mkXPrompt prompt config (getShellCompl' CaseInSensitive cmds $ searchPredicate config) action
 
-data TerminalPrompt = TerminalPrompt
+data Terminal = Terminal
 
-instance XPrompt TerminalPrompt where
+instance XPrompt Terminal where
     showXPrompt _ = "Run in terminal: "
     completionToCommand _ = completionToCommand Shell
 

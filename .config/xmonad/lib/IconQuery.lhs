@@ -3,16 +3,15 @@
 module IconQuery (iconQuery) where
 
 import Data.List
-import Data.Monoid
 import XMonad.ManageHook
+import XMonad.Hooks.ManageHelpers hiding ((^?), ($?))
 
-iconQuery = getFirst <$> composeAll
-    [ className =? "Alacritty" <&&> title $? " - nvim" --> icon "\xe62b" -- 
-    , className =? "Alacritty" --> icon "\xf489" -- 
-    , className =? "Luakit" --> icon "\xf484" -- 
+iconQuery = composeOne
+    [ className =? "Alacritty" <&&> title $? " - nvim" -?> return "\xe62b" -- 
+    , className =? "Alacritty" -?> return "\xf489" -- 
+    , className =? "Luakit" -?> return "\xf484" -- 
+    , return $ Just "\xfaae" -- 类
     ]
-
-icon = return . First . Just
 
 q ^? s = fmap (s `isPrefixOf`) q
 q $? s = fmap (s `isSuffixOf`) q

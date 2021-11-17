@@ -18,5 +18,4 @@ feh --no-fehbg --bg-fill ~/.config/wallpaper
 picom -b
 
 export _JAVA_AWT_WM_NONREPARENTING=1
-mkdir -p ~/.cache/xmonad ~/.local/share/xmonad
 exec xmonad
