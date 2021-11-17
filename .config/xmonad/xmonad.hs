@@ -190,6 +190,7 @@ extraKeys textHeight =
 
     , ("M-b", spawn "luakit")
     , ("M-S-b", spawn "luakit --private")
+    , ("M-C-b", spawn "firefox")
     , ("M-u", spawn "unicode-input")
     , ("M-z", spawn "lock")
 
