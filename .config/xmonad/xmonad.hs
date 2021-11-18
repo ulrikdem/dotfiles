@@ -192,7 +192,7 @@ extraKeys textHeight =
     , ("M-S-b", spawn "luakit --private")
     , ("M-C-b", spawn "firefox")
     , ("M-u", spawn "unicode-input")
-    , ("M-z", spawn "lock")
+    , ("M-l", spawn "lock")
 
     , ("<XF86AudioMute>", spawn "amixer set Master toggle")
     , ("<XF86AudioLowerVolume>", spawn "amixer set Master 2%-")
