@@ -172,7 +172,7 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
-    call s:Highlight('Normal', #{bg: 'SrceryBlack'})
+    execute 'highlight Normal guibg='.synIDattr(hlID('SrceryBlack'), 'fg', 'gui')
     call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
     call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
     call s:Highlight('CursorLine', #{bg: 'SrceryXgray1'})
