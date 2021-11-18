@@ -1088,8 +1088,6 @@ autocmd vimrc FileType mail,markdown,tex setlocal spell
 
 Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
-let g:tex_flavor = 'latex'
-let g:tex_conceal = 'agm'
 autocmd vimrc FileType tex setlocal conceallevel=2
 let g:vimtex_indent_on_ampersands = v:false
 let g:vimtex_indent_bib_enabled = v:false
