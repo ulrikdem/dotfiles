@@ -84,3 +84,23 @@ key_bindings:
   - action: SpawnNewInstance
     key: Return
     mods: Control|Shift
+
+  - action: FirstOccupied
+    key: 7
+    mods: Shift
+    mode: Vi|~Search
+
+  - action: Last
+    key: 5
+    mods: Shift
+    mode: Vi|~Search
+
+  - action: Bracket
+    key: 6
+    mods: Shift
+    mode: Vi|~Search
+
+  - action: SearchBackward
+    key: 53
+    mods: Shift
+    mode: Vi|~Search
