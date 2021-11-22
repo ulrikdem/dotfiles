@@ -85,6 +85,10 @@ key_bindings:
     key: Return
     mods: Control|Shift
 
+  - action: Paste
+    key: P
+    mode: Vi|~Search
+
   - action: FirstOccupied
     key: 7
     mods: Shift
