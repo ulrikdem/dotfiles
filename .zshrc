@@ -79,7 +79,7 @@ if declare -f isgrml >/dev/null; then
     }
 
     grml_theme_add_token arrow '%F{blue}» %f'
-    PS2='%8F%_ %F{blue}» %f'
+    PS2='%F{blue}» %f'
 
     bindkey '^P' history-beginning-search-backward-end
     bindkey '^N' history-beginning-search-forward-end
