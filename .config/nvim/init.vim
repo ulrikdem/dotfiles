@@ -624,10 +624,10 @@ function! s:CustomFzf(source, options, parse) abort
             endfor
         endif
     endfunction
-    call fzf#run(fzf#wrap({
-        \ 'source': a:source,
-        \ 'sink*': funcref("\<SID>FzfSink"),
-        \ 'options': extend([
+    call fzf#run(fzf#wrap(#{
+        \ source: a:source,
+        \ sinklist: funcref("\<SID>FzfSink"),
+        \ options: extend([
             \ '--multi',
             \ '--expect=ctrl-x,ctrl-v,ctrl-t,ctrl-q',
         \ ], a:options),
