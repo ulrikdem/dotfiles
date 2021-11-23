@@ -84,7 +84,6 @@ if declare -f isgrml >/dev/null; then
     bindkey '^P' history-beginning-search-backward-end
     bindkey '^N' history-beginning-search-forward-end
 
-    bindkey -s '^S' '^X.'
     abk[LC]='--color=always |& less -R'
 fi
 
