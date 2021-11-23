@@ -46,14 +46,15 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
     ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
     ZSH_HIGHLIGHT_STYLES+=(
         default fg=15
+        path_prefix fg=15
+        path fg=15,bold
         assign fg=cyan
         unknown-token fg=red
         bracket-error fg=red
         bracket-level-1 fg=8
         comment fg=8
     )
-    noglob unset ZSH_HIGHLIGHT_STYLES[path] ZSH_HIGHLIGHT_STYLES[precommand] \
-        ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
+    noglob unset ZSH_HIGHLIGHT_STYLES[precommand] ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
 fi
 
 if declare -f isgrml >/dev/null; then
