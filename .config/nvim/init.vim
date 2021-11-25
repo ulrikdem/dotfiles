@@ -278,7 +278,7 @@ let g:lightline = #{
     \ _mode_: #{f: 'fake'},
 \ }
 
-if $POWERLINE == '0' || $TERM ==# 'linux'
+if $TERM ==# 'linux' || exists('$NO_POWERLINE')
     let g:lightline.subseparator = #{left: '│', right: '│'}
 else
     let g:lightline.separator = #{left: '', right: ''}
