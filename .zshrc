@@ -42,24 +42,6 @@ setopt rc_quotes
 
 stty -ixon
 
-zle_highlight=(suffix:fg=8)
-
-if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
-    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-    ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
-    ZSH_HIGHLIGHT_STYLES+=(
-        default fg=15
-        path_prefix fg=15
-        path fg=15,bold
-        assign fg=cyan
-        unknown-token fg=red
-        bracket-error fg=red
-        bracket-level-1 fg=8
-        comment fg=8
-    )
-    noglob unset ZSH_HIGHLIGHT_STYLES[precommand] ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
-fi
-
 if declare -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs venv rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
@@ -85,10 +67,34 @@ if declare -f isgrml >/dev/null; then
     grml_theme_add_token arrow '%F{blue}» %f'
     PS2='%F{blue}» %f'
 
+    autoload up-line-or-beginning-search down-line-or-beginning-search
+    zle -N up-line-or-beginning-search
+    zle -N down-line-or-beginning-search
+    [[ -n $key[Up] ]] && bindkey -- $key[Up] up-line-or-beginning-search
+    [[ -n $key[Down] ]] && bindkey -- $key[Down] down-line-or-beginning-search
+
     bindkey '^P' history-beginning-search-backward-end
     bindkey '^N' history-beginning-search-forward-end
 
     abk[LC]='--color=always |& less -R'
+fi
+
+zle_highlight=(suffix:fg=8)
+
+if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
+    source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+    ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
+    ZSH_HIGHLIGHT_STYLES+=(
+        default fg=15
+        path_prefix fg=15
+        path fg=15,bold
+        assign fg=cyan
+        unknown-token fg=red
+        bracket-error fg=red
+        bracket-level-1 fg=8
+        comment fg=8
+    )
+    noglob unset ZSH_HIGHLIGHT_STYLES[precommand] ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
 fi
 
 if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
