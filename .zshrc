@@ -33,8 +33,11 @@ type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
 setopt no_bg_nice
 setopt chase_links
 setopt no_check_jobs
+setopt glob_star_short
 setopt list_packed
 setopt no_list_types
+setopt pushd_silent
+setopt rc_expand_param
 setopt rc_quotes
 
 stty -ixon
