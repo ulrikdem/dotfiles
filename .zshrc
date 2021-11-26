@@ -67,6 +67,8 @@ if declare -f isgrml >/dev/null; then
     grml_theme_add_token arrow '%F{blue}» %f'
     PS2='%F{blue}» %f'
 
+    [[ -n $key[BackTab] ]] && bindkey -- $key[BackTab] reverse-menu-complete
+
     autoload up-line-or-beginning-search down-line-or-beginning-search
     zle -N up-line-or-beginning-search
     zle -N down-line-or-beginning-search
