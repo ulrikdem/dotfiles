@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if ! type alacritty &>/dev/null; then
+if ! command -v alacritty >/dev/null; then
     exec /usr/bin/xterm "$@"
 fi
 
