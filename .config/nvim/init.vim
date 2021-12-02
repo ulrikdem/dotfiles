@@ -31,7 +31,6 @@ endtry
 
 set clipboard=unnamed
 set cursorline
-set hidden
 set linebreak breakindent showbreak=↪
 set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a
@@ -149,8 +148,6 @@ endfunction
 
 set expandtab tabstop=4 shiftwidth=0
 Plug 'tpope/vim-sleuth'
-
-set nojoinspaces
 
 if has('python3') && filereadable('/usr/share/clang/clang-format.py')
     command! -range=% ClangFormat call ClangFormat('<line1>:<line2>')
@@ -712,7 +709,6 @@ endfunction
 
 " Search and completion {{{1
 
-set inccommand=nosplit
 set ignorecase smartcase
 Plug 'pgdouyon/vim-evanesco'
 
