@@ -115,7 +115,7 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
             local results=$(
                 cd -- ${~dir:-.}
                 unset REPORTTIME
-                fd -L0 | fzf --read0 --height 40% --reverse --prompt ${dir:-./} -q "$query" --bind ctrl-z:ignore -m --print0 |
+                fd -L0 --strip-cwd-prefix | fzf --read0 --height 40% --reverse --prompt ${dir:-./} -q "$query" --bind ctrl-z:ignore -m --print0 |
                     while read -rd $'\0' item; do
                         echo -nE "$dir${(q)item} "
                     done
@@ -125,7 +125,7 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
         }
 
         fzf-cd-widget() {
-            local dir=$(unset REPORTTIME; fd -L0td | fzf --read0 --height 40% --reverse --prompt 'cd ' --bind ctrl-z:ignore)
+            local dir=$(unset REPORTTIME; fd -L0td --strip-cwd-prefix | fzf --read0 --height 40% --reverse --prompt 'cd ' --bind ctrl-z:ignore)
             zle redisplay
             if [[ -n $dir ]]; then
                 zle push-line

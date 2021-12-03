@@ -4,14 +4,14 @@ from subprocess import PIPE
 
 class fzf_cd(Command):
     def execute(self):
-        p = self.fm.execute_command('fd -L0td | fzf --read0 --reverse --prompt="$PWD/"', stdout=PIPE)
+        p = self.fm.execute_command('fd -L0td --strip-cwd-prefix | fzf --read0 --reverse --prompt="$PWD/"', stdout=PIPE)
         stdout = p.communicate()[0]
         if p.returncode == 0:
             self.fm.cd(abspath(stdout.decode()[:-1]))
 
 class fzf_select(Command):
     def execute(self):
-        p = self.fm.execute_command('fd -L0 | fzf --read0 --reverse --prompt="$PWD/"', stdout=PIPE)
+        p = self.fm.execute_command('fd -L0 --strip-cwd-prefix | fzf --read0 --reverse --prompt="$PWD/"', stdout=PIPE)
         stdout = p.communicate()[0]
         if p.returncode == 0:
             self.fm.select_file(abspath(stdout.decode()[:-1]))
