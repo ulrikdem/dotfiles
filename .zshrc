@@ -19,6 +19,7 @@ if [[ -d ~/.dotfiles.git ]]; then
         (($#)) || set zsh
         GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ "$@"
     }
+    alias dotfiles='dotfiles '
     compdef 'dotfiles _precommand' dotfiles 2>/dev/null
 fi
 
