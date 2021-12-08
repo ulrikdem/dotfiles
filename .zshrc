@@ -78,9 +78,6 @@ if declare -f isgrml >/dev/null; then
     [[ -n $key[Up] ]] && bindkey -- $key[Up] up-line-or-beginning-search
     [[ -n $key[Down] ]] && bindkey -- $key[Down] down-line-or-beginning-search
 
-    bindkey '^P' history-beginning-search-backward-end
-    bindkey '^N' history-beginning-search-forward-end
-
     abk[LC]='--color=always |& less -R'
 fi
 

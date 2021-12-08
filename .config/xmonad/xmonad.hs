@@ -256,8 +256,8 @@ commandPromptConfig textHeight matches = def
     , font = fontName theme
     , historyFilter = deleteAllDuplicates
     , promptKeymap = M.union (M.fromList
-        [ ((controlMask, xK_p), historyUpMatching matches)
-        , ((controlMask, xK_n), historyDownMatching matches)
+        [ ((0, xK_Up), historyUpMatching matches)
+        , ((0, xK_Down), historyDownMatching matches)
         ]) $ promptKeymap $ windowPromptConfig textHeight
     }
 

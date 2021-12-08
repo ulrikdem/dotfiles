@@ -717,8 +717,6 @@ set ignorecase smartcase
 Plug 'pgdouyon/vim-evanesco'
 
 set wildignorecase wildmode=longest:full,full wildcharm=<Tab>
-cnoremap <expr> <C-N> pumvisible() ? '<C-N>' : '<Down>'
-cnoremap <expr> <C-P> pumvisible() ? '<C-P>' : '<Up>'
 cnoremap <expr> /
     \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? '<C-Y>' : '/'
 

@@ -180,9 +180,6 @@ modes.add_binds("ex-follow", {
     end},
 })
 
-cmdhist.history_prev = "<control-p>"
-cmdhist.history_next = "<control-n>"
-
 modes.get_mode("command").reset_on_navigation = false
 modes.get_mode("completion").reset_on_navigation = false
 
