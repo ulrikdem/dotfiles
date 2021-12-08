@@ -49,7 +49,7 @@ if declare -f isgrml >/dev/null; then
     zstyle :prompt:grml:left:setup items user at host fullpath vcs venv rc newline arrow
     zstyle :prompt:grml:right:setup use-rprompt false
 
-    zstyle :prompt:grml:left:items:at pre %F{white}
+    zstyle :prompt:grml:left:items:at pre %F{8}
     zstyle :prompt:grml:left:items:at post %f
     zstyle :prompt:grml:left:items:host pre %B%F{blue}
     zstyle :prompt:grml:left:items:host post %f%b
@@ -90,9 +90,8 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
     ZSH_HIGHLIGHT_HIGHLIGHTERS+=(brackets)
     ZSH_HIGHLIGHT_STYLES+=(
-        default fg=15
-        path_prefix fg=15
-        path fg=15,bold
+        path_prefix none
+        path bold
         assign fg=cyan
         unknown-token fg=red
         bracket-error fg=red
