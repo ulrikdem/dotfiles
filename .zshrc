@@ -26,8 +26,10 @@ type abduco >/dev/null && alias abduco="abduco -e '^H'"
 type diff >/dev/null && alias diff='diff --color=auto'
 type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
-type nvim >/dev/null && alias vim=nvim
-type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vim=nvr
+type git >/dev/null && alias g=git
+type nvim >/dev/null && alias vi=nvim vim=nvim
+type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vi=nvr vim=nvr
+type ranger >/dev/null && alias r=ranger
 type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
 
 setopt no_bg_nice
