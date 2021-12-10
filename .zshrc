@@ -107,17 +107,17 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
             [[ $LBUFFER =~ '\s$' ]] && local word= || local word=$words[-1]
             local query=${word##*/}
             local dir=${word:0:$#word-$#query}
-            while [[ -n $dir && ! -d $~dir ]]; do
-                query=${${dir%/}##*/}/$query
+            while [[ -n $dir && ! -d ${(Q)${~dir}} ]]; do
+                query=$dir:t/$query
                 dir=${word:0:$#word-$#query}
             done
             local results=$(
-                cd -- ${~dir:-.}
+                cd -- ${(Q)${~dir}:-.}
                 unset REPORTTIME
                 fd -L0 --strip-cwd-prefix |
-                    fzf --read0 --height 40% --reverse --prompt ${dir:-./} -q "$query" --bind ctrl-z:ignore -m --print0 |
+                    fzf --read0 --height 40% --reverse --prompt "${(Q)dir:-./}" -q "$query" --bind ctrl-z:ignore -m --print0 |
                     while read -rd $'\0' item; do
-                        echo -nE "$dir${(q)item} "
+                        echo -nE - "$dir${(q)item} "
                     done
             )
             [[ -n $results ]] && LBUFFER=${LBUFFER:0:$#LBUFFER-$#word}$results
