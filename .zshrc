@@ -5,7 +5,7 @@ type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
 zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
 
 zstyle ':completion:*:*:git-*:*:files' command '-git-files-wrapper'
-git-files-wrapper() {
+function git-files-wrapper {
     if [[ "$1 $2" = 'git ls-files' ]]; then
         shift 2
         git ls-files --directory "$@"
@@ -15,7 +15,7 @@ git-files-wrapper() {
 }
 
 if [[ -d ~/.dotfiles.git ]]; then
-    dotfiles() {
+    function dotfiles {
         (($#)) || set zsh
         GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ "$@"
     }
@@ -63,7 +63,7 @@ if declare -f isgrml >/dev/null; then
     zstyle ':vcs_info:*' check-for-changes true
 
     grml_theme_add_token venv -f prompt-venv
-    prompt-venv() {
+    function prompt-venv {
         REPLY=${VIRTUAL_ENV+%8F\[%F\{blue\}venv%8F\] %f}
     }
 
@@ -102,7 +102,7 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
     source /usr/share/fzf/key-bindings.zsh
 
     if type fd >/dev/null; then
-        fzf-file-widget() {
+        function fzf-file-widget {
             local words=(${(z)LBUFFER})
             [[ $LBUFFER =~ '\s$' ]] && local word= || local word=$words[-1]
             local query=${word##*/}
@@ -124,7 +124,7 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
             zle redisplay
         }
 
-        fzf-cd-widget() {
+        function fzf-cd-widget {
             local dir=$(
                 unset REPORTTIME
                 fd -L0td --strip-cwd-prefix | fzf --read0 --height 40% --reverse --prompt 'cd ' --bind ctrl-z:ignore
