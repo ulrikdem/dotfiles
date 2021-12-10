@@ -37,6 +37,7 @@ setopt no_hup
 
 # Prompting
 setopt prompt_subst
+setopt transient_rprompt
 
 # ZLE
 setopt no_beep
@@ -48,6 +49,7 @@ HISTFILE=~/.zsh_history
 HISTSIZE=10000
 SAVEHIST=$HISTSIZE
 
+KEYTIMEOUT=1
 LISTMAX=0
 REPORTTIME=5
 
@@ -81,6 +83,10 @@ function preexec {
 
 VIRTUAL_ENV_DISABLE_PROMPT=1
 
+RPROMPT=
+RPROMPT2=
+ZLE_RPROMPT_INDENT=0
+
 # Key Bindings {{{1
 
 bindkey -e
@@ -105,13 +111,13 @@ function bindkeymaps {
 bindkeymaps "$terminfo[kcuu1]" up-line-or-beginning-search main
 bindkeymaps "$terminfo[kcud1]" down-line-or-beginning-search main
 
-bindkeymaps "$terminfo[khome]" beginning-of-line main
-bindkeymaps "$terminfo[kend]" end-of-line main
+bindkeymaps "$terminfo[khome]" beginning-of-line main vicmd
+bindkeymaps "$terminfo[kend]" end-of-line main vicmd
 
-bindkeymaps "$terminfo[kLFT5]" backward-word main
-bindkeymaps "$terminfo[kRIT5]" forward-word main
+bindkeymaps "$terminfo[kLFT5]" backward-word main vicmd
+bindkeymaps "$terminfo[kRIT5]" forward-word main vicmd
 
-bindkeymaps "$terminfo[kdch1]" delete-char main
+bindkeymaps "$terminfo[kdch1]" delete-char main vicmd
 
 bindkeymaps '\t' complete-word main
 bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
@@ -119,8 +125,34 @@ bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
 autoload -U bracketed-paste-url-magic
 zle -N bracketed-paste bracketed-paste-url-magic
 
+bindkeymaps '\e' vi-cmd-mode main
+bindkeymaps "S'" quote-region visual
+
+for key in {a,i}{\',\",\`}; do
+    bindkeymaps $key select-quoted viopp visual
+done
+for key in {a,i}${(s..):-'()[]{}<>bB'}; do
+    bindkeymaps $key select-bracketed viopp visual
+done
+bindkeymaps 'a^W' select-word-match viopp visual
+bindkeymaps 'i^W' select-word-match viopp visual
+unset key
+
+bindkeymaps '^A' incarg vicmd
+function decarg { NUMERIC=$((-${NUMERIC:-1})) incarg }
+bindkeymaps '^X' decarg vicmd
+
+function zle-keymap-select {
+    [[ $KEYMAP = vicmd ]] && RPROMPT='%S COMMAND %s' || RPROMPT=
+    RPROMPT2=$RPROMPT
+    zle reset-prompt
+}
+zle -N zle-keymap-select
+zle -A zle-keymap-select zle-line-init
+
 if (($+terminfo[smkx] && $+terminfo[rmkx])); then
     function zle-line-init {
+        zle-keymap-select
         echoti smkx
     }
     function zle-line-finish {
