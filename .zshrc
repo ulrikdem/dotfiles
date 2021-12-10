@@ -1,8 +1,173 @@
-zstyle ':completion:*' menu select
-zstyle ':completion:*:descriptions' format '%8F%d:%f'
+# Options {{{1
 
-type dircolors >/dev/null && eval $(dircolors ~/.config/dir_colors)
-zstyle ':completion:*:default' list-colors ${(s.:.)LS_COLORS}
+# Changing Directories
+setopt auto_cd
+setopt auto_pushd
+setopt cd_silent
+setopt chase_links
+setopt pushd_ignore_dups
+setopt pushd_silent
+
+# Completion
+setopt complete_in_word
+setopt list_packed
+setopt no_list_types
+
+# Expansion and Globbing
+setopt extended_glob
+setopt glob_star_short
+setopt magic_equal_subst
+setopt rc_expand_param
+
+# History
+setopt extended_history
+setopt hist_ignore_space
+setopt hist_lex_words
+setopt share_history
+
+# Input/Output
+setopt interactive_comments
+setopt rc_quotes
+
+# Job Control
+setopt auto_continue
+setopt no_bg_nice
+setopt no_check_running_jobs
+setopt no_hup
+
+# Prompting
+setopt prompt_subst
+
+# ZLE
+setopt no_beep
+setopt combining_chars
+
+# Parameters and Modules {{{1
+
+HISTFILE=~/.zsh_history
+HISTSIZE=10000
+SAVEHIST=$HISTSIZE
+
+LISTMAX=0
+REPORTTIME=5
+
+zmodload zsh/complist
+zmodload zsh/parameter
+zmodload zsh/terminfo
+zmodload zsh/zutil
+
+# Prompt and Title {{{1
+
+PROMPT='%F{blue}%B%n%b%8F@%F{blue}%B%m%f %~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}%(?.. %F{red}%?%f)
+%F{blue}»%f '
+PROMPT2='%F{blue}»%f '
+
+autoload -U vcs_info
+zstyle ':vcs_info:*' formats ' %8F[%F{blue}%b%c%u%8F]%f'
+zstyle ':vcs_info:*' actionformats ' %8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F]%f'
+zstyle ':vcs_info:*' branchformat '%b%8F:%F{blue}%r'
+zstyle ':vcs_info:*' stagedstr '%8F:%F{green}S'
+zstyle ':vcs_info:*' unstagedstr '%8F:%F{red}U'
+zstyle ':vcs_info:*' check-for-changes true
+
+function precmd {
+    vcs_info
+    print -Pn '\e]2;%n@%m: %~\a'
+}
+function preexec {
+    print -Pn '\e]2;%n@%m: '
+    printf '%s\a' "$1"
+}
+
+VIRTUAL_ENV_DISABLE_PROMPT=1
+
+# Key Bindings {{{1
+
+bindkey -e
+
+autoload -U select-word-style
+select-word-style shell
+
+function bindkeymaps {
+    local key=$1 widget=$2 keymap
+    shift 2
+    if [[ -n $key ]]; then
+        if ! zle -la "$widget"; then
+            (($+functions[$widget])) || autoload -U "$widget"
+            zle -N "$widget"
+        fi
+        for keymap; do
+            bindkey -M "$keymap" -- "$key" "$widget"
+        done
+    fi
+}
+
+bindkeymaps "$terminfo[kcuu1]" up-line-or-beginning-search main
+bindkeymaps "$terminfo[kcud1]" down-line-or-beginning-search main
+
+bindkeymaps "$terminfo[khome]" beginning-of-line main
+bindkeymaps "$terminfo[kend]" end-of-line main
+
+bindkeymaps "$terminfo[kLFT5]" backward-word main
+bindkeymaps "$terminfo[kRIT5]" forward-word main
+
+bindkeymaps "$terminfo[kdch1]" delete-char main
+
+bindkeymaps '\t' complete-word main
+bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
+
+autoload -U bracketed-paste-url-magic
+zle -N bracketed-paste bracketed-paste-url-magic
+
+if (($+terminfo[smkx] && $+terminfo[rmkx])); then
+    function zle-line-init {
+        echoti smkx
+    }
+    function zle-line-finish {
+        echoti rmkx
+    }
+    zle -N zle-line-init
+    zle -N zle-line-finish
+fi
+
+stty -ixon
+
+# Completion {{{1
+
+autoload -U compinit
+compinit -d ~/.cache/zcompdump
+
+zstyle ':completion:*' use-cache true
+zstyle ':completion:*' cache-path ~/.cache/zcompcache
+
+zstyle ':completion:*' menu select
+zstyle ':completion:*' select-scroll -1
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
+
+zstyle ':completion:*' completer _extensions _complete
+zstyle ':completion:*' ignore-parents pwd
+zstyle ':completion:*' list-suffixes true
+
+zstyle ':completion:*' rehash true
+zstyle ':completion:*:processes' command 'ps xo pid:8,args'
+zstyle ':completion:*:jobs' numbers true
+
+zstyle ':completion:*:manuals' separate-sections true
+zstyle ':completion:*:manuals.^1' insert-sections true
+
+zstyle ':completion:*' group-name ''
+zstyle ':completion:*:descriptions' format '%8F%d:%f'
+zstyle ':completion:*:warnings' format '%8Fno matches for %d%f'
+zstyle ':completion:*:messages' format '%8F%d%f'
+
+if (($+commands[dircolors])) && [[ -f ~/.config/dir_colors ]]; then
+    eval $(dircolors ~/.config/dir_colors)
+    zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}
+fi
+
+zle -C external-pwds complete-word _generic
+bindkeymaps '^Xo' external-pwds main
+zstyle ':completion:external-pwds:*' completer _external_pwds
 
 zstyle ':completion:*:*:git-*:*:files' command '-git-files-wrapper'
 function git-files-wrapper {
@@ -14,74 +179,44 @@ function git-files-wrapper {
     fi
 }
 
+# Aliases and Functions {{{1
+
+alias ls='ls --color=auto'
+alias ll='ls -lh'
+alias la='ls -lha'
+
+(($+commands[diff])) && alias diff='diff --color'
+(($+commands[grep])) && alias grep='grep --color'
+(($+commands[ssh])) && alias ssh='TERM=xterm-256color ssh'
+(($+commands[abduco])) && alias abduco="abduco -e '^H'"
+
+(($+commands[nvim])) && alias vi=nvim vim=nvim
+(($+commands[nvr] && $+NVIM_LISTEN_ADDRESS)) && alias vi=nvr vim=nvr
+(($+commands[ranger])) && alias r=ranger
+(($+commands[git])) && alias g=git
+
 if [[ -d ~/.dotfiles.git ]]; then
     function dotfiles {
         (($#)) || set zsh
         GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ "$@"
     }
     alias dotfiles='dotfiles '
-    compdef 'dotfiles _precommand' dotfiles 2>/dev/null
+    compdef 'dotfiles _precommand' dotfiles
 fi
 
-type abduco >/dev/null && alias abduco="abduco -e '^H'"
-type diff >/dev/null && alias diff='diff --color=auto'
-type gcc >/dev/null && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
-type g++ >/dev/null && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
-type git >/dev/null && alias g=git
-type nvim >/dev/null && alias vi=nvim vim=nvim
-type nvr >/dev/null && [[ -n $NVIM_LISTEN_ADDRESS ]] && alias vi=nvr vim=nvr
-type ranger >/dev/null && alias r=ranger
-type ssh >/dev/null && alias ssh='TERM=xterm-256color ssh'
+(($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
+(($+commands[g++])) && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
 
-setopt no_bg_nice
-setopt chase_links
-setopt no_check_jobs
-setopt glob_star_short
-setopt list_packed
-setopt no_list_types
-setopt pushd_silent
-setopt rc_expand_param
-setopt rc_quotes
+alias cdtmp='cd -- "$(mktemp -td cdtmp.XXXXXXXX)"'
+alias rmcdir='cd .. && rmdir -- "$OLDPWD"'
 
-stty -ixon
+autoload -U zargs
+autoload -U zmv
 
-if declare -f isgrml >/dev/null; then
-    zstyle :prompt:grml:left:setup items user at host fullpath vcs venv rc newline arrow
-    zstyle :prompt:grml:right:setup use-rprompt false
+(($+aliases[run-help])) && unalias run-help
+autoload -U run-help{,-git,-ip,-openssl,-p4,-sudo,-svk,-svn}
 
-    zstyle :prompt:grml:left:items:at pre %F{8}
-    zstyle :prompt:grml:left:items:at post %f
-    zstyle :prompt:grml:left:items:host pre %B%F{blue}
-    zstyle :prompt:grml:left:items:host post %f%b
-    grml_theme_add_token fullpath '%~ ' %B %b
-
-    zstyle ':vcs_info:*' formats '%8F[%F{blue}%b%c%u%8F] %f'
-    zstyle ':vcs_info:*' actionformats '%8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F] %f'
-    zstyle ':vcs_info:(sv[nk]|bzr):*' branchformat %b%8F:%F{blue}%r
-    zstyle ':vcs_info:*' stagedstr %8F:%F{green}S
-    zstyle ':vcs_info:*' unstagedstr %8F:%F{red}U
-    zstyle ':vcs_info:*' check-for-changes true
-
-    grml_theme_add_token venv -f prompt-venv
-    function prompt-venv {
-        REPLY=${VIRTUAL_ENV+%8F\[%F\{blue\}venv%8F\] %f}
-    }
-
-    grml_theme_add_token arrow '%F{blue}» %f'
-    PS2='%F{blue}» %f'
-
-    [[ -n $key[BackTab] ]] && bindkey -- $key[BackTab] reverse-menu-complete
-
-    autoload up-line-or-beginning-search down-line-or-beginning-search
-    zle -N up-line-or-beginning-search
-    zle -N down-line-or-beginning-search
-    [[ -n $key[Up] ]] && bindkey -- $key[Up] up-line-or-beginning-search
-    [[ -n $key[Down] ]] && bindkey -- $key[Down] down-line-or-beginning-search
-
-    abk[LC]='--color=always |& less -R'
-fi
-
-zle_highlight=(suffix:fg=8)
+# Syntax Highlighting {{{1
 
 if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]]; then
     source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
@@ -98,10 +233,14 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
     noglob unset ZSH_HIGHLIGHT_STYLES[precommand] ZSH_HIGHLIGHT_STYLES[bracket-level-{2..5}]
 fi
 
+zle_highlight=(suffix:fg=8 region:fg=8,standout paste:none)
+
+# FZF {{{1
+
 if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
     source /usr/share/fzf/key-bindings.zsh
 
-    if type fd >/dev/null; then
+    if (($+commands[fd])); then
         function fzf-file-widget {
             local words=(${(z)LBUFFER})
             [[ $LBUFFER =~ '\s$' ]] && local word= || local word=$words[-1]
@@ -138,3 +277,9 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
         }
     fi
 fi
+
+# Local Configuration {{{1
+
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
+
+# vim: foldmethod=marker
