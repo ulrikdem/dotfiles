@@ -81,6 +81,8 @@ endfor
 nmap <C-LeftMouse> <LeftMouse><C-]>
 nnoremap <C-RightMouse> <C-O>
 
+map! <C-H> <C-W>
+
 let g:mapleader = ' '
 set notimeout
 
