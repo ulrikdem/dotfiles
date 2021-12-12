@@ -145,14 +145,14 @@ bindkeymaps '^X' decarg vicmd
 function zle-line-pre-redraw {
     if [[ $KEYMAP = vicmd ]]; then
         case $REGION_ACTIVE in
-            0) RPROMPT='%0F%K{blue} NORMAL %k%f';;
-            1) RPROMPT='%0F%K{magenta} VISUAL %k%f';;
-            2) RPROMPT='%0F%K{magenta} V-LINE %k%f';;
+            0) RPROMPT=$'%0F%K{blue} NORMAL %k%f%{\e[2 q%}';;
+            1) RPROMPT=$'%0F%K{magenta} VISUAL %k%f%{\e[2 q%}';;
+            2) RPROMPT=$'%0F%K{magenta} V-LINE %k%f%{\e[2 q%}';;
         esac
     elif [[ $ZLE_STATE = *overwrite* ]]; then
-        RPROMPT='%0F%K{red} REPLACE %k%f'
+        RPROMPT=$'%0F%K{red} REPLACE %k%f%{\e[4 q%}'
     else
-        RPROMPT='%0F%K{green} INSERT %k%f'
+        RPROMPT=$'%0F%K{green} INSERT %k%f%{\e[6 q%}'
     fi
     if [[ $RPROMPT != $RPROMPT2 ]]; then
         RPROMPT2=$RPROMPT
@@ -160,19 +160,17 @@ function zle-line-pre-redraw {
     fi
 }
 zle -N zle-line-pre-redraw
-zle -A zle-line-pre-redraw zle-line-init
 
-if (($+terminfo[smkx] && $+terminfo[rmkx])); then
-    function zle-line-init {
-        zle-line-pre-redraw
-        echoti smkx
-    }
-    function zle-line-finish {
-        echoti rmkx
-    }
-    zle -N zle-line-init
-    zle -N zle-line-finish
-fi
+function zle-line-init {
+    zle-line-pre-redraw
+    (($+terminfo[smkx])) && echoti smkx
+}
+function zle-line-finish {
+    (($+terminfo[rmkx])) && echoti rmkx
+    echo -n '\e[2 q'
+}
+zle -N zle-line-init
+zle -N zle-line-finish
 
 stty -ixon
 
