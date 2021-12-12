@@ -117,17 +117,51 @@ bindkeymaps "$terminfo[kend]" end-of-line main vicmd
 bindkeymaps "$terminfo[kLFT5]" backward-word main vicmd
 bindkeymaps "$terminfo[kRIT5]" forward-word main vicmd
 
+WORDCHARS='"#$%''*+-.?\_'
+bindkeymaps '^H' .backward-kill-word main
+
 bindkeymaps "$terminfo[kdch1]" delete-char main vicmd
+
 bindkeymaps "$terminfo[kich1]" vi-insert vicmd
 bindkeymaps "$terminfo[kich1]" overwrite-mode main
 
 bindkeymaps '\t' complete-word main
 bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
 
+bindkeymaps '\e^_' copy-earlier-word main
+
+bindkeymaps '\eo' accept-and-infer-next-history main
+
+function accept-history { print -rS "$BUFFER"; zle send-break }
+bindkeymaps '\eH' accept-history main
+
+bindkeymaps '^Q' push-line-or-edit main
+
+bindkeymaps '\ee' edit-command-line main
+
+bindkeymaps '^V' vi-quoted-insert main
+bindkeymaps '\ev' insert-unicode-char main
+
+function expand-dots { [[ $LBUFFER = (^*[[:WORD:]]).. ]] && LBUFFER+=/.. || LBUFFER+=. }
+bindkeymaps . expand-dots main
+
+bindkeymaps ' ' magic-space main
+
+bindkeymaps '^Xp' expand-absolute-path main
+
+function inplace-mkdir {
+    local words=(${(z)LBUFFER})
+    zle -M "$(mkdir -pv -- ${(Q)${~words[-1]}} 2>&1)"
+}
+bindkeymaps '\em' inplace-mkdir main
+
 autoload -U bracketed-paste-url-magic
 zle -N bracketed-paste bracketed-paste-url-magic
 
 bindkeymaps '\e' vi-cmd-mode main
+
+bindkeymaps Y vi-yank-eol vicmd
+
 bindkeymaps "S'" quote-region visual
 
 for key in {a,i}{\',\",\`}; do
@@ -136,9 +170,10 @@ done
 for key in {a,i}${(s..):-'()[]{}<>bB'}; do
     bindkeymaps $key select-bracketed viopp visual
 done
+unset key
+
 bindkeymaps 'a^W' select-word-match viopp visual
 bindkeymaps 'i^W' select-word-match viopp visual
-unset key
 
 bindkeymaps '^A' incarg vicmd
 function decarg { NUMERIC=$((-${NUMERIC:-1})) incarg }
