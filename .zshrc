@@ -142,17 +142,29 @@ bindkeymaps '^A' incarg vicmd
 function decarg { NUMERIC=$((-${NUMERIC:-1})) incarg }
 bindkeymaps '^X' decarg vicmd
 
-function zle-keymap-select {
-    [[ $KEYMAP = vicmd ]] && RPROMPT='%S COMMAND %s' || RPROMPT=
-    RPROMPT2=$RPROMPT
-    zle reset-prompt
+function zle-line-pre-redraw {
+    if [[ $KEYMAP = vicmd ]]; then
+        case $REGION_ACTIVE in
+            0) RPROMPT='%0F%K{blue} NORMAL %k%f';;
+            1) RPROMPT='%0F%K{magenta} VISUAL %k%f';;
+            2) RPROMPT='%0F%K{magenta} V-LINE %k%f';;
+        esac
+    elif [[ $ZLE_STATE = *overwrite* ]]; then
+        RPROMPT='%0F%K{red} REPLACE %k%f'
+    else
+        RPROMPT='%0F%K{green} INSERT %k%f'
+    fi
+    if [[ $RPROMPT != $RPROMPT2 ]]; then
+        RPROMPT2=$RPROMPT
+        zle reset-prompt
+    fi
 }
-zle -N zle-keymap-select
-zle -A zle-keymap-select zle-line-init
+zle -N zle-line-pre-redraw
+zle -A zle-line-pre-redraw zle-line-init
 
 if (($+terminfo[smkx] && $+terminfo[rmkx])); then
     function zle-line-init {
-        zle-keymap-select
+        zle-line-pre-redraw
         echoti smkx
     }
     function zle-line-finish {
