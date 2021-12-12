@@ -83,7 +83,7 @@ function preexec {
 
 VIRTUAL_ENV_DISABLE_PROMPT=1
 
-RPROMPT=$'%0F%K{$vi_mode_color} $vi_mode %k%f%{\e[$vi_mode_cursor q%}'
+RPROMPT='%0F%K{$vi_mode_color} $vi_mode %k%f'
 RPROMPT2=$RPROMPT
 ZLE_RPROMPT_INDENT=0
 
@@ -145,7 +145,7 @@ function decarg { NUMERIC=$((-${NUMERIC:-1})) incarg }
 bindkeymaps '^X' decarg vicmd
 
 function zle-line-pre-redraw {
-    local old_mode=$vi_mode
+    local old_mode=$vi_mode old_cursor=$vi_mode_cursor
     if [[ $KEYMAP = vicmd ]]; then
         case $REGION_ACTIVE in
             0) vi_mode=NORMAL vi_mode_color=blue;;
@@ -159,6 +159,7 @@ function zle-line-pre-redraw {
         vi_mode=INSERT vi_mode_color=green vi_mode_cursor=6
     fi
     [[ $vi_mode != $old_mode ]] && zle reset-prompt
+    [[ $vi_mode_cursor != $old_cursor ]] && echo -n "\e[$vi_mode_cursor q"
 }
 zle -N zle-line-pre-redraw
 
@@ -167,8 +168,9 @@ function zle-line-init {
     (($+terminfo[smkx])) && echoti smkx
 }
 function zle-line-finish {
+    vi_mode_cursor=2
+    echo -n "\e[$vi_mode_cursor q"
     (($+terminfo[rmkx])) && echoti rmkx
-    echo -n '\e[2 q'
 }
 zle -N zle-line-init
 zle -N zle-line-finish
