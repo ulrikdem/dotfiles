@@ -118,6 +118,8 @@ bindkeymaps "$terminfo[kLFT5]" backward-word main vicmd
 bindkeymaps "$terminfo[kRIT5]" forward-word main vicmd
 
 bindkeymaps "$terminfo[kdch1]" delete-char main vicmd
+bindkeymaps "$terminfo[kich1]" vi-insert vicmd
+bindkeymaps "$terminfo[kich1]" overwrite-mode main
 
 bindkeymaps '\t' complete-word main
 bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
