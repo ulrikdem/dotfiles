@@ -108,3 +108,7 @@ key_bindings:
     key: 53
     mods: Shift
     mode: Vi|~Search
+
+cursor:
+  vi_mode_style:
+    shape: Block
