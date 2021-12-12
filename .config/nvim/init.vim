@@ -174,6 +174,7 @@ function! s:UpdateColorScheme() abort
     call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
     call s:Highlight('CursorLine', #{bg: 'SrceryXgray1'})
     call s:Highlight('CursorLineNr', #{bg: 'SrceryXgray1'})
+    call s:Highlight('TermCursor', #{fg: 'SrceryBlack', bg: 'Normal', attr: 'NONE'})
     call s:Highlight('CocErrorVirtualText', #{bg: 'SrceryXgray1'})
     call s:Highlight('CocWarningVirtualText', #{bg: 'SrceryXgray1'})
     call s:Highlight('CocInfoVirtualText', #{bg: 'SrceryXgray1'})
