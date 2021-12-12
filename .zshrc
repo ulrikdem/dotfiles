@@ -83,8 +83,8 @@ function preexec {
 
 VIRTUAL_ENV_DISABLE_PROMPT=1
 
-RPROMPT=
-RPROMPT2=
+RPROMPT=$'%0F%K{$vi_mode_color} $vi_mode %k%f%{\e[$vi_mode_cursor q%}'
+RPROMPT2=$RPROMPT
 ZLE_RPROMPT_INDENT=0
 
 # Key Bindings {{{1
@@ -145,21 +145,20 @@ function decarg { NUMERIC=$((-${NUMERIC:-1})) incarg }
 bindkeymaps '^X' decarg vicmd
 
 function zle-line-pre-redraw {
+    local old_mode=$vi_mode
     if [[ $KEYMAP = vicmd ]]; then
         case $REGION_ACTIVE in
-            0) RPROMPT=$'%0F%K{blue} NORMAL %k%f%{\e[2 q%}';;
-            1) RPROMPT=$'%0F%K{magenta} VISUAL %k%f%{\e[2 q%}';;
-            2) RPROMPT=$'%0F%K{magenta} V-LINE %k%f%{\e[2 q%}';;
+            0) vi_mode=NORMAL vi_mode_color=blue;;
+            1) vi_mode=VISUAL vi_mode_color=magenta;;
+            2) vi_mode=V-LINE vi_mode_color=magenta;;
         esac
+        vi_mode_cursor=2
     elif [[ $ZLE_STATE = *overwrite* ]]; then
-        RPROMPT=$'%0F%K{red} REPLACE %k%f%{\e[4 q%}'
+        vi_mode=REPLACE vi_mode_color=red vi_mode_cursor=4
     else
-        RPROMPT=$'%0F%K{green} INSERT %k%f%{\e[6 q%}'
+        vi_mode=INSERT vi_mode_color=green vi_mode_cursor=6
     fi
-    if [[ $RPROMPT != $RPROMPT2 ]]; then
-        RPROMPT2=$RPROMPT
-        zle reset-prompt
-    fi
+    [[ $vi_mode != $old_mode ]] && zle reset-prompt
 }
 zle -N zle-line-pre-redraw
 
