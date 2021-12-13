@@ -183,7 +183,7 @@ function zle-line-pre-redraw {
     local old_mode=$vi_mode old_cursor=$vi_mode_cursor
     if [[ $KEYMAP = vicmd ]]; then
         case $REGION_ACTIVE in
-            0) vi_mode=NORMAL vi_mode_color=blue;;
+            0) vi_mode=NORMAL vi_mode_color=green;;
             1) vi_mode=VISUAL vi_mode_color=magenta;;
             2) vi_mode=V-LINE vi_mode_color=magenta;;
         esac
@@ -191,7 +191,7 @@ function zle-line-pre-redraw {
     elif [[ $ZLE_STATE = *overwrite* ]]; then
         vi_mode=REPLACE vi_mode_color=red vi_mode_cursor=4
     else
-        vi_mode=INSERT vi_mode_color=green vi_mode_cursor=6
+        vi_mode=INSERT vi_mode_color=blue vi_mode_cursor=6
     fi
     [[ $vi_mode != $old_mode ]] && zle reset-prompt
     [[ $vi_mode_cursor != $old_cursor ]] && echo -n "\e[$vi_mode_cursor q"

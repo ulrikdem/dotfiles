@@ -347,8 +347,8 @@ function! s:UpdateLightlineColors() abort
         \ },
     \ }
     for [l:mode, l:color] in [
-        \ ['normal', 'Blue'],
-        \ ['insert', 'Green'],
+        \ ['normal', 'Green'],
+        \ ['insert', 'Blue'],
         \ ['replace', 'Red'],
         \ ['visual', 'Magenta'],
         \ ['command', 'Orange'],
