@@ -3,6 +3,9 @@ Description=KMonad %f
 
 [Service]
 ExecStart=/usr/bin/kmonad -i 'device-file "%f"' -o 'uinput-sink "KMonad %f"' %E/kmonad.kbd
+DynamicUser=true
+SupplementaryGroups=input uinput
+PrivateNetwork=true
 
 [Install]
 WantedBy=multi-user.target
