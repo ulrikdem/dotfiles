@@ -291,6 +291,8 @@ fi
 alias cdtmp='cd -- "$(mktemp -td cdtmp.XXXXXXXX)"'
 alias rmcdir='cd .. && rmdir -- "$OLDPWD"'
 
+(($+commands[xargs])) && alias xargs='xargs '
+
 autoload -U zargs
 autoload -U zmv
 
