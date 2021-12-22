@@ -224,7 +224,7 @@ zstyle ':completion:*' menu select
 zstyle ':completion:*' select-scroll -1
 zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'
 
-zstyle ':completion:*' completer _extensions _complete
+zstyle ':completion:*' completer _extensions _complete _files
 zstyle ':completion:*' ignore-parents pwd
 zstyle ':completion:*' list-suffixes true
 
