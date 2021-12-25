@@ -498,6 +498,9 @@ completion.completers.session = {
                 table.insert(results, {lousy.util.escape(name), format = {{lit = name}}, buf = name})
             end
         end
+        table.sort(results, function(a, b)
+            return a.buf < b.buf
+        end)
         return results
     end,
 }
