@@ -1,4 +1,4 @@
--- Unique instance {{{1
+-- Unique Instance {{{1
 
 local display = os.getenv("DISPLAY")
 local instance_suffix = display and "."..display:gsub("[^%w_]", "_") or ""
@@ -348,7 +348,7 @@ function window.methods.update_win_title(win)
     win.win.title = ((win.view.title or "") == "" and "" or win.view.title.." - ").."luakit"
 end
 
--- Smooth scroll {{{1
+-- Smooth Scroll {{{1
 
 local function setup_smooth_scroll(view)
     local scroll_targets = {x = {}, y = {}}
@@ -417,7 +417,7 @@ local function setup_smooth_scroll(view)
 end
 webview.add_signal("init", setup_smooth_scroll)
 
--- Private mode {{{1
+-- Private Mode {{{1
 
 local new_window = window.new
 function window.new(args)
@@ -539,7 +539,7 @@ modes.add_cmds{
     }},
 }
 
--- Dark mode {{{1
+-- Dark Mode {{{1
 
 settings.application.prefer_dark_mode = true
 
