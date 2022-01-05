@@ -1,6 +1,6 @@
 #!/bin/bash
 temp=$(mktemp -t luakit.XXXXXXXX)
-alacritty --class xmonad-custom-float -t "Download $1" \
+alacritty --class xmonad-custom-float -t download \
     -e "$(dirname "$0")/download-prompt-helper.sh" "$1" "$temp"
 file=$(<"$temp")
 rm -- "$temp"

@@ -2,8 +2,8 @@
 eval $(dircolors ~/.config/dir_colors)
 query=
 while true; do
-    readarray -t result < <(ls --color | fzf --ansi --color hl:3,hl+:3,fg+:-1 --no-clear --reverse \
-        --prompt "${PWD%/}/" --query "$query" --print-query --expect ctrl-p,tab,shift-tab,ctrl-o)
+    readarray -t result < <(cat <(ls --color) | fzf --ansi --color hl:3,hl+:3,fg+:-1,header:8 --header "$1" --reverse \
+        --no-clear --prompt "${PWD%/}/" --query "$query" --print-query --expect ctrl-p,tab,shift-tab,ctrl-o)
     ((!${#result[@]})) && exit
     query=
     case ${result[1]} in
