@@ -3,6 +3,9 @@ set colored-completion-prefix on
 set colored-stats on
 set completion-ignore-case on
 set mark-symlinked-directories on
+set match-hidden-files off
 set revert-all-at-newline on
-C-p: history-search-backward
-C-n: history-search-forward
+set show-all-if-unmodified on
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+C-H: unix-filename-rubout
