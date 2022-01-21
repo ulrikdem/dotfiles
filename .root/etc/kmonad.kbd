@@ -13,7 +13,7 @@
 (deflayer base
     `     `     !     ^     $     $     XX    *     *     \\    =     bspc  bspc  bspc
     tab   q     w     f     p     b           j     l     u     y     ;     -     -
-    esc   @a    @r    @s    @t    g           m     @n    @e    @i    @o    '     '     '
+    esc   @a    @r    @s    @t    g           m     @n    @e    @i    @o    '     ret   ret
     z     z     @x    c     d     v     XX    k     h     ,     @.    /     /
           @ret  @ret  @ret              @spc              @ret  @ret  @ret  @ret
 )
@@ -37,7 +37,7 @@
 (deflayer kp
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
     _     _     _     _     _     _           nlck  kp7   kp8   kp9   _     _     _
-    _     _     _     _     _     _           _     kp4   kp5   kp6   kp0   _     _     _
+    _     _     _     _     _     _           _     kp4   kp5   kp6   kp0   _     kprt  kprt
     _     _     _     _     _     _     _     _     kp1   kp2   kp3   _     _
           kprt  kprt  kprt              _                 kprt  kprt  kprt  kprt
 )
