@@ -71,11 +71,15 @@ hints:
         key: Y
         mods: Control|Shift
 
+    - regex: '(/?[[:word:].-]+|~[[:word:].-]*)(/[[:word:].-]+)+/?'
+      post_processing: true
+      action: Paste
+      binding:
+        key: P
+        mods: Control|Shift
+
     - regex: '[[:xdigit:]]{6,}'
       action: Paste
-      mouse:
-        enabled: true
-        mods: Shift
       binding:
         key: H
         mods: Control|Shift
