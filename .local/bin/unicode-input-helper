@@ -26,15 +26,18 @@ def output(code, char, name, seqs=''):
     print(f'\x1b[90m{code}\x1b[0m\t{char}\t{name} \x1b[90m{seqs}\x1b[0m ')
 
 keysyms = {}
+altgr = {}
 with open(sys.argv[1]) as file:
     pattern = r'\bkey\s*<.*?>\s*\{\s*\[(.*?)\]\s*\}|\bsymbols\s*\[.*?\]\s*=\s*\[(.*?)\]'
     for match in re.finditer(pattern, file.read()):
-        for key in (match[1] or match[2]).split(','):
-            key = key.strip()
+        keys = [key.strip() for key in (match[1] or match[2]).split(',')]
+        for i, key in enumerate(keys):
             if re.fullmatch(r'U[0-9A-F]{4,6}', key):
                 keysyms[key] = chr(int(key[1:], 16))
             elif not key.startswith('KP_'):
                 keysyms[key] = f'<{key}>'
+            if 2 <= i < 4 and key != keys[i - 2] and keys[i - 2] in keysyms:
+                altgr[key] = keys[i - 2]
 
 with open('/usr/include/X11/keysymdef.h') as file:
     pattern = r'^#define XK_(\w+)\s+0x[0-9a-f]+\s*/\*[ (]U\+([0-9A-F]{4,6}) .*[ )]\*/\s*$'
@@ -44,6 +47,8 @@ with open('/usr/include/X11/keysymdef.h') as file:
             char = chr(int(code, 16))
             keysyms[key] = char
             keysyms[f'U{code}'] = char
+        if key in altgr:
+            altgr[f'U{code}'] = altgr[key]
 keysyms['space'] = '␣'
 
 compose = {}
@@ -62,8 +67,10 @@ with open('/usr/share/unicode/UnicodeData.txt') as file:
         if name.startswith('<'):
             continue
         char = chr(int(code, 16))
-        seqs = ' '.join(compose.get(char, []))
-        output(code, char, name, seqs)
+        seqs = compose.get(char, [])
+        if f'U{code}' in altgr:
+            seqs.insert(0, 'altgr+' + keysyms[altgr[f'U{code}']])
+        output(code, char, name, ' '.join(seqs))
 
 nerd = []
 with open(sys.argv[2]) as file:
