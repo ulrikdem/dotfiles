@@ -52,8 +52,8 @@
 
 (deflayer nav
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
-    _     XX    @qwer XX    XX    XX          volu  home  up    end   pgup  _     _
-    _     lmet  lalt  @lsft lctl  XX          vold  left  down  rght  pgdn  _     _     _
+    _     XX    @qwer XX    XX    brup        volu  home  up    end   pgup  _     _
+    _     lmet  lalt  @lsft lctl  brdn        vold  left  down  rght  pgdn  _     _     _
     XX    XX    ralt  XX    XX    XX    _     mute  ins   caps  cmps  del   del
           ret   ret   ret               spc               ret   ret   ret   ret
 )
