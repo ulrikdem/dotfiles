@@ -29,8 +29,8 @@
 (deflayer num
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
     _     XX    [     ]     XX    XX          @kp   7     8     9     ;     _     _
-    _     lmet  @lp   @rp   lctl  XX          .     @4    @5    @6    @0    _     _     _
-    XX    XX    @{    }     @fn   XX    _     ,     1     2     @3    /     /
+    _     @num, @lp   @rp   @num. XX          @fn   @4    @5    @6    @0    _     _     _
+    <     <     @{    }     >     XX    _     XX    1     2     @3    /     /
           ret   ret   ret               spc               ret   ret   ret   ret
 )
 
@@ -100,8 +100,10 @@
     x    (tap-hold-next-release 200 #(x  (layer-next x ))  ralt)
     .    (tap-hold-next-release 200 #(.  (layer-next . ))  ralt)
 
+    num, (tap-hold-next-release 200 #(,  (layer-next , ))  lmet)
     lp   (tap-hold-next-release 200 #(\( (layer-next lp))  lalt)
     rp   (tap-hold-next-release 200 #(\) (layer-next rp)) @lsft)
+    num. (tap-hold-next-release 200 #(.  (layer-next . ))  lctl)
     4    (tap-hold-next-release 200 #(4  (layer-next 4 ))  rctl)
     5    (tap-hold-next-release 200 #(5  (layer-next 5 )) @rsft)
     6    (tap-hold-next-release 200 #(6  (layer-next 6 ))  lalt)
@@ -181,6 +183,13 @@
           _     _     _                 _                 _     _     _     _
 )
 
+(deflayer ,
+    _     _     _     _     _     _     _     _     _     _     _     _     _     _
+    _     _     _     _     _     _           _     _     _     _     _     _     _
+    _     _     _     _     _     _           _     _     _     _     _     _     _     _
+    _     _     _     _     _     _     ,     _     _     _     _     _     _
+          _     _     _                 _                 _     _     _     _
+)
 (deflayer lp
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _
