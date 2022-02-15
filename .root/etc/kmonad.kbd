@@ -27,7 +27,7 @@
 )
 
 (deflayer num
-    _     _     _     _     _     _     _     _     _     _     _     _     _     _
+    _     _     _     _     _     _     _     *     *     -     _     _     _     _
     _     XX    [     ]     XX    XX          @kp   7     8     9     ;     _     _     _
     _     @<    @lp   @rp   @>    XX          @fn   @4    @5    @6    @0    _     _
     XX    XX    @{    }     .     ,     _     XX    1     2     @3    /     /
@@ -35,11 +35,19 @@
 )
 
 (deflayer kp
-    _     _     _     _     _     _     _     _     _     _     _     _     _     _
+    _     _     _     _     _     _     _     kp*   kp*   kp-   _     _     _     _
     _     _     _     _     _     _           nlck  kp7   kp8   kp9   _     _     _     _
-    _     _     _     _     _     _           XX    kp4   kp5   kp6   kp0   _     _
-    _     _     _     _     _     _     _     _     kp1   kp2   kp3   _     _
+    _     _     _     @kprp _     _           XX    kp4   kp5   kp6   kp0   _     _
+    _     _     _     _     kp.   _     _     _     kp1   kp2   kp3   kp/   kp/
           kprt  kprt  kprt              _                 kprt  kprt  kprt  kprt
+)
+
+(deflayer kpsft
+    _     _     _     _     _     _     _     _     _     -     kp+   _     _     _
+    _     _     _     _     _     _           _     _     _     _     _     _     _     _
+    _     _     _     _     _     _           _     _     _     _     _     _     _
+    _     _     _     _     _     _     _     _     _     _     _     /     /
+          _     _     _                 _                 _     _     _     _
 )
 
 (deflayer fn
@@ -110,6 +118,8 @@
     0    (tap-hold-next-release 200 #(0  (layer-next 0 ))  rmet)
     {    (tap-hold-next-release 200 #({  (layer-next { ))  ralt)
     3    (tap-hold-next-release 200 #(3  (layer-next 3 ))  ralt)
+
+    kprp (tap-hold-next-release 200 #(\) (layer-next rp)) (around @lsft (layer-toggle kpsft)))
 )
 
 (deflayer a
