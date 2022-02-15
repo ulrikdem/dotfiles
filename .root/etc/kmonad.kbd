@@ -37,7 +37,7 @@
 (deflayer kp
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
     _     _     _     _     _     _           nlck  kp7   kp8   kp9   _     _     _     _
-    _     _     _     _     _     _           _     kp4   kp5   kp6   kp0   _     kprt
+    _     _     _     _     _     _           _     kp4   kp5   kp6   kp0   _     _
     _     _     _     _     _     _     _     _     kp1   kp2   kp3   _     _
           kprt  kprt  kprt              _                 kprt  kprt  kprt  kprt
 )
