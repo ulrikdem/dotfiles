@@ -288,9 +288,6 @@ fi
 (($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 (($+commands[g++])) && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
 
-alias cdtmp='cd -- "$(mktemp -td cdtmp.XXXXXXXX)"'
-alias rmcdir='cd .. && rmdir -- "$OLDPWD"'
-
 (($+commands[xargs])) && alias xargs='xargs '
 
 autoload -U zargs
