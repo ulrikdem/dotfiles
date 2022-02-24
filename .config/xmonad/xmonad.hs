@@ -193,6 +193,7 @@ extraKeys textHeight =
     , ("M-C-b", spawn "firefox")
     , ("M-u", spawn "unicode-input")
     , ("M-l", spawn "lock")
+    , ("M-S-l", spawn "systemctl suspend")
 
     , ("<XF86AudioMute>", spawn "amixer set Master toggle")
     , ("<XF86AudioLowerVolume>", spawn "amixer set Master 2%-")
