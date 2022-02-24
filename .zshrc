@@ -270,6 +270,7 @@ alias la='ls -lha'
 (($+commands[ssh])) && alias ssh='TERM=xterm-256color ssh'
 (($+commands[abduco])) && alias abduco="abduco -e '^H'"
 
+(($+commands[ipython])) && alias ipy=ipython
 (($+commands[nvim])) && alias vi=nvim vim=nvim
 (($+commands[nvr] && $+NVIM_LISTEN_ADDRESS)) && alias vi=nvr vim=nvr
 (($+commands[ranger])) && alias r=ranger
