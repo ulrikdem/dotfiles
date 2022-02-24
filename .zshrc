@@ -278,12 +278,12 @@ alias la='ls -lha'
 (($+commands[git])) && alias g=git
 
 if [[ -d ~/.dotfiles.git ]]; then
-    function dotfiles {
+    function conf {
         (($#)) || set zsh
         GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~ "$@"
     }
-    alias dotfiles='dotfiles '
-    compdef 'dotfiles _precommand' dotfiles
+    alias conf='conf '
+    compdef 'conf _precommand' conf
 fi
 
 (($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
