@@ -288,6 +288,7 @@ fi
 (($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 (($+commands[g++])) && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
 
+(($+commands[sudo])) && alias sudo='sudo '
 (($+commands[xargs])) && alias xargs='xargs '
 
 autoload -U zargs
