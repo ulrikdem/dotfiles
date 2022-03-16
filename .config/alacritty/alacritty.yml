@@ -113,6 +113,11 @@ key_bindings:
     mods: Shift
     mode: Vi|~Search
 
+  - chars: "\e\x7f"
+    key: Back
+    mods: Control
+    mode: ~Vi|~Search
+
 cursor:
   vi_mode_style:
     shape: Block
