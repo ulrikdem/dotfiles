@@ -14,7 +14,7 @@ iconQuery = composeOne
     , className =? "Gimp" -?> return "\xf1fc" -- 
     , className =? "Luakit" -?> return "\xf484" -- 
     , className =? "mpv" -?> return "\xf144" -- 
-    , className =? "Sxiv" -?> return "\xf03e" -- 
+    , className =? "Sxiv" -?> return "\xf7e8" -- 
     , className $? ".exe" -?> return "\xf000" -- 
     , appName =? "libreoffice" -?> return "\xf713" -- 
     , return $ Just "\xfaae" -- 类
