@@ -166,7 +166,6 @@ Plug 'godlygeek/tabular'
 Plug 'srcery-colors/srcery-vim'
 let g:srcery_bg_passthrough = v:true
 let g:srcery_italic = v:true
-let g:srcery_guisp_fallback = 'fg'
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
