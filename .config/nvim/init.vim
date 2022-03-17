@@ -1033,9 +1033,9 @@ if executable('ccls')
     endfunction
 endif
 
-if executable('pyls')
+if executable('pylsp')
     let g:coc_user_config.languageserver.python = #{
-        \ command: 'pyls',
+        \ command: 'pylsp',
         \ filetypes: ['python'],
     \ }
 endif
