@@ -13,9 +13,9 @@
 (deflayer base
     `     `     !     ^     $     $     XX    *     *     -     =     bspc  bspc  bspc
     tab   q     w     f     p     b           j     l     u     y     ;     \\    \\    \\
-    esc   @a    @r    @s    @t    g           m     @n    @e    @i    @o    '     ret
-    z     z     @x    c     d     v     XX    k     h     ,     @.    /     /
-          @ret  @ret  @ret              @spc              @ret  @ret  @ret  @ret
+    esc   @a    @r    @s    @t    g           m     @n    @e    @i    @o    '     _
+    z     z     @x    c     d     v     XX    k     h     ,     @.    /     _
+          _     @ret  @ret              @spc              @ret  @ret  @ret  _
 )
 
 (deflayer sft
@@ -30,23 +30,23 @@
     _     _     _     _     _     _     _     *     *     -     _     _     _     _
     _     XX    [     ]     XX    XX          @kp   7     8     9     ;     _     _     _
     _     @<    @lp   @rp   @>    XX          @fn   @4    @5    @6    @0    _     _
-    XX    XX    @{    }     .     ,     _     XX    1     2     @3    /     /
-          ret   ret   ret               spc               ret   ret   ret   ret
+    XX    XX    @{    }     .     ,     _     XX    1     2     @3    /     _
+          _     ret   ret               spc               ret   ret   ret   _
 )
 
 (deflayer kp
     _     _     _     _     _     _     _     kp*   kp*   kp-   _     _     _     _
     _     _     _     _     _     _           nlck  kp7   kp8   kp9   _     _     _     _
     _     _     _     @kprp _     _           XX    kp4   kp5   kp6   kp0   _     _
-    _     _     _     _     kp.   _     _     _     kp1   kp2   kp3   kp/   kp/
-          kprt  kprt  kprt              _                 kprt  kprt  kprt  kprt
+    _     _     _     _     kp.   _     _     _     kp1   kp2   kp3   kp/   _
+          _     kprt  kprt              _                 kprt  kprt  kprt  _
 )
 
 (deflayer kpsft
     _     _     _     _     _     _     _     _     _     -     kp+   _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _
-    _     _     _     _     _     _     _     _     _     _     _     /     /
+    _     _     _     _     _     _     _     _     _     _     _     /     _
           _     _     _                 _                 _     _     _     _
 )
 
@@ -54,7 +54,7 @@
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
     _     _     _     _     _     _           pause f7    f8    f9    f12   _     _     _
     _     _     _     _     _     _           slck  f4    f5    f6    f11   _     _
-    _     _     _     _     _     _     _     sys   f1    f2    f3    f10   f10
+    _     _     _     _     _     _     _     sys   f1    f2    f3    f10   _
           _     _     _                 _                 _     _     _     _
 )
 
@@ -62,8 +62,8 @@
     _     _     _     _     _     _     _     _     _     _     _     _     _     _
     _     XX    @qwer XX    XX    brup        volu  home  up    end   pgup  _     _     _
     _     lmet  lalt  @lsft lctl  brdn        vold  left  down  rght  pgdn  _     _
-    XX    XX    ralt  XX    XX    XX    _     mute  ins   caps  cmps  del   del
-          ret   ret   ret               spc               ret   ret   ret   ret
+    XX    XX    ralt  XX    XX    XX    _     mute  ins   caps  cmps  del   _
+          _     ret   ret               spc               ret   ret   ret   _
 )
 
 (deflayer qwerty
