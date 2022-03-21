@@ -439,7 +439,7 @@ autocmd vimrc TermOpen * setlocal matchpairs= nocursorline
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
-tnoremap <C-\> <C-\><C-N>
+tnoremap <M-Esc> <C-\><C-N>
 
 tnoremap <M-Left> <Cmd>wincmd h<CR>
 tnoremap <M-Down> <Cmd>wincmd j<CR>
