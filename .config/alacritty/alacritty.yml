@@ -113,7 +113,7 @@ key_bindings:
     mods: Shift
     mode: Vi|~Search
 
-  - chars: "\e\x7f"
+  - chars: "\x17"
     key: Back
     mods: Control
     mode: ~Vi|~Search
