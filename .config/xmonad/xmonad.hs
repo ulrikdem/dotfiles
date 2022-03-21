@@ -244,7 +244,6 @@ windowPromptConfig textHeight = def
     , historySize = 0
     , promptKeymap = M.union (M.fromList
         [ ((controlMask, xK_u), killBefore)
-        , ((controlMask, xK_w), killWord Prev)
         , ((controlMask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
         , ((controlMask, xK_Left), moveCursor Prev >> moveWord Prev)
         , ((controlMask, xK_Right), moveWord Next >> moveCursor Next)
