@@ -118,7 +118,7 @@ bindkeymaps "$terminfo[kLFT5]" backward-word main vicmd
 bindkeymaps "$terminfo[kRIT5]" forward-word main vicmd
 
 WORDCHARS='"#$%''*+-.?\_'
-bindkeymaps '\e^?' .backward-kill-word main
+bindkeymaps '^W' .backward-kill-word main
 
 bindkeymaps "$terminfo[kdch1]" delete-char main vicmd
 
