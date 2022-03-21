@@ -8,3 +8,4 @@ set revert-all-at-newline on
 set show-all-if-unmodified on
 "\e[A": history-search-backward
 "\e[B": history-search-forward
+"\e\d": unix-filename-rubout
