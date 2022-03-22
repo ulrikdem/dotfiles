@@ -40,6 +40,7 @@ local modes = require("modes")
 local newtab_chrome = require("newtab_chrome")
 local open_editor = require("open_editor")
 local quickmarks = require("quickmarks")
+local readline = require("readline")
 local referer_control_wm = require_web_module("referer_control_wm")
 local search = require("search")
 local select = require("select")
@@ -182,6 +183,14 @@ modes.add_binds("ex-follow", {
 
 modes.get_mode("command").reset_on_navigation = false
 modes.get_mode("completion").reset_on_navigation = false
+
+for _, bind in ipairs(readline.bindings) do
+    if bind[1] == "<Control-w>" then
+        bind[1] = "<Mod1-BackSpace>"
+    elseif bind[1] == "<Mod1-BackSpace>" then
+        bind[1] = "<Control-w>"
+    end
+end
 
 -- Tabs {{{1
 
