@@ -1,6 +1,10 @@
 font:
   size: 9
 
+cursor:
+  vi_mode_style:
+    shape: Block
+
 colors:
   normal:
     black: &black '#1c1b19'
@@ -93,6 +97,42 @@ key_bindings:
     key: P
     mode: Vi|~Search
 
+  - action: ScrollPageUp
+    key: PageUp
+    mode: Vi
+
+  - action: ScrollPageDown
+    key: PageDown
+    mode: Vi
+
+  - action: SemanticLeft
+    key: Left
+    mods: Shift
+    mode: Vi|~Search
+
+  - action: SemanticRight
+    key: Right
+    mods: Shift
+    mode: Vi|~Search
+
+  - action: WordLeft
+    key: Left
+    mods: Control
+    mode: Vi|~Search
+
+  - action: WordRight
+    key: Right
+    mods: Control
+    mode: Vi|~Search
+
+  - action: First
+    key: Home
+    mode: Vi|~Search
+
+  - action: Last
+    key: End
+    mode: Vi|~Search
+
   - action: FirstOccupied
     key: 7
     mods: Shift
@@ -113,11 +153,22 @@ key_bindings:
     mods: Shift
     mode: Vi|~Search
 
+  - action: SearchFocusNext
+    key: G
+    mods: Control
+    mode: Search
+
+  - action: SearchFocusPrevious
+    key: T
+    mods: Control
+    mode: Search
+
+  - action: SearchDeleteWord
+    key: Back
+    mods: Control
+    mode: Search
+
   - chars: "\x17"
     key: Back
     mods: Control
     mode: ~Vi|~Search
-
-cursor:
-  vi_mode_style:
-    shape: Block
