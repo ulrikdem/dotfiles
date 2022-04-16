@@ -15,6 +15,7 @@ int main(int argc, char **argv) {
         args[2] = "netctl-auto@wlan0.service";
     } else if (!strcmp(argv[1], "menu")) {
         args[0] = "/usr/bin/wifi-menu";
+        args[1] = "-o";
     } else {
         args[0] = "/usr/bin/netctl-auto";
         args[1] = "switch-to";
