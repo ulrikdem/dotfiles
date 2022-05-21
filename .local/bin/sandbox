@@ -1,0 +1,40 @@
+#!/bin/bash
+
+args=(
+    --setenv SANDBOX ''
+    --unshare-all
+    --die-with-parent
+    --proc /proc
+    --dev-bind /dev /dev
+    --symlink /run /var/run
+)
+
+for path in /tmp /var/tmp /run/user/$UID ~; do
+    args+=(--dir "$path")
+done
+for path in /usr/{bin,sbin,lib*}; do
+    args+=(--symlink "$path" "${path#/usr}")
+done
+for path in /usr /opt /sys /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged; do
+    args+=(--ro-bind-try "$path" "$path")
+done
+while read -rd '' path; do
+    args+=(--ro-bind-try "$HOME/$path" "$HOME/$path")
+done < <(git --git-dir ~/.dotfiles.git ls-files -z)
+
+while getopts nxr:w: opt; do
+    case $opt in
+        n) args+=(--share-net);;
+        x)
+            for path in $XAUTHORITY /tmp/.X11-unix/X${DISPLAY#:} $XDG_RUNTIME_DIR/pulse/native; do
+                args+=(--ro-bind "$path" "$path")
+            done;;
+        r) args+=(--ro-bind "$OPTARG" "$(realpath -- "$OPTARG")");;
+        w) args+=(--bind "$OPTARG" "$(realpath -- "$OPTARG")");;
+        ?) echo 'sandbox [-n] [-x] [-r path]... [-w path]...' >&2; exit 1;;
+    esac
+done
+shift $((OPTIND - 1))
+
+(($#)) || set -- zsh
+exec bwrap "${args[@]}" -- "$@"

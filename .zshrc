@@ -60,7 +60,7 @@ zmodload zsh/zutil
 
 # Prompt and Title {{{1
 
-PROMPT='%F{blue}%B%n%b%8F@%F{blue}%B%m%f %~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}%(?.. %F{red}%?%f)
+PROMPT='%F{blue}%B%n%b%8F@%F{blue}%B%m%f %~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}'${SANDBOX+ %8F[%F{blue}sandbox%8F]%f}'%(?.. %F{red}%?%f)
 %F{blue}»%f '
 PROMPT2='%F{blue}»%f '
 
