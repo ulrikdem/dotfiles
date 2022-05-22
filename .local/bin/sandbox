@@ -6,16 +6,15 @@ args=(
     --die-with-parent
     --proc /proc
     --dev /dev
+    --dir /tmp
+    --dir /var/tmp
     --symlink /run /var/run
 )
 
-for path in /tmp /var/tmp /run/user/$UID; do
-    args+=(--dir "$path")
-done
 for path in /usr/{bin,sbin,lib*}; do
     args+=(--symlink "$path" "${path#/usr}")
 done
-for path in /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged; do
+for path in /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged $XDG_RUNTIME_DIR/dconf-service/keyfile/defaults; do
     args+=(--ro-bind-try "$path" "$path")
 done
 while read -rd '' path; do
@@ -29,7 +28,7 @@ while getopts nxr:w: opt; do
             for path in $XAUTHORITY /tmp/.X11-unix/X${DISPLAY#:} $XDG_RUNTIME_DIR/pulse/native /sys/dev{,ices}; do
                 args+=(--ro-bind-try "$path" "$path")
             done
-            for path in /dev/dri /dev/nvidia*; do
+            for path in /dev/{dri,nvidia*}; do
                 args+=(--dev-bind-try "$path" "$path")
             done;;
         r) args+=(--ro-bind "$OPTARG" "$(realpath -- "$OPTARG")");;
