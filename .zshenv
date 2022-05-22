@@ -20,6 +20,8 @@ export FZF_DEFAULT_OPTS='--color 16,info:8 --marker * --tiebreak end,length '\
 export HIGHLIGHT_OPTIONS="-t 4 -O xterm256"
 [[ -f ~/.config/highlight/themes/vim.theme ]] && HIGHLIGHT_OPTIONS+=" -D $HOME/.config/highlight -s vim"
 
+[[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
+
 [[ -f /usr/lib/qt/plugins/styles/libkvantum.so ]] && export QT_STYLE_OVERRIDE=kvantum
 
 export WINEDLLOVERRIDES=winemenubuilder.exe=d
