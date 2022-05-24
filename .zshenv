@@ -1,7 +1,7 @@
 typeset -U path
 path=(~/.local/bin $path)
 
-if [[ -x /usr/bin/luakit ]]; then
+if type luakit >/dev/null; then
     export BROWSER=luakit
 elif type firefox >/dev/null; then
     export BROWSER=firefox

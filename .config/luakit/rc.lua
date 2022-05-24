@@ -315,6 +315,7 @@ lousy.widget.tab.label_format = "<span foreground='{index_fg}'>{index}</span>: {
 -- Widgets {{{1
 
 window.add_signal("build", function(win)
+    win.layout.bg = "black"
     win.sbar.l.layout:pack(lousy.widget.uri())
     win.sbar.l.layout:pack(lousy.widget.progress())
     win.sbar.r.layout:pack(lousy.widget.buf())

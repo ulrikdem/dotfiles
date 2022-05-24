@@ -1,5 +1,0 @@
-@import "resource:///org/gtk/libgtk/theme/Adwaita/gtk-contained-dark.css";
-
-window.background {
-    background-color: black;
-}
