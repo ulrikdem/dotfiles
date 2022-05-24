@@ -571,10 +571,6 @@ local dark_style = stylesheet{
     top_frame_only = true,
 }
 
-webview.add_signal("init", function(view)
-    view.stylesheets[dark_style] = true
-end)
-
 local check_dark_wm = require_web_module("check_dark_wm")
 
 local function change_class(view, action, class)
