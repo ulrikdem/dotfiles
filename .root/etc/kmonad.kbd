@@ -11,7 +11,7 @@
 )
 
 (deflayer base
-    `     `     !     ^     $     $     XX    *     *     -     =     bspc  bspc  bspc
+    `     `     !     ^     $     $     XX    \_    \_    -     =     bspc  bspc  bspc
     tab   q     w     f     p     b           j     l     u     y     ;     \\    \\    \\
     esc   @a    @r    @s    @t    g           m     @n    @e    @i    @o    '     _
     z     z     @x    c     d     v     XX    k     h     ,     @.    /     _
@@ -19,7 +19,7 @@
 )
 
 (deflayer sft
-    _     _     2     3     5     5     _     7     7     _     _     _     _     _
+    _     _     2     3     5     5     _     7     7     8     _     _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _
     _     _     _     _     _     _     _     _     _     _     _     _     _
@@ -27,7 +27,7 @@
 )
 
 (deflayer num
-    _     _     _     _     _     _     _     *     *     -     _     _     _     _
+    _     _     _     _     _     _     _     _     _     -     _     _     _     _
     _     XX    [     ]     XX    XX          @kp   7     8     9     ;     _     _     _
     _     @<    @lp   @rp   @>    XX          @fn   @4    @5    @6    @0    _     _
     XX    XX    @{    }     .     ,     _     XX    1     2     @3    /     _
@@ -35,7 +35,7 @@
 )
 
 (deflayer kp
-    _     _     _     _     _     _     _     kp*   kp*   kp-   _     _     _     _
+    _     _     _     _     _     _     _     _     _     kp-   _     _     _     _
     _     _     _     _     _     _           nlck  kp7   kp8   kp9   _     _     _     _
     _     _     _     @kprp _     _           XX    kp4   kp5   kp6   kp0   _     _
     _     _     _     _     kp.   _     _     _     kp1   kp2   kp3   kp/   _
@@ -43,7 +43,7 @@
 )
 
 (deflayer kpsft
-    _     _     _     _     _     _     _     _     _     -     kp+   _     _     _
+    _     _     _     _     _     _     _     _     _     kp*   kp+   _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _     _
     _     _     _     _     _     _           _     _     _     _     _     _     _
     _     _     _     _     _     _     _     _     _     _     _     /     _
