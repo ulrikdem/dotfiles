@@ -19,6 +19,7 @@ _ = "_"
 
 around = namedtuple("around", ("outer", "inner"))
 layer_add = namedtuple("layer_add", ("layer"))
+layer_rem = namedtuple("layer_rem", ("layer"))
 layer_switch = namedtuple("layer_switch", ("layer"))
 layer_toggle = namedtuple("layer_toggle", ("layer"))
 tap_hold_next_release = namedtuple("tap_hold_next_release", ("delay", "tap", "hold"))
@@ -38,15 +39,18 @@ def map_button(f, button):
 
 repeat_layers = {}
 
-def add_repeat(key):
-    if re.fullmatch("[lr](alt|ctl|met|sft)", key):
-        return key
-    layer = "repeat-" + {"\\(": "lparen", "\\)": "rparen"}.get(key, key)
-    repeat_layers[layer] = ["deflayer", layer] + [_] * 47 + [key] + [_] * 14
-    return around(key, layer_add(layer))
+def wrap_key(button):
+    layer = "repeat-" + {"\\(": "lparen", "\\)": "rparen"}.get(button, button)
+    mod = re.fullmatch("[lr](alt|ctl|met|sft)", button)
+    if not re.fullmatch(r"[A-Z0-9]|\\_|bspc", button):
+        button = around(button, layer_rem("caps"))
+    if mod:
+        return button
+    repeat_layers[layer] = ["deflayer", layer] + [_] * 47 + [button] + [_] * 14
+    return around(button, layer_add(layer))
 
 def layer(name, *buttons):
-    buttons = [map_button(add_repeat, button) for button in buttons]
+    buttons = [map_button(wrap_key, button) for button in buttons]
     blocks.append(["deflayer", name, *(buttons[i] if isinstance(i, int) else i for i in [
         0,  0,  1,  2,  3,  3,  XX, 4,  4,  5,  6,  7,  7,  7,
         8,  9,  10, 11, 12, 13,     14, 15, 16, 17, 18, 19, 19, 19,
@@ -91,6 +95,24 @@ layer("shift",
     _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
     _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
             _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
+                                            _,      _,
+)
+
+mt_A = tap_hold("A", lmet)
+mt_R = tap_hold("R", lalt)
+mt_S = tap_hold("S", lsft)
+mt_T = tap_hold("T", lctl)
+mt_N = tap_hold("N", rctl)
+mt_E = tap_hold("E", rsft)
+mt_I = tap_hold("I", lalt)
+mt_O = tap_hold("O", rmet)
+mt_X = tap_hold("X", ralt)
+
+layer("caps",
+    _,      _,      _,      _,                                      _,      _,      _,      _,
+    _,      "Q",    "W",    "F",    "P",    "B",    "J",    "L",    "U",    "Y",    _,      _,
+    _,      mt_A,   mt_R,   mt_S,   mt_T,   "G",    "M",    mt_N,   mt_E,   mt_I,   mt_O,   _,
+            "Z",    mt_X,   "C",    "D",    "V",    "K",    "H",    _,      _,      _,
                                             _,      _,
 )
 
@@ -143,12 +165,13 @@ layer("fn",
 )
 
 qwerty = layer_switch("qwerty")
+capwrd = around(layer_add("caps"), layer_add("nav"))
 
 layer("nav",
     _,      _,      _,      _,                                      _,      _,      _,      _,
     _,      XX,     qwerty, XX,     XX,     "brup", "volu", "home", "up",   "end",  "pgup", _,
     _,      lmet,   lalt,   lsft,   lctl,   "brdn", "vold", "left", "down", "rght", "pgdn", _,
-            XX,     ralt,   XX,     XX,     XX,     "mute", "ins",  "caps", "cmps", "del",
+            XX,     ralt,   capwrd, XX,     XX,     "mute", "ins",  "caps", "cmps", "del",
                                             _,      "spc",
 )
 
