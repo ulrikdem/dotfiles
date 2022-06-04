@@ -168,7 +168,7 @@ layer("fn",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       XX,      XX,      XX,      XX,      XX,      "pause", "f7",    "f8",    "f9",    "f12",   _,
     _,       lmet,    lalt,    lsft,    lctl,    XX,      "slck",  "f4",    "f5",    "f6",    "f11",   _,
-             XX,      ralt,    XX,      XX,      XX,      "sys",   "f1",    "f2",    "f3",    "f10",
+             XX,      ralt,    "caps",  XX,      XX,      "sys",   "f1",    "f2",    "f3",    "f10",
                                                  _,       _,       "ret",
 )
 
@@ -179,7 +179,7 @@ layer("nav",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       XX,      qwerty,  XX,      XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
     _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
-             XX,      ralt,    capswrd, XX,      XX,      "mute",  "ins",   "caps",  "cmps",  "del",
+             XX,      ralt,    capswrd, XX,      XX,      "mute",  "cmps",  "ins",   XX,      "del",
                                                  _,       "spc",   _,
 )
 
