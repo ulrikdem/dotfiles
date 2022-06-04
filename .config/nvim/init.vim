@@ -1137,8 +1137,6 @@ if executable('xdg-open')
     autocmd vimrc FileType dot nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
 endif
 
-Plug 'kmonad/kmonad-vim'
-
 " Debugging {{{1
 
 if executable('gdb')
