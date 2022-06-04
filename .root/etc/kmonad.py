@@ -76,111 +76,111 @@ rsft = around("rsft", layer_toggle("shift"))
 ralt = "ralt"
 rmet = "rmet"
 
-mt_a = tap_hold("a", lmet)
-mt_r = tap_hold("r", lalt)
-mt_s = tap_hold("s", lsft)
-mt_t = tap_hold("t", lctl)
-mt_n = tap_hold("n", rctl)
-mt_e = tap_hold("e", rsft)
-mt_i = tap_hold("i", lalt)
-mt_o = tap_hold("o", rmet)
-mt_x = tap_hold("x", ralt)
-mt_dot = tap_hold(".", ralt)
+a_met = tap_hold("a", lmet)
+r_alt = tap_hold("r", lalt)
+s_sft = tap_hold("s", lsft)
+t_ctl = tap_hold("t", lctl)
+n_ctl = tap_hold("n", rctl)
+e_sft = tap_hold("e", rsft)
+i_alt = tap_hold("i", lalt)
+o_met = tap_hold("o", rmet)
+x_alt = tap_hold("x", ralt)
+dot_alt = tap_hold(".", ralt)
 
-lt_ret = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("fn")), layer_toggle("num")))
-lt_spc = tap_hold("spc", layer_toggle("nav"))
+ret_num = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("fn")), layer_toggle("num")))
+spc_nav = tap_hold("spc", layer_toggle("nav"))
 
 layer("base",
-    "`",    "!",    "^",    "$",                                    "\\_",  "-",    "=",    "bspc",
-    "tab",  "q",    "w",    "f",    "p",    "b",    "j",    "l",    "u",    "y",    ";",    "\\\\",
-    "esc",  mt_a,   mt_r,   mt_s,   mt_t,   "g",    "m",    mt_n,   mt_e,   mt_i,   mt_o,   "'",
-            "z",    mt_x,   "c",    "d",    "v",    "k",    "h",    ",",    mt_dot, "/",
-                                            lt_ret, lt_spc,
+    "`",     "!",     "^",     "$",                                         "\\_",   "-",     "=",     "bspc",
+    "tab",   "q",     "w",     "f",     "p",     "b",     "j",     "l",     "u",     "y",     ";",     "\\\\",
+    "esc",   a_met,   r_alt,   s_sft,   t_ctl,   "g",     "m",     n_ctl,   e_sft,   i_alt,   o_met,   "'",
+             "z",     x_alt,   "c",     "d",     "v",     "k",     "h",     ",",     dot_alt, "/",
+                                                 ret_num, spc_nav,
 )
 
 layer("shift",
-    _,      "@",    "#",    "%",                                    "&",    "*",    _,      _,
-    _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
-    _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
-            _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
-                                            _,      _,
+    _,       "@",     "#",     "%",                                         "&",     "*",     _,       _,
+    _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
+    _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
+             _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
+                                                 _,       _,
 )
 
-mt_A = tap_hold("A", lmet)
-mt_R = tap_hold("R", lalt)
-mt_S = tap_hold("S", lsft)
-mt_T = tap_hold("T", lctl)
-mt_N = tap_hold("N", rctl)
-mt_E = tap_hold("E", rsft)
-mt_I = tap_hold("I", lalt)
-mt_O = tap_hold("O", rmet)
-mt_X = tap_hold("X", ralt)
+A_met = tap_hold("A", lmet)
+R_alt = tap_hold("R", lalt)
+S_sft = tap_hold("S", lsft)
+T_ctl = tap_hold("T", lctl)
+N_ctl = tap_hold("N", rctl)
+E_sft = tap_hold("E", rsft)
+I_alt = tap_hold("I", lalt)
+O_met = tap_hold("O", rmet)
+X_alt = tap_hold("X", ralt)
 
 layer("caps",
-    _,      _,      _,      _,                                      _,      _,      _,      _,
-    _,      "Q",    "W",    "F",    "P",    "B",    "J",    "L",    "U",    "Y",    _,      _,
-    _,      mt_A,   mt_R,   mt_S,   mt_T,   "G",    "M",    mt_N,   mt_E,   mt_I,   mt_O,   _,
-            "Z",    mt_X,   "C",    "D",    "V",    "K",    "H",    _,      _,      _,
-                                            _,      _,
+    _,       _,       _,       _,                                           _,       _,       _,       _,
+    _,       "Q",     "W",     "F",     "P",     "B",     "J",     "L",     "U",     "Y",     _,       _,
+    _,       A_met,   R_alt,   S_sft,   T_ctl,   "G",     "M",     N_ctl,   E_sft,   I_alt,   O_met,   _,
+             "Z",     X_alt,   "C",     "D",     "V",     "K",     "H",     _,       _,       _,
+                                                 _,       _,
 )
 
-mt_lt = tap_hold("<", lmet)
-mt_lp = tap_hold("\\(", lalt)
-mt_rp = tap_hold("\\)", lsft)
-mt_gt = tap_hold(">", lctl)
-mt_4 = tap_hold("4", rctl)
-mt_5 = tap_hold("5", rsft)
-mt_6 = tap_hold("6", lalt)
-mt_0 = tap_hold("0", rmet)
-mt_lb = tap_hold("{", ralt)
-mt_3 = tap_hold("3", ralt)
+lt_met = tap_hold("<", lmet)
+lp_alt = tap_hold("\\(", lalt)
+rp_sft = tap_hold("\\)", lsft)
+gt_ctl = tap_hold(">", lctl)
+_4_ctl = tap_hold("4", rctl)
+_5_sft = tap_hold("5", rsft)
+_6_alt = tap_hold("6", lalt)
+_0_met = tap_hold("0", rmet)
+lb_alt = tap_hold("{", ralt)
+_3_alt = tap_hold("3", ralt)
 
 kp = layer_add("kp")
 fn = layer_add("fn")
 
 layer("num",
-    _,      _,      _,      _,                                      _,      "-",    _,      _,
-    _,      XX,     "[",    "]",    XX,     XX,     kp,     "7",    "8",    "9",    ";",    _,
-    _,      mt_lt,  mt_lp,  mt_rp,  mt_gt,  XX,     fn,     mt_4,   mt_5,   mt_6,   mt_0,   _,
-            XX,     mt_lb,  "}",    ".",    ",",    XX,     "1",    "2",    mt_3,   "/",
-                                            "ret",  _,
+    _,       _,       _,       _,                                           _,       "-",     _,       _,
+    _,       XX,      "[",     "]",     XX,      XX,      kp,      "7",     "8",     "9",     ";",     _,
+    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      fn,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
+             XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
+                                                 "ret",   _,
 )
 
-kp_rp = tap_hold("\\)", around(lsft, layer_toggle("kp-shift")))
+rp_ksft = tap_hold("\\)", around(lsft, layer_toggle("kp-shift")))
 
 layer("kp",
-    _,      _,      _,      _,                                      _,      "kp-",  _,      _,
-    _,      _,      _,      _,      _,      _,      "nlck", "kp7",  "kp8",  "kp9",  _,      _,
-    _,      _,      _,      kp_rp,  _,      _,      XX,     "kp4",  "kp5",  "kp6",  "kp0",  _,
-            _,      _,      _,      "kp.",  _,      _,      "kp1",  "kp2",  "kp3",  "kp/",
-                                            "kprt", _,
+    _,       _,       _,       _,                                           _,       "kp-",   _,       _,
+    _,       _,       _,       _,       _,       _,       "nlck",  "kp7",   "kp8",   "kp9",   _,       _,
+    _,       _,       _,       rp_ksft, _,       _,       XX,      "kp4",   "kp5",   "kp6",   "kp0",   _,
+             _,       _,       _,       "kp.",   _,       _,       "kp1",   "kp2",   "kp3",   "kp/",
+                                                 "kprt",  _,
 )
 
 layer("kp-shift",
-    _,      _,      _,      _,                                      _,      "kp*",  "kp+",  _,
-    _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
-    _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
-            _,      _,      _,      _,      _,      _,      _,      _,      _,      "/",
-                                            _,      _,
+    _,       _,       _,       _,                                           _,       "kp*",   "kp+",   _,
+    _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
+    _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
+             _,       _,       _,       _,       _,       _,       _,       _,       _,       "?",
+                                                 _,       _,
 )
 
 layer("fn",
-    _,      _,      _,      _,                                      _,      _,      _,      _,
-    _,      _,      _,      _,      _,      _,      "pause","f7",   "f8",   "f9",   "f12",  _,
-    _,      _,      _,      _,      _,      _,      "slck", "f4",   "f5",   "f6",   "f11",  _,
-            _,      _,      _,      _,      _,      "sys",  "f1",   "f2",   "f3",   "f10",
-                                            _,      _,
+    _,       _,       _,       _,                                           _,       _,       _,       _,
+    _,       _,       _,       _,       _,       _,       "pause", "f7",    "f8",    "f9",    "f12",   _,
+    _,       _,       _,       _,       _,       _,       "slck",  "f4",    "f5",    "f6",    "f11",   _,
+             _,       _,       _,       _,       _,       "sys",   "f1",    "f2",    "f3",    "f10",
+                                                 _,       _,
 )
 
-capwrd = around(layer_add("caps"), layer_add("nav"))
+capswrd = around(layer_add("caps"), layer_add("nav"))
 qwerty = layer_switch("qwerty")
 
 layer("nav",
-    _,      _,      _,      _,                                      _,      _,      _,      _,
-    _,      XX,     qwerty, XX,     XX,     "brup", "volu", "home", "up",   "end",  "pgup", _,
-    _,      lmet,   lalt,   lsft,   lctl,   "brdn", "vold", "left", "down", "rght", "pgdn", _,
-            XX,     ralt,   capwrd, XX,     XX,     "mute", "ins",  "caps", "cmps", "del",
-                                            _,      "spc",
+    _,       _,       _,       _,                                           _,       _,       _,       _,
+    _,       XX,      qwerty,  XX,      XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
+    _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
+             XX,      ralt,    capswrd, XX,      XX,      "mute",  "ins",   "caps",  "cmps",  "del",
+                                                 _,       "spc",
 )
 
 sparse_layer("qwerty",
