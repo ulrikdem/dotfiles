@@ -87,7 +87,7 @@ o_met = tap_hold("o", rmet)
 x_alt = tap_hold("x", ralt)
 dot_alt = tap_hold(".", ralt)
 
-ret_num = tap_hold("ret", around(layer_toggle("kp"), layer_toggle("num")))
+ret_num = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("kp-shift")), layer_toggle("num")))
 spc_nav = tap_hold("spc", layer_toggle("nav"))
 ret_fn = tap_hold("ret", layer_toggle("fn"))
 
