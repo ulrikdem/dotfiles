@@ -57,14 +57,14 @@ def wrap_key(button):
     return around(button, layer_add(repeat_layer))
 
 def layer(name, *buttons):
-    assert len(buttons) == 44
+    assert len(buttons) == 45
     buttons = [map_button(wrap_key, button) for button in buttons]
     blocks.append(("deflayer", name, *(buttons[i] if type(i) is int else i for i in (
         0,  0,  1,  2,  3,  3,  XX, 4,  4,  5,  6,  7,  7,  7,
         8,  9,  10, 11, 12, 13,     14, 15, 16, 17, 18, 19, 19, 19,
         20, 21, 22, 23, 24, 25,     26, 27, 28, 29, 30, 31, _,
         32, 32, 33, 34, 35, 36, _,  37, 38, 39, 40, 41, _,
-            _,  42, 42,         43,         42, 42, 42, _,
+            44, 44, 42,         43,         42, 44, 44, 44,
     ))))
 
 lmet = "lmet"
@@ -87,15 +87,16 @@ o_met = tap_hold("o", rmet)
 x_alt = tap_hold("x", ralt)
 dot_alt = tap_hold(".", ralt)
 
-ret_num = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("fn")), layer_toggle("num")))
+ret_num = tap_hold("ret", around(layer_toggle("kp"), layer_toggle("num")))
 spc_nav = tap_hold("spc", layer_toggle("nav"))
+ret_fn = tap_hold("ret", layer_toggle("fn"))
 
 layer("base",
     "`",     "!",     "^",     "$",                                         "\\_",   "-",     "=",     "bspc",
     "tab",   "q",     "w",     "f",     "p",     "b",     "j",     "l",     "u",     "y",     ";",     "\\\\",
     "esc",   a_met,   r_alt,   s_sft,   t_ctl,   "g",     "m",     n_ctl,   e_sft,   i_alt,   o_met,   "'",
              "z",     x_alt,   "c",     "d",     "v",     "k",     "h",     ",",     dot_alt, "/",
-                                                 ret_num, spc_nav,
+                                                 ret_num, spc_nav, ret_fn,
 )
 
 layer("shift",
@@ -103,7 +104,7 @@ layer("shift",
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
              _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
-                                                 _,       _,
+                                                 _,       _,       _,
 )
 
 A_met = tap_hold("A", lmet)
@@ -121,7 +122,7 @@ layer("caps",
     _,       "Q",     "W",     "F",     "P",     "B",     "J",     "L",     "U",     "Y",     _,       _,
     _,       A_met,   R_alt,   S_sft,   T_ctl,   "G",     "M",     N_ctl,   E_sft,   I_alt,   O_met,   _,
              "Z",     X_alt,   "C",     "D",     "V",     "K",     "H",     _,       _,       _,
-                                                 _,       _,
+                                                 _,       _,       _,
 )
 
 lt_met = tap_hold("<", lmet)
@@ -136,14 +137,13 @@ lb_alt = tap_hold("{", ralt)
 _3_alt = tap_hold("3", ralt)
 
 kp = layer_add("kp")
-fn = layer_add("fn")
 
 layer("num",
     _,       _,       _,       _,                                           _,       "-",     _,       _,
     _,       XX,      "[",     "]",     XX,      XX,      kp,      "7",     "8",     "9",     ";",     _,
-    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      fn,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
+    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
              XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
-                                                 "ret",   _,
+                                                 "ret",   _,       _,
 )
 
 rp_ksft = tap_hold("\\)", around(lsft, layer_toggle("kp-shift")))
@@ -151,9 +151,9 @@ rp_ksft = tap_hold("\\)", around(lsft, layer_toggle("kp-shift")))
 layer("kp",
     _,       _,       _,       _,                                           _,       "kp-",   _,       _,
     _,       _,       _,       _,       _,       _,       "nlck",  "kp7",   "kp8",   "kp9",   _,       _,
-    _,       _,       _,       rp_ksft, _,       _,       XX,      "kp4",   "kp5",   "kp6",   "kp0",   _,
+    _,       _,       _,       rp_ksft, _,       _,       _,       "kp4",   "kp5",   "kp6",   "kp0",   _,
              _,       _,       _,       "kp.",   _,       _,       "kp1",   "kp2",   "kp3",   "kp/",
-                                                 "kprt",  _,
+                                                 "kprt",  _,       _,
 )
 
 layer("kp-shift",
@@ -161,15 +161,15 @@ layer("kp-shift",
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
              _,       _,       _,       _,       _,       _,       _,       _,       _,       "?",
-                                                 _,       _,
+                                                 _,       _,       _,
 )
 
 layer("fn",
     _,       _,       _,       _,                                           _,       _,       _,       _,
-    _,       _,       _,       _,       _,       _,       "pause", "f7",    "f8",    "f9",    "f12",   _,
-    _,       _,       _,       _,       _,       _,       "slck",  "f4",    "f5",    "f6",    "f11",   _,
-             _,       _,       _,       _,       _,       "sys",   "f1",    "f2",    "f3",    "f10",
-                                                 _,       _,
+    _,       XX,      XX,      XX,      XX,      XX,      "pause", "f7",    "f8",    "f9",    "f12",   _,
+    _,       lmet,    lalt,    lsft,    lctl,    XX,      "slck",  "f4",    "f5",    "f6",    "f11",   _,
+             XX,      ralt,    XX,      XX,      XX,      "sys",   "f1",    "f2",    "f3",    "f10",
+                                                 _,       _,       "ret",
 )
 
 capswrd = around(layer_add("caps"), layer_add("nav"))
@@ -180,7 +180,7 @@ layer("nav",
     _,       XX,      qwerty,  XX,      XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
     _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
              XX,      ralt,    capswrd, XX,      XX,      "mute",  "ins",   "caps",  "cmps",  "del",
-                                                 _,       "spc",
+                                                 _,       "spc",   _,
 )
 
 sparse_layer("qwerty",
