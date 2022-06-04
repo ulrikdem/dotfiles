@@ -60,7 +60,7 @@ def layer(name, *buttons):
     assert len(buttons) == 45
     buttons = [map_button(wrap_key, button) for button in buttons]
     blocks.append(("deflayer", name, *(buttons[i] if type(i) is int else i for i in (
-        0,  0,  1,  2,  3,  3,  XX, 4,  4,  5,  6,  7,  7,  7,
+        0,  0,  1,  2,  3,  3,  4,  4,  4,  5,  6,  7,  7,  7,
         8,  9,  10, 11, 12, 13,     14, 15, 16, 17, 18, 19, 19, 19,
         20, 21, 22, 23, 24, 25,     26, 27, 28, 29, 30, 31, _,
         32, 32, 33, 34, 35, 36, _,  37, 38, 39, 40, 41, _,
@@ -173,18 +173,41 @@ layer("fn",
 )
 
 capswrd = around(layer_add("caps"), layer_add("nav"))
+game = layer_switch("game")
 qwerty = layer_switch("qwerty")
 
 layer("nav",
     _,       _,       _,       _,                                           _,       _,       _,       _,
-    _,       XX,      qwerty,  XX,      XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
+    _,       qwerty,  XX,      game,    XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
     _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
              XX,      ralt,    capswrd, XX,      XX,      "mute",  "cmps",  "ins",   XX,      "del",
                                                  _,       "spc",   _,
 )
 
+ret_bas = tap_hold("ret", around(around(layer_toggle("shift"), layer_toggle("caps")), layer_toggle("base")))
+bas_num = tap_hold(layer_switch("base"), layer_toggle("game-num"))
+
+layer("game",
+    _,       _,       _,       _,                                           _,       _,       _,       "bspc",
+    "tab",   "lalt",  "q",     "w",     "e",     "r",     "volu",  "home",  "up",    "end",   "pgup",  _,
+    "esc",   "lsft",  "a",     "s",     "d",     "f",     "vold",  "left",  "down",  "rght",  "pgdn",  _,
+             "lctl",  "z",     "x",     "c",     "v",     "mute",  "cmps",  "ins",   XX,      "del",
+                                                 ret_bas, "spc",   bas_num,
+)
+
+_0_alt = tap_hold("0", "lalt")
+_0_sft = tap_hold("0", "lsft")
+_0_ctl = tap_hold("0", "lctl")
+
+layer("game-num",
+    _,       _,       _,       _,                                           _,       _,       _,       _,
+    _,       _0_alt,  "9",     "8",     "7",     XX,      "brup",  "f7",    "f8",    "f9",    "f12",   _,
+    _,       _0_sft,  "6",     "5",     "4",     XX,      "brdn",  "f4",    "f5",    "f6",    "f11",   _,
+             _0_ctl,  "3",     "2",     "1",     XX,      XX,      "f1",    "f2",    "f3",    "f10",
+                                                 _,       _,       _,
+)
+
 sparse_layer("qwerty",
-    (28, lctl),
     (56, around(lalt, layer_toggle("alt"))),
     (58, around(ralt, layer_toggle("alt"))),
 )
