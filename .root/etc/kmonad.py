@@ -1,63 +1,71 @@
 #!/usr/bin/env python3
 
 import re
-from collections import namedtuple
+
+XX = "XX"
+_ = "_"
 
 blocks = [
-    ["defcfg", "fallthrough", "true"],
-    ["defsrc", *"""
+    ("defcfg", "fallthrough", "true"),
+    ("defsrc", *"""
         `    1    2    3    4    5    6    7    8    9    0    -    =    bspc
         tab  q    w    e    r    t         y    u    i    o    p    [    ]    \\
         caps a    s    d    f    g         h    j    k    l    ;    '    ret
         lsft 102d z    x    c    v    b    n    m    ,    .    /    rsft
              lctl lmet lalt           spc            ralt rmet cmps rctl
-    """.split()],
+    """.split()),
 ]
 
-XX = "XX"
-_ = "_"
+sparse_layers = set()
 
-around = namedtuple("around", ("outer", "inner"))
-layer_add = namedtuple("layer_add", ("layer"))
-layer_rem = namedtuple("layer_rem", ("layer"))
-layer_switch = namedtuple("layer_switch", ("layer"))
-layer_toggle = namedtuple("layer_toggle", ("layer"))
-tap_hold_next_release = namedtuple("tap_hold_next_release", ("delay", "tap", "hold"))
+def sparse_layer(name, *pairs):
+    buttons = [_] * 62
+    for i, button in pairs:
+        buttons[i] = button
+    sparse_layers.add(("deflayer", name, *buttons))
 
+def layer_toggle(layer):
+    return ("layer-toggle", layer)
+def layer_add(layer):
+    return ("layer-add", layer)
+def layer_rem(layer):
+    return ("layer-rem", layer)
+def layer_switch(layer):
+    return ("layer-switch", layer)
+
+def around(outer, inner):
+    return ("around", outer, inner)
 def tap_hold(tap, hold):
-    return tap_hold_next_release(200, tap, hold)
+    return ("tap-hold-next-release", 200, tap, hold)
 
 def map_button(f, button):
-    if isinstance(button, tuple):
-        if isinstance(button, around):
-            return around(map_button(f, button.outer), map_button(f, button.inner))
-        elif isinstance(button, tap_hold_next_release):
-            return button._replace(tap=map_button(f, button.tap), hold=map_button(f, button.hold))
+    if type(button) is tuple:
+        if button[0] == "around" or button[0].startswith("tap-hold"):
+            return (*button[:-2], *(map_button(f, b) for b in button[-2:]))
     elif button != XX and button != _:
         return f(button)
     return button
 
-repeat_layers = {}
-
 def wrap_key(button):
-    layer = "repeat-" + {"\\(": "lparen", "\\)": "rparen"}.get(button, button)
+    repeat_layer = "repeat-" + {"\\(": "lparen", "\\)": "rparen"}.get(button, button)
     mod = re.fullmatch("[lr](alt|ctl|met|sft)", button)
     if not re.fullmatch(r"[A-Z0-9]|\\_|bspc", button):
         button = around(button, layer_rem("caps"))
     if mod:
         return button
-    repeat_layers[layer] = ["deflayer", layer] + [_] * 47 + [button] + [_] * 14
-    return around(button, layer_add(layer))
+    sparse_layer(repeat_layer, (47, button))
+    return around(button, layer_add(repeat_layer))
 
 def layer(name, *buttons):
+    assert len(buttons) == 44
     buttons = [map_button(wrap_key, button) for button in buttons]
-    blocks.append(["deflayer", name, *(buttons[i] if isinstance(i, int) else i for i in [
+    blocks.append(("deflayer", name, *(buttons[i] if type(i) is int else i for i in (
         0,  0,  1,  2,  3,  3,  XX, 4,  4,  5,  6,  7,  7,  7,
         8,  9,  10, 11, 12, 13,     14, 15, 16, 17, 18, 19, 19, 19,
         20, 21, 22, 23, 24, 25,     26, 27, 28, 29, 30, 31, _,
         32, 32, 33, 34, 35, 36, _,  37, 38, 39, 40, 41, _,
             _,  42, 42,         43,         42, 42, 42, _,
-    ])])
+    ))))
 
 lmet = "lmet"
 lalt = "lalt"
@@ -91,7 +99,7 @@ layer("base",
 )
 
 layer("shift",
-    _,      "2",    "3",    "5",                                    "7",    "8",    _,      _,
+    _,      "@",    "#",    "%",                                    "&",    "*",    _,      _,
     _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
     _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
             _,      _,      _,      _,      _,      _,      _,      _,      _,      _,
@@ -116,9 +124,6 @@ layer("caps",
                                             _,      _,
 )
 
-add_kp = layer_add("kp")
-add_fn = layer_add("fn")
-
 mt_lt = tap_hold("<", lmet)
 mt_lp = tap_hold("\\(", lalt)
 mt_rp = tap_hold("\\)", lsft)
@@ -130,10 +135,13 @@ mt_0 = tap_hold("0", rmet)
 mt_lb = tap_hold("{", ralt)
 mt_3 = tap_hold("3", ralt)
 
+kp = layer_add("kp")
+fn = layer_add("fn")
+
 layer("num",
     _,      _,      _,      _,                                      _,      "-",    _,      _,
-    _,      XX,     "[",    "]",    XX,     XX,     add_kp, "7",    "8",    "9",    ";",    _,
-    _,      mt_lt,  mt_lp,  mt_rp,  mt_gt,  XX,     add_fn, mt_4,   mt_5,   mt_6,   mt_0,   _,
+    _,      XX,     "[",    "]",    XX,     XX,     kp,     "7",    "8",    "9",    ";",    _,
+    _,      mt_lt,  mt_lp,  mt_rp,  mt_gt,  XX,     fn,     mt_4,   mt_5,   mt_6,   mt_0,   _,
             XX,     mt_lb,  "}",    ".",    ",",    XX,     "1",    "2",    mt_3,   "/",
                                             "ret",  _,
 )
@@ -164,8 +172,8 @@ layer("fn",
                                             _,      _,
 )
 
-qwerty = layer_switch("qwerty")
 capwrd = around(layer_add("caps"), layer_add("nav"))
+qwerty = layer_switch("qwerty")
 
 layer("nav",
     _,      _,      _,      _,                                      _,      _,      _,      _,
@@ -175,20 +183,21 @@ layer("nav",
                                             _,      "spc",
 )
 
-buttons = [_] * 62
-buttons[56] = buttons[58] = layer_switch("base")
-blocks.append(["deflayer", "alt", *buttons])
-buttons[56] = around(lalt, layer_toggle("alt"))
-buttons[58] = around(ralt, layer_toggle("alt"))
-buttons[28] = lctl
-blocks.append(["deflayer", "qwerty", *buttons])
+sparse_layer("qwerty",
+    (28, lctl),
+    (56, around(lalt, layer_toggle("alt"))),
+    (58, around(ralt, layer_toggle("alt"))),
+)
 
-blocks.extend(repeat_layers.values())
+sparse_layer("alt",
+    (56, layer_switch("base")),
+    (58, layer_switch("base")),
+)
+
+blocks.extend(sparse_layers)
 
 def to_str(expr):
-    if isinstance(expr, tuple):
-        expr = [type(expr).__name__.replace("_", "-"), *expr]
-    if isinstance(expr, list):
+    if type(expr) is tuple:
         return "(" + " ".join(map(to_str, expr)) + ")"
     return str(expr)
 
