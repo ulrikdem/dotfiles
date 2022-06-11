@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+keymap=$(kmonad-keymap)
+sudo tee /etc/kmonad.kbd <<<$keymap >/dev/null
+sudo systemctl restart 'kmonad@*.service'
