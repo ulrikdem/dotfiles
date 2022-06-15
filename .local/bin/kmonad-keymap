@@ -49,12 +49,12 @@ def map_button(f, button):
 def wrap_key(button):
     repeat_layer = "repeat-" + {"\\(": "lparen", "\\)": "rparen"}.get(button, button)
     mod = re.fullmatch("[lr](alt|ctl|met|sft)", button)
-    if not re.fullmatch(r"[A-Z0-9]|\\_|bspc", button):
+    if not re.fullmatch(r"\w|\\_|bspc", button):
         button = around(button, layer_rem("caps"))
-    if mod:
-        return button
-    sparse_layer(repeat_layer, (47, button))
-    return around(button, layer_add(repeat_layer))
+    if not mod:
+        sparse_layer(repeat_layer, (47, button))
+        button = around(button, layer_add(repeat_layer))
+    return button
 
 def layer(name, *buttons):
     assert len(buttons) == 45
