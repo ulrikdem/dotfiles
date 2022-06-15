@@ -64,7 +64,7 @@ def layer(name, *buttons):
         8,  9,  10, 11, 12, 13,     14, 15, 16, 17, 18, 19, 19, 19,
         20, 21, 22, 23, 24, 25,     26, 27, 28, 29, 30, 31, _,
         32, 32, 33, 34, 35, 36, _,  37, 38, 39, 40, 41, _,
-            44, 44, 42,         43,         42, 44, 44, 44,
+            42, 42, 43,         44,         43, 42, 42, 42,
     ))))
 
 lmet = "lmet"
@@ -87,8 +87,8 @@ o_met = tap_hold("o", rmet)
 x_alt = tap_hold("x", ralt)
 dot_alt = tap_hold(".", ralt)
 
-ret_num = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("kp-shift")), layer_toggle("num")))
 spc_nav = tap_hold("spc", layer_toggle("nav"))
+ret_num = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("kp-shift")), layer_toggle("num")))
 ret_fn = tap_hold("ret", layer_toggle("fn"))
 
 layer("base",
@@ -96,7 +96,7 @@ layer("base",
     "tab",   "q",     "w",     "f",     "p",     "b",     "j",     "l",     "u",     "y",     ";",     "\\\\",
     "esc",   a_met,   r_alt,   s_sft,   t_ctl,   "g",     "m",     n_ctl,   e_sft,   i_alt,   o_met,   "'",
              "z",     x_alt,   "c",     "d",     "v",     "k",     "h",     ",",     dot_alt, "/",
-                                                 ret_num, spc_nav, ret_fn,
+                                        ret_fn,  ret_num, spc_nav,
 )
 
 layer("shift",
@@ -104,7 +104,7 @@ layer("shift",
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
              _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
-                                                 _,       _,       _,
+                                        _,       _,       _,
 )
 
 A_met = tap_hold("A", lmet)
@@ -122,7 +122,7 @@ layer("caps",
     _,       "Q",     "W",     "F",     "P",     "B",     "J",     "L",     "U",     "Y",     _,       _,
     _,       A_met,   R_alt,   S_sft,   T_ctl,   "G",     "M",     N_ctl,   E_sft,   I_alt,   O_met,   _,
              "Z",     X_alt,   "C",     "D",     "V",     "K",     "H",     _,       _,       _,
-                                                 _,       _,       _,
+                                        _,       _,       _,
 )
 
 lt_met = tap_hold("<", lmet)
@@ -143,7 +143,7 @@ layer("num",
     _,       XX,      "[",     "]",     XX,      XX,      kp,      "7",     "8",     "9",     ";",     _,
     _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
              XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
-                                                 "ret",   _,       _,
+                                        _,       "ret",   _,
 )
 
 rp_ksft = tap_hold("\\)", around(lsft, layer_toggle("kp-shift")))
@@ -153,7 +153,7 @@ layer("kp",
     _,       _,       _,       _,       _,       _,       "nlck",  "kp7",   "kp8",   "kp9",   _,       _,
     _,       _,       _,       rp_ksft, _,       _,       _,       "kp4",   "kp5",   "kp6",   "kp0",   _,
              _,       _,       _,       "kp.",   _,       _,       "kp1",   "kp2",   "kp3",   "kp/",
-                                                 "kprt",  _,       _,
+                                        _,       "kprt",  _,
 )
 
 layer("kp-shift",
@@ -161,7 +161,7 @@ layer("kp-shift",
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
     _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,       _,
              _,       _,       _,       _,       _,       _,       _,       _,       _,       "/",
-                                                 _,       _,       _,
+                                        _,       _,       _,
 )
 
 layer("fn",
@@ -169,7 +169,7 @@ layer("fn",
     _,       XX,      XX,      XX,      XX,      XX,      "pause", "f7",    "f8",    "f9",    "f12",   _,
     _,       lmet,    lalt,    lsft,    lctl,    XX,      "slck",  "f4",    "f5",    "f6",    "f11",   _,
              XX,      ralt,    "caps",  XX,      XX,      "sys",   "f1",    "f2",    "f3",    "f10",
-                                                 _,       _,       "ret",
+                                        "ret",   _,       _,
 )
 
 capswrd = around(layer_add("caps"), layer_add("nav"))
@@ -181,7 +181,7 @@ layer("nav",
     _,       qwerty,  XX,      game,    XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
     _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
              XX,      ralt,    capswrd, XX,      XX,      "mute",  "cmps",  "ins",   XX,      "del",
-                                                 _,       "spc",   _,
+                                        _,       _,       "spc",
 )
 
 ret_bas = tap_hold("ret", around(around(layer_toggle("shift"), layer_toggle("caps")), layer_toggle("base")))
@@ -192,7 +192,7 @@ layer("game",
     "tab",   "lalt",  "q",     "w",     "e",     "r",     "volu",  "home",  "up",    "end",   "pgup",  _,
     "esc",   "lsft",  "a",     "s",     "d",     "f",     "vold",  "left",  "down",  "rght",  "pgdn",  _,
              "lctl",  "z",     "x",     "c",     "v",     "mute",  "cmps",  "ins",   XX,      "del",
-                                                 ret_bas, "spc",   bas_num,
+                                        bas_num, ret_bas, "spc",
 )
 
 _0_alt = tap_hold("0", "lalt")
@@ -204,7 +204,7 @@ layer("game-num",
     _,       _0_alt,  "9",     "8",     "7",     XX,      "brup",  "f7",    "f8",    "f9",    "f12",   _,
     _,       _0_sft,  "6",     "5",     "4",     XX,      "brdn",  "f4",    "f5",    "f6",    "f11",   _,
              _0_ctl,  "3",     "2",     "1",     XX,      XX,      "f1",    "f2",    "f3",    "f10",
-                                                 _,       _,       _,
+                                        _,       _,       _,
 )
 
 sparse_layer("qwerty",
