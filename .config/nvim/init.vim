@@ -164,13 +164,26 @@ Plug 'godlygeek/tabular'
 
 " Colorscheme {{{1
 
+autocmd vimrc ColorScheme * call s:UpdateColorScheme()
+function! s:UpdateColorScheme() abort
+    highlight DiffDelete ctermfg=52 ctermbg=52 guifg=#5F0000 guibg=#5F0000
+    highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#008700
+    highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#0000AF
+    highlight DiffText ctermfg=NONE ctermbg=19 guifg=NONE guibg=#0000AF guisp=#0000AF
+    highlight manBold cterm=bold gui=bold
+    highlight manItalic cterm=italic gui=italic
+    highlight link manUnderline manItalic
+    highlight link manTitle manSectionHeading
+    highlight link manOptionDesc NONE
+endfunction
+
 Plug 'srcery-colors/srcery-vim'
 let g:srcery_bg_passthrough = v:true
 let g:srcery_italic = v:true
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
-autocmd vimrc ColorScheme srcery call s:UpdateColorScheme()
-function! s:UpdateColorScheme() abort
+autocmd vimrc ColorScheme srcery call s:UpdateSrceryColorScheme()
+function! s:UpdateSrceryColorScheme() abort
     execute 'highlight Normal guibg='.synIDattr(hlID('SrceryBlack'), 'fg', 'gui')
     call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
     call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
@@ -185,9 +198,6 @@ function! s:UpdateColorScheme() abort
     call s:Highlight('Visual', #{bg: 'SrceryXgray4', attr: 'NONE'})
     call s:Highlight('Search', #{fg: 'SrceryBlack', bg: 'SrceryBrightYellow', attr: 'NONE'})
     call s:Highlight('IncSearch', #{fg: 'SrceryBlack', bg: 'SrceryYellow', attr: 'NONE'})
-    call s:Highlight('DiffAdd', #{fg: 'SrceryBlack', bg: 'SrceryGreen'})
-    call s:Highlight('DiffChange', #{fg: 'SrceryBlack', bg: 'SrceryBlue'})
-    call s:Highlight('DiffText', #{fg: 'SrceryBlack', bg: 'SrceryBrightBlue'})
     call s:Highlight('PmenuThumb', #{bg: 'SrceryXgray5'})
     highlight! link PmenuSbar Pmenu
     highlight! link Operator SrceryBrightWhite
@@ -201,15 +211,6 @@ function! s:UpdateColorScheme() abort
     highlight! link SpellLocal CocWarningHighlight
     highlight! link SpellCap CocInfoHighlight
     highlight! link SpellRare CocHintHighlight
-endfunction
-
-autocmd vimrc ColorScheme * call s:UpdateManColors()
-function! s:UpdateManColors() abort
-    highlight manBold cterm=bold gui=bold
-    highlight manItalic cterm=italic gui=italic
-    highlight link manUnderline manItalic
-    highlight link manTitle manSectionHeading
-    highlight link manOptionDesc NONE
 endfunction
 
 function! s:Highlight(group, args) abort
