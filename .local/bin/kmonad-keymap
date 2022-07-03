@@ -37,10 +37,14 @@ def around(outer, inner):
     return ("around", outer, inner)
 def tap_hold(tap, hold):
     return ("tap-hold-next-release", 200, tap, hold)
+def tap_macro_release(*buttons):
+    return ("tap-macro-release", *buttons)
 
 def map_button(f, button):
     if type(button) is tuple:
-        if button[0] == "around" or button[0].startswith("tap-hold"):
+        if button[0] == "around" or button[0].startswith("tap-macro"):
+            return (button[0], *(map_button(f, b) for b in button[1:]))
+        elif button[0].startswith("tap"):
             return (*button[:-2], *(map_button(f, b) for b in button[-2:]))
     elif button != XX and button != _:
         return f(button)
@@ -88,7 +92,7 @@ x_alt = tap_hold("x", ralt)
 dot_alt = tap_hold(".", ralt)
 
 spc_nav = tap_hold("spc", layer_toggle("nav"))
-ret_num = tap_hold("ret", around(around(layer_toggle("kp"), layer_toggle("kp-shift")), layer_toggle("num")))
+ret_num = tap_hold("ret", around(layer_toggle("num"), tap_macro_release(around(layer_rem("kp"), layer_rem("kp-shift")))))
 ret_fn = tap_hold("ret", layer_toggle("fn"))
 
 layer("base",
@@ -139,7 +143,7 @@ _3_alt = tap_hold("3", ralt)
 kp = layer_add("kp")
 
 layer("num",
-    _,       _,       _,       _,                                           _,       "-",     "=",     _,
+    _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       XX,      "[",     "]",     XX,      XX,      kp,      "7",     "8",     "9",     ";",     _,
     _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
              XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
@@ -184,7 +188,7 @@ layer("nav",
                                         _,       _,       "spc",
 )
 
-ret_bas = tap_hold("ret", around(around(layer_toggle("shift"), layer_toggle("caps")), layer_toggle("base")))
+ret_bas = tap_hold("ret", around(layer_toggle("base"), tap_macro_release(around(layer_rem("shift"), layer_rem("caps")))))
 bas_num = tap_hold(layer_switch("base"), layer_toggle("game-num"))
 
 layer("game",
