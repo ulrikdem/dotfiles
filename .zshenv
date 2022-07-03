@@ -22,7 +22,7 @@ export HIGHLIGHT_OPTIONS="-t 4 -O xterm256"
 
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
 
-[[ -f /usr/lib/qt/plugins/styles/libkvantum.so ]] && export QT_STYLE_OVERRIDE=kvantum
+[[ -f /usr/lib/qt/plugins/styles/libkvantum.so ]] && export QT_STYLE_OVERRIDE=kvantum-dark
 
 export WINEDLLOVERRIDES=winemenubuilder.exe=d
 
