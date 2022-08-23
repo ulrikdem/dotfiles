@@ -1,4 +1,4 @@
-TARGETS := ../bin/igrep-format ../bin/nvidia-modules ../bin/vpn ../bin/wifi
+TARGETS := ../bin/igrep-format ../bin/nvidia-modules ../bin/vpn
 
 all: $(TARGETS)
 
