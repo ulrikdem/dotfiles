@@ -14,7 +14,6 @@ xss-lock -- sh -c 'xset dpms 5; i3lock -nec 000000 && killall -q i3lock; xset dp
 
 numlockx
 
-feh --no-fehbg --bg-fill ~/.config/wallpaper
 picom -b
 
 export _JAVA_AWT_WM_NONREPARENTING=1
