@@ -779,7 +779,7 @@ if executable('node')
         \ ])
         call s:PatchFile(l:dir.'/lib/attach.js', [], [])
     endfunction
-    Plug 'neoclide/coc.nvim', #{branch: 'release', do: function('PatchCoc')}
+    Plug 'neoclide/coc.nvim', #{tag: 'v0.0.81', do: function('PatchCoc')}
 else
     call s:CompletionFallback()
 endif
