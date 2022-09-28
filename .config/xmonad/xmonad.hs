@@ -163,7 +163,7 @@ extraKeys textHeight =
     , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
 
     , ("M-s", allNamedScratchpadAction
-        [ NS "" (terminalName ++ " --class xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        [ NS "" (terminalName ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
     , ("M-c", toggleTag "collapsible")
