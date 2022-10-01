@@ -1100,7 +1100,7 @@ if executable('zathura')
 endif
 let g:vimtex_fold_enabled = v:true
 let g:vimtex_fold_types = {}
-for s:key in ['envs', 'env_options', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
+for s:key in ['envs', 'env_options', 'items', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
     let g:vimtex_fold_types[s:key] = #{enabled: v:false}
 endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:InitVimtexBuffer()
