@@ -270,6 +270,7 @@ alias la='ls -lha'
 (($+commands[diff])) && alias diff='diff --color'
 (($+commands[grep])) && alias grep='grep --color'
 (($+commands[ssh])) && alias ssh='TERM=xterm-256color ssh'
+(($+commands[units])) && alias units='units -v1'
 
 (($+commands[ipython])) && alias ipy=ipython
 (($+commands[nvim])) && alias vi=nvim vim=nvim
