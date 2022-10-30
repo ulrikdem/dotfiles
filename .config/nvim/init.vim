@@ -1116,6 +1116,8 @@ function! s:CleanTexFiles() abort
         call delete(expand('%:r').l:ext)
     endfor
 endfunction
+autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
+autocmd vimrc User Plug_tabular autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
 
 Plug 'iamcco/markdown-preview.nvim', #{do: {-> mkdp#util#install()}}
 let g:mkdp_page_title = '${name}'
