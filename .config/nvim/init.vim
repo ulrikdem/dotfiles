@@ -1112,7 +1112,7 @@ function! s:InitVimtexBuffer() abort
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
 endfunction
 function! s:CleanTexFiles() abort
-    for l:ext in ['.synctex.gz', '.bbl', '.nav', '.snm']
+    for l:ext in ['.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm']
         call delete(expand('%:r').l:ext)
     endfor
 endfunction
