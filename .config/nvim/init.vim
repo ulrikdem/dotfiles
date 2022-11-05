@@ -1098,6 +1098,8 @@ endif
 if executable('zathura')
     let g:vimtex_view_method = 'zathura'
 endif
+let g:vimtex_view_use_temp_files = v:true
+let g:vimtex_view_forward_search_on_start = v:false
 let g:vimtex_fold_enabled = v:true
 let g:vimtex_fold_types = {}
 for s:key in ['envs', 'env_options', 'items', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
@@ -1112,7 +1114,7 @@ function! s:InitVimtexBuffer() abort
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
 endfunction
 function! s:CleanTexFiles() abort
-    for l:ext in ['.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm']
+    for l:ext in ['_vimtex.pdf', '_vimtex.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm']
         call delete(expand('%:r').l:ext)
     endfor
 endfunction
