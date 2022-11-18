@@ -17,14 +17,15 @@ blocks = [
     ("defcfg", "fallthrough", "true"),
     ("defsrc", *source_keys),
 ]
-
 sparse_layers = set()
+layer_names = set()
 
 def sparse_layer(name, mapping):
     buttons = [_] * len(source_keys)
     for key, button in mapping.items():
         buttons[source_keys.index(key)] = button
     sparse_layers.add(("deflayer", name, *buttons))
+    layer_names.add(name)
 
 def layer_toggle(layer):
     return ("layer-toggle", layer)
@@ -34,6 +35,8 @@ def layer_rem(layer):
     return ("layer-rem", layer)
 def layer_switch(layer):
     return ("layer-switch", layer)
+def layer_reset(layer):
+    return ("layer-reset", layer)
 
 def around(outer, inner):
     return ("around", outer, inner)
@@ -74,6 +77,7 @@ def layer(name, *buttons):
     assert len(buttons) == max(i for i in indices if type(i) is int) + 1
     buttons = [map_button(wrap_key, button) for button in buttons]
     blocks.append(("deflayer", name, *(buttons[i] if type(i) is int else i for i in indices)))
+    layer_names.add(name)
 
 lmet = "lmet"
 lalt = "lalt"
@@ -181,8 +185,8 @@ layer("fn",
 )
 
 capswrd = around(layer_add("caps"), layer_add("nav"))
-game = layer_switch("game")
-qwerty = layer_switch("qwerty")
+game = layer_reset("game")
+qwerty = layer_reset("qwerty")
 
 layer("nav",
     _,       _,       _,       _,                                           _,       _,       _,       _,
@@ -192,8 +196,8 @@ layer("nav",
                                         _,       _,       "spc",
 )
 
-ret_bas = tap_hold("ret", around(layer_toggle("base"), tap_macro_release(around(layer_rem("shift"), layer_rem("caps")))))
-bas_num = tap_hold(layer_switch("base"), layer_toggle("game-num"))
+ret_bas = tap_hold("ret", tap_macro_release(layer_add("base"), layer_reset("game")))
+bas_num = tap_hold(layer_reset("base"), layer_toggle("game-num"))
 
 layer("game",
     _,       _,       _,       _,                                           _,       _,       _,       "bspc",
@@ -221,14 +225,18 @@ sparse_layer("qwerty", {
 })
 
 sparse_layer("alt", {
-    "lalt": layer_switch("base"),
-    "ralt": layer_switch("base"),
+    "lalt": layer_reset("base"),
+    "ralt": layer_reset("base"),
 })
 
 blocks.extend(sparse_layers)
 
 def to_str(expr):
     if type(expr) is tuple:
+        if expr[0] == "layer-reset":
+            expr = layer_switch(expr[1])
+            for layer in layer_names:
+                expr = around(layer_rem(layer), expr)
         return "(" + " ".join(map(to_str, expr)) + ")"
     return str(expr)
 
