@@ -49,13 +49,14 @@ import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Stack
 
+import ConfigOverride
 import IconQuery
 
 -- Main {{{1
 
 main = do
     textHeight <- getTextHeight
-    xmonad $ ewmh $ docks $ def
+    xmonad $ overrideConfig $ ewmh $ docks $ def
         { startupHook = barStartupHook <> setDefaultCursor xC_left_ptr
         , handleEventHook = barEventHook <> workspaceEventHook
         , logHook = do
