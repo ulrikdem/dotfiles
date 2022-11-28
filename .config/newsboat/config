@@ -1,0 +1,11 @@
+show-keymap-hint no
+scrolloff 4
+articlelist-format "%4i %f %D  %?T?[%T] &?%t"
+feed-sort-order lastupdated
+show-read-feeds no
+confirm-mark-feed-read no
+goto-next-feed no
+keep-articles-days 365
+reload-threads 4
+browser "firefox -- %u >/dev/null 2>&1 &"
+macro v set browser "mpv --force-window --no-terminal -- %u &"; open-in-browser-and-mark-read; set browser "firefox -- %u >/dev/null 2>&1 &" -- "Play media and mark read"
