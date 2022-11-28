@@ -196,15 +196,15 @@ layer("nav",
                                         _,       _,       "spc",
 )
 
-ret_bas = tap_hold("ret", tap_macro_release(layer_add("base"), layer_reset("game")))
-bas_num = tap_hold(layer_reset("base"), layer_toggle("game-num"))
+gamenum = tap_hold("ret", layer_toggle("game-num"))
+base = tap_hold(layer_reset("base"), tap_macro_release(layer_add("base"), layer_reset("game")))
 
 layer("game",
     _,       _,       _,       _,                                           _,       _,       _,       "bspc",
     "tab",   "lalt",  "q",     "w",     "e",     "r",     "volu",  "home",  "up",    "end",   "pgup",  _,
     "esc",   "lsft",  "a",     "s",     "d",     "f",     "vold",  "left",  "down",  "rght",  "pgdn",  _,
              "lctl",  "z",     "x",     "c",     "v",     "mute",  "cmps",  "ins",   XX,      "del",
-                                        bas_num, ret_bas, "spc",
+                                        base,    gamenum, "spc",
 )
 
 _0_alt = tap_hold("0", "lalt")
