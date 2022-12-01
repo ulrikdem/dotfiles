@@ -1,11 +1,7 @@
 typeset -U path
 path=(~/.local/bin $path)
 
-if type luakit >/dev/null; then
-    export BROWSER=luakit
-elif type firefox >/dev/null; then
-    export BROWSER=firefox
-fi
+type firefox >/dev/null && export BROWSER=firefox
 
 [[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim MANPAGER='nvim +Man!' ABDUCO_CMD='nvim +terminal'
 

@@ -12,7 +12,6 @@ iconQuery = composeOne
     , className =? "Evince" <||> className =? "Zathura" -?> return "\xf4a5" -- 
     , className =? "firefox" -?> return "\xf269" -- 
     , className =? "Gimp" -?> return "\xf1fc" -- 
-    , className =? "Luakit" -?> return "\xf484" -- 
     , className =? "mpv" -?> return "\xf144" -- 
     , className =? "Sxiv" -?> return "\xf7e8" -- 
     , className $? ".exe" -?> return "\xf000" -- 

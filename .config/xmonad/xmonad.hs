@@ -189,9 +189,8 @@ extraKeys textHeight =
     , ("M-p", commandPrompt textHeight Shell spawn)
     , ("M-S-p", commandPrompt textHeight Terminal $ runInTerm "")
 
-    , ("M-b", spawn "luakit")
-    , ("M-S-b", spawn "luakit --private")
-    , ("M-C-b", spawn "firefox")
+    , ("M-b", spawn "firefox")
+    , ("M-S-b", spawn "firefox --private-window")
     , ("M-u", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
