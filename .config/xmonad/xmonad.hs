@@ -191,6 +191,7 @@ extraKeys textHeight =
 
     , ("M-b", spawn "firefox")
     , ("M-S-b", spawn "firefox --private-window")
+    , ("M-S-t", spawn "thunderbird")
     , ("M-u", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
