@@ -3,7 +3,6 @@ scrolloff 4
 articlelist-format "%4i %f %D  %?T?[%T] &?%t"
 feed-sort-order lastupdated
 show-read-feeds no
-confirm-mark-feed-read no
 goto-next-feed no
 keep-articles-days 365
 reload-threads 4
