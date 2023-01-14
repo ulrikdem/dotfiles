@@ -1,7 +1,4 @@
 #!/bin/bash
-power=/sys/bus/pci/devices/0000:01:00.0/power/control
 if [[ $1 = pre ]]; then
-    echo on >$power
-else
-    echo auto >$power
+    echo on >/sys/bus/pci/devices/0000:01:00.0/power/control
 fi
