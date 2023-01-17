@@ -21,7 +21,7 @@ while read -rd '' path; do
     args+=(--ro-bind-try "$HOME/$path" "$HOME/$path")
 done < <(git --git-dir ~/.dotfiles.git ls-files -z)
 
-while getopts nxr:w: opt; do
+while getopts nxr:w:d: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
@@ -33,7 +33,8 @@ while getopts nxr:w: opt; do
             done;;
         r) args+=(--ro-bind "$OPTARG" "$(realpath -- "$OPTARG")");;
         w) args+=(--bind "$OPTARG" "$(realpath -- "$OPTARG")");;
-        ?) echo 'sandbox [-n] [-x] [-r path]... [-w path]...' >&2; exit 1;;
+        d) args+=(--dev-bind "$OPTARG" "$(realpath -- "$OPTARG")");;
+        ?) echo 'sandbox [-n] [-x] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
