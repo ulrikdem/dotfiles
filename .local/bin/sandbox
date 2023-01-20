@@ -39,5 +39,5 @@ while getopts nxr:w:d: opt; do
 done
 shift $((OPTIND - 1))
 
-(($#)) || set -- zsh
-exec bwrap "${args[@]}" -- "$@"
+(($#)) || set zsh
+exec bwrap "${args[@]}" "$@"
