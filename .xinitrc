@@ -12,6 +12,8 @@ xset s off
 xset dpms 0 0 0
 xss-lock -- sh -c 'xset dpms 5; i3lock -nec 000000 && killall -q i3lock; xset dpms 0' &
 
+/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+
 numlockx
 
 picom -b
