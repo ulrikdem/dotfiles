@@ -122,8 +122,8 @@ barLogHook = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
         pp color = filterOutWsPP [scratchpadWorkspaceTag] def
-            { ppCurrent = xmobarBorder "Bottom" color 2
-            , ppVisible = xmobarBorder "Bottom" "gray25" 2
+            { ppCurrent = xmobarBorder "Top" color 2
+            , ppVisible = xmobarBorder "Top" "gray25" 2
             , ppHiddenNoWindows = id
             , ppRename = rename
             , ppTitle = xmobarRaw . shorten 100
