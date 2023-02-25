@@ -192,6 +192,7 @@ extraKeys textHeight =
     , ("M-b", spawn "firefox")
     , ("M-S-b", spawn "firefox --private-window")
     , ("M-S-t", spawn "thunderbird")
+    , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
     , ("M-u", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
