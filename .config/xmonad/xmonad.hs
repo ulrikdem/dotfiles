@@ -30,6 +30,7 @@ import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
 import XMonad.Hooks.StatusBar.PP
+import XMonad.Hooks.UrgencyHook
 
 import XMonad.Layout.Decoration
 import XMonad.Layout.Named
@@ -56,7 +57,7 @@ import IconQuery
 
 main = do
     textHeight <- getTextHeight
-    xmonad $ overrideConfig $ ewmh $ docks $ def
+    xmonad $ overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ docks $ def
         { startupHook = barStartupHook <> setDefaultCursor xC_left_ptr
         , handleEventHook = barEventHook <> workspaceEventHook
         , logHook = do
@@ -124,6 +125,7 @@ barLogHook = do
         pp color = filterOutWsPP [scratchpadWorkspaceTag] def
             { ppCurrent = xmobarBorder "Top" color 2
             , ppVisible = xmobarBorder "Top" "gray25" 2
+            , ppUrgent = xmobarBorder "Top" "orange3" 2
             , ppHiddenNoWindows = id
             , ppRename = rename
             , ppTitle = xmobarRaw . shorten 100
@@ -193,7 +195,7 @@ extraKeys textHeight =
     , ("M-S-b", spawn "firefox --private-window")
     , ("M-S-t", spawn "thunderbird")
     , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
-    , ("M-u", spawn "unicode-input")
+    , ("M-C-u", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
 
@@ -202,6 +204,9 @@ extraKeys textHeight =
     , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 2%+")
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
+
+    , ("M-u", focusUrgent)
+    , ("M-S-u", clearUrgents)
 
     , ("M-<Tab>", toggleWS' [scratchpadWorkspaceTag])
     , ("M-S-,", moveTo Prev cycleWSType)
