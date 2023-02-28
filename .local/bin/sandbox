@@ -25,7 +25,7 @@ while getopts nxr:w:d: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
-            for path in $XAUTHORITY /tmp/.X11-unix/X${DISPLAY#:} $XDG_RUNTIME_DIR/pulse/native /sys/dev{,ices}; do
+            for path in $XAUTHORITY /tmp/.X11-unix/X${DISPLAY#:} $XDG_RUNTIME_DIR/{pipewire-0,pulse/native} /sys/dev{,ices}; do
                 args+=(--ro-bind-try "$path" "$path")
             done
             for path in /dev/{dri,nvidia*}; do
