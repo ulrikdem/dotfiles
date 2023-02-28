@@ -1,5 +1,7 @@
 Config
-    { additionalFonts = ["xft:Symbols Nerd Font-9", "xft:Symbols Nerd Font-11"]
+    { position = TopH 19
+    , font = "Monospace 9"
+    , additionalFonts = ["Symbols Nerd Font 9", "Symbols Nerd Font 11"]
     , fgColor = "gray50"
     , template = "%UnsafeStdinReader%}{%wi%%dynnetwork%%ip%%cpu%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =

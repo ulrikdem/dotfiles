@@ -105,7 +105,7 @@ getTextHeight = do
 barStartupHook = dynStatusBarStartup spawnBar $ return ()
 barEventHook = dynStatusBarEventHook spawnBar $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -f '" ++ fontName theme ++ "' -x " ++ show i
+spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
@@ -124,8 +124,8 @@ barLogHook = do
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
         pp color = filterOutWsPP [scratchpadWorkspaceTag] def
             { ppCurrent = xmobarBorder "Top" color 2
-            , ppVisible = xmobarBorder "Top" "gray25" 2
-            , ppUrgent = xmobarBorder "Top" "orange3" 2
+            , ppVisible = xmobarBorder "Top" "#404040" 2 -- gray25
+            , ppUrgent = xmobarBorder "Top" "#cd8500" 2 -- orange3
             , ppHiddenNoWindows = id
             , ppRename = rename
             , ppTitle = xmobarRaw . shorten 100
@@ -136,7 +136,7 @@ barLogHook = do
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
-    multiPP (pp "green4") (pp "gray50")
+    multiPP (pp "#008b00" {- green4 -}) (pp "#808080" {- gray50 -})
 
 workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} = do
     atom <- getAtom "_NET_DESKTOP_VIEWPORT"
