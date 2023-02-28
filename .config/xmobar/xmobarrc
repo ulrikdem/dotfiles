@@ -1,5 +1,5 @@
 Config
-    { position = TopH 19
+    { position = TopH 23
     , font = "Monospace 9"
     , additionalFonts = ["Symbols Nerd Font 9", "Symbols Nerd Font 11"]
     , fgColor = "gray50"
