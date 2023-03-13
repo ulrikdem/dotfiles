@@ -151,6 +151,9 @@ removedKeys = ["M-?", "M-S-/", "M-S-<Tab>"]
 
 extraKeys textHeight =
     [ ("M-<Return>", promote)
+    , ("M-h", windows W.focusDown)
+    , ("M-S-h", windows W.swapDown)
+    , ("M-C-h", rotAllDown)
     , ("M-C-j", rotAllDown)
     , ("M-C-k", rotAllUp)
 
