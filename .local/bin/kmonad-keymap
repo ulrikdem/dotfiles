@@ -152,7 +152,7 @@ kp = layer_add("kp")
 
 layer("num",
     _,       _,       _,       _,                                           _,       _,       _,       _,
-    _,       XX,      "[",     "]",     XX,      XX,      kp,      "7",     "8",     "9",     ";",     _,
+    _,       XX,      "[",     "]",     "cmps",  XX,      kp,      "7",     "8",     "9",     ";",     _,
     _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
              XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
                                         _,       "ret",   _,
@@ -192,7 +192,7 @@ layer("nav",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       qwerty,  XX,      game,    XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
     _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
-             XX,      ralt,    capswrd, XX,      XX,      "mute",  "cmps",  "ins",   XX,      "del",
+             XX,      ralt,    capswrd, XX,      XX,      "mute",  "ins",   XX,      XX,      "del",
                                         _,       _,       "spc",
 )
 
@@ -203,7 +203,7 @@ layer("game",
     _,       _,       _,       _,                                           _,       _,       _,       "bspc",
     "tab",   "lalt",  "q",     "w",     "e",     "r",     "volu",  "home",  "up",    "end",   "pgup",  _,
     "esc",   "lsft",  "a",     "s",     "d",     "f",     "vold",  "left",  "down",  "rght",  "pgdn",  _,
-             "lctl",  "z",     "x",     "c",     "v",     "mute",  "cmps",  "ins",   XX,      "del",
+             "lctl",  "z",     "x",     "c",     "v",     "mute",  "ins",   XX,      XX,      "del",
                                         base,    gamenum, "spc",
 )
 
