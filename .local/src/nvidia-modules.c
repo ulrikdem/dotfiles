@@ -8,7 +8,7 @@ int main(int argc, char **argv) {
     if (argc == 2 && !strcmp(argv[1], "load")) {
         return system("/sbin/modprobe -i nvidia && /sbin/modprobe nvidia-drm");
     } else if (argc == 2 && !strcmp(argv[1], "unload")) {
-        return system("/sbin/modprobe -r nvidia-drm nvidia");
+        return system("/sbin/modprobe -r nvidia-drm nvidia-uvm nvidia");
     } else {
         fputs("nvidia-modules load|unload\n", stderr);
         return 1;
