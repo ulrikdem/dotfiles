@@ -1105,7 +1105,7 @@ let g:vimtex_fold_types = {}
 for s:key in ['envs', 'env_options', 'items', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
     let g:vimtex_fold_types[s:key] = #{enabled: v:false}
 endfor
-autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex call s:InitVimtexBuffer()
+autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex,bib call s:InitVimtexBuffer()
 function! s:InitVimtexBuffer() abort
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
     nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>CleanTexFiles()<CR>
@@ -1115,7 +1115,7 @@ function! s:InitVimtexBuffer() abort
 endfunction
 function! s:CleanTexFiles() abort
     for l:ext in ['_vimtex.pdf', '_vimtex.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm', '.vrb']
-        call delete(expand('%:r').l:ext)
+        call delete(fnamemodify(b:vimtex.tex, ':r').l:ext)
     endfor
 endfunction
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
