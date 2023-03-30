@@ -216,13 +216,13 @@ layer("game-num",
 )
 
 sparse_layer("qwerty", {
-    "lalt": around(lalt, layer_toggle("alt")),
-    "ralt": around(ralt, layer_toggle("alt")),
+    "caps": around(lctl, layer_toggle("qwerty-ctl")),
+    "lctl": around(lctl, layer_toggle("qwerty-ctl")),
 })
 
-sparse_layer("alt", {
-    "lalt": layer_reset("base"),
-    "ralt": layer_reset("base"),
+sparse_layer("qwerty-ctl", {
+    "caps": "caps",
+    "lctl": layer_reset("base"),
 })
 
 blocks.extend(sparse_layers)
