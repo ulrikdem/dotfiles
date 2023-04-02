@@ -109,13 +109,13 @@ spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
-            . xmobarFont 1 <$> runQuery iconQuery win
-        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "")
+            <$> runQuery iconQuery win
+        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "" . xmobarFont 1)
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w _ = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
             $ xmobarAction ("xdotool getactivewindow set_desktop_for_window " ++ show (read w - 1)) "3"
-            $ xmobarColor "gray25" "" $ pad $ (w ++) $ M.findWithDefault "" w icons
+            $ pad $ (w ++) $ xmobarColor "gray25" "" $ M.findWithDefault "" w icons
         getScreen = do
             S i <- withWindowSet $ return . W.screen . W.current
             return $ Just $ show i
