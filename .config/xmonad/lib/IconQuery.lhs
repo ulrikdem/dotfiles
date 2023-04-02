@@ -8,8 +8,8 @@ import XMonad.Hooks.ManageHelpers
 
 iconQuery = composeOne
     [ className =? "Alacritty" <&&> title $? " - nvim" -?> return "\xe62b" -- 
-    , className =? "Alacritty" -?> return "\xf489" -- 
-    , className =? "Evince" <||> className =? "Zathura" -?> return "\xf4a5" -- 
+    , className =? "Alacritty" -?> return "\xe795" -- 
+    , className =? "Evince" <||> className =? "Zathura" -?> return "\xf718" -- 
     , className =? "firefox" -?> return "\xf269" -- 
     , className =? "Gimp" -?> return "\xf1fc" -- 
     , className =? "mpv" -?> return "\xf144" -- 
