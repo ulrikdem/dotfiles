@@ -200,19 +200,19 @@ gamenum = tap_hold("ret", layer_toggle("game-num"))
 base = tap_hold(layer_reset("base"), tap_macro_release(layer_add("base"), layer_reset("game")))
 
 layer("game",
-    _,       _,       _,       _,                                           _,       _,       _,       "bspc",
-    "tab",   "lalt",  "q",     "w",     "e",     "r",     "volu",  "home",  "up",    "end",   "pgup",  _,
-    "esc",   "lsft",  "a",     "s",     "d",     "f",     "vold",  "left",  "down",  "rght",  "pgdn",  _,
-             "lctl",  "z",     "x",     "c",     "v",     "mute",  "ins",   XX,      XX,      "del",
+    _,       _,       _,       _,                                           _,       _,       _,       _,
+    "tab",   "lalt",  "q",     "w",     "e",     "r",     "t",     "f7",    "f8",    "f9",    "f12",   _,
+    "esc",   "lsft",  "a",     "s",     "d",     "f",     "g",     "f4",    "f5",    "f6",    "f11",   _,
+             "lctl",  "z",     "x",     "c",     "v",     "b",     "f1",    "f2",    "f3",    "f10",
                                         base,    gamenum, "spc",
 )
 
 layer("game-num",
     _,       _,       _,       _,                                           _,       _,       _,       _,
-    _,       _,       "7",     "8",     "9",     XX,      "brup",  "f7",    "f8",    "f9",    "f12",   _,
-    _,       _,       "4",     "5",     "6",     "0",     "brdn",  "f4",    "f5",    "f6",    "f11",   _,
-             _,       "1",     "2",     "3",     XX,      XX,      "f1",    "f2",    "f3",    "f10",
-                                        _,       _,       _,
+    _,       _,       "7",     "8",     "9",     XX,      XX,      _,       _,       _,       _,       _,
+    _,       _,       "4",     "5",     "6",     "0",     XX,      _,       _,       _,       _,       _,
+             _,       "1",     "2",     "3",     XX,      XX,      _,       _,       _,       _,
+                                        _,       "ret",   _,
 )
 
 sparse_layer("qwerty", {
