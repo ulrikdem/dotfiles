@@ -1112,6 +1112,7 @@ function! s:InitVimtexBuffer() abort
     nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>CleanTexFiles()<CR>
     nmap <buffer> <Leader>mv <Plug>(vimtex-view)
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
+    setlocal foldlevel=9
 endfunction
 function! s:CleanTexFiles() abort
     for l:ext in ['_vimtex.pdf', '_vimtex.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm', '.vrb']
