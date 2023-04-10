@@ -3,7 +3,6 @@
 args=(
     --setenv SANDBOX ''
     --unshare-all
-    --die-with-parent
     --proc /proc
     --dev /dev
     --dir /tmp
