@@ -63,17 +63,14 @@ hints:
         enabled: true
         mods: Control|Shift
       binding:
-        key: U
+        key: O
         mods: Control|Shift
 
     - regex: *uri
       post_processing: true
-      action: Select
-      mouse:
-        enabled: true
-        mods: Shift
+      action: Paste
       binding:
-        key: Y
+        key: U
         mods: Control|Shift
 
     - regex: '(/?[[:word:].-]+|~[[:word:].-]*)(/[[:word:].-]+)+/?'
