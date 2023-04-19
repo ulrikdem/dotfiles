@@ -1,9 +1,6 @@
 Config
-    { position = TopH 23
-    , font = "Monospace 9"
-    , additionalFonts = ["Symbols Nerd Font 11"]
+    { template = "%UnsafeStdinReader%}{%wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , fgColor = "gray50"
-    , template = "%UnsafeStdinReader%}{%wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , commands =
         [ Run UnsafeStdinReader
         , Run Wireless ""

@@ -58,8 +58,8 @@ import IconQuery
 main = do
     textHeight <- getTextHeight
     xmonad $ overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ docks $ def
-        { startupHook = barStartupHook <> setDefaultCursor xC_left_ptr
-        , handleEventHook = barEventHook <> workspaceEventHook
+        { startupHook = barStartupHook textHeight <> setDefaultCursor xC_left_ptr
+        , handleEventHook = barEventHook textHeight <> workspaceEventHook
         , logHook = do
             barLogHook
             let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
@@ -89,8 +89,10 @@ tagIff = bool delTag addTag
 theme = def
     { inactiveColor = "black"
     , inactiveBorderWidth = 0
-    , fontName = "xft:monospace-9"
+    , fontName = "xft:monospace-" ++ show fontSize
     }
+
+fontSize = 9
 
 getTextHeight = do
     display <- openDisplay ""
@@ -102,10 +104,14 @@ getTextHeight = do
 
 -- Bar {{{1
 
-barStartupHook = dynStatusBarStartup spawnBar $ return ()
-barEventHook = dynStatusBarEventHook spawnBar $ return ()
+barStartupHook textHeight = dynStatusBarStartup (spawnBar textHeight) $ return ()
+barEventHook textHeight = dynStatusBarEventHook (spawnBar textHeight) $ return ()
 
-spawnBar (S i) = spawnPipe $ "xmobar -x " ++ show i
+spawnBar textHeight (S i) = spawnPipe $ "xmobar -p 'TopH " ++ show (barHeight textHeight) ++ "' -x " ++ show i
+    ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "' -D \"$(xrdb -get Xft.dpi)\""
+
+barHeight textHeight = h + h `mod` 2 - 1 where
+    h = textHeight * 3 `div` 2
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
@@ -290,7 +296,7 @@ layout textHeight = addDecoration $ addSmartBorderSpacing $ addNavigation custom
     addSmartBorderSpacing = lessBorders Screen . smartSpacingWithEdge gapWidth
     addNavigation = configurableNavigation noNavigateBorders
     customLayout = EmptyLayout [def, def {limit = maxBound}]
-        $ textHeight + fromIntegral gapWidth * 2 :: CustomLayout Window
+        $ barHeight textHeight + fromIntegral gapWidth * 2 :: CustomLayout Window
     gapWidth = round $ fromIntegral textHeight / 4
 
 data CollapseDecoration a = CollapseDecoration
