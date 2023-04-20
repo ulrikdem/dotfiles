@@ -24,6 +24,14 @@ def exec_field_to_cmds_override(exe, *args, **kwargs):
     return exec_field_to_cmds(exe, *args, **kwargs)
 Mimeo.exec_field_to_cmds = exec_field_to_cmds_override
 
+def run_cmd(cmd, quiet):
+    missing_term, cmd = Mimeo.check_term(cmd)
+    if missing_term:
+        subprocess.run(cmd)
+    else:
+        subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+Mimeo.run_cmd = run_cmd
+
 args = ['-q', '--'] + sys.argv[1:]
 if not (sys.stdin.isatty() and sys.stdout.isatty()):
     args = ['--term', 'alacritty -e %s'] + args
