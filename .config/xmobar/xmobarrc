@@ -1,5 +1,5 @@
 Config
-    { template = "%UnsafeStdinReader%}{%wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    { template = "}%UnsafeStdinReader%{ %wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , fgColor = "gray50"
     , commands =
         [ Run UnsafeStdinReader
