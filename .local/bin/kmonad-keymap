@@ -186,33 +186,55 @@ layer("fn",
 
 capswrd = around(layer_add("caps"), layer_add("nav"))
 game = layer_reset("game")
+gamenum = around(game, layer_add("game-num"))
 qwerty = layer_reset("qwerty")
 
 layer("nav",
     _,       _,       _,       _,                                           _,       _,       _,       _,
-    _,       qwerty,  XX,      game,    XX,      "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
+    _,       qwerty,  XX,      game,    gamenum, "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
     _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
              XX,      ralt,    capswrd, XX,      XX,      "mute",  "ins",   XX,      XX,      "del",
                                         _,       _,       "spc",
 )
 
-gamenum = tap_hold("ret", layer_toggle("game-num"))
-base = tap_hold(layer_reset("base"), tap_macro_release(layer_add("base"), layer_reset("game")))
+ret_gnm = tap_hold("ret", layer_toggle("game-num"))
+esc_gnv = tap_hold("esc", layer_toggle("game-nav"))
+base = tap_hold(layer_reset("base"), tap_macro_release(layer_add("base"), game))
 
 layer("game",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     "tab",   "lalt",  "q",     "w",     "e",     "r",     "t",     "f7",    "f8",    "f9",    "f12",   _,
-    "esc",   "lsft",  "a",     "s",     "d",     "f",     "g",     "f4",    "f5",    "f6",    "f11",   _,
+    esc_gnv, "lsft",  "a",     "s",     "d",     "f",     "g",     "f4",    "f5",    "f6",    "f11",   _,
              "lctl",  "z",     "x",     "c",     "v",     "b",     "f1",    "f2",    "f3",    "f10",
-                                        base,    gamenum, "spc",
+                                        base,    ret_gnm, "spc",
 )
 
+spc_mir = tap_hold("spc", layer_toggle("mirror"))
+ret_bas = tap_hold("ret", tap_macro_release(layer_add("base"), gamenum))
+bas_gnv = tap_hold(layer_reset("base"), layer_toggle("game-nav"))
+
 layer("game-num",
-    _,       _,       _,       _,                                           _,       _,       _,       _,
+    "f1",    "f2",    "f3",    "f4",                                        XX,      XX,      XX,      _,
     _,       _,       "7",     "8",     "9",     XX,      XX,      _,       _,       _,       _,       _,
     _,       _,       "4",     "5",     "6",     "0",     XX,      _,       _,       _,       _,       _,
-             _,       "1",     "2",     "3",     XX,      XX,      _,       _,       _,       _,
-                                        _,       "ret",   _,
+             _,       "1",     "2",     "3",     "a",     XX,      _,       _,       _,       _,
+                                        bas_gnv, ret_bas, spc_mir,
+)
+
+layer("game-nav",
+    "f5",    "f6",    "f7",    "f8",                                        XX,      XX,      XX,      _,
+    _,       _,       "home",  "up",    "end",   "volu",  XX,      _,       _,       _,       _,       _,
+    _,       _,       "left",  "down",  "rght",  "vold",  XX,      _,       _,       _,       _,       _,
+             _,       XX,      "bspc",  "del",   "mute",  XX,      _,       _,       _,       _,
+                                        _,       _,       _,
+)
+
+layer("mirror",
+    _,       _,       _,       _,                                           _,       _,       _,       _,
+    _,       ";",     "y",     "u",     "l",     "j",     "b",     "p",     "f",     "w",     "q",     _,
+    _,       "o",     "i",     "e",     "n",     "m",     "g",     "t",     "s",     "r",     "a",     _,
+             "/",     ".",     ",",     "h",     "k",     "v",     "d",     "c",     "x",     "z",
+                                        _,       _,       _,
 )
 
 sparse_layer("qwerty", {
