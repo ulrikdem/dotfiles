@@ -686,7 +686,7 @@ function! s:ToggleDiff() abort
     endif
 endfunction
 
-set diffopt+=vertical,foldcolumn:1,algorithm:histogram,hiddenoff
+set diffopt+=vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff
 
 call insert(g:lightline.active.left[1], 'git')
 call insert(g:lightline.inactive.left[0], 'git')
