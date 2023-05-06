@@ -4,7 +4,7 @@ Config
     , commands =
         [ Run UnsafeStdinReader
         , Run Wireless ""
-            [ "-t", "<ssid> <fn=1>直</fn> <quality>% <fc=gray25>│<raw=1: /></fc>"
+            [ "-t", "<ssid> <fn=1>󰖩</fn> <quality>% <fc=gray25>│<raw=1: /></fc>"
             , "-x", "<fc=black><raw=36:"
             , "-h", "green4"
             , "-n", "orange3"
@@ -13,7 +13,7 @@ Config
             , "-L", "25"
             ] 10
         , Run DynNetwork
-            [ "-t", "<dev> <fn=1></fn><rx>K <fn=1></fn><tx>K <fc=gray25>│</fc> "
+            [ "-t", "<dev> <fn=1>󰁅</fn><rx>K <fn=1>󰁝</fn><tx>K <fc=gray25>│</fc> "
             , "-h", "green4"
             , "-l", "orange3"
             , "-H", "0"
@@ -23,7 +23,7 @@ Config
             [ "-c", "ip route show default | sed -E 's:.*src (\\S+).*:\\1 <fc=gray25>│</fc> :'"
             ] "ip" 10
         , Run Cpu
-            [ "-t", "<fn=1>﬙</fn> <total>% "
+            [ "-t", "<fn=1>󰘚</fn> <total>% "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -35,7 +35,7 @@ Config
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", "<fn=1></fn> <usedratio>% <fc=gray25>│</fc> "
+            [ "-t", "<fn=1>󰍛</fn> <usedratio>% <fc=gray25>│</fc> "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -43,15 +43,15 @@ Config
             , "-L", "50"
             ] 10
         , Run Brightness
-            [ "-t", "<fn=1></fn> <fc=green4><percent></fc>% <fc=gray25>│</fc> "
+            [ "-t", "<fn=1>󰃟</fn> <fc=green4><percent></fc>% <fc=gray25>│</fc> "
             , "--"
             , "-D", "intel_backlight"
             ] 1
         , Run Alsa "default" "Master"
             [ "-t", "<fn=1><status></fn> <fc=green4><volume></fc>% <fc=gray25>│</fc> "
             , "--"
-            , "-O", "<fc=gray50>墳</fc>"
-            , "-o", "<fc=gray50>ﱝ</fc>"
+            , "-O", "<fc=gray50>󰕾</fc>"
+            , "-o", "<fc=gray50>󰝟</fc>"
             ]
         , Run Battery
             [ "-t", "<fn=1><acstatus></fn> <left>% <timeleft> <fc=gray25>│</fc> "
@@ -61,9 +61,9 @@ Config
             , "-H", "50"
             , "-L", "25"
             , "--"
-            , "-i", "<fc=gray50></fc>"
-            , "-O", "<fc=gray50></fc>"
-            , "-o", "<fc=gray50></fc>"
+            , "-i", "<fc=gray50>󰂄</fc>"
+            , "-O", "<fc=gray50>󰂄</fc>"
+            , "-o", "<fc=gray50>󰁹</fc>"
             ] 10
         , Run Date "%Y-%m-%d %H:%M:%S " "date" 10
         ]

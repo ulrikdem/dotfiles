@@ -9,15 +9,15 @@ import XMonad.Hooks.ManageHelpers
 iconQuery = composeOne
     [ className =? "Alacritty" <&&> title $? " - nvim" -?> return "\xe62b" -- 
     , className =? "Alacritty" -?> return "\xe795" -- 
-    , className =? "Evince" <||> className =? "Zathura" -?> return "\xf718" -- 
+    , className =? "Evince" <||> className =? "Zathura" -?> return "\xf0219" -- 󰈙
     , className =? "firefox" -?> return "\xf269" -- 
     , className =? "Gimp" -?> return "\xf1fc" -- 
     , className =? "mpv" -?> return "\xf144" -- 
-    , className =? "Sxiv" -?> return "\xf7e8" -- 
-    , className =? "thunderbird" -?> return "\xf6ef" -- 
+    , className =? "Sxiv" -?> return "\xf02e9" -- 󰋩
+    , className =? "thunderbird" -?> return "\xf01f0" -- 󰇰
     , className $? ".exe" -?> return "\xf000" -- 
-    , appName =? "libreoffice" -?> return "\xf713" -- 
-    , return $ Just "\xfaae" -- 类
+    , appName =? "libreoffice" -?> return "\xf0214" -- 󰈔
+    , return $ Just "\xf05af" -- 󰖯
     ]
 
 \end{code}
