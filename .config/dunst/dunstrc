@@ -1,0 +1,9 @@
+[global]
+follow = keyboard
+offset = 17x40
+frame_width = 1
+separator_height = 1
+corner_radius = 4
+transparency = 10
+close_all = mod4+shift+d
+history = mod4+ctrl+d

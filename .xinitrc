@@ -18,5 +18,8 @@ numlockx
 
 picom -b
 
+eval $(dbus-launch --sh-syntax --exit-with-session)
+dunst &
+
 export _JAVA_AWT_WM_NONREPARENTING=1
 exec xmonad
