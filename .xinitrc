@@ -5,7 +5,7 @@ export GDK_DPI_SCALE=$(bc <<<"scale=2; 1/$GDK_SCALE")
 xrdb -merge <<<"Xft.dpi: $((96*GDK_SCALE))"
 xrdb -merge ~/.config/Xresources
 
-eval $(dbus-launch --sh-syntax --exit-with-session)
+dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
 
 ~/.config/xplugrc
 xplugd
@@ -17,7 +17,6 @@ xss-lock -- sh -c 'xset dpms 5; i3lock -nec 000000 && killall -q i3lock; xset dp
 numlockx
 
 picom &
-dunst &
 /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
 
 export _JAVA_AWT_WM_NONREPARENTING=1

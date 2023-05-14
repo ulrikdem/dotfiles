@@ -1,0 +1,8 @@
+[Unit]
+Description=Dunst Switcher
+
+[Service]
+ExecStart=/bin/bash ${HOME}/.local/bin/dunst-switcher
+
+[Install]
+WantedBy=default.target

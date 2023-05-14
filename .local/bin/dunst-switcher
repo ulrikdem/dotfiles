@@ -1,0 +1,7 @@
+#!/bin/bash
+gdbus monitor --system --dest org.freedesktop.login1 --object-path /org/freedesktop/login1/seat/seat0 | while read -r line; do
+    [[ $line =~ "'ActiveSession': <('"([0-9]+)\' ]] || continue
+    pid=$(pgrep -t $(loginctl show-session ${BASH_REMATCH[1]} -p TTY --value) '^xmonad' | head -n 1)
+    [[ -n $pid ]] && grep -zE '^(DISPLAY|XAUTHORITY)=' /proc/$pid/environ | xargs -0 dbus-update-activation-environment --systemd
+    systemctl --user stop dunst.service
+done
