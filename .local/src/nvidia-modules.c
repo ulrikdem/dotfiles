@@ -13,5 +13,4 @@ int main(int argc, char **argv) {
         fputs("nvidia-modules load|unload\n", stderr);
         return 1;
     }
-    return 0;
 }
