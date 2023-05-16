@@ -1,0 +1,2 @@
+#!/bin/bash
+BROWSER=webview exec /usr/bin/jupyter-lab "$@"

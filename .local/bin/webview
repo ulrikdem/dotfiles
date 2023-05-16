@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+
+from PyQt6.QtCore import QUrl
+from PyQt6.QtWebEngineCore import QWebEngineSettings
+from PyQt6.QtWebEngineWidgets import QWebEngineView
+from PyQt6.QtWidgets import QApplication
+from sys import argv
+
+app = QApplication(argv)
+view = QWebEngineView()
+view.titleChanged.connect(view.setWindowTitle)
+view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
+view.load(QUrl(argv[1]))
+view.show()
+app.exec()
