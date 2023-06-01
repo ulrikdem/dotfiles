@@ -10,10 +10,7 @@ args=(
     --symlink /run /var/run
 )
 
-for path in /usr/{bin,sbin,lib*}; do
-    args+=(--symlink "$path" "${path#/usr}")
-done
-for path in /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged $XDG_RUNTIME_DIR/dconf-service/keyfile/defaults; do
+for path in /bin /sbin /lib* /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged $XDG_RUNTIME_DIR/dconf-service/keyfile/defaults; do
     args+=(--ro-bind-try "$path" "$path")
 done
 while read -rd '' path; do
