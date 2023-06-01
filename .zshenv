@@ -18,7 +18,8 @@ export HIGHLIGHT_OPTIONS="-t 4 -O xterm256"
 
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
 
-export WINEDLLOVERRIDES=winemenubuilder.exe=d
+export WINEDLLOVERRIDES=winemenubuilder.exe=
+export DXVK_HUD=fps
 
 if [[ -f ~/.zshenv.local ]]; then
     source ~/.zshenv.local
