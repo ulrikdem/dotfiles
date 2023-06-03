@@ -263,7 +263,7 @@ function git-files-wrapper {
 
 # Aliases and Functions {{{1
 
-alias ls='ls --color=auto --hyperlink=auto'
+[[ $TERM = alacritty ]] && alias ls='ls --color=auto --hyperlink=auto' || alias ls='ls --color=auto'
 alias ll='ls -lh'
 alias la='ls -lha'
 
