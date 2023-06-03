@@ -10,11 +10,11 @@ args=(
     --symlink /run /var/run
 )
 
-for path in /bin /sbin /lib* /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged $XDG_RUNTIME_DIR/dconf-service/keyfile/defaults; do
+for path in /bin /sbin /lib* /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults"; do
     [[ -L $path ]] && args+=(--symlink "$(readlink -- "$path")" "$path") || args+=(--ro-bind-try "$path" "$path")
 done
 while read -rd '' path; do
-    args+=(--ro-bind-try "$HOME/$path" "$HOME/$path")
+    args+=(--ro-bind-try ~/"$path" ~/"$path")
 done < <(git --git-dir ~/.dotfiles.git ls-files -z)
 
 add-path() {
@@ -25,7 +25,7 @@ while getopts nxr:w:d: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
-            for path in $XAUTHORITY /tmp/.X11-unix/X${DISPLAY#:} ${WAYLAND_DISPLAY:+$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY} $XDG_RUNTIME_DIR/{pipewire-0,pulse/native} /sys/dev{,ices}; do
+            for path in ${XAUTHORITY:+"$XAUTHORITY"} "/tmp/.X11-unix/X${DISPLAY#:}" ${WAYLAND_DISPLAY:+"$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"} "$XDG_RUNTIME_DIR"/{pipewire-0,pulse/native} /sys/dev{,ices}; do
                 args+=(--ro-bind-try "$path" "$path")
             done
             for path in /dev/{dri,nvidia*}; do
