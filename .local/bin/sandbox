@@ -21,7 +21,7 @@ add-path() {
     args+=(--$1 "${OPTARG%%=*}" "$(realpath -ms -- "${OPTARG#*=}")")
 }
 
-while getopts nxr:w:d: opt; do
+while getopts nxbr:w:d: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
@@ -31,10 +31,13 @@ while getopts nxr:w:d: opt; do
             for path in /dev/{dri,nvidia*}; do
                 args+=(--dev-bind-try "$path" "$path")
             done;;
+        b)
+            path=$(sed -E 's/^unix:path=([^,]*).*/\1/' <<<$DBUS_SESSION_BUS_ADDRESS)
+            args+=(--bind "$path" "$path");;
         r) add-path ro-bind;;
         w) add-path bind;;
         d) add-path dev-bind;;
-        ?) echo 'sandbox [-n] [-x] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
+        ?) echo 'sandbox [-n] [-x] [-b] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
