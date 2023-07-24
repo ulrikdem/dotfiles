@@ -132,12 +132,11 @@ function! s:StartBracketRepeat(bracket) abort
     return a:bracket."\<Char-0xA0>"
 endfunction
 
-nnoremap [<Char-0xA0><Esc> <Cmd>unlet g:fake_mode<CR>
-nnoremap ]<Char-0xA0><Esc> <Cmd>unlet g:fake_mode<CR>
+nnoremap [<Char-0xA0><Esc> <Cmd>unlet g:fake_mode \| redrawstatus<CR>
+nnoremap ]<Char-0xA0><Esc> <Cmd>unlet g:fake_mode \| redrawstatus<CR>
 nmap <expr> [<Char-0xA0> <SID>RepeatBracket('[', '<M-[>')
 nmap <expr> ]<Char-0xA0> <SID>RepeatBracket(']', '<M-]>')
 function! s:RepeatBracket(bracket, restart) abort
-    unlet g:fake_mode
     let l:char = getchar()
     let l:char = type(l:char) == v:t_number ? nr2char(l:char) : l:char
     if l:char == "\<M-[>" || l:char == "\<M-]>"
@@ -145,6 +144,8 @@ function! s:RepeatBracket(bracket, restart) abort
     elseif l:char =~ '^\d$'
         return l:char.a:restart
     endif
+    unlet g:fake_mode
+    redrawstatus
     return a:bracket.l:char.'zz'.a:restart
 endfunction
 
