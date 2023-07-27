@@ -203,7 +203,7 @@ extraKeys textHeight =
     , ("M-b", spawn "firefox")
     , ("M-S-t", spawn "thunderbird")
     , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
-    , ("M-C-u", spawn "unicode-input")
+    , ("M-u", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
 
@@ -213,8 +213,8 @@ extraKeys textHeight =
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
-    , ("M-u", focusUrgent)
-    , ("M-S-u", clearUrgents)
+    , ("M-S-u", focusUrgent)
+    , ("M-C-u", clearUrgents)
 
     , ("M-<Tab>", toggleWS' [scratchpadWorkspaceTag])
     , ("M-C-<Left>", moveTo Prev cycleWSType)
