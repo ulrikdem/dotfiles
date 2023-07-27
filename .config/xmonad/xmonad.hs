@@ -201,7 +201,6 @@ extraKeys textHeight =
     , ("M-S-p", commandPrompt textHeight Terminal $ runInTerm "")
 
     , ("M-b", spawn "firefox")
-    , ("M-S-b", spawn "firefox --private-window")
     , ("M-S-t", spawn "thunderbird")
     , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
     , ("M-C-u", spawn "unicode-input")
