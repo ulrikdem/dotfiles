@@ -21,6 +21,7 @@ char=$(
 
 import re
 import sys
+from pathlib import Path
 
 def output(code, char, name, seqs=''):
     print(f'\x1b[90m{code}\x1b[0m\t{char}\t{name} \x1b[90m{seqs}\x1b[0m ')
@@ -52,14 +53,18 @@ with open('/usr/include/X11/keysymdef.h') as file:
 keysyms['space'] = '␣'
 
 compose = {}
-with open('/usr/share/X11/locale/en_US.UTF-8/Compose') as file:
-    pattern = r'^\s*<Multi_key>((?:\s*<\w+>)+)\s*:\s*"([^\\]|\\.)"'
-    for match in re.finditer(pattern, file.read(), re.MULTILINE):
-        seq, char = match.groups()
-        seq = [key.strip('<>') for key in seq.split()]
-        if all(key in keysyms for key in seq):
-            seq = ''.join(keysyms[key] for key in seq)
-            compose.setdefault(char[-1], []).append(seq)
+for path in ['/usr/share/X11/locale/en_US.UTF-8/Compose', Path.home() / '.XCompose']:
+    try:
+        with open(path) as file:
+            pattern = r'^\s*<Multi_key>((?:\s*<\w+>)+)\s*:\s*"([^\\]|\\.)"'
+            for match in re.finditer(pattern, file.read(), re.MULTILINE):
+                seq, char = match.groups()
+                seq = [key.strip('<>') for key in seq.split()]
+                if all(key in keysyms for key in seq):
+                    seq = ''.join(keysyms[key] for key in seq)
+                    compose.setdefault(char[-1], []).append(seq)
+    except FileNotFoundError:
+        pass
 
 with open('/usr/share/unicode/UnicodeData.txt') as file:
     for line in file:
