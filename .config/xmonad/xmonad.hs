@@ -65,7 +65,7 @@ main = do
             barLogHook
             let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
             withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
-        , manageHook = let rect = W.RationalRect 0 (2 / 3) 1 (1 / 3) in composeAll
+        , manageHook = let rect = W.RationalRect (2 / 3) 0 (1 / 3) 1 in composeAll
             [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> customFloating rect
             , appName =? "xmonad-custom-float" --> customFloating rect
             , placeHook $ fixed (0.5, 0.5)
