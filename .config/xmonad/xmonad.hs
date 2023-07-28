@@ -71,10 +71,10 @@ main = do
             , placeHook $ fixed (0.5, 0.5)
             , appName =? "xmonad-float" --> doFloat
             ]
-        , layoutHook = resetEmpty
+        , layoutHook = lessBorders Screen $ resetEmpty
             $ named "tiled" (avoidStruts $ layout textHeight)
-            ||| named "full" (avoidStruts $ noBorders StateFull)
-            ||| named "fullscreen" (noBorders StateFull)
+            ||| named "full" (avoidStruts StateFull)
+            ||| named "fullscreen" StateFull
         , normalBorderColor = "black"
         , focusedBorderColor = "gray50"
         , terminal = terminalName
@@ -297,9 +297,9 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = addDecoration $ addSmartBorderSpacing $ addNavigation customLayout where
+layout textHeight = addDecoration $ addSpacing $ addNavigation customLayout where
     addDecoration = decoration EllipsisShrinker theme CollapseDecoration
-    addSmartBorderSpacing = lessBorders Screen . smartSpacingWithEdge gapWidth
+    addSpacing = smartSpacingWithEdge gapWidth
     addNavigation = configurableNavigation noNavigateBorders
     customLayout = EmptyLayout [def, def {limit = maxBound}]
         $ barHeight textHeight + fromIntegral gapWidth * 2 :: CustomLayout Window
