@@ -19,6 +19,7 @@ import XMonad
 import qualified XMonad.StackSet as W
 
 import XMonad.Actions.CycleWS
+import XMonad.Actions.FlexibleResize
 import XMonad.Actions.PhysicalScreens
 import XMonad.Actions.Promote
 import XMonad.Actions.RotSlaves
@@ -77,8 +78,8 @@ main = do
         , normalBorderColor = "black"
         , focusedBorderColor = "gray50"
         , terminal = terminalName
-        , modMask = mod4Mask
-        } `additionalKeysP` extraKeys textHeight `removeKeysP` removedKeys
+        , modMask = modm
+        } `removeKeysP` removedKeys `additionalKeysP` extraKeys textHeight `additionalMouseBindings` extraMouseBindings
 
 terminalName = "alacritty"
 
@@ -152,6 +153,8 @@ workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} =
 workspaceEventHook _ = mempty
 
 -- Keys {{{1
+
+modm = mod4Mask
 
 removedKeys = ["M-?", "M-S-/", "M-S-<Tab>"]
 
@@ -232,6 +235,10 @@ extraKeys textHeight =
         ]
     , (keys, index) <- zip ["wn", "e", "ri"] [0..]
     , key <- keys
+    ]
+
+extraMouseBindings =
+    [ ((modm, button3), \w -> focus w >> mouseResizeEdgeWindow (1 / 3) w >> windows W.shiftMaster)
     ]
 
 moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
