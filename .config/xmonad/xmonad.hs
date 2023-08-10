@@ -65,9 +65,9 @@ main = do
             barLogHook
             let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
             withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
-        , manageHook = let rect = W.RationalRect (2 / 3) 0 (1 / 3) 1 in composeAll
-            [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> customFloating rect
-            , appName =? "xmonad-custom-float" --> customFloating rect
+        , manageHook = composeAll
+            [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
+            , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
             , placeHook $ fixed (0.5, 0.5)
             , appName =? "xmonad-float" --> doFloat
             ]
@@ -151,6 +151,11 @@ workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} =
         >>= flip whenJust (\w -> windows $ W.greedyView (show workspace) . W.view w)
     mempty
 workspaceEventHook _ = mempty
+
+manageCustomFloat textHeight = do
+    height <- liftX $ withWindowSet $ return . rect_height . screenRect . W.screenDetail . W.current
+    let y = fi (barHeight textHeight) / fi height
+    customFloating $ W.RationalRect (2 / 3) y (1 / 3) (1 - y)
 
 -- Keys {{{1
 
