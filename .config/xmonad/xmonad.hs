@@ -101,7 +101,7 @@ getTextHeight = do
     height <- xftfont_height font
     xftFontClose display font
     closeDisplay display
-    return $ fromIntegral $ height
+    return $ fi height
 
 -- Bar {{{1
 
@@ -147,7 +147,7 @@ barLogHook = do
 
 workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} = do
     atom <- getAtom "_NET_DESKTOP_VIEWPORT"
-    when (ev_message_type event == atom) $ screenWorkspace (fromIntegral screen)
+    when (ev_message_type event == atom) $ screenWorkspace (fi screen)
         >>= flip whenJust (\w -> windows $ W.greedyView (show workspace) . W.view w)
     mempty
 workspaceEventHook _ = mempty
@@ -302,8 +302,8 @@ layout textHeight = addDecoration $ addSpacing $ addNavigation customLayout wher
     addSpacing = smartSpacingWithEdge gapWidth
     addNavigation = configurableNavigation noNavigateBorders
     customLayout = EmptyLayout [def, def {limit = maxBound}]
-        $ barHeight textHeight + fromIntegral gapWidth * 2 :: CustomLayout Window
-    gapWidth = round $ fromIntegral textHeight / 4
+        $ barHeight textHeight + fi gapWidth * 2 :: CustomLayout Window
+    gapWidth = round $ fi textHeight / 4
 
 data CollapseDecoration a = CollapseDecoration
     deriving (Read, Show)
@@ -348,15 +348,15 @@ instance LayoutClass CustomLayout Window where
 
             split rect weights = split' rect weights where
                 split' rect@Rectangle {rect_height = h} (Just weight : weights) =
-                    setHeight rect weights $ round $ fromIntegral (h - collapsedHeight' * numCollapsed) * relWeight
+                    setHeight rect weights $ round $ fi (h - collapsedHeight' * numCollapsed) * relWeight
                     where
-                        numCollapsed = fromIntegral (length $ filter isNothing weights)
+                        numCollapsed = fi (length $ filter isNothing weights)
                         relWeight = weight / (weight + sum (catMaybes weights))
                 split' rect (Nothing : weights) = setHeight rect weights collapsedHeight'
                 split' _ [] = []
                 setHeight (Rectangle x y w h) weights h' =
-                    Rectangle x y w h' : split' (Rectangle x (y + fromIntegral h') w (h - h')) weights
-                collapsedHeight' = min collapsedHeight $ rect_height rect `div` fromIntegral (length weights)
+                    Rectangle x y w h' : split' (Rectangle x (y + fi h') w (h - h')) weights
+                collapsedHeight' = min collapsedHeight $ rect_height rect `div` fi (length weights)
 
             layoutCol col rect wins = zip wins $ split rect $ map findWeight wins where
                 findWeight win = M.findWithDefault (Just 1) win $ M.union collapsedWins'' winWeights'
