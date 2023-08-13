@@ -34,6 +34,8 @@ import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.UrgencyHook
 
 import XMonad.Layout.Decoration
+import XMonad.Layout.GridVariants hiding (Orientation(..))
+import XMonad.Layout.LayoutModifier
 import XMonad.Layout.Named
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
@@ -138,7 +140,7 @@ barLogHook = do
             , ppRename = rename
             , ppTitle = xmobarRaw
             , ppTitleSanitize = id
-            , ppExtras = [getScreen, showTag "collapsible", showTag "scratchpad"]
+            , ppExtras = [getScreen, showTag "scratchpad"]
             , ppOrder = \(workspaces : layout : title : screen : tags)
                 -> [intercalate screen $ lines workspaces, title ++ concat tags]
             , ppSep = "<fc=gray25>│</fc> "
@@ -187,18 +189,12 @@ extraKeys textHeight =
         [ NS "" (terminalName ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
-    , ("M-c", toggleTag "collapsible")
 
-    , ("M-a", sendMessage AddColumn)
-    , ("M-d", sendMessage DeleteColumn)
-    , ("M-,", sendMessage $ ModifyLimit succ)
-    , ("M-.", sendMessage $ ModifyLimit pred)
-    , ("M--", sendMessage $ ModifyColWeight (/ weightFactor))
-    , ("M-S-=", sendMessage $ ModifyColWeight (* weightFactor))
-    , ("M-=", sendMessage ResetColWeights)
-    , ("M-C--", sendMessage $ ModifyWinWeight (/ weightFactor))
-    , ("M-C-S-=", sendMessage $ ModifyWinWeight (* weightFactor))
-    , ("M-C-=", sendMessage ResetWinWeights)
+    , ("M-C-<Left>", sendMessage $ IncMasterCols (-1))
+    , ("M-C-<Right>", sendMessage $ IncMasterCols 1)
+    , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
+    , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
+    , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
 
     , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
     , ("M-f", sendMessage $ JumpToLayout "full")
@@ -303,139 +299,31 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = addDecoration $ addSpacing $ addNavigation customLayout where
-    addDecoration = decoration EllipsisShrinker theme CollapseDecoration
-    addSpacing = smartSpacingWithEdge gapWidth
-    addNavigation = configurableNavigation noNavigateBorders
-    customLayout = EmptyLayout [def, def {limit = maxBound}]
-        $ barHeight textHeight + fi gapWidth * 2 :: CustomLayout Window
+layout textHeight = spacing $ navigation $ focusTracking $ limit grid where
+    spacing = smartSpacingWithEdge gapWidth
+    navigation = configurableNavigation noNavigateBorders
+    limit = ModifiedLayout $ SlidingLimit 0 3
+    grid = TallGrid 1000000000 2 1 1 0 :: TallGrid Window
     gapWidth = round $ fi textHeight / 4
 
-data CollapseDecoration a = CollapseDecoration
+data SlidingLimit a = SlidingLimit Int Int
     deriving (Read, Show)
 
-instance DecorationStyle CollapseDecoration Window where
-    decorate _ _ _ _ stack _ (win, rect) = bool Nothing (Just rect) <$> isCollapsed stack win
-    shrink _ _ = id
+instance LayoutModifier SlidingLimit a where
+    modifyLayoutWithUpdate (SlidingLimit start limit) workspace rect = case W.stack workspace of
+        Just stack@(W.Stack focus up down) -> do
+            let i = length up
+                start' = max 0 $ min (length stack - limit) $ max (i - limit + 1) $ min i start
+                stack' = W.Stack focus (take (i - start') up) (take (start' + limit - 1 - i) down)
+            result <- runLayout workspace {W.stack = Just stack'} rect
+            return (result, Just $ SlidingLimit start' limit)
+        Nothing -> (, Nothing) <$> runLayout workspace rect
+    pureMess (SlidingLimit start limit) = fmap apply . fromMessage where
+        apply (ModifyLimit f) = SlidingLimit start $ max 1 $ f limit
 
-isCollapsed stack win = (&& win /= W.focus stack) <$> hasTag "collapsible" win
+data ModifyLimit = ModifyLimit (Int -> Int)
 
-data EllipsisShrinker = EllipsisShrinker
-    deriving (Read, Show)
-
-instance Shrinker EllipsisShrinker where
-    shrinkIt _ s = s : map (++ "…") (reverse $ inits $ init s)
-
-data Column = Column
-    { limit :: Int
-    , colWeight :: Rational
-    , winWeights :: M.Map Int Rational
-    }
-    deriving (Read, Show)
-
-instance Default Column where
-    def = Column 1 1 M.empty
-
-data CustomLayout a
-    = CustomLayout (W.Stack Column) Int Dimension
-    | EmptyLayout [Column] Dimension
-    deriving (Read, Show)
-
-instance LayoutClass CustomLayout Window where
-    doLayout layout rect stack = do
-        let (cols, collapsedHeight) = case layout of
-                CustomLayout c _ h -> (W.integrate c, h)
-                EmptyLayout c h -> (c, h)
-            wins = W.integrate stack
-
-        collapsedWins <- forM wins $ isCollapsed stack
-        let collapsedWins' = M.fromList $ zip (map fst $ filter snd $ zip wins collapsedWins) $ repeat Nothing
-            allCollapsed = all (`M.member` collapsedWins')
-
-            split rect weights = split' rect weights where
-                split' rect@Rectangle {rect_height = h} (Just weight : weights) =
-                    setHeight rect weights $ round $ fi (h - collapsedHeight' * numCollapsed) * relWeight
-                    where
-                        numCollapsed = fi (length $ filter isNothing weights)
-                        relWeight = weight / (weight + sum (catMaybes weights))
-                split' rect (Nothing : weights) = setHeight rect weights collapsedHeight'
-                split' _ [] = []
-                setHeight (Rectangle x y w h) weights h' =
-                    Rectangle x y w h' : split' (Rectangle x (y + fi h') w (h - h')) weights
-                collapsedHeight' = min collapsedHeight $ rect_height rect `div` fi (length weights)
-
-            layoutCol col rect wins = zip wins $ split rect $ map findWeight wins where
-                findWeight win = M.findWithDefault (Just 1) win $ M.union collapsedWins'' winWeights'
-                collapsedWins'' = if allCollapsed wins then M.empty else collapsedWins'
-                winWeights' = M.map Just $ M.mapKeys (wins !!) $ M.takeWhileAntitone (< length wins) $ winWeights col
-
-            cumLimits = scanl (+) 0 $ limit <$> init cols
-
-            colWins = takeWhile (not . null) $ zipWith take (map limit cols) $ map (`drop` wins) cumLimits
-            colWeight' col wins = if allCollapsed wins then Nothing else Just $ colWeight col
-            colRects = map mirrorRect $ split (mirrorRect rect) $ zipWith colWeight' cols colWins
-            winRects = concat $ zipWith3 layoutCol cols colRects colWins
-
-            colIndex = pred $ fromMaybe (length cols) $ findIndex (> length (W.up stack)) cumLimits
-            winIndex = length (W.up stack) - cumLimits !! colIndex
-            layout' = CustomLayout W.Stack
-                { W.up = reverse $ take colIndex cols
-                , W.focus = cols !! colIndex
-                , W.down = drop (colIndex + 1) cols
-                } winIndex collapsedHeight
-
-        return (winRects, Just layout')
-
-    emptyLayout (CustomLayout cols _ height) _ = return ([], Just $ EmptyLayout (W.integrate cols) height)
-    emptyLayout (EmptyLayout _ _) _ = return ([], Nothing)
-
-    handleMessage (CustomLayout cols@W.Stack {W.focus = col} focus collapsedHeight) message =
-        case fromMessage message of
-            Just AddColumn -> fixFocus cols
-                { W.focus = def {colWeight = colWeight col}
-                , W.down = col : W.down cols
-                }
-            Just DeleteColumn -> skipLastCol $ fixFocus cols
-                { W.focus = head $ W.down cols
-                , W.down = tail $ W.down cols
-                }
-            Just (ModifyLimit f) -> skipLastCol $ fixFocus cols
-                { W.focus = col {limit = max 1 $ f $ limit col}
-                }
-            Just (ModifyColWeight f) -> fixFocus cols
-                { W.focus = col {colWeight = f $ colWeight col}
-                }
-            Just ResetColWeights -> fixFocus W.Stack
-                { W.up = resetWeight <$> W.up cols
-                , W.focus = resetWeight col
-                , W.down = resetWeight <$> W.down cols
-                }
-            Just (ModifyWinWeight f) -> fixFocus cols
-                { W.focus = col {winWeights = M.alter (mfilter (/= 1) . Just . f . fromMaybe 1) focus $ winWeights col}
-                }
-            Just ResetWinWeights -> fixFocus cols
-                { W.focus = col {winWeights = M.empty}
-                }
-            Nothing -> return Nothing
-        where
-            fixFocus cols = do
-                let focus' = min focus $ pred $ limit $ W.focus cols
-                modifyWindowSet $ foldr (.) id $ replicate (focus - focus') W.focusUp
-                return $ Just $ CustomLayout cols focus' collapsedHeight
-            skipLastCol layout = if null (W.down cols) then return Nothing else layout
-            resetWeight col = col {colWeight = 1}
-    handleMessage (EmptyLayout _ _) _ = return Nothing
-
-data LayoutMessage
-    = AddColumn
-    | DeleteColumn
-    | ModifyLimit (Int -> Int)
-    | ModifyColWeight (Rational -> Rational)
-    | ResetColWeights
-    | ModifyWinWeight (Rational -> Rational)
-    | ResetWinWeights
-
-instance Message LayoutMessage
+instance Message ModifyLimit
 
 resetEmpty layout = ResetEmpty layout layout
 
