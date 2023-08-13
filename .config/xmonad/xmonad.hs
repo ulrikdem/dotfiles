@@ -183,7 +183,7 @@ extraKeys textHeight =
     , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
     , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
-    , ("M-S-m", placeFocused $ fixed (0.5, 0.5))
+    , ("M-c", placeFocused $ fixed (0.5, 0.5))
 
     , ("M-s", allNamedScratchpadAction
         [ NS "" (terminalName ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
