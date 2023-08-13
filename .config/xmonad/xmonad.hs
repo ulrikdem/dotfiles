@@ -299,27 +299,52 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = spacing $ navigation $ focusTracking $ limit grid where
+layout textHeight = deco $ spacing $ navigation $ focusTracking $ limit grid where
+    deco = decoration (ShrinkTo "←") theme (SideDecoration False collapseWidth)
+        . decoration (ShrinkTo "→") theme (SideDecoration True collapseWidth)
     spacing = smartSpacingWithEdge gapWidth
     navigation = configurableNavigation noNavigateBorders
-    limit = ModifiedLayout $ SlidingLimit 0 3
+    limit = ModifiedLayout $ SlidingLimit 3 0 $ collapseWidth + fi gapWidth * 2
     grid = TallGrid 1000000000 2 1 1 0 :: TallGrid Window
+    collapseWidth = barHeight textHeight
     gapWidth = round $ fi textHeight / 4
 
-data SlidingLimit a = SlidingLimit Int Int
+data ShrinkTo = ShrinkTo String
+    deriving (Read, Show)
+
+instance Shrinker ShrinkTo where
+    shrinkIt (ShrinkTo s) _ = [s]
+
+data SideDecoration a = SideDecoration Bool Dimension
+    deriving (Read, Show)
+
+instance DecorationStyle SideDecoration Window where
+    pureDecoration (SideDecoration side width) _ _ _ stack _ (win, rect) =
+        if rect_width rect == width && win `elem` bool W.up W.down side stack then Just rect else Nothing
+    shrink _ _ = id
+
+data SlidingLimit a = SlidingLimit Int Int Dimension
     deriving (Read, Show)
 
 instance LayoutModifier SlidingLimit a where
-    modifyLayoutWithUpdate (SlidingLimit start limit) workspace rect = case W.stack workspace of
+    modifyLayoutWithUpdate (SlidingLimit limit start width) workspace rect@(Rectangle x y w h) = case W.stack workspace of
         Just stack@(W.Stack focus up down) -> do
             let i = length up
                 start' = max 0 $ min (length stack - limit) $ max (i - limit + 1) $ min i start
-                stack' = W.Stack focus (take (i - start') up) (take (start' + limit - 1 - i) down)
-            result <- runLayout workspace {W.stack = Just stack'} rect
-            return (result, Just $ SlidingLimit start' limit)
+                (up', upHidden) = splitAt (i - start') up
+                (down', downHidden) = splitAt (start' + limit - 1 - i) down
+                (wins, x') = case upHidden of
+                    win : _ | limit > 1 -> ([(win, Rectangle x y width h)], x + fi width)
+                    _ -> ([], x)
+                wins' = case downHidden of
+                    win : _ | limit > 1 -> (win, Rectangle (x + fi (w - width)) y width h) : wins
+                    _ -> wins
+            (wins, layout) <- runLayout workspace {W.stack = Just $ W.Stack focus up' down'}
+                $ Rectangle x' y (w - width * fi (length wins')) h
+            return ((wins' ++ wins, layout), Just $ SlidingLimit limit start' width)
         Nothing -> (, Nothing) <$> runLayout workspace rect
-    pureMess (SlidingLimit start limit) = fmap apply . fromMessage where
-        apply (ModifyLimit f) = SlidingLimit start $ max 1 $ f limit
+    pureMess (SlidingLimit limit start width) = fmap apply . fromMessage where
+        apply (ModifyLimit f) = SlidingLimit (max 1 $ f limit) start width
 
 data ModifyLimit = ModifyLimit (Int -> Int)
 
