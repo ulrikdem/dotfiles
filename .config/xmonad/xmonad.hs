@@ -226,8 +226,8 @@ extraKeys textHeight =
     , ("M-C-u", clearUrgents)
 
     , ("M-<Tab>", toggleWS' [scratchpadWorkspaceTag])
-    , ("M-C-<Left>", moveTo Prev cycleWSType)
-    , ("M-C-<Right>", moveTo Next cycleWSType)
+    , ("M-S-,", moveTo Prev cycleWSType)
+    , ("M-S-.", moveTo Next cycleWSType)
     ] ++
     [ ("M-C-" ++ [key], windows $ swapWithCurrent workspace)
     | (key, workspace) <- zip ['1'..] $ workspaces def
