@@ -75,6 +75,7 @@ main = do
             $ named "tiled" (avoidStruts $ layout textHeight)
             ||| named "full" (avoidStruts StateFull)
             ||| named "fullscreen" StateFull
+        , borderWidth = 2
         , normalBorderColor = "black"
         , focusedBorderColor = "gray50"
         , terminal = terminalName
