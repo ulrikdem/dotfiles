@@ -12,7 +12,7 @@ int main(int argc, char **argv) {
     args[2] = "exec";
     args[3] = "vpn";
     args[4] = "/usr/bin/sudo";
-    args[5] = "-u";
+    args[5] = "-Eu";
     args[6] = uid;
     args[7] = "--";
     for (int i = 1; i < argc; ++i)
