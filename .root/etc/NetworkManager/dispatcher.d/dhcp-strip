@@ -1,0 +1,5 @@
+#!/bin/bash
+if [[ $NM_DISPATCHER_ACTION = down ]]; then
+    nmcli connection modify uuid "$CONNECTION_UUID" ipv4.dhcp-send-hostname no ipv6.dhcp-send-hostname no
+    rm -f "/var/lib/NetworkManager/internal-$CONNECTION_UUID-$DEVICE_IP_IFACE.lease"
+fi
