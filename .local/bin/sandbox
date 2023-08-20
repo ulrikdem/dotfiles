@@ -36,7 +36,7 @@ while getopts nxbr:w:d: opt; do
             args+=(--bind "$path" "$path");;
         r) add-path ro-bind;;
         w) add-path bind;;
-        d) add-path dev-bind;;
+        d) add-path dev-bind-try;;
         ?) echo 'sandbox [-n] [-x] [-b] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
     esac
 done
