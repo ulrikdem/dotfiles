@@ -6,5 +6,5 @@ After=network.target
 Type=oneshot
 RemainAfterExit=yes
 ExecStart=/bin/ip netns add vpn
-ExecStart=/bin/ip netns exec vpn ip link set dev lo up
+ExecStart=/bin/ip -n vpn link set dev lo up
 ExecStop=/bin/ip netns delete vpn
