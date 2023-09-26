@@ -40,6 +40,7 @@ import XMonad.Layout.Named
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
 import XMonad.Layout.StateFull
+import XMonad.Layout.Tabbed
 import XMonad.Layout.WindowNavigation
 
 import XMonad.Prompt
@@ -78,8 +79,8 @@ main = do
             ||| named "full" (avoidStruts StateFull)
             ||| named "fullscreen" StateFull
         , borderWidth = 2
-        , normalBorderColor = "black"
-        , focusedBorderColor = "gray50"
+        , normalBorderColor = inactiveColor theme
+        , focusedBorderColor = activeColor theme
         , terminal = terminalName
         , modMask = modm
         } `removeKeysP` removedKeys `additionalKeysP` extraKeys textHeight `additionalMouseBindings` extraMouseBindings
@@ -91,8 +92,15 @@ tagIff = bool delTag addTag
 -- Theme {{{1
 
 theme = def
-    { inactiveColor = "black"
+    { activeColor = "gray50"
+    , activeTextColor = "black"
+    , activeBorderWidth = 0
+    , inactiveColor = "black"
+    , inactiveTextColor = "gray50"
     , inactiveBorderWidth = 0
+    , urgentColor = inactiveColor theme
+    , urgentTextColor = inactiveTextColor theme
+    , urgentBorderWidth = 0
     , fontName = "xft:monospace-" ++ show fontSize
     }
 
@@ -299,56 +307,45 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = deco $ spacing $ navigation $ focusTracking $ limit grid where
-    deco = decoration (ShrinkTo "←") theme (SideDecoration False collapseWidth)
-        . decoration (ShrinkTo "→") theme (SideDecoration True collapseWidth)
-    spacing = smartSpacingWithEdge gapWidth
+layout textHeight = limit $ spacing $ navigation grid where
+    limit = ModifiedLayout $ Limit 3 tabbed
+    tabbed = focusTracking $ tabbedBottom EllipsisShrinker theme {decoHeight = textHeight * 5 `div` 4}
+    spacing = smartSpacingWithEdge $ round $ fi textHeight / 4
     navigation = configurableNavigation noNavigateBorders
-    limit = ModifiedLayout $ SlidingLimit 3 0 $ collapseWidth + fi gapWidth * 2
-    grid = TallGrid 1000000000 2 1 1 0 :: TallGrid Window
-    collapseWidth = barHeight textHeight
-    gapWidth = round $ fi textHeight / 4
+    grid = TallGrid 1000000000 2 1 1 0
 
-data ShrinkTo = ShrinkTo String
+data EllipsisShrinker = EllipsisShrinker
     deriving (Read, Show)
 
-instance Shrinker ShrinkTo where
-    shrinkIt (ShrinkTo s) _ = [s]
+instance Shrinker EllipsisShrinker where
+    shrinkIt _ s = s : map (++ "…") (reverse $ inits $ init s)
 
-data SideDecoration a = SideDecoration Bool Dimension
+data Limit l a = Limit Int (l a)
     deriving (Read, Show)
 
-instance DecorationStyle SideDecoration Window where
-    pureDecoration (SideDecoration side width) _ _ _ stack _ (win, rect) =
-        if rect_width rect == width && win `elem` bool W.up W.down side stack then Just rect else Nothing
-    shrink _ _ = id
-
-data SlidingLimit a = SlidingLimit Int Int Dimension
-    deriving (Read, Show)
-
-instance LayoutModifier SlidingLimit a where
-    modifyLayoutWithUpdate (SlidingLimit limit start width) workspace rect@(Rectangle x y w h) = case W.stack workspace of
-        Just stack@(W.Stack focus up down) -> do
-            let i = length up
-                start' = max 0 $ min (length stack - limit) $ max (i - limit + 1) $ min i start
-                (up', upHidden) = splitAt (i - start') up
-                (down', downHidden) = splitAt (start' + limit - 1 - i) down
-                (wins, x') = case upHidden of
-                    win : _ | limit > 1 -> ([(win, Rectangle x y width h)], x + fi width)
-                    _ -> ([], x)
-                wins' = case downHidden of
-                    win : _ | limit > 1 -> (win, Rectangle (x + fi (w - width)) y width h) : wins
-                    _ -> wins
-            (wins, layout) <- runLayout workspace {W.stack = Just $ W.Stack focus up' down'}
-                $ Rectangle x' y (w - width * fi (length wins')) h
-            return ((wins' ++ wins, layout), Just $ SlidingLimit limit start' width)
-        Nothing -> (, Nothing) <$> runLayout workspace rect
-    pureMess (SlidingLimit limit start width) = fmap apply . fromMessage where
-        apply (ModifyLimit f) = SlidingLimit (max 1 $ f limit) start width
+instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
+    modifyLayoutWithUpdate (Limit n extraLayout) (W.Workspace tag mainLayout stack) rect = do
+        let focus = fromMaybe 0 $ length . W.up <$> stack
+            (mainWins, extraWins) = splitAt (n - 1) $ W.integrate' stack
+            extraStack = toStack (max 0 $ focus - n + 1) extraWins
+            extraFocus = fmap W.focus extraStack
+            mainStack = toStack (min focus $ n - 1) $ mainWins ++ maybeToList extraFocus
+        (rects, mainLayout) <- runLayout (W.Workspace tag mainLayout mainStack) rect
+        (rects, extraLayout) <- case break ((== extraFocus) . Just . fst) rects of
+            (before, (_, rect) : after) -> do
+                (rects, extraLayout) <- runLayout (W.Workspace tag extraLayout extraStack) rect
+                return (before ++ rects ++ after, extraLayout)
+            (_, []) -> (rects,) . snd <$> runLayout (W.Workspace tag extraLayout Nothing) rect
+        return ((rects, mainLayout), Limit n <$> extraLayout)
+    handleMess (Limit n extraLayout) message = case fromMessage message of
+        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) extraLayout
+        Nothing -> fmap (Limit n) <$> handleMessage extraLayout message
 
 data ModifyLimit = ModifyLimit (Int -> Int)
 
 instance Message ModifyLimit
+
+toStack i list = if null list then Nothing else let (a, b) = splitAt i list in Just $ W.Stack (head b) (reverse a) (tail b)
 
 resetEmpty layout = ResetEmpty layout layout
 
