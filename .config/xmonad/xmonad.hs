@@ -308,8 +308,8 @@ instance XPrompt Terminal where
 -- Layout {{{1
 
 layout textHeight = limit $ spacing $ navigation grid where
-    limit = ModifiedLayout $ Limit 3 tabbed
-    tabbed = focusTracking $ tabbedBottom EllipsisShrinker theme {decoHeight = textHeight * 5 `div` 4}
+    limit = ModifiedLayout $ Limit 3 (0, 0) tabbed
+    tabbed = tabbedBottom EllipsisShrinker theme {decoHeight = textHeight * 5 `div` 4}
     spacing = smartSpacingWithEdge $ round $ fi textHeight / 4
     navigation = configurableNavigation noNavigateBorders
     grid = TallGrid 1000000000 2 1 1 0
@@ -320,26 +320,31 @@ data EllipsisShrinker = EllipsisShrinker
 instance Shrinker EllipsisShrinker where
     shrinkIt _ s = s : map (++ "…") (reverse $ inits $ init s)
 
-data Limit l a = Limit Int (l a)
+data Limit l a = Limit Int (Int, Int) (l a)
     deriving (Read, Show)
 
 instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
-    modifyLayoutWithUpdate (Limit n extraLayout) (W.Workspace tag mainLayout stack) rect = do
+    modifyLayoutWithUpdate (Limit n state extraLayout) (W.Workspace tag mainLayout stack) rect = do
         let focus = fromMaybe 0 $ length . W.up <$> stack
             (mainWins, extraWins) = splitAt (n - 1) $ W.integrate' stack
-            extraStack = toStack (max 0 $ focus - n + 1) extraWins
+            state' = (length extraWins, if focus >= n - 1 then focus - n + 1
+                                        else if length extraWins > fst state then 0
+                                        else max 0 $ snd state + length extraWins - fst state)
+            extraStack = toStack (snd state') extraWins
             extraFocus = fmap W.focus extraStack
             mainStack = toStack (min focus $ n - 1) $ mainWins ++ maybeToList extraFocus
-        (rects, mainLayout) <- runLayout (W.Workspace tag mainLayout mainStack) rect
-        (rects, extraLayout) <- case break ((== extraFocus) . Just . fst) rects of
+        (rects, mainLayout') <- runLayout (W.Workspace tag mainLayout mainStack) rect
+        (rects, extraLayout') <- case break ((== extraFocus) . Just . fst) rects of
             (before, (_, rect) : after) -> do
-                (rects, extraLayout) <- runLayout (W.Workspace tag extraLayout extraStack) rect
-                return (before ++ rects ++ after, extraLayout)
+                (rects, extraLayout') <- runLayout (W.Workspace tag extraLayout extraStack) rect
+                return (before ++ rects ++ after, extraLayout')
             (_, []) -> (rects,) . snd <$> runLayout (W.Workspace tag extraLayout Nothing) rect
-        return ((rects, mainLayout), Limit n <$> extraLayout)
-    handleMess (Limit n extraLayout) message = case fromMessage message of
-        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) extraLayout
-        Nothing -> fmap (Limit n) <$> handleMessage extraLayout message
+        let update = if state' == state && isNothing extraLayout' then Nothing
+                     else Just $ Limit n state' $ fromMaybe extraLayout extraLayout'
+        return ((rects, mainLayout'), update)
+    handleMess (Limit n state extraLayout) message = case fromMessage message of
+        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) state extraLayout
+        Nothing -> fmap (Limit n state) <$> handleMessage extraLayout message
 
 data ModifyLimit = ModifyLimit (Int -> Int)
 
