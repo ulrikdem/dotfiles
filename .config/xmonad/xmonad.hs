@@ -194,13 +194,13 @@ extraKeys textHeight =
         [ NS "" (terminalName ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
-    , ("M-f", toggleTag "fullscreen" >> refresh)
 
     , ("M-C-<Left>", modifyColumns (-))
     , ("M-C-<Right>", modifyColumns (+))
     , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
+    , ("M-f", withFocused $ sendMessage . ToggleFullscreen)
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
@@ -309,7 +309,7 @@ instance XPrompt Terminal where
 layout textHeight =
     lessBorders Screen $
     resetEmpty $
-    ModifiedLayout Fullscreen $
+    ModifiedLayout (Fullscreen Nothing) $
     ModifiedLayout (Limit 3 (0, 0) $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}) $
     avoidStruts $
     smartSpacingWithEdge (fi textHeight `div` 4) $
@@ -327,6 +327,7 @@ data LayoutMessage
     = ModifyColumns (Int -> Int)
     | WithColumns (Int -> X ())
     | ModifyLimit (Int -> Int)
+    | ToggleFullscreen Window
 
 instance Message LayoutMessage
 
@@ -396,15 +397,19 @@ toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
     _ -> Nothing
 
-data Fullscreen a = Fullscreen
+data Fullscreen a = Fullscreen (Maybe a)
     deriving (Read, Show)
 
 instance LayoutModifier Fullscreen Window where
-    modifyLayout _ workspace@W.Workspace{W.stack = Just W.Stack{W.focus = win}} rect = do
-        full <- hasTag "fullscreen" win
-        if not full then runLayout workspace rect
-        else ([(win, rect)],) . snd <$> runLayout workspace{W.stack = Nothing} rect
-    modifyLayout _ workspace rect = runLayout workspace rect
+    modifyLayoutWithUpdate (Fullscreen state) workspace rect
+        | Just win <- state, Just stack <- W.stack workspace, W.focus stack == win = do
+            (_, update) <- runLayout workspace{W.stack = Nothing} rect
+            return (([(win, rect)], update), Nothing)
+        | Nothing <- state = (, Nothing) <$> runLayout workspace rect
+        | otherwise = (, Just $ Fullscreen Nothing) <$> runLayout workspace rect
+    pureMess (Fullscreen state) m = case fromMessage m of
+        Just (ToggleFullscreen win) -> Just $ Fullscreen $ if state == Just win then Nothing else Just win
+        _ -> Nothing
 
 resetEmpty layout = ResetEmpty layout layout
 
