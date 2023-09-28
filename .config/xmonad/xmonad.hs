@@ -339,18 +339,17 @@ data Grid a = Grid
     deriving (Read, Show)
 
 instance (Eq a) => LayoutClass Grid a where
-    doLayout grid@Grid{colWeights = weights} rect stack@W.Stack{W.focus = focus} = return (rects, update) where
+    doLayout grid@Grid{colWeights = weights} rect stack@W.Stack{W.focus = focus} = return (rects, grid') where
         colWins = split (length weights) $ W.integrate stack
         rects = layout (mirrorRect rect) (zip colWins weights) >>= \(wins, r) -> layout (mirrorRect r) $ zip wins $ repeat 1
-        focused' = (,) <$> findIndex (focus `elem`) colWins <*> fmap snd (find ((focus ==) . fst) rects)
-        update = if focused' == focused grid then Nothing else Just grid{focused = focused'}
+        grid' = Just grid{focused = (,) <$> findIndex (focus `elem`) colWins <*> fmap snd (find ((focus ==) . fst) rects)}
         split _ [] = []
         split cols wins = let (a, b) = splitAt (max 1 $ length wins `div` cols) wins in a : split (cols - 1) b
         layout rect as = layout' rect as $ sum $ snd <$> as
         layout' (Rectangle x y w h) ((a, weight) : as) total = let h' = round $ fi h * weight / total
             in (a, Rectangle x y w h') : layout' (Rectangle x (y + fi h') w (h - h')) as (total - weight)
         layout' _ [] _ = []
-    emptyLayout grid _ = return ([], focused grid >> Just grid{focused = Nothing})
+    emptyLayout grid _ = return ([], Just grid{focused = Nothing})
     handleMessage grid@Grid{colWeights = weights} m
         | Just (ModifyColumns f) <- fromMessage m = return $ Just grid{colWeights = replicate (max 1 $ f $ length weights) 1}
         | Just (WithColumns f) <- fromMessage m = f (length weights) >> return Nothing
@@ -386,9 +385,7 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
                 (rects, extraLayout') <- runLayout (W.Workspace tag extraLayout extraStack) rect
                 return (before ++ rects ++ after, extraLayout')
             (_, []) -> (rects,) . snd <$> runLayout (W.Workspace tag extraLayout Nothing) rect
-        let update = if state' == state && isNothing extraLayout' then Nothing
-                     else Just $ Limit n state' $ fromMaybe extraLayout extraLayout'
-        return ((rects, mainLayout'), update)
+        return ((rects, mainLayout'), Just $ Limit n state' $ fromMaybe extraLayout extraLayout')
     handleMess (Limit n state extraLayout) m = case fromMessage m of
         Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) state extraLayout
         _ -> fmap (Limit n state) <$> handleMessage extraLayout m
@@ -405,7 +402,6 @@ instance LayoutModifier Fullscreen Window where
         | Just win <- state, Just stack <- W.stack workspace, W.focus stack == win = do
             (_, update) <- runLayout workspace{W.stack = Nothing} rect
             return (([(win, rect)], update), Nothing)
-        | Nothing <- state = (, Nothing) <$> runLayout workspace rect
         | otherwise = (, Just $ Fullscreen Nothing) <$> runLayout workspace rect
     pureMess (Fullscreen state) m = case fromMessage m of
         Just (ToggleFullscreen win) -> Just $ Fullscreen $ if state == Just win then Nothing else Just win
