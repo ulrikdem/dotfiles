@@ -33,14 +33,15 @@ import XMonad.Hooks.Place
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.UrgencyHook
 
+import XMonad.Layout.BorderResize
 import XMonad.Layout.Decoration
-import XMonad.Layout.GridVariants hiding (Orientation(..))
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.Named
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
 import XMonad.Layout.StateFull
 import XMonad.Layout.Tabbed
+import XMonad.Layout.WindowArranger
 import XMonad.Layout.WindowNavigation
 
 import XMonad.Prompt
@@ -198,8 +199,8 @@ extraKeys textHeight =
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
 
-    , ("M-C-<Left>", sendMessage $ IncMasterCols (-1))
-    , ("M-C-<Right>", sendMessage $ IncMasterCols 1)
+    , ("M-C-<Left>", sendMessage $ ModifyColumns pred)
+    , ("M-C-<Right>", sendMessage $ ModifyColumns succ)
     , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
@@ -307,18 +308,59 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = limit $ spacing $ navigation grid where
+layout textHeight = limit $ spacing $ navigation $ borderResize grid where
     limit = ModifiedLayout $ Limit 3 (0, 0) tabbed
     tabbed = tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
     spacing = smartSpacingWithEdge $ fi textHeight `div` 4
     navigation = configurableNavigation noNavigateBorders
-    grid = TallGrid 1000000000 2 1 1 0
+    grid = Grid [1, 1] (textHeight * 8) Nothing :: Grid Window
 
 data EllipsisShrinker = EllipsisShrinker
     deriving (Read, Show)
 
 instance Shrinker EllipsisShrinker where
     shrinkIt _ s = s : map (++ "…") (reverse $ inits $ init s)
+
+data LayoutMessage
+    = ModifyColumns (Int -> Int)
+    | ModifyLimit (Int -> Int)
+
+instance Message LayoutMessage
+
+data Grid a = Grid
+    { colWeights :: [Rational]
+    , minWidth :: Dimension
+    , focused :: Maybe (Int, Rectangle)
+    }
+    deriving (Read, Show)
+
+instance (Eq a) => LayoutClass Grid a where
+    doLayout grid@Grid{colWeights = weights} rect stack@W.Stack{W.focus = focus} = return (rects, update) where
+        colWins = split (length weights) $ W.integrate stack
+        rects = layout (mirrorRect rect) (zip colWins weights) >>= \(wins, r) -> layout (mirrorRect r) $ zip wins $ repeat 1
+        focused' = (,) <$> findIndex (focus `elem`) colWins <*> fmap snd (find ((focus ==) . fst) rects)
+        update = guard (focused' /= focused grid) >> Just grid{focused = focused'}
+        split _ [] = []
+        split cols wins = let (a, b) = splitAt (max 1 $ length wins `div` cols) wins in a : split (cols - 1) b
+        layout rect as = layout' rect as $ sum $ snd <$> as
+        layout' (Rectangle x y w h) ((a, weight) : as) total = let h' = round $ fi h * weight / total
+            in (a, Rectangle x y w h') : layout' (Rectangle x (y + fi h') w (h - h')) as (total - weight)
+        layout' _ [] _ = []
+    emptyLayout grid _ = return ([], focused grid >> Just grid{focused = Nothing})
+    pureMessage grid@Grid{colWeights = weights} m
+        | Just (ModifyColumns f) <- fromMessage m = Just grid{colWeights = replicate (max 1 $ f $ length weights) 1}
+        | Just (SetGeometry rect@(Rectangle x' _ w' _)) <- fromMessage m,
+          Just (col, Rectangle x _ w _) <- focused grid,
+          w' /= w && (x' == x || col > 0),
+          (before, l : r : after) <- splitAt (if x' == x then col else col - 1) weights,
+          let scale = weights !! col / fi w
+              delta = (fi w' - fi w) * scale
+              (l', r') = if x' == x then (l + delta, r - delta) else (l - delta, r + delta)
+              min = fi (minWidth grid) * scale,
+          l' >= min && r' >= min
+            = Just grid{colWeights = before ++ l' : r' : after, focused = Just (col, rect)}
+        | otherwise = Nothing
+    description _ = "Grid"
 
 data Limit l a = Limit Int (Int, Int) (l a)
     deriving (Read, Show)
@@ -345,10 +387,6 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
     handleMess (Limit n state extraLayout) m
         | Just (ModifyLimit f) <- fromMessage m = return $ Just $ Limit (max 1 $ f n) state extraLayout
         | otherwise = fmap (Limit n state) <$> handleMessage extraLayout m
-
-data ModifyLimit = ModifyLimit (Int -> Int)
-
-instance Message ModifyLimit
 
 toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
