@@ -156,7 +156,7 @@ barLogHook = do
             }
     multiPP (pp "#008b00" {- green4 -}) (pp "#808080" {- gray50 -})
 
-workspaceEventHook event@ClientMessageEvent {ev_data = screen : workspace : _} = do
+workspaceEventHook event@ClientMessageEvent{ev_data = screen : workspace : _} = do
     atom <- getAtom "_NET_DESKTOP_VIEWPORT"
     when (ev_message_type event == atom) $ screenWorkspace (fi screen)
         >>= flip whenJust (\w -> windows $ W.greedyView (show workspace) . W.view w)
@@ -251,7 +251,7 @@ extraMouseBindings =
     [ ((modm, button3), \w -> focus w >> mouseResizeEdgeWindow (1 / 3) w >> windows W.shiftMaster)
     ]
 
-moveLeft win stack = stack {W.up = b, W.down = reverse a ++ W.down stack} where
+moveLeft win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
 moveRight win = reverseS . moveLeft win . reverseS
 
@@ -309,8 +309,8 @@ instance XPrompt Terminal where
 
 layout textHeight = limit $ spacing $ navigation grid where
     limit = ModifiedLayout $ Limit 3 (0, 0) tabbed
-    tabbed = tabbedBottom EllipsisShrinker theme {decoHeight = textHeight * 5 `div` 4}
-    spacing = smartSpacingWithEdge $ round $ fi textHeight / 4
+    tabbed = tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
+    spacing = smartSpacingWithEdge $ fi textHeight `div` 4
     navigation = configurableNavigation noNavigateBorders
     grid = TallGrid 1000000000 2 1 1 0
 
@@ -342,15 +342,17 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
         let update = if state' == state && isNothing extraLayout' then Nothing
                      else Just $ Limit n state' $ fromMaybe extraLayout extraLayout'
         return ((rects, mainLayout'), update)
-    handleMess (Limit n state extraLayout) message = case fromMessage message of
-        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) state extraLayout
-        Nothing -> fmap (Limit n state) <$> handleMessage extraLayout message
+    handleMess (Limit n state extraLayout) m
+        | Just (ModifyLimit f) <- fromMessage m = return $ Just $ Limit (max 1 $ f n) state extraLayout
+        | otherwise = fmap (Limit n state) <$> handleMessage extraLayout m
 
 data ModifyLimit = ModifyLimit (Int -> Int)
 
 instance Message ModifyLimit
 
-toStack i list = if null list then Nothing else let (a, b) = splitAt i list in Just $ W.Stack (head b) (reverse a) (tail b)
+toStack i list = case splitAt i list of
+    (up, focus : down) -> Just $ W.Stack focus (reverse up) down
+    _ -> Nothing
 
 resetEmpty layout = ResetEmpty layout layout
 
@@ -363,6 +365,6 @@ instance (LayoutClass l a) => LayoutClass (ResetEmpty l) a where
         return (rects, Just $ ResetEmpty reset $ fromMaybe reset layout')
     runLayout (W.Workspace tag (ResetEmpty reset layout) stack) rect = do
         (rects, layout') <- runLayout (W.Workspace tag layout stack) rect
-        return (rects, fmap (ResetEmpty reset) layout')
-    handleMessage (ResetEmpty reset layout) message = fmap (ResetEmpty reset) <$> handleMessage layout message
+        return (rects, ResetEmpty reset <$> layout')
+    handleMessage (ResetEmpty reset layout) m = fmap (ResetEmpty reset) <$> handleMessage layout m
     description (ResetEmpty _ layout) = description layout
