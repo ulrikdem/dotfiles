@@ -199,8 +199,8 @@ extraKeys textHeight =
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
 
-    , ("M-C-<Left>", sendMessage $ ModifyColumns pred)
-    , ("M-C-<Right>", sendMessage $ ModifyColumns succ)
+    , ("M-C-<Left>", modifyColumns (-))
+    , ("M-C-<Right>", modifyColumns (+))
     , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
@@ -255,6 +255,11 @@ extraMouseBindings =
 moveLeft win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
 moveRight win = reverseS . moveLeft win . reverseS
+
+modifyColumns op = do
+    send <- gets $ flip sendMessageWithNoRefresh . W.workspace . W.current . windowset
+    send $ WithColumns $ \c -> send $ ModifyLimit $ \l -> l `op` ceiling (fi l / fi c)
+    sendMessage $ ModifyColumns (`op` 1)
 
 toggleTag tag = withFocused $ \win -> do
     hasTag' <- hasTag tag win
@@ -323,6 +328,7 @@ instance Shrinker EllipsisShrinker where
 
 data LayoutMessage
     = ModifyColumns (Int -> Int)
+    | WithColumns (Int -> X ())
     | ModifyLimit (Int -> Int)
 
 instance Message LayoutMessage
@@ -347,8 +353,9 @@ instance (Eq a) => LayoutClass Grid a where
             in (a, Rectangle x y w h') : layout' (Rectangle x (y + fi h') w (h - h')) as (total - weight)
         layout' _ [] _ = []
     emptyLayout grid _ = return ([], focused grid >> Just grid{focused = Nothing})
-    pureMessage grid@Grid{colWeights = weights} m
-        | Just (ModifyColumns f) <- fromMessage m = Just grid{colWeights = replicate (max 1 $ f $ length weights) 1}
+    handleMessage grid@Grid{colWeights = weights} m
+        | Just (ModifyColumns f) <- fromMessage m = return $ Just grid{colWeights = replicate (max 1 $ f $ length weights) 1}
+        | Just (WithColumns f) <- fromMessage m = f (length weights) >> return Nothing
         | Just (SetGeometry rect@(Rectangle x' _ w' _)) <- fromMessage m,
           Just (col, Rectangle x _ w _) <- focused grid,
           w' /= w && (x' == x || col > 0),
@@ -358,8 +365,8 @@ instance (Eq a) => LayoutClass Grid a where
               (l', r') = if x' == x then (l + delta, r - delta) else (l - delta, r + delta)
               min = fi (minWidth grid) * scale,
           l' >= min && r' >= min
-            = Just grid{colWeights = before ++ l' : r' : after, focused = Just (col, rect)}
-        | otherwise = Nothing
+            = return $ Just grid{colWeights = before ++ l' : r' : after, focused = Just (col, rect)}
+        | otherwise = return Nothing
     description _ = "Grid"
 
 data Limit l a = Limit Int (Int, Int) (l a)
