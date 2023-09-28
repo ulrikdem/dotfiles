@@ -124,12 +124,12 @@ barHeight textHeight = h + h `mod` 2 - 1 where
 
 barLogHook = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
+            . xmobarAction ("xdotool set_desktop_for_window " ++ show win ++ " $(xdotool get_desktop)") "3"
             <$> runQuery iconQuery win
         getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "" . xmobarFont 1)
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w _ = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
-            $ xmobarAction ("xdotool getactivewindow set_desktop_for_window " ++ show (read w - 1)) "3"
             $ pad $ (w ++) $ xmobarColor "gray25" "" $ M.findWithDefault "" w icons
         getScreen = do
             S i <- gets $ W.screen . W.current . windowset
