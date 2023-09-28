@@ -5,5 +5,5 @@ frame_width = 1
 separator_height = 1
 transparency = 10
 show_indicators = false
-close_all = mod4+shift+d
-history = mod4+ctrl+d
+close_all = mod4+d
+history = mod4+shift+d
