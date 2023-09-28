@@ -194,6 +194,7 @@ extraKeys textHeight =
         [ NS "" (terminalName ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
+    , ("M-f", toggleTag "fullscreen" >> refresh)
 
     , ("M-C-<Left>", modifyColumns (-))
     , ("M-C-<Right>", modifyColumns (+))
@@ -305,13 +306,16 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = lessBorders Screen $ resetEmpty $ tiled ||| StateFull where
-    tiled = avoidStruts $ limit $ spacing $ navigation $ borderResize grid
-    limit = ModifiedLayout $ Limit 3 (0, 0) tabbed
-    tabbed = tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
-    spacing = smartSpacingWithEdge $ fi textHeight `div` 4
-    navigation = configurableNavigation noNavigateBorders
-    grid = Grid [1, 1] (textHeight * 8) Nothing :: Grid Window
+layout textHeight =
+    lessBorders Screen $
+    resetEmpty $
+    ModifiedLayout Fullscreen $
+    ModifiedLayout (Limit 3 (0, 0) $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}) $
+    avoidStruts $
+    smartSpacingWithEdge (fi textHeight `div` 4) $
+    configurableNavigation noNavigateBorders $
+    borderResize $
+    (Grid [1, 1] (textHeight * 8) Nothing :: Grid Window)
 
 data EllipsisShrinker = EllipsisShrinker
     deriving (Read, Show)
@@ -391,6 +395,16 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
 toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
     _ -> Nothing
+
+data Fullscreen a = Fullscreen
+    deriving (Read, Show)
+
+instance LayoutModifier Fullscreen Window where
+    modifyLayout _ workspace@W.Workspace{W.stack = Just W.Stack{W.focus = win}} rect = do
+        full <- hasTag "fullscreen" win
+        if not full then runLayout workspace rect
+        else ([(win, rect)],) . snd <$> runLayout workspace{W.stack = Nothing} rect
+    modifyLayout _ workspace rect = runLayout workspace rect
 
 resetEmpty layout = ResetEmpty layout layout
 
