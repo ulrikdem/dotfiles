@@ -342,7 +342,7 @@ instance (Eq a) => LayoutClass Grid a where
         colWins = split (length weights) $ W.integrate stack
         rects = layout (mirrorRect rect) (zip colWins weights) >>= \(wins, r) -> layout (mirrorRect r) $ zip wins $ repeat 1
         focused' = (,) <$> findIndex (focus `elem`) colWins <*> fmap snd (find ((focus ==) . fst) rects)
-        update = guard (focused' /= focused grid) >> Just grid{focused = focused'}
+        update = if focused' == focused grid then Nothing else Just grid{focused = focused'}
         split _ [] = []
         split cols wins = let (a, b) = splitAt (max 1 $ length wins `div` cols) wins in a : split (cols - 1) b
         layout rect as = layout' rect as $ sum $ snd <$> as
@@ -388,9 +388,9 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
         let update = if state' == state && isNothing extraLayout' then Nothing
                      else Just $ Limit n state' $ fromMaybe extraLayout extraLayout'
         return ((rects, mainLayout'), update)
-    handleMess (Limit n state extraLayout) m
-        | Just (ModifyLimit f) <- fromMessage m = return $ Just $ Limit (max 1 $ f n) state extraLayout
-        | otherwise = fmap (Limit n state) <$> handleMessage extraLayout m
+    handleMess (Limit n state extraLayout) m = case fromMessage m of
+        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) state extraLayout
+        _ -> fmap (Limit n state) <$> handleMessage extraLayout m
 
 toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
