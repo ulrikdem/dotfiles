@@ -136,7 +136,7 @@ barLogHook = do
             $ xmobarAction ("xdotool getactivewindow set_desktop_for_window " ++ show (read w - 1)) "3"
             $ pad $ (w ++) $ xmobarColor "gray25" "" $ M.findWithDefault "" w icons
         getScreen = do
-            S i <- withWindowSet $ return . W.screen . W.current
+            S i <- gets $ W.screen . W.current . windowset
             return $ Just $ show i
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
@@ -165,7 +165,7 @@ workspaceEventHook event@ClientMessageEvent{ev_data = screen : workspace : _} = 
 workspaceEventHook _ = mempty
 
 manageCustomFloat textHeight = do
-    height <- liftX $ withWindowSet $ return . rect_height . screenRect . W.screenDetail . W.current
+    height <- liftX $ gets $ rect_height . screenRect . W.screenDetail . W.current . windowset
     let y = fi (barHeight textHeight) / fi height
     customFloating $ W.RationalRect (2 / 3) y (1 / 3) (1 - y)
 
