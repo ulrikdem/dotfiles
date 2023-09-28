@@ -36,7 +36,6 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.BorderResize
 import XMonad.Layout.Decoration
 import XMonad.Layout.LayoutModifier
-import XMonad.Layout.Named
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
 import XMonad.Layout.StateFull
@@ -75,10 +74,7 @@ main = do
             , placeHook $ fixed (0.5, 0.5)
             , appName =? "xmonad-float" --> doFloat
             ]
-        , layoutHook = lessBorders Screen $ resetEmpty
-            $ named "tiled" (avoidStruts $ layout textHeight)
-            ||| named "full" (avoidStruts StateFull)
-            ||| named "fullscreen" StateFull
+        , layoutHook = layout textHeight
         , borderWidth = 2
         , normalBorderColor = inactiveColor theme
         , focusedBorderColor = activeColor theme
@@ -205,10 +201,6 @@ extraKeys textHeight =
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
 
-    , ("M-<Space>", sendMessage $ JumpToLayout "tiled")
-    , ("M-f", sendMessage $ JumpToLayout "full")
-    , ("M-S-f", sendMessage $ JumpToLayout "fullscreen")
-
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
     , ("M-p", commandPrompt textHeight Shell spawn)
@@ -313,7 +305,8 @@ instance XPrompt Terminal where
 
 -- Layout {{{1
 
-layout textHeight = limit $ spacing $ navigation $ borderResize grid where
+layout textHeight = lessBorders Screen $ resetEmpty $ tiled ||| StateFull where
+    tiled = avoidStruts $ limit $ spacing $ navigation $ borderResize grid
     limit = ModifiedLayout $ Limit 3 (0, 0) tabbed
     tabbed = tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
     spacing = smartSpacingWithEdge $ fi textHeight `div` 4
