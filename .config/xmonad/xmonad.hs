@@ -98,8 +98,8 @@ theme = def
     , inactiveColor = "black"
     , inactiveTextColor = "gray50"
     , inactiveBorderWidth = 0
-    , urgentColor = inactiveColor theme
-    , urgentTextColor = inactiveTextColor theme
+    , urgentColor = "black"
+    , urgentTextColor = "orange3"
     , urgentBorderWidth = 0
     , fontName = "xft:monospace-" ++ show fontSize
     }
