@@ -200,14 +200,14 @@ extraKeys textHeight =
     , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
-    , ("M-f", withFocused $ sendMessage . ToggleFullscreen)
+    , ("M-S-f", withFocused $ sendMessage . ToggleFullscreen)
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
     , ("M-p", commandPrompt textHeight Shell spawn)
     , ("M-S-p", commandPrompt textHeight Terminal $ runInTerm "")
 
-    , ("M-b", spawn "firefox")
+    , ("M-f", spawn "firefox")
     , ("M-S-t", spawn "thunderbird")
     , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
     , ("M-u", spawn "unicode-input")
