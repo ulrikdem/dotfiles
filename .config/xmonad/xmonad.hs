@@ -188,7 +188,6 @@ extraKeys textHeight =
     , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
     , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
-    , ("M-S-f", withFocused $ windows . flip W.float (W.RationalRect 0 0 1 1))
     , ("M-c", placeFocused $ fixed (0.5, 0.5))
 
     , ("M-s", allNamedScratchpadAction
@@ -201,6 +200,7 @@ extraKeys textHeight =
     , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
+    , ("M-S-f", withFocused $ sendMessage . ToggleFullscreen)
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
@@ -307,6 +307,7 @@ instance XPrompt Terminal where
 layout textHeight =
     lessBorders Screen $
     resetEmpty $
+    ModifiedLayout (Fullscreen Nothing) $
     ModifiedLayout (Limit 3 (0, 0) $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}) $
     avoidStruts $
     smartSpacingWithEdge (fi textHeight `div` 4) $
@@ -390,6 +391,19 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
 toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
     _ -> Nothing
+
+data Fullscreen a = Fullscreen (Maybe a)
+    deriving (Read, Show)
+
+instance LayoutModifier Fullscreen Window where
+    modifyLayoutWithUpdate (Fullscreen state) workspace rect
+        | Just win <- state, Just stack <- W.stack workspace, W.focus stack == win = do
+            (_, update) <- runLayout workspace{W.stack = Nothing} rect
+            return (([(win, rect)], update), Nothing)
+        | otherwise = (, Just $ Fullscreen Nothing) <$> runLayout workspace rect
+    pureMess (Fullscreen state) m = case fromMessage m of
+        Just (ToggleFullscreen win) -> Just $ Fullscreen $ if state == Just win then Nothing else Just win
+        _ -> Nothing
 
 resetEmpty layout = ResetEmpty layout layout
 
