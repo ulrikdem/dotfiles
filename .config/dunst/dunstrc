@@ -1,6 +1,6 @@
 [global]
 follow = keyboard
-offset = 17x40
+offset = 18x41
 frame_width = 1
 separator_height = 1
 transparency = 10
