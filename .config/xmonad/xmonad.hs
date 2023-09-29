@@ -259,8 +259,6 @@ toggleTag tag = withFocused $ \win -> do
     tagIff (not hasTag') tag win
     barLogHook
 
-weightFactor = 1.26
-
 cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
 
 -- Prompt {{{1
