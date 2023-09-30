@@ -687,7 +687,7 @@ function! s:ToggleDiff() abort
     endif
 endfunction
 
-set diffopt+=vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff
+set diffopt+=vertical,foldcolumn:1,linematch:60,hiddenoff
 map [h [c
 map ]h ]c
 nnoremap dx dp
