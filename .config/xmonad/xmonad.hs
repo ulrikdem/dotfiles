@@ -173,16 +173,16 @@ manageCustomFloat textHeight = do
 keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf textHeight in
     [ ("M-q", spawn "xmonad --recompile && xmonad --restart")
     , ("M-S-q", io exitSuccess)
-    , ("M-S-c", kill)
+    , ("M-x", kill)
 
-    , ("M-<Return>", promote)
+    , ("M-S-m", promote)
     , ("M-m", windows W.focusMaster)
-    , ("M-k", windows W.focusUp)
-    , ("M-h", windows W.focusDown)
-    , ("M-S-k", windows W.swapUp)
-    , ("M-S-h", windows W.swapDown)
-    , ("M-C-k", rotAllUp)
-    , ("M-C-h", rotAllDown)
+    , ("M-n", windows W.focusUp)
+    , ("M-e", windows W.focusDown)
+    , ("M-S-n", windows W.swapUp)
+    , ("M-S-e", windows W.swapDown)
+    , ("M-C-n", rotAllUp)
+    , ("M-C-e", rotAllDown)
 
     , ("M-<Up>", sendMessage $ Go U)
     , ("M-<Down>", sendMessage $ Go D)
@@ -194,31 +194,31 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
     , ("M-c", placeFocused $ fixed (0.5, 0.5))
-    , ("M-t", withFocused $ windows . W.sink)
+    , ("M-S-t", withFocused $ windows . W.sink)
 
     , ("M-s", allNamedScratchpadAction
         [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
 
-    , ("M-C-<Left>", modifyColumns (-))
-    , ("M-C-<Right>", modifyColumns (+))
-    , ("M-C-<Up>", sendMessage $ ModifyLimit pred)
-    , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
-    , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
-    , ("M-S-f", withFocused $ sendMessage . ToggleFullscreen)
-    , ("M-S-<Space>", setLayout $ Layout layout)
+    , ("M--", modifyColumns (-))
+    , ("M-=", modifyColumns (+))
+    , ("M-C--", sendMessage $ ModifyLimit pred)
+    , ("M-C-=", sendMessage $ ModifyLimit succ)
+    , ("M-S-=", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
+    , ("M-f", withFocused $ sendMessage . ToggleFullscreen)
+    , ("M-<Backspace>", setLayout $ Layout layout)
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
-    , ("M-p", commandPrompt textHeight Shell spawn)
-    , ("M-S-p", commandPrompt textHeight Terminal $ runInTerm "")
+    , ("M-r", commandPrompt textHeight Shell spawn)
+    , ("M-S-r", commandPrompt textHeight Terminal $ runInTerm "")
 
-    , ("M-S-<Return>", spawn terminal)
-    , ("M-f", spawn "firefox")
-    , ("M-S-t", spawn "thunderbird")
+    , ("M-<Return>", spawn terminal)
+    , ("M-w", spawn "firefox")
+    , ("M-t", spawn "thunderbird")
     , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
-    , ("M-u", spawn "unicode-input")
+    , ("M-i", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
 
@@ -228,12 +228,12 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
-    , ("M-S-u", focusUrgent)
-    , ("M-C-u", clearUrgents)
+    , ("M-u", focusUrgent)
+    , ("M-S-u", clearUrgents)
 
-    , ("M-<Tab>", toggleWS' [scratchpadWorkspaceTag])
-    , ("M-S-,", moveTo Prev cycleWSType)
-    , ("M-S-.", moveTo Next cycleWSType)
+    , ("M-<Space>", toggleWS' [scratchpadWorkspaceTag])
+    , ("M-[", moveTo Prev cycleWSType)
+    , ("M-]", moveTo Next cycleWSType)
     ] ++
 
     [ (mod ++ w, windows $ f w)
@@ -244,7 +244,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     [ (mod ++ [key], f i)
     | (mod, f) <- [("M-", viewScreen def), ("M-S-", sendToScreen def),
         ("M-C-", getScreen def >=> flip whenJust (screenWorkspace >=> flip whenJust (windows . W.greedyView)))]
-    , (key, i) <- zip "nei" [0..]
+    , (key, i) <- zip "h,." [0..]
     ]
 
 mouse XConfig{modMask = mod} = M.fromList
