@@ -2,7 +2,7 @@
 
 -- vim: foldmethod=marker
 
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TupleSections #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TupleSections #-}
 {-# OPTIONS_GHC -Wno-deprecations #-}
 
 import Control.Monad
@@ -14,6 +14,8 @@ import Data.Maybe
 import qualified Data.Map.Strict as M
 
 import Graphics.X11.Xft
+
+import System.Exit
 
 import XMonad
 import qualified XMonad.StackSet as W
@@ -59,30 +61,31 @@ import IconQuery
 
 -- Main {{{1
 
-main = do
-    textHeight <- getTextHeight
-    xmonad $ overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ docks $ def
-        { startupHook = barStartupHook textHeight <> setDefaultCursor xC_left_ptr
-        , handleEventHook = barEventHook textHeight <> workspaceEventHook
-        , logHook = do
-            barLogHook
-            let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
-            withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
-        , manageHook = composeAll
-            [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
-            , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
-            , placeHook $ fixed (0.5, 0.5)
-            , appName =? "xmonad-float" --> doFloat
-            ]
-        , layoutHook = layout textHeight
-        , borderWidth = 2
-        , normalBorderColor = inactiveColor theme
-        , focusedBorderColor = activeColor theme
-        , terminal = terminalName
-        , modMask = modm
-        } `removeKeysP` removedKeys `additionalKeysP` extraKeys textHeight `additionalMouseBindings` extraMouseBindings
+main = xmonad . conf =<< getTextHeight
 
-terminalName = "alacritty"
+conf textHeight = overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ docks def
+    { startupHook = barStartupHook textHeight <> setDefaultCursor xC_left_ptr
+        <> checkKeymap (conf textHeight) (keymap textHeight)
+    , handleEventHook = barEventHook textHeight <> workspaceEventHook
+    , logHook = do
+        barLogHook
+        let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
+        withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
+    , manageHook = composeAll
+        [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
+        , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
+        , placeHook $ fixed (0.5, 0.5)
+        , appName =? "xmonad-float" --> doFloat
+        ]
+    , layoutHook = layout textHeight
+    , borderWidth = 2
+    , normalBorderColor = inactiveColor theme
+    , focusedBorderColor = activeColor theme
+    , terminal = "alacritty"
+    , modMask = mod4Mask
+    , keys = flip mkKeymap $ keymap textHeight
+    , mouseBindings = mouse
+    }
 
 tagIff = bool delTag addTag
 
@@ -167,17 +170,19 @@ manageCustomFloat textHeight = do
 
 -- Keys {{{1
 
-modm = mod4Mask
+keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf textHeight in
+    [ ("M-q", spawn "xmonad --recompile && xmonad --restart")
+    , ("M-S-q", io exitSuccess)
+    , ("M-S-c", kill)
 
-removedKeys = ["M-?", "M-S-/", "M-S-<Tab>"]
-
-extraKeys textHeight =
-    [ ("M-<Return>", promote)
+    , ("M-<Return>", promote)
+    , ("M-m", windows W.focusMaster)
+    , ("M-k", windows W.focusUp)
     , ("M-h", windows W.focusDown)
+    , ("M-S-k", windows W.swapUp)
     , ("M-S-h", windows W.swapDown)
-    , ("M-C-h", rotAllDown)
-    , ("M-C-j", rotAllDown)
     , ("M-C-k", rotAllUp)
+    , ("M-C-h", rotAllDown)
 
     , ("M-<Up>", sendMessage $ Go U)
     , ("M-<Down>", sendMessage $ Go D)
@@ -189,9 +194,10 @@ extraKeys textHeight =
     , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
     , ("M-c", placeFocused $ fixed (0.5, 0.5))
+    , ("M-t", withFocused $ windows . W.sink)
 
     , ("M-s", allNamedScratchpadAction
-        [ NS "" (terminalName ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
 
@@ -201,12 +207,14 @@ extraKeys textHeight =
     , ("M-C-<Down>", sendMessage $ ModifyLimit succ)
     , ("M-a", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
     , ("M-S-f", withFocused $ sendMessage . ToggleFullscreen)
+    , ("M-S-<Space>", setLayout $ Layout layout)
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
     , ("M-p", commandPrompt textHeight Shell spawn)
     , ("M-S-p", commandPrompt textHeight Terminal $ runInTerm "")
 
+    , ("M-S-<Return>", spawn terminal)
     , ("M-f", spawn "firefox")
     , ("M-S-t", spawn "thunderbird")
     , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
@@ -227,22 +235,21 @@ extraKeys textHeight =
     , ("M-S-,", moveTo Prev cycleWSType)
     , ("M-S-.", moveTo Next cycleWSType)
     ] ++
-    [ ("M-C-" ++ [key], windows $ swapWithCurrent workspace)
-    | (key, workspace) <- zip ['1'..] $ workspaces def
+
+    [ (mod ++ w, windows $ f w)
+    | (mod, f) <- [("M-", W.greedyView), ("M-S-", W.shift), ("M-C-", swapWithCurrent)]
+    , w <- workspaces $ conf textHeight
     ] ++
 
-    [ (mod ++ [key], action index)
-    | (mod, action) <-
-        [ ("M-", viewScreen def)
-        , ("M-S-", sendToScreen def)
-        , ("M-C-", getScreen def >=> flip whenJust (screenWorkspace >=> flip whenJust (windows . W.greedyView)))
-        ]
-    , (keys, index) <- zip ["wn", "e", "ri"] [0..]
-    , key <- keys
+    [ (mod ++ [key], f i)
+    | (mod, f) <- [("M-", viewScreen def), ("M-S-", sendToScreen def),
+        ("M-C-", getScreen def >=> flip whenJust (screenWorkspace >=> flip whenJust (windows . W.greedyView)))]
+    , (key, i) <- zip "nei" [0..]
     ]
 
-extraMouseBindings =
-    [ ((modm, button3), \w -> focus w >> mouseResizeEdgeWindow (1 / 3) w >> windows W.shiftMaster)
+mouse XConfig{modMask = mod} = M.fromList
+    [ ((mod, button1), \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
+    , ((mod, button3), \w -> focus w >> mouseResizeEdgeWindow (1 / 3) w >> windows W.shiftMaster)
     ]
 
 moveLeft win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
