@@ -723,7 +723,6 @@ endfunction
 " Search and completion {{{1
 
 set ignorecase smartcase
-Plug 'pgdouyon/vim-evanesco'
 
 set wildignorecase wildmode=longest:full,full wildcharm=<Tab>
 cnoremap <expr> /
