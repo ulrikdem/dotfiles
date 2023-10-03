@@ -171,7 +171,7 @@ manageCustomFloat textHeight = do
 -- Keys {{{1
 
 keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf textHeight in
-    [ ("M-q", spawn "xmonad --recompile && xmonad --restart")
+    [ ("M-q", asks directories >>= flip recompile False >>= flip when (restart "xmonad" True))
     , ("M-S-q", io exitSuccess)
     , ("M-x", kill)
 
