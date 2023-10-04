@@ -193,14 +193,6 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
     , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
 
-    , ("M-c", placeFocused $ fixed (0.5, 0.5))
-    , ("M-S-t", withFocused $ windows . W.sink)
-
-    , ("M-s", allNamedScratchpadAction
-        [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
-        ] "")
-    , ("M-S-s", toggleTag "scratchpad")
-
     , ("M--", modifyColumns (-))
     , ("M-=", modifyColumns (+))
     , ("M-C--", sendMessage $ ModifyLimit pred)
@@ -209,10 +201,13 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
 
-    , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
-    , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
-    , ("M-r", commandPrompt textHeight Shell spawn)
-    , ("M-S-r", commandPrompt textHeight Terminal $ runInTerm "")
+    , ("M-c", placeFocused $ fixed (0.5, 0.5))
+    , ("M-S-t", withFocused $ windows . W.sink)
+
+    , ("M-s", allNamedScratchpadAction
+        [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        ] "")
+    , ("M-S-s", toggleTag "scratchpad")
 
     , ("M-<Return>", spawn terminal)
     , ("M-w", spawn "firefox")
@@ -227,6 +222,11 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 2%+")
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
+
+    , ("M-r", commandPrompt textHeight Shell spawn)
+    , ("M-S-r", commandPrompt textHeight Terminal $ runInTerm "")
+    , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
+    , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
     , ("M-u", focusUrgent)
     , ("M-S-u", clearUrgents)
