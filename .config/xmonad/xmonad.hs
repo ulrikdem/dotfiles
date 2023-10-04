@@ -174,6 +174,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     [ ("M-q", asks directories >>= flip recompile False >>= flip when (restart "xmonad" True))
     , ("M-S-q", io exitSuccess)
     , ("M-x", kill)
+    , ("M-a", sortWindows)
 
     , ("M-S-m", promote)
     , ("M-m", windows W.focusMaster)
@@ -250,6 +251,11 @@ mouse XConfig{modMask = mod} = M.fromList
     [ ((mod, button1), \w -> focus w >> mouseMoveWindow w >> windows W.shiftMaster)
     , ((mod, button3), \w -> focus w >> mouseResizeEdgeWindow (1 / 3) w >> windows W.shiftMaster)
     ]
+
+sortWindows = do
+    wins <- gets $ W.integrate' . W.stack . W.workspace . W.current . windowset
+    titles <- forM wins $ runQuery title
+    windows $ W.modify Nothing $ const $ W.differentiate $ map fst $ sortOn snd $ zip wins titles
 
 moveLeft win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
