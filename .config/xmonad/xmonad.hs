@@ -206,7 +206,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-C--", sendMessage $ ModifyLimit pred)
     , ("M-C-=", sendMessage $ ModifyLimit succ)
     , ("M-S-=", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
-    , ("M-f", withFocused $ sendMessage . ToggleFullscreen)
+    , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
