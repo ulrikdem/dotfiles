@@ -189,10 +189,10 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-<Down>", sendMessage $ Go D)
     , ("M-<Left>", sendMessage $ Go L)
     , ("M-<Right>", sendMessage $ Go R)
-    , ("M-S-<Up>", sendMessage $ Swap U)
-    , ("M-S-<Down>", sendMessage $ Swap D)
-    , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveLeft) L)
-    , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveRight) R)
+    , ("M-S-<Up>", sendMessage $ Apply (windows . W.modify' . moveUp) U)
+    , ("M-S-<Down>", sendMessage $ Apply (windows . W.modify' . moveDown) D)
+    , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveUp) L)
+    , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveDown) R)
 
     , ("M--", modifyColumns (-))
     , ("M-=", modifyColumns (+))
@@ -257,9 +257,9 @@ sortWindows = do
     titles <- forM wins $ runQuery title
     windows $ W.modify Nothing $ const $ W.differentiate $ map fst $ sortOn snd $ zip wins titles
 
-moveLeft win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
+moveUp win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
     (a, b) = splitAt (succ $ fromJust $ elemIndex win $ W.up stack) $ W.up stack
-moveRight win = reverseS . moveLeft win . reverseS
+moveDown win = reverseS . moveUp win . reverseS
 
 modifyColumns op = do
     send <- gets $ flip sendMessageWithNoRefresh . W.workspace . W.current . windowset
