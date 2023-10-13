@@ -414,7 +414,7 @@ if executable('rg') && executable('igrep-format')
             \ '--delimiter=\0',
             \ '--ansi',
             \ '--layout=reverse-list',
-            \ '--phony',
+            \ '--disabled',
             \ '--bind=change:top+reload:'.l:cmd,
         \ ], function("\<SID>ParseIGrep"))
     endfunction
@@ -486,7 +486,7 @@ let g:fzf_layout = #{
         \ height: 0.25,
         \ yoffset: 1,
         \ border: 'top',
-        \ highlight: 'VertSplit',
+        \ highlight: 'WinSeparator',
     \ },
 \ }
 autocmd vimrc FileType fzf mode
