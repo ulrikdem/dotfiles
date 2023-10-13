@@ -33,7 +33,7 @@ set clipboard=unnamed
 set cursorline
 set linebreak breakindent showbreak=↪
 set list listchars=tab:→\ ,trail:·,nbsp:·
-set mouse=a
+set mouse=a mousemodel=extend
 set scrolloff=4
 set shortmess+=IA
 set splitbelow splitright
