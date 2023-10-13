@@ -111,15 +111,15 @@ function bindkeymaps {
 bindkeymaps "$terminfo[kcuu1]" up-line-or-beginning-search main
 bindkeymaps "$terminfo[kcud1]" down-line-or-beginning-search main
 
-bindkeymaps "$terminfo[khome]" beginning-of-line main vicmd
-bindkeymaps "$terminfo[kend]" end-of-line main vicmd
+bindkeymaps "$terminfo[khome]" beginning-of-line main vicmd viopp visual
+bindkeymaps "$terminfo[kend]" end-of-line main vicmd viopp visual
 
-bindkeymaps "$terminfo[kLFT5]" backward-word main vicmd
-bindkeymaps "$terminfo[kRIT5]" forward-word main vicmd
+bindkeymaps "$terminfo[kLFT5]" backward-word main vicmd viopp visual
+bindkeymaps "$terminfo[kRIT5]" forward-word main vicmd viopp visual
 
 WORDCHARS='"#$%''*+-.?\_'
-bindkeymaps "$terminfo[kLFT]" .backward-word main vicmd
-bindkeymaps "$terminfo[kRIT]" .forward-word main vicmd
+bindkeymaps "$terminfo[kLFT]" .backward-word main vicmd viopp visual
+bindkeymaps "$terminfo[kRIT]" .forward-word main vicmd viopp visual
 bindkeymaps '^W' .backward-kill-word main
 
 bindkeymaps "$terminfo[kdch1]" delete-char main vicmd
@@ -135,11 +135,11 @@ bindkeymaps '\e^_' copy-earlier-word main
 bindkeymaps '\eo' accept-and-infer-next-history main
 
 function accept-history { print -rS "$BUFFER"; zle send-break }
-bindkeymaps '\eH' accept-history main
+bindkeymaps '\eH' accept-history main vicmd
 
-bindkeymaps '^Q' push-line-or-edit main
+bindkeymaps '^Q' push-line-or-edit main vicmd
 
-bindkeymaps '\ee' edit-command-line main
+bindkeymaps '\ee' edit-command-line main vicmd
 
 bindkeymaps '^V' vi-quoted-insert main
 bindkeymaps '\ev' insert-unicode-char main
