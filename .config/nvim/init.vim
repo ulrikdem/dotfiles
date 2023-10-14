@@ -69,6 +69,8 @@ endfunction
 nnoremap <C-S> <Cmd>update<CR>
 nnoremap ZT <Cmd>silent only \| quit<CR>
 
+nnoremap <M-n> <C-W>W
+nnoremap <M-e> <C-W>w
 nnoremap <M-Left> <C-W>h
 nnoremap <M-Down> <C-W>j
 nnoremap <M-Up> <C-W>k
@@ -444,6 +446,8 @@ autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
 tnoremap <M-Esc> <C-\><C-N>
 
+tnoremap <M-n> <Cmd>wincmd W<CR>
+tnoremap <M-e> <Cmd>wincmd w<CR>
 tnoremap <M-Left> <Cmd>wincmd h<CR>
 tnoremap <M-Down> <Cmd>wincmd j<CR>
 tnoremap <M-Up> <Cmd>wincmd k<CR>
