@@ -329,11 +329,10 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
         function fzf-file-widget {
             local words=(${(z)LBUFFER})
             [[ $LBUFFER =~ '\s$' ]] && local word= || local word=$words[-1]
-            local query=${word##*/}
-            local dir=${word:0:$#word-$#query}
+            local dir=${word:+${word%/}/} query=
             while [[ -n $dir && ! -d ${(Q)${~dir}} ]]; do
-                query=$dir:t/$query
-                dir=${word:0:$#word-$#query}
+                dir=${dir%%[^/]#/}
+                query=${word:$#dir}
             done
             local results=$(
                 cd -- ${(Q)${~dir}:-.}
