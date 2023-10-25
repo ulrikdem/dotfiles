@@ -196,10 +196,9 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
 
     , ("M--", modifyColumns (-))
     , ("M-=", modifyColumns (+))
-    , ("M-u", sendMessage $ ModifyLimit pred)
-    , ("M-y", sendMessage $ ModifyLimit succ)
-    , ("M-S-u", setLimitFromStack $ succ . length . W.up)
-    , ("M-S-y", setLimitFromStack length)
+    , ("M-C--", sendMessage $ ModifyLimit pred)
+    , ("M-C-=", sendMessage $ ModifyLimit succ)
+    , ("M-S-=", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
     , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
 
@@ -265,10 +264,6 @@ modifyColumns op = do
     send <- gets $ flip sendMessageWithNoRefresh . W.workspace . W.current . windowset
     send $ WithColumns $ \c -> send $ ModifyLimit $ \l -> l `op` ceiling (fi l / fi c)
     sendMessage $ ModifyColumns (`op` 1)
-
-setLimitFromStack f = do
-    stack <- gets $ W.stack . W.workspace . W.current . windowset
-    whenJust stack $ sendMessage . ModifyLimit . const . f
 
 toggleTag tag = withFocused $ \win -> do
     hasTag' <- hasTag tag win
