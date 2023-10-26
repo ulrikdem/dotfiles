@@ -198,7 +198,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-=", modifyColumns (+))
     , ("M-C--", sendMessage $ ModifyLimit pred)
     , ("M-C-=", sendMessage $ ModifyLimit succ)
-    , ("M-\\", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
+    , ("M-\\", fmap W.stack getWorkspace >>= flip whenJust (sendMessage . ModifyLimit . const . length))
     , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
 
@@ -254,7 +254,7 @@ mouse XConfig{modMask = mod} = M.fromList
     ]
 
 sortWindows = do
-    wins <- gets $ W.integrate' . W.stack . W.workspace . W.current . windowset
+    wins <- W.integrate' . W.stack <$> getWorkspace
     titles <- forM wins $ runQuery title
     windows $ W.modify Nothing $ const $ W.differentiate $ map fst $ sortOn snd $ zip wins titles
 
@@ -263,9 +263,11 @@ moveUp win stack = stack{W.up = b, W.down = reverse a ++ W.down stack} where
 moveDown win = reverseS . moveUp win . reverseS
 
 modifyColumns op = do
-    send <- gets $ flip sendMessageWithNoRefresh . W.workspace . W.current . windowset
+    send <- flip sendMessageWithNoRefresh <$> getWorkspace
     send $ WithColumns $ \c -> send $ ModifyLimit $ \l -> l `op` ceiling (fi l / fi c)
     sendMessage $ ModifyColumns (`op` 1)
+
+getWorkspace = gets $ W.workspace . W.current . windowset
 
 toggleTag tag = withFocused $ \win -> do
     hasTag' <- hasTag tag win
