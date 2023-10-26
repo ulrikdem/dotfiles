@@ -230,7 +230,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
     , ("M-u", focusUrgent)
-    , ("M-S-u", clearUrgents)
+    , ("M-S-u", clearUrgents >> barLogHook)
 
     , ("M-<Space>", toggleWS' [scratchpadWorkspaceTag])
     , ("M-[", moveTo Prev cycleWSType)
