@@ -198,7 +198,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-=", modifyColumns (+))
     , ("M-C--", sendMessage $ ModifyLimit pred)
     , ("M-C-=", sendMessage $ ModifyLimit succ)
-    , ("M-S-=", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
+    , ("M-\\", withWindowSet $ flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack . W.workspace . W.current)
     , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
 
