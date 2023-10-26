@@ -13,6 +13,7 @@ iconQuery = composeOne
     , className =? "firefox" -?> return "\xf269" -- 
     , className =? "Gimp" -?> return "\xf1fc" -- 
     , className =? "mpv" -?> return "\xf144" -- 
+    , className =? "Nm-connection-editor" -?> return "\xf06f3" -- 󰛳
     , className =? "Sxiv" -?> return "\xf02e9" -- 󰋩
     , className =? "thunderbird" -?> return "\xf01f0" -- 󰇰
     , className =? "webview" <&&> title $? "JupyterLab" -?> return "\xf0320" -- 󰌠
