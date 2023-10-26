@@ -1,6 +1,6 @@
 \begin{code}
 
-module IconQuery (iconQuery) where
+module IconQuery where
 
 import Data.List
 import XMonad.ManageHook

@@ -1,6 +1,6 @@
 \begin{code}
 
-module ConfigOverride (overrideConfig) where
+module ConfigOverride where
 
 overrideConfig = id
 
