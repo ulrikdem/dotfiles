@@ -56,8 +56,7 @@ import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Stack
 
-import ConfigOverride
-import IconQuery
+import LocalConfig
 
 -- Main {{{1
 

@@ -1,10 +1,12 @@
 \begin{code}
 
-module IconQuery where
+module LocalConfig where
 
 import Data.List
 import XMonad.ManageHook
 import XMonad.Hooks.ManageHelpers
+
+overrideConfig = id
 
 iconQuery = composeOne
     [ className =? "Alacritty" <&&> title $? " - nvim" -?> return "\xe62b" -- 
