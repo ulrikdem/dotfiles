@@ -1,12 +1,22 @@
 \begin{code}
 
-module LocalConfig where
+module LocalConfig (overrideConfig, leaderMap, iconQuery) where
 
 import Data.List
 import XMonad.ManageHook
 import XMonad.Hooks.ManageHelpers
 
 overrideConfig = id
+
+leaderMap terminal =
+    [ ("f", spawn "firefox")
+    , ("h", spawn $ terminal ++ " -e htop")
+    , ("m", spawn "mpv --player-operation-mode=pseudo-gui")
+    , ("n", spawn $ terminal ++ " -e newsboat")
+    , ("p", spawn $ terminal ++ " -e ipython")
+    , ("t", spawn "thunderbird")
+    , ("v", spawn $ terminal ++ " -e nvim")
+    ]
 
 iconQuery = composeOne
     [ className =? "Alacritty" <&&> title $? " - nvim" -?> return "\xe62b" -- 

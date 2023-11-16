@@ -202,7 +202,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-<Backspace>", setLayout $ Layout layout)
 
     , ("M-c", placeFocused $ fixed (0.5, 0.5))
-    , ("M-S-t", withFocused $ windows . W.sink)
+    , ("M-t", withFocused $ windows . W.sink)
 
     , ("M-s", allNamedScratchpadAction
         [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
@@ -210,9 +210,6 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-S-s", toggleTag "scratchpad")
 
     , ("M-<Return>", spawn terminal)
-    , ("M-w", spawn "firefox")
-    , ("M-t", spawn "thunderbird")
-    , ("M-v", spawn "mpv --player-operation-mode=pseudo-gui")
     , ("M-i", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
@@ -231,7 +228,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-u", focusUrgent)
     , ("M-S-u", clearUrgents >> barLogHook)
 
-    , ("M-<Space>", toggleWS' [scratchpadWorkspaceTag])
+    , ("M-p", toggleWS' [scratchpadWorkspaceTag])
     , ("M-[", moveTo Prev cycleWSType)
     , ("M-]", moveTo Next cycleWSType)
     ] ++
@@ -245,6 +242,11 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     | (mod, f) <- [("M-", viewScreen def), ("M-S-", sendToScreen def),
         ("M-C-", getScreen def >=> flip whenJust (screenWorkspace >=> flip whenJust (windows . W.greedyView)))]
     , (key, i) <- zip "h,." [0..]
+    ] ++
+
+    [ ("M-<Space> " ++ mod ++ key, action)
+    | mod <- ["", "M-"]
+    , (key, action) <- leaderMap terminal
     ]
 
 mouse XConfig{modMask = mod} = M.fromList
