@@ -89,7 +89,7 @@ hints:
 key_bindings:
   - action: SpawnNewInstance
     key: Return
-    mods: Control|Shift
+    mods: Control
 
   - action: Paste
     key: P
