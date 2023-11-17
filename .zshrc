@@ -74,11 +74,10 @@ zstyle ':vcs_info:*' check-for-changes true
 
 function precmd {
     vcs_info
-    print -Pn '\e]2;%n@%m: %~\a'
+    print -Pn '\e]2;%n@%m %~\a'
 }
 function preexec {
-    print -Pn '\e]2;%n@%m: '
-    printf '%s\a' "$1"
+    printf '\e]2;%s\a' "$1"
 }
 
 VIRTUAL_ENV_DISABLE_PROMPT=1
