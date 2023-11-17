@@ -8,14 +8,14 @@ import XMonad.Hooks.ManageHelpers
 
 overrideConfig = id
 
-leaderMap terminal =
+leaderMap spawnInTerminal =
     [ ("f", spawn "firefox")
-    , ("h", spawn $ terminal ++ " -e htop")
+    , ("h", spawnInTerminal "htop")
     , ("m", spawn "mpv --player-operation-mode=pseudo-gui")
-    , ("n", spawn $ terminal ++ " -e newsboat")
-    , ("p", spawn $ terminal ++ " -e ipython")
+    , ("n", spawnInTerminal "newsboat")
+    , ("p", spawnInTerminal "ipython")
     , ("t", spawn "thunderbird")
-    , ("v", spawn $ terminal ++ " -e nvim")
+    , ("v", spawnInTerminal "nvim")
     ]
 
 iconQuery = composeOne

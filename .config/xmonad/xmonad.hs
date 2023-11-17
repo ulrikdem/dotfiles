@@ -221,7 +221,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
     , ("M-r", commandPrompt textHeight Shell spawn)
-    , ("M-S-r", commandPrompt textHeight Terminal $ runInTerm "")
+    , ("M-S-r", commandPrompt textHeight Terminal $ spawnIn terminal)
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
@@ -246,7 +246,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
 
     [ ("M-<Space> " ++ mod ++ key, action)
     | mod <- ["", "M-"]
-    , (key, action) <- leaderMap terminal
+    , (key, action) <- leaderMap $ spawnIn terminal
     ]
 
 mouse XConfig{modMask = mod} = M.fromList
@@ -276,6 +276,12 @@ toggleTag tag = withFocused $ \win -> do
     barLogHook
 
 cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
+
+spawnIn terminal command = safeSpawn terminal
+    ["-e" , "sh" , "-c" , "printf '\\e]2;%s\\a' '" ++ escape command ++ "'; exec " ++ command] where
+    escape s = case break (== '\'') s of
+        (a, []) -> a
+        (a, _ : b) -> a ++ "'\\''" ++ escape b
 
 -- Prompt {{{1
 
