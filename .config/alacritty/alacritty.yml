@@ -87,7 +87,7 @@ hints:
         mods: Control|Shift
 
 key_bindings:
-  - action: SpawnNewInstance
+  - action: CreateNewWindow
     key: Return
     mods: Control
 
