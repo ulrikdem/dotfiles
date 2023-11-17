@@ -19,8 +19,14 @@ leaderMap spawnInTerminal =
     ]
 
 iconQuery = composeOne
-    [ className =? "Alacritty" <&&> title $? " - nvim" -?> return "\xe62b" -- 
-    , className =? "Alacritty" -?> return "\xe795" -- 
+    [ className =? "Alacritty" -?> composeOne
+        [ title =? "htop" -?> return "\xf0128" -- 󰄨
+        , title =? "ipython" -?> return "\xf0320" -- 󰌠
+        , title =? "newsboat" -?> return "\xf09e" -- 
+        , title ^? "ranger:" -?> return "\xe5fe" -- 
+        , title $? " - nvim" -?> return "\xe62b" -- 
+        , return $ Just "\xe795" -- 
+        ]
     , className =? "Evince" <||> className =? "Zathura" -?> return "\xf0219" -- 󰈙
     , className =? "firefox" -?> return "\xf269" -- 
     , className =? "Gimp" -?> return "\xf1fc" -- 
