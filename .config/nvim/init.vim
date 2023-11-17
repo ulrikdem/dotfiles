@@ -435,8 +435,8 @@ Plug 'lambdalisue/suda.vim'
 
 " Terminal {{{1
 
-autocmd vimrc BufEnter * let &titlestring = (&buftype ==# 'terminal' ? 'terminal' : '%F').' - nvim'
-autocmd vimrc TermOpen * set titlestring=terminal\ -\ nvim
+autocmd vimrc BufEnter * let &titlestring = (&buftype ==# 'terminal' ? '[Terminal]' : '%F').' - nvim'
+autocmd vimrc TermOpen * set titlestring=[Terminal]\ -\ nvim
 
 autocmd vimrc TermOpen * setlocal matchpairs= nocursorline
 autocmd vimrc TermOpen * startinsert
