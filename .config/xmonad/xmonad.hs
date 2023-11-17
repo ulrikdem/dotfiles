@@ -220,8 +220,9 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
-    , ("M-r", commandPrompt textHeight Shell spawn)
-    , ("M-S-r", commandPrompt textHeight Terminal $ spawnIn terminal)
+    , ("M-r", commandPrompt textHeight "Run: " spawn =<< io getCommands)
+    , ("M-S-r", commandPrompt textHeight "Run in terminal: " (spawnIn terminal) =<< io getCommands)
+    , ("M-o", commandPrompt textHeight "Open: " (spawn . ("xdg-open " ++)) []) 
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
@@ -312,16 +313,15 @@ commandPromptConfig textHeight matches = def
         ]) $ promptKeymap $ windowPromptConfig textHeight
     }
 
-commandPrompt textHeight prompt action = do
+commandPrompt textHeight prompt action cmds = do
     matches <- initMatches
     let config = commandPromptConfig textHeight matches
-    cmds <- io getCommands
-    mkXPrompt prompt config (getShellCompl' CaseInSensitive cmds $ searchPredicate config) action
+    mkXPrompt (Prompt prompt) config (getShellCompl' CaseInSensitive cmds $ searchPredicate config) action
 
-data Terminal = Terminal
+data Prompt = Prompt String
 
-instance XPrompt Terminal where
-    showXPrompt _ = "Run in terminal: "
+instance XPrompt Prompt where
+    showXPrompt (Prompt p) = p
     completionToCommand _ = completionToCommand Shell
 
 -- Layout {{{1
