@@ -279,7 +279,7 @@ toggleTag tag = withFocused $ \win -> do
 cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
 
 spawnIn terminal command = safeSpawn terminal
-    ["-e" , "sh" , "-c" , "printf '\\e]2;%s\\a' '" ++ escape command ++ "'; exec " ++ command] where
+    ["-e" , "sh", "-c", "printf '\\e]2;%s\\a' '" ++ escape command ++ "'; exec " ++ command] where
     escape s = case break (== '\'') s of
         (a, []) -> a
         (a, _ : b) -> a ++ "'\\''" ++ escape b
