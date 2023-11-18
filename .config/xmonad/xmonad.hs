@@ -316,7 +316,8 @@ commandPromptConfig textHeight matches = def
 commandPrompt textHeight prompt action cmds = do
     matches <- initMatches
     let config = commandPromptConfig textHeight matches
-    mkXPrompt (Prompt prompt) config (getShellCompl' CaseInSensitive cmds $ searchPredicate config) action
+        compl = fmap (map $ dropWhileEnd (== '/')) . getShellCompl' CaseInSensitive cmds (searchPredicate config)
+    mkXPrompt (Prompt prompt) config compl action
 
 data Prompt = Prompt String
 
