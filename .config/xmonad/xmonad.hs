@@ -220,9 +220,9 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
-    , ("M-r", commandPrompt textHeight Shell id spawn =<< io getCommands)
-    , ("M-S-r", commandPrompt textHeight Terminal id (spawnIn terminal) =<< io getCommands)
-    , ("M-o", commandPrompt textHeight Open shellQuote (safeSpawn "xdg-open" . pure) [])
+    , ("M-r", commandPrompt textHeight Shell (completionToCommand Shell) spawn =<< io getCommands)
+    , ("M-S-r", commandPrompt textHeight Terminal (completionToCommand Shell) (spawnIn terminal) =<< io getCommands)
+    , ("M-o", commandPrompt textHeight Open (shellQuote . shellQuote) (safeSpawn "xdg-open" . pure) [])
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
