@@ -220,9 +220,9 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("<XF86MonBrightnessDown>", spawn "light -U 10")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
-    , ("M-r", commandPrompt textHeight "Run: " spawn =<< io getCommands)
-    , ("M-S-r", commandPrompt textHeight "Run in terminal: " (spawnIn terminal) =<< io getCommands)
-    , ("M-o", commandPrompt textHeight "Open: " (spawn . ("xdg-open " ++)) []) 
+    , ("M-r", commandPrompt textHeight Shell id spawn =<< io getCommands)
+    , ("M-S-r", commandPrompt textHeight Terminal id (spawnIn terminal) =<< io getCommands)
+    , ("M-o", commandPrompt textHeight Open shellQuote (safeSpawn "xdg-open" . pure) [])
     , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
@@ -279,7 +279,9 @@ toggleTag tag = withFocused $ \win -> do
 cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
 
 spawnIn terminal command = safeSpawn terminal
-    ["-e" , "sh", "-c", "printf '\\e]2;%s\\a' '" ++ escape command ++ "'; exec " ++ command] where
+    ["-e" , "sh", "-c", "printf '\\e]2;%s\\a' " ++ shellQuote command ++ "; exec " ++ command]
+
+shellQuote = wrap "'" "'" . escape where
     escape s = case break (== '\'') s of
         (a, []) -> a
         (a, _ : b) -> a ++ "'\\''" ++ escape b
@@ -313,17 +315,24 @@ commandPromptConfig textHeight matches = def
         ]) $ promptKeymap $ windowPromptConfig textHeight
     }
 
-commandPrompt textHeight prompt action cmds = do
+commandPrompt textHeight prompt escape action cmds = do
     matches <- initMatches
     let config = commandPromptConfig textHeight matches
-        compl = fmap (map $ dropWhileEnd (== '/')) . getShellCompl' CaseInSensitive cmds (searchPredicate config)
-    mkXPrompt (Prompt prompt) config compl action
+        compl = fmap (map $ dropWhileEnd (== '/')) . getShellCompl' CaseInSensitive cmds (searchPredicate config) . escape
+    mkXPrompt prompt config compl action
 
-data Prompt = Prompt String
+data Terminal = Terminal
 
-instance XPrompt Prompt where
-    showXPrompt (Prompt p) = p
+instance XPrompt Terminal where
+    showXPrompt _ = "Run in terminal: "
     completionToCommand _ = completionToCommand Shell
+
+data Open = Open
+
+instance XPrompt Open where
+    showXPrompt _ = "Open: "
+    commandToComplete _ = id
+    nextCompletion _ = getNextCompletion
 
 -- Layout {{{1
 
