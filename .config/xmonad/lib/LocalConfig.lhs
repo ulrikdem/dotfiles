@@ -10,6 +10,7 @@ overrideConfig = id
 
 leaderMap spawnInTerminal =
     [ ("f", spawn "firefox")
+    , ("S-f", spawn "firefox --private-window")
     , ("h", spawnInTerminal "htop")
     , ("m", spawn "mpv --player-operation-mode=pseudo-gui")
     , ("n", spawnInTerminal "newsboat")
