@@ -117,7 +117,8 @@ barHeight textHeight = h + h `mod` 2 - 1 where
 
 barLogHook screen@(S sid) prop = do
     workspace <- fromJust <$> screenWorkspace screen
-    index <- fromJust . ($ workspace) <$> getWsIndex
+    sort <- getSortByIndex
+    index <- fromJust . elemIndex workspace . map W.tag . sort . W.workspaces . windowset
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop " ++ show index ++ " set_desktop_for_window " ++ show win ++ " " ++ show index) "3"
             <$> runQuery iconQuery win
