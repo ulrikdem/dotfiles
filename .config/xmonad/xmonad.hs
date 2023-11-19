@@ -44,9 +44,7 @@ import XMonad.Layout.WindowArranger
 import XMonad.Layout.WindowNavigation
 
 import XMonad.Prompt
-import XMonad.Prompt.FuzzyMatch
 import XMonad.Prompt.Shell
-import XMonad.Prompt.Window
 
 import XMonad.Util.Cursor
 import XMonad.Util.EZConfig
@@ -116,9 +114,7 @@ barHeight textHeight = h + h `mod` 2 - 1 where
     h = textHeight * 3 `div` 2
 
 barLogHook screen@(S sid) prop = do
-    workspace <- fromJust <$> screenWorkspace screen
-    sort <- getSortByIndex
-    index <- fromJust . elemIndex workspace . map W.tag . sort . W.workspaces . windowset
+    index <- workspaceIndex =<< fmap fromJust (screenWorkspace screen)
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop " ++ show index ++ " set_desktop_for_window " ++ show win ++ " " ++ show index) "3"
             <$> runQuery iconQuery win
@@ -148,6 +144,10 @@ barLogHook screen@(S sid) prop = do
     screenWorkspace screen >>= flip whenJust (modifyWindowSet . W.view)
     dynamicLogString pp >>= xmonadPropLog' prop
     modifyWindowSet $ W.view $ W.tag $ W.workspace current
+
+workspaceIndex workspace = do
+    sort <- getSortByIndex
+    gets $ fromJust . elemIndex workspace . map W.tag . sort . W.workspaces . windowset
 
 -- Hooks {{{1
 
@@ -231,8 +231,15 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-r", commandPrompt textHeight Shell (completionToCommand Shell) spawn =<< io getCommands)
     , ("M-S-r", commandPrompt textHeight Terminal (completionToCommand Shell) (spawnIn terminal) =<< io getCommands)
     , ("M-o", commandPrompt textHeight Open (shellQuote . shellQuote) (safeSpawn "xdg-open" . pure) [])
-    , ("M-g", windowPrompt (windowPromptConfig textHeight) Goto allWindows)
-    , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
+
+    , ("M-w", do
+        i <- workspaceIndex =<< fmap W.tag getWorkspace
+        safeSpawn "rofi"
+            [ "-show", "window"
+            , "-window-command", "xdotool set_desktop_for_window {window} " ++ show i
+            , "-font", "monospace " ++ show fontSize
+            , "-yoffset", show $ barHeight textHeight
+            ])
 
     , ("M-u", focusUrgent)
     , ("M-S-u", clearUrgents >> logHook)
@@ -295,16 +302,15 @@ shellQuote = wrap "'" "'" . escape where
 
 -- Prompt {{{1
 
-windowPromptConfig textHeight = def
+promptConfig textHeight matches = def
     { promptBorderWidth = 0
     , height = textHeight
     , font = fontName theme
-    , maxComplColumns = Just 1
-    , searchPredicate = fuzzyMatch
-    , sorter = fuzzySort
-    , historySize = 0
+    , historyFilter = deleteAllDuplicates
     , promptKeymap = let isSeparator c = isSpace c || c == '/' in M.union (M.fromList
-        [ ((mod1Mask, xK_BackSpace), killWord Prev)
+        [ ((0, xK_Up), historyUpMatching matches)
+        , ((0, xK_Down), historyDownMatching matches)
+        , ((mod1Mask, xK_BackSpace), killWord Prev)
         , ((mod1Mask, xK_d), killWord Next >> deleteString Next)
         , ((controlMask, xK_Left), moveCursor Prev >> moveWord Prev)
         , ((controlMask, xK_Right), moveCursor Prev >> moveWord Next >> moveCursor Next >> moveCursor Next)
@@ -314,20 +320,9 @@ windowPromptConfig textHeight = def
         ]) $ defaultXPKeymap' isSeparator
     }
 
-commandPromptConfig textHeight matches = def
-    { promptBorderWidth = 0
-    , height = textHeight
-    , font = fontName theme
-    , historyFilter = deleteAllDuplicates
-    , promptKeymap = M.union (M.fromList
-        [ ((0, xK_Up), historyUpMatching matches)
-        , ((0, xK_Down), historyDownMatching matches)
-        ]) $ promptKeymap $ windowPromptConfig textHeight
-    }
-
 commandPrompt textHeight prompt escape action cmds = do
     matches <- initMatches
-    let config = commandPromptConfig textHeight matches
+    let config = promptConfig textHeight matches
         strip cs = if length cs > 1 then deleteConsecutive $ dropWhileEnd (== '/') <$> cs else cs
         compl = fmap strip . getShellCompl' CaseInSensitive cmds (searchPredicate config) . escape
     mkXPrompt prompt config compl action
