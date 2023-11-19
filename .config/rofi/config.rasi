@@ -1,0 +1,32 @@
+configuration {
+    monitor: -1;
+    location: 2;
+    fixed-num-lines: false;
+
+    modes: "window";
+    window-match-fields: "desktop,class,title";
+    window-format: "{w:1}  {c}  {t}";
+
+    disable-history: true;
+
+    sort: true;
+    sorting-method: "fzf";
+    matching: "fuzzy";
+
+    kb-remove-word-forward: "Alt+d";
+    kb-move-front: "Home";
+    kb-move-end: "End";
+    kb-row-first: "Control+Home";
+    kb-row-last: "Control+End";
+
+    inputchange {
+        action: "kb-row-first";
+    }
+
+    me-accept-entry: "MousePrimary";
+    me-select-entry: "";
+}
+
+@theme "/usr/share/rofi/themes/android_notification.rasi"
+
+/* vim:set filetype=css: */
