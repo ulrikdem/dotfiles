@@ -3,7 +3,6 @@
 -- vim: foldmethod=marker
 
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TupleSections #-}
-{-# OPTIONS_GHC -Wno-deprecations #-}
 
 import Control.Monad
 
@@ -28,10 +27,10 @@ import XMonad.Actions.RotSlaves
 import XMonad.Actions.SwapWorkspaces
 import XMonad.Actions.TagWindows
 
-import XMonad.Hooks.DynamicBars
 import XMonad.Hooks.EwmhDesktops
 import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.Place
+import XMonad.Hooks.StatusBar
 import XMonad.Hooks.StatusBar.PP
 import XMonad.Hooks.UrgencyHook
 
@@ -61,14 +60,11 @@ import LocalConfig
 
 main = xmonad . conf =<< getTextHeight
 
-conf textHeight = overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ docks def
-    { startupHook = barStartupHook textHeight <> setDefaultCursor xC_left_ptr
-        <> checkKeymap (conf textHeight) (keymap textHeight)
-    , handleEventHook = barEventHook textHeight <> workspaceEventHook
-    , logHook = do
-        barLogHook
-        let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
-        withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
+conf textHeight = overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ dynamicSBs (statusBar textHeight) $ docks def
+    { startupHook = setDefaultCursor xC_left_ptr <> checkKeymap (conf textHeight) (keymap textHeight)
+    , handleEventHook = workspaceEventHook
+    , logHook = let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
+        in withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
     , manageHook = composeAll
         [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
         , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
@@ -114,16 +110,17 @@ getTextHeight = do
 
 -- Bar {{{1
 
-barStartupHook textHeight = dynStatusBarStartup (spawnBar textHeight) $ return ()
-barEventHook textHeight = dynStatusBarEventHook (spawnBar textHeight) $ return ()
-
-spawnBar textHeight (S i) = spawnPipe $ "xmobar -p 'TopH " ++ show (barHeight textHeight) ++ "' -x " ++ show i
-    ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "' -D \"$(xrdb -get Xft.dpi)\""
+statusBar textHeight screen@(S i) = return $ statusBarGeneric cmd $ barLogHook screen prop where
+    prop = "_XMONAD_LOG_" ++ show i
+    cmd = "xmobar -p 'TopH " ++ show (barHeight textHeight) ++ "' -x " ++ show i
+        ++ " -C '[Run UnsafeNamedXPropertyLog \"" ++ prop ++ "\" \"xmonad\"]'"
+        ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "'"
+        ++ " -D \"$(xrdb -get Xft.dpi)\""
 
 barHeight textHeight = h + h `mod` 2 - 1 where
     h = textHeight * 3 `div` 2
 
-barLogHook = do
+barLogHook screen prop = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop_for_window " ++ show win ++ " $(xdotool get_desktop)") "3"
             <$> runQuery iconQuery win
@@ -138,7 +135,9 @@ barLogHook = do
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
-        pp color = filterOutWsPP [scratchpadWorkspaceTag] def
+    current <- gets $ W.current . windowset
+    let color = if screen == W.screen current then "#008b00" {- green4 -} else "#808080" {- gray50 -}
+        pp = filterOutWsPP [scratchpadWorkspaceTag] def
             { ppCurrent = xmobarBorder "Top" color 2
             , ppVisible = xmobarBorder "Top" "#404040" 2 -- gray25
             , ppUrgent = xmobarBorder "Top" "#cd8500" 2 -- orange3
@@ -152,7 +151,9 @@ barLogHook = do
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
-    multiPP (pp "#008b00" {- green4 -}) (pp "#808080" {- gray50 -})
+    screenWorkspace screen >>= flip whenJust (modifyWindowSet . W.view)
+    dynamicLogString pp >>= xmonadPropLog' prop
+    modifyWindowSet $ W.view $ W.tag $ W.workspace current
 
 workspaceEventHook event@ClientMessageEvent{ev_data = screen : workspace : _} = do
     atom <- getAtom "_NET_DESKTOP_VIEWPORT"
@@ -168,7 +169,7 @@ manageCustomFloat textHeight = do
 
 -- Keys {{{1
 
-keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf textHeight in
+keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHook = logHook} = conf textHeight in
     [ ("M-q", asks directories >>= flip recompile False >>= flip when (restart "xmonad" True))
     , ("M-S-q", io exitSuccess)
     , ("M-x", kill)
@@ -226,7 +227,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout} = conf
     , ("M-S-g", windowPrompt (windowPromptConfig textHeight) Bring allWindows)
 
     , ("M-u", focusUrgent)
-    , ("M-S-u", clearUrgents >> barLogHook)
+    , ("M-S-u", clearUrgents >> logHook)
 
     , ("M-p", toggleWS' [scratchpadWorkspaceTag])
     , ("M-[", moveTo Prev cycleWSType)
@@ -273,7 +274,6 @@ getWorkspace = gets $ W.workspace . W.current . windowset
 toggleTag tag = withFocused $ \win -> do
     hasTag' <- hasTag tag win
     tagIff (not hasTag') tag win
-    barLogHook
 
 cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
 

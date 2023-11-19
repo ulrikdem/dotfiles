@@ -1,9 +1,8 @@
 Config
-    { template = "}%UnsafeStdinReader%{ %wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    { template = "}%xmonad%{ %wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , fgColor = "gray50"
     , commands =
-        [ Run UnsafeStdinReader
-        , Run Wireless ""
+        [ Run Wireless ""
             [ "-t", "<ssid> <fn=1>󰖩</fn> <quality>% <fc=gray25>│<raw=1: /></fc>"
             , "-x", "<fc=black><raw=36:"
             , "-h", "green4"
