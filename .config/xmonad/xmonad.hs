@@ -53,6 +53,7 @@ import XMonad.Util.EZConfig
 import XMonad.Util.NamedScratchpad
 import XMonad.Util.Run
 import XMonad.Util.Stack
+import XMonad.Util.WorkspaceCompare
 
 import LocalConfig
 
@@ -115,8 +116,10 @@ barHeight textHeight = h + h `mod` 2 - 1 where
     h = textHeight * 3 `div` 2
 
 barLogHook screen@(S sid) prop = do
+    workspace <- fromJust <$> screenWorkspace screen
+    index <- fromJust . ($ workspace) <$> getWsIndex
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
-            . xmobarAction ("xdotool set_desktop_for_window " ++ show win ++ " $(xdotool get_desktop)") "3"
+            . xmobarAction ("xdotool set_desktop " ++ show index ++ " set_desktop_for_window " ++ show win ++ " " ++ show index) "3"
             <$> runQuery iconQuery win
         getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "" . xmobarFont 1)
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
