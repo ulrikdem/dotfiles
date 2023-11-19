@@ -60,28 +60,22 @@ import LocalConfig
 
 main = xmonad . conf =<< getTextHeight
 
-conf textHeight = overrideConfig $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh $ dynamicSBs (statusBar textHeight) $ docks def
-    { startupHook = setDefaultCursor xC_left_ptr <> checkKeymap (conf textHeight) (keymap textHeight)
-    , handleEventHook = workspaceEventHook
-    , logHook = let tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
-        in withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows
-    , manageHook = composeAll
-        [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
-        , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
-        , placeHook $ fixed (0.5, 0.5)
-        , appName =? "xmonad-float" --> doFloat
-        ]
-    , layoutHook = layout textHeight
-    , borderWidth = 2
-    , normalBorderColor = inactiveColor theme
-    , focusedBorderColor = activeColor theme
-    , terminal = "alacritty"
-    , modMask = mod4Mask
-    , keys = flip mkKeymap $ keymap textHeight
-    , mouseBindings = mouse
-    }
-
-tagIff = bool delTag addTag
+conf textHeight = overrideConfig
+    $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh
+    $ dynamicSBs (statusBar textHeight) $ docks def
+        { startupHook = setDefaultCursor xC_left_ptr <> checkKeymap (conf textHeight) (keymap textHeight)
+        , handleEventHook = workspaceEventHook
+        , manageHook = floatManageHook textHeight
+        , logHook = floatLogHook
+        , layoutHook = layout textHeight
+        , borderWidth = 2
+        , normalBorderColor = inactiveColor theme
+        , focusedBorderColor = activeColor theme
+        , terminal = "alacritty"
+        , modMask = mod4Mask
+        , keys = flip mkKeymap $ keymap textHeight
+        , mouseBindings = mouse
+        }
 
 -- Theme {{{1
 
@@ -155,6 +149,8 @@ barLogHook screen prop = do
     dynamicLogString pp >>= xmonadPropLog' prop
     modifyWindowSet $ W.view $ W.tag $ W.workspace current
 
+-- Hooks {{{1
+
 workspaceEventHook event@ClientMessageEvent{ev_data = screen : workspace : _} = do
     atom <- getAtom "_NET_DESKTOP_VIEWPORT"
     when (ev_message_type event == atom) $ screenWorkspace (fi screen)
@@ -162,10 +158,22 @@ workspaceEventHook event@ClientMessageEvent{ev_data = screen : workspace : _} = 
     mempty
 workspaceEventHook _ = mempty
 
+floatManageHook textHeight = composeAll
+    [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
+    , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
+    , placeHook $ fixed (0.5, 0.5)
+    , appName =? "xmonad-float" --> doFloat
+    ]
+
 manageCustomFloat textHeight = do
     height <- liftX $ gets $ rect_height . screenRect . W.screenDetail . W.current . windowset
     let y = fi (barHeight textHeight) / fi height
     customFloating $ W.RationalRect (2 / 3) y (1 / 3) (1 - y)
+
+floatLogHook = withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows where
+    tagFloating set win = tagIff (win `M.member` W.floating set) "floating" win
+
+tagIff = bool delTag addTag
 
 -- Keys {{{1
 
