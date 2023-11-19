@@ -327,7 +327,8 @@ commandPromptConfig textHeight matches = def
 commandPrompt textHeight prompt escape action cmds = do
     matches <- initMatches
     let config = commandPromptConfig textHeight matches
-        compl = fmap (map $ dropWhileEnd (== '/')) . getShellCompl' CaseInSensitive cmds (searchPredicate config) . escape
+        strip cs = if length cs > 1 then deleteConsecutive $ dropWhileEnd (== '/') <$> cs else cs
+        compl = fmap strip . getShellCompl' CaseInSensitive cmds (searchPredicate config) . escape
     mkXPrompt prompt config compl action
 
 data Terminal = Terminal
