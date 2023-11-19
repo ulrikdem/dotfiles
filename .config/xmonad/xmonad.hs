@@ -355,7 +355,7 @@ layout textHeight =
     smartSpacingWithEdge (fi textHeight `div` 4) $
     configurableNavigation noNavigateBorders $
     borderResize $
-    (Grid [1, 1] (textHeight * 8) Nothing :: Grid Window)
+    (Columns [1, 1] (textHeight * 8) Nothing :: Columns Window)
 
 data EllipsisShrinker = EllipsisShrinker
     deriving (Read, Show)
@@ -371,40 +371,40 @@ data LayoutMessage
 
 instance Message LayoutMessage
 
-data Grid a = Grid
+data Columns a = Columns
     { colWeights :: [Rational]
     , minWidth :: Dimension
     , focused :: Maybe (Int, Rectangle)
     }
     deriving (Read, Show)
 
-instance (Eq a) => LayoutClass Grid a where
-    doLayout grid@Grid{colWeights = weights} rect stack@W.Stack{W.focus = focus} = return (rects, grid') where
-        colWins = split (length weights) $ W.integrate stack
-        rects = layout (mirrorRect rect) (zip colWins weights) >>= \(wins, r) -> layout (mirrorRect r) $ zip wins $ repeat 1
-        grid' = Just grid{focused = (,) <$> findIndex (focus `elem`) colWins <*> fmap snd (find ((focus ==) . fst) rects)}
-        split _ [] = []
-        split cols wins = let (a, b) = splitAt (max 1 $ length wins `div` cols) wins in a : split (cols - 1) b
-        layout rect as = layout' rect as $ sum $ snd <$> as
-        layout' (Rectangle x y w h) ((a, weight) : as) total = let h' = round $ fi h * weight / total
-            in (a, Rectangle x y w h') : layout' (Rectangle x (y + fi h') w (h - h')) as (total - weight)
-        layout' _ [] _ = []
-    emptyLayout grid _ = return ([], Just grid{focused = Nothing})
-    handleMessage grid@Grid{colWeights = weights} m
-        | Just (ModifyColumns f) <- fromMessage m = return $ Just grid{colWeights = replicate (max 1 $ f $ length weights) 1}
+instance (Eq a) => LayoutClass Columns a where
+    doLayout layout@Columns{colWeights = weights} rect stack@W.Stack{W.focus = focus} = return (rects, layout') where
+        colWins = splitList (length weights) $ W.integrate stack
+        rects = splitRect (mirrorRect rect) (zip colWins weights) >>= \(wins, r) -> splitRect (mirrorRect r) $ zip wins $ repeat 1
+        layout' = Just layout{focused = (,) <$> findIndex (focus `elem`) colWins <*> fmap snd (find ((focus ==) . fst) rects)}
+        splitList _ [] = []
+        splitList cols wins = let (a, b) = splitAt (max 1 $ length wins `div` cols) wins in a : splitList (cols - 1) b
+        splitRect rect as = splitRect' rect as $ sum $ snd <$> as
+        splitRect' (Rectangle x y w h) ((a, weight) : as) total = let h' = round $ fi h * weight / total
+            in (a, Rectangle x y w h') : splitRect' (Rectangle x (y + fi h') w (h - h')) as (total - weight)
+        splitRect' _ [] _ = []
+    emptyLayout layout _ = return ([], Just layout{focused = Nothing})
+    handleMessage layout@Columns{colWeights = weights} m
+        | Just (ModifyColumns f) <- fromMessage m = return $ Just layout{colWeights = replicate (max 1 $ f $ length weights) 1}
         | Just (WithColumns f) <- fromMessage m = f (length weights) >> return Nothing
         | Just (SetGeometry rect@(Rectangle x' _ w' _)) <- fromMessage m,
-          Just (col, Rectangle x _ w _) <- focused grid,
+          Just (col, Rectangle x _ w _) <- focused layout,
           w' /= w && (x' == x || col > 0),
           (before, l : r : after) <- splitAt (if x' == x then col else col - 1) weights,
           let scale = weights !! col / fi w
               delta = (fi w' - fi w) * scale
               (l', r') = if x' == x then (l + delta, r - delta) else (l - delta, r + delta)
-              min = fi (minWidth grid) * scale,
+              min = fi (minWidth layout) * scale,
           l' >= min && r' >= min
-            = return $ Just grid{colWeights = before ++ l' : r' : after, focused = Just (col, rect)}
+            = return $ Just layout{colWeights = before ++ l' : r' : after, focused = Just (col, rect)}
         | otherwise = return Nothing
-    description _ = "Grid"
+    description _ = "Columns"
 
 data Limit l a = Limit Int (Int, Int) (l a)
     deriving (Read, Show)
