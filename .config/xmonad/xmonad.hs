@@ -303,12 +303,15 @@ windowPromptConfig textHeight = def
     , searchPredicate = fuzzyMatch
     , sorter = fuzzySort
     , historySize = 0
-    , promptKeymap = M.union (M.fromList
-        [ ((controlMask, xK_u), killBefore)
-        , ((controlMask, xK_BackSpace), killWord' (\c -> isSpace c || c == '/') Prev)
+    , promptKeymap = let isSeparator c = isSpace c || c == '/' in M.union (M.fromList
+        [ ((mod1Mask, xK_BackSpace), killWord Prev)
+        , ((mod1Mask, xK_d), killWord Next >> deleteString Next)
         , ((controlMask, xK_Left), moveCursor Prev >> moveWord Prev)
-        , ((controlMask, xK_Right), moveWord Next >> moveCursor Next)
-        ]) emacsLikeXPKeymap
+        , ((controlMask, xK_Right), moveCursor Prev >> moveWord Next >> moveCursor Next >> moveCursor Next)
+        , ((shiftMask, xK_Left), moveCursor Prev >> moveWord' isSeparator Prev)
+        , ((shiftMask, xK_Right), moveCursor Prev >> moveWord' isSeparator Next >> moveCursor Next >> moveCursor Next)
+        , ((shiftMask, xK_Insert), pasteString)
+        ]) $ defaultXPKeymap' isSeparator
     }
 
 commandPromptConfig textHeight matches = def
