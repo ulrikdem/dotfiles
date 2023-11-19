@@ -114,18 +114,15 @@ statusBar textHeight screen@(S i) = return $ statusBarGeneric cmd $ barLogHook s
 barHeight textHeight = h + h `mod` 2 - 1 where
     h = textHeight * 3 `div` 2
 
-barLogHook screen prop = do
-    let getIcon w win = xmobarAction ("xdotool set_desktop_viewport \n " ++ w ++ " windowactivate " ++ show win) "1"
+barLogHook screen@(S sid) prop = do
+    let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop_for_window " ++ show win ++ " $(xdotool get_desktop)") "3"
             <$> runQuery iconQuery win
         getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "" . xmobarFont 1)
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
-    let rename w _ = xmobarAction ("xdotool set_desktop_viewport \n " ++ w) "1"
+    let rename w _ = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w) "1"
             $ pad $ (w ++) $ xmobarColor "gray25" "" $ M.findWithDefault "" w icons
-        getScreen = do
-            S i <- gets $ W.screen . W.current . windowset
-            return $ Just $ show i
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
@@ -139,9 +136,8 @@ barLogHook screen prop = do
             , ppRename = rename
             , ppTitle = xmobarRaw
             , ppTitleSanitize = id
-            , ppExtras = [getScreen, showTag "scratchpad"]
-            , ppOrder = \(workspaces : layout : title : screen : tags)
-                -> [intercalate screen $ lines workspaces, title ++ concat tags]
+            , ppExtras = [showTag "scratchpad"]
+            , ppOrder = \(workspaces : layout : title : tags) -> [workspaces, title ++ concat tags]
             , ppSep = "<fc=gray25>│</fc> "
             , ppWsSep = ""
             }
