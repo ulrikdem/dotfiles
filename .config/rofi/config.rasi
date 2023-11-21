@@ -3,15 +3,14 @@ configuration {
     location: 2;
     fixed-num-lines: false;
 
-    modes: "window";
-    window-match-fields: "desktop,class,title";
+    modes: [window];
+    window-match-fields: [desktop, class, title];
     window-format: "{w:1}  {c}  {t}";
 
     disable-history: true;
 
     sort: true;
     sorting-method: "fzf";
-    matching: "fuzzy";
 
     kb-remove-word-forward: "Alt+d";
     kb-move-front: "Home";
@@ -28,5 +27,21 @@ configuration {
 }
 
 @theme "/usr/share/rofi/themes/android_notification.rasi"
+
+window, listview {
+    border: 0;
+    scrollbar: false;
+}
+
+case-indicator {
+    enabled: false;
+}
+
+element normal urgent {
+    text-color: @normal-foreground;
+}
+element selected urgent {
+    text-color: @selected-normal-foreground;
+}
 
 /* vim:set filetype=css: */
