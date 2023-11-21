@@ -12,9 +12,10 @@ leaderMap spawnInTerminal =
     [ ("f", spawn "firefox")
     , ("S-f", spawn "firefox --private-window")
     , ("h", spawnInTerminal "htop")
+    , ("i", spawnInTerminal "ipython")
     , ("m", spawn "mpv --player-operation-mode=pseudo-gui")
     , ("n", spawnInTerminal "newsboat")
-    , ("p", spawnInTerminal "ipython")
+    , ("p", spawn "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class Alacritty,xmonad-float -T pulsemixer -e pulsemixer")
     , ("t", spawn "thunderbird")
     , ("v", spawnInTerminal "nvim")
     ]
@@ -24,6 +25,7 @@ iconQuery = composeOne
         [ title =? "htop" -?> return "\xf0128" -- 󰄨
         , title =? "ipython" -?> return "\xf0320" -- 󰌠
         , title =? "newsboat" -?> return "\xf09e" -- 
+        , title =? "pulsemixer" -?> return "\xf057e" -- 󰕾
         , title ^? "ranger:" -?> return "\xe5fe" -- 
         , title $? " - nvim" -?> return "\xe62b" -- 
         , return $ Just "\xe795" -- 
