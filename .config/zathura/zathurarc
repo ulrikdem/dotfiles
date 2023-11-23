@@ -1,5 +1,4 @@
 set guioptions ""
-set incremental-search true
 set recolor-keephue true
 set scroll-page-aware true
 set statusbar-home-tilde true
