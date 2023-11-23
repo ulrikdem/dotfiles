@@ -420,7 +420,7 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
             (before, (_, rect) : after) -> do
                 (rects, extraLayout') <- runLayout (W.Workspace tag extraLayout extraStack) rect
                 return (before ++ rects ++ after, extraLayout')
-            (_, []) -> (rects,) . snd <$> runLayout (W.Workspace tag extraLayout Nothing) rect
+            (_, []) -> (rects,) <$> handleMessage extraLayout (SomeMessage Hide)
         return ((rects, mainLayout'), Just $ Limit n state' $ fromMaybe extraLayout extraLayout')
     handleMess (Limit n state extraLayout) m = case fromMessage m of
         Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) state extraLayout
@@ -449,7 +449,8 @@ data ResetEmpty l a = ResetEmpty (l a) (l a)
     deriving (Read, Show)
 
 instance (LayoutClass l a) => LayoutClass (ResetEmpty l) a where
-    runLayout (W.Workspace tag (ResetEmpty reset _) Nothing) rect = do
+    runLayout (W.Workspace tag (ResetEmpty reset layout) Nothing) rect = do
+        handleMessage layout $ SomeMessage ReleaseResources
         (rects, layout') <- runLayout (W.Workspace tag reset Nothing) rect
         return (rects, Just $ ResetEmpty reset $ fromMaybe reset layout')
     runLayout (W.Workspace tag (ResetEmpty reset layout) stack) rect = do
