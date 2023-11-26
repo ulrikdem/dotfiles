@@ -114,7 +114,8 @@ barHeight textHeight = h + h `mod` 2 - 1 where
     h = textHeight * 3 `div` 2
 
 barLogHook screen@(S sid) prop = do
-    index <- workspaceIndex =<< fmap fromJust (screenWorkspace screen)
+    workspaceIndex <- getWorkspaceIndex
+    index <- workspaceIndex . fromJust <$> screenWorkspace screen
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop " ++ show index ++ " set_desktop_for_window " ++ show win ++ " " ++ show index) "3"
             <$> runQuery iconQuery win
@@ -122,7 +123,8 @@ barLogHook screen@(S sid) prop = do
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w _ = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w) "1"
-            $ pad $ (w ++) $ xmobarColor "gray25" "" $ M.findWithDefault "" w icons
+            $ pad $ (++ xmobarColor "gray25" "" (M.findWithDefault "" w icons))
+            $ xmobarAction ("xdotool set_desktop " ++ show index ++ "; xdotool getactivewindow set_desktop_for_window " ++ show (workspaceIndex w)) "3" w
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
@@ -145,9 +147,10 @@ barLogHook screen@(S sid) prop = do
     dynamicLogString pp >>= xmonadPropLog' prop
     modifyWindowSet $ W.view $ W.tag $ W.workspace current
 
-workspaceIndex workspace = do
+getWorkspaceIndex = do
     sort <- getSortByIndex
-    gets $ fromJust . elemIndex workspace . map W.tag . sort . W.workspaces . windowset
+    workspaces <- gets $ map W.tag . sort . W.workspaces . windowset
+    return $ fromJust . (`elemIndex` workspaces)
 
 -- Hooks {{{1
 
@@ -233,7 +236,8 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-o", commandPrompt textHeight Open (shellQuote . shellQuote) (safeSpawn "xdg-open" . pure) [])
 
     , ("M-w", do
-        i <- workspaceIndex =<< fmap W.tag getWorkspace
+        workspaceIndex <- getWorkspaceIndex
+        i <- workspaceIndex . W.tag <$> getWorkspace
         safeSpawn "rofi"
             [ "-show", "window"
             , "-window-command", "xdotool set_desktop_for_window {window} " ++ show i
