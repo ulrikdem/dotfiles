@@ -438,10 +438,10 @@ data Fullscreen a = Fullscreen (Maybe a)
     deriving (Read, Show)
 
 instance LayoutModifier Fullscreen Window where
-    modifyLayoutWithUpdate (Fullscreen state) workspace rect
-        | Just win <- state, Just stack <- W.stack workspace, W.focus stack == win = do
-            (_, update) <- runLayout workspace{W.stack = Nothing} rect
-            return (([(win, rect)], update), Nothing)
+    modifyLayoutWithUpdate (Fullscreen state) workspace@(W.Workspace _ layout stack) rect
+        | Just win <- state, Just stack' <- stack, W.focus stack' == win = do
+            layout' <- handleMessage layout $ SomeMessage Hide
+            return (([(win, rect)], layout'), Nothing)
         | otherwise = (, Just $ Fullscreen Nothing) <$> runLayout workspace rect
     pureMess (Fullscreen state) m = case fromMessage m of
         Just (ToggleFullscreen win) -> Just $ Fullscreen $ if state == Just win then Nothing else Just win
