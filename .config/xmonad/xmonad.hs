@@ -14,6 +14,8 @@ import qualified Data.Map.Strict as M
 
 import Graphics.X11.Xft
 
+import Numeric
+
 import System.Exit
 
 import XMonad
@@ -119,22 +121,26 @@ barLogHook screen@(S sid) prop = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop " ++ show index ++ " set_desktop_for_window " ++ show win ++ " " ++ show index) "3"
             <$> runQuery iconQuery win
-        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "" . xmobarFont 1)
+        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "\n" . xmobarFont 1)
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w _ = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w) "1"
-            $ pad $ (++ xmobarColor "gray25" "" (M.findWithDefault "" w icons))
+            $ pad $ (++ xmobarColor "gray25" "\n" (M.findWithDefault "" w icons))
             $ xmobarAction ("xdotool set_desktop " ++ show index ++ "; xdotool getactivewindow set_desktop_for_window " ++ show (workspaceIndex w)) "3" w
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
     current <- gets $ W.current . windowset
-    let color = if screen == W.screen current then "#008b00" {- green4 -} else "#808080" {- gray50 -}
+    let color = if screen == W.screen current then [0x00, 0x8B, 0x00] {- green4 -} else [0x80, 0x80, 0x80] {- gray50 -}
+        showColor [r, g, b] = let hex i = showHex (i `div` 16) . showHex (i `mod` 16) in ('#' :) . hex r . hex g . hex b
+        background color = intercalate (showColor color ":0") . lines . xmobarColor "gray50" "\n"
+        highlight color = xmobarBorder "Bottom" (showColor color "") 2 . background (map (`div` 4) color)
         pp = filterOutWsPP [scratchpadWorkspaceTag] def
-            { ppCurrent = xmobarBorder "Top" color 2
-            , ppVisible = xmobarBorder "Top" "#404040" 2 -- gray25
-            , ppUrgent = xmobarBorder "Top" "#cd8500" 2 -- orange3
-            , ppHiddenNoWindows = id
+            { ppCurrent = highlight color
+            , ppVisible = highlight [0x40, 0x40, 0x40] -- gray25
+            , ppUrgent = highlight [0xCD, 0x85, 0x00] -- orange3
+            , ppHidden = background [0, 0, 0]
+            , ppHiddenNoWindows = background [0, 0, 0]
             , ppRename = rename
             , ppTitle = xmobarRaw
             , ppTitleSanitize = id
