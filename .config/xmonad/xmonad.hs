@@ -39,7 +39,6 @@ import XMonad.Hooks.UrgencyHook
 import XMonad.Layout.BorderResize
 import XMonad.Layout.Decoration
 import XMonad.Layout.LayoutModifier
-import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
 import XMonad.Layout.Tabbed
 import XMonad.Layout.WindowArranger
@@ -107,13 +106,17 @@ getTextHeight = do
 
 statusBar textHeight screen@(S i) = return $ statusBarGeneric cmd $ barLogHook screen prop where
     prop = "_XMONAD_LOG_" ++ show i
-    cmd = "xmobar -p 'TopH " ++ show (barHeight textHeight) ++ "' -x " ++ show i
+    cmd = "xmobar -p 'TopHM " ++ show (barHeight textHeight) ++ " " ++ margin ++ " " ++ margin ++ " " ++ margin ++ " 0'"
+        ++ " -x " ++ show i
         ++ " -C '[Run UnsafeNamedXPropertyLog \"" ++ prop ++ "\" \"xmonad\"]'"
         ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "'"
         ++ " -D \"$(xrdb -get Xft.dpi)\""
+    margin = show $ gapWidth textHeight
 
 barHeight textHeight = h + h `mod` 2 - 1 where
     h = textHeight * 3 `div` 2
+
+gapWidth textHeight = textHeight `div` 5 * 2
 
 barLogHook screen@(S sid) prop = do
     workspaceIndex <- getWorkspaceIndex
@@ -129,7 +132,7 @@ barLogHook screen@(S sid) prop = do
             $ xmobarAction ("xdotool set_desktop " ++ show index ++ "; xdotool getactivewindow set_desktop_for_window " ++ show (workspaceIndex w)) "3" w
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
-            return $ Just $ if hasTag' == Just True then " <fc=gray25>[" ++ tag ++ "]</fc>" else ""
+            return $ Just $ if hasTag' == Just True then xmobarColor "gray25" "\n" $ " [" ++ tag ++ "]" else ""
     current <- gets $ W.current . windowset
     let color = if screen == W.screen current then [0x00, 0x8B, 0x00] {- green4 -} else [0x80, 0x80, 0x80] {- gray50 -}
         showColor [r, g, b] = let hex i = showHex (i `div` 16) . showHex (i `mod` 16) in ('#' :) . hex r . hex g . hex b
@@ -145,8 +148,8 @@ barLogHook screen@(S sid) prop = do
             , ppTitle = xmobarRaw
             , ppTitleSanitize = id
             , ppExtras = [showTag "scratchpad"]
-            , ppOrder = \(workspaces : layout : title : tags) -> [workspaces, title ++ concat tags]
-            , ppSep = "<fc=gray25>│</fc> "
+            , ppOrder = \(workspaces : layout : title : tags) -> [workspaces, background [0, 0, 0] $ pad $ title ++ concat tags]
+            , ppSep = " "
             , ppWsSep = ""
             }
     screenWorkspace screen >>= flip whenJust (modifyWindowSet . W.view)
@@ -176,7 +179,7 @@ floatManageHook textHeight = composeAll
 
 manageCustomFloat textHeight = do
     height <- liftX $ gets $ rect_height . screenRect . W.screenDetail . W.current . windowset
-    let y = fi (barHeight textHeight) / fi height
+    let y = fi (barHeight textHeight + gapWidth textHeight) / fi height
     customFloating $ W.RationalRect (2 / 3) y (1 / 3) (1 - y)
 
 floatLogHook = withWindowSet $ mapM_ <$> tagFloating <*> W.allWindows where
@@ -248,7 +251,6 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
             [ "-show", "window"
             , "-window-command", "xdotool set_desktop_for_window {window} " ++ show i
             , "-font", "monospace " ++ show fontSize
-            , "-yoffset", show $ barHeight textHeight
             ])
 
     , ("M-u", focusUrgent)
@@ -353,12 +355,11 @@ instance XPrompt Open where
 -- Layout {{{1
 
 layout textHeight =
-    lessBorders Screen $
     resetEmpty $
     ModifiedLayout (Fullscreen Nothing) $
     ModifiedLayout (Limit 3 (0, 0) $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}) $
     avoidStruts $
-    smartSpacingWithEdge (fi textHeight `div` 4) $
+    spacingWithEdge (fi $ gapWidth textHeight `div` 2) $
     configurableNavigation noNavigateBorders $
     borderResize $
     (Columns [1, 1] (textHeight * 8) Nothing :: Columns Window)
