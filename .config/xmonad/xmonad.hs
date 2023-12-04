@@ -238,7 +238,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("<XF86MonBrightnessUp>", spawn "light -A 10")
 
     , ("M-r", commandPrompt textHeight Shell (completionToCommand Shell) spawn =<< io getCommands)
-    , ("M-S-r", commandPrompt textHeight Terminal (completionToCommand Shell) (spawnIn terminal) =<< io getCommands)
+    , ("M-S-r", commandPrompt textHeight Terminal (completionToCommand Shell) (spawnIn terminal []) =<< io getCommands)
     , ("M-o", commandPrompt textHeight Open (shellQuote . shellQuote) (safeSpawn "xdg-open" . pure) [])
 
     , ("M-w", do
@@ -270,9 +270,11 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , (key, i) <- zip "h,." [0..]
     ] ++
 
-    [ ("M-<Space> " ++ mod ++ key, action)
+    [ ("M-<Space> " ++ mod ++ mod' ++ key, f command)
     | mod <- ["", "M-"]
-    , (key, action) <- leaderMap $ spawnIn terminal
+    , (key, command, term) <- leaderMap
+    , (mod', f) <- if term then [("", spawnIn terminal []), ("S-", spawnIn terminal ["--class=Alacritty,xmonad-scratchpad"])]
+                           else [("", spawn)]
     ]
 
 mouse XConfig{modMask = mod} = M.fromList
@@ -302,8 +304,8 @@ toggleTag tag = withFocused $ \win -> do
 
 cycleWSType = hiddenWS :&: ignoringWSs [scratchpadWorkspaceTag]
 
-spawnIn terminal command = safeSpawn terminal
-    ["-e" , "sh", "-c", "printf '\\e]2;%s\\a' " ++ shellQuote command ++ "; exec " ++ command]
+spawnIn terminal args command = safeSpawn terminal
+    $ args ++ ["-e" , "sh", "-c", "printf '\\e]2;%s\\a' " ++ shellQuote command ++ "; exec " ++ command]
 
 shellQuote = wrap "'" "'" . escape where
     escape s = case break (== '\'') s of

@@ -2,22 +2,21 @@
 
 module LocalConfig (overrideConfig, leaderMap, iconQuery) where
 
-import Data.List
 import XMonad.ManageHook
 import XMonad.Hooks.ManageHelpers
 
 overrideConfig = id
 
-leaderMap spawnInTerminal =
-    [ ("f", spawn "firefox")
-    , ("S-f", spawn "firefox --private-window")
-    , ("h", spawnInTerminal "htop")
-    , ("i", spawnInTerminal "ipython")
-    , ("m", spawn "mpv --player-operation-mode=pseudo-gui")
-    , ("n", spawnInTerminal "newsboat")
-    , ("p", spawn "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class Alacritty,xmonad-float -T pulsemixer -e pulsemixer")
-    , ("t", spawn "thunderbird")
-    , ("v", spawnInTerminal "nvim")
+leaderMap =
+    [ ("f", "firefox", False)
+    , ("S-f", "firefox --private-window", False)
+    , ("h", "htop", True)
+    , ("i", "ipython", True)
+    , ("m", "mpv --player-operation-mode=pseudo-gui", False)
+    , ("n", "newsboat", True)
+    , ("p", "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class Alacritty,xmonad-float -T pulsemixer -e pulsemixer", False)
+    , ("t", "thunderbird", False)
+    , ("v", "nvim", True)
     ]
 
 iconQuery = composeOne
