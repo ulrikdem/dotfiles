@@ -75,7 +75,7 @@ with open('/usr/share/unicode/UnicodeData.txt') as file:
         seqs = compose.get(char, [])
         if f'U{code}' in altgr:
             seqs.insert(0, 'altgr+' + keysyms[altgr[f'U{code}']])
-        output(code, char, name, ' '.join(seqs))
+        output(code, char, name.lower(), ' '.join(seqs))
 
 nerd = []
 with open(sys.argv[2]) as file:
@@ -84,7 +84,7 @@ with open(sys.argv[2]) as file:
         nerd.append((char, name))
 for char, name in sorted(nerd):
     code = hex(ord(char))[2:].upper()
-    name = 'NERD FONTS ' + name.upper().replace('_', ' ')
+    name = 'nerd fonts ' + name.replace('_', ' ')
     output(code, char, name)
 
 EOF
