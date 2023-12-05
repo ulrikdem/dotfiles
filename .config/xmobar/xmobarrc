@@ -22,7 +22,7 @@ Config
             [ "-c", "ip route show default | sed -E 's:.*src (\\S+).*:\\1 <fc=gray25>│</fc> :'"
             ] "ip" 10
         , Run Cpu
-            [ "-t", "<fn=1>󰘚</fn> <total>% "
+            [ "-t", "<fn=0></fn> <total>% "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
@@ -34,7 +34,7 @@ Config
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", "<fn=1>󰍛</fn> <usedratio>% <fc=gray25>│</fc> "
+            [ "-t", "<fn=0></fn> <usedratio>% <fc=gray25>│</fc> "
             , "-h", "red3"
             , "-n", "orange3"
             , "-l", "green4"
