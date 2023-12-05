@@ -22,7 +22,7 @@ leaderMap =
 iconQuery = composeOne
     [ className =? "Alacritty" -?> composeOne
         [ title =? "htop" -?> return "\xf0128" -- 󰄨
-        , title =? "ipython" -?> return "\xf0320" -- 󰌠
+        , title =? "ipython" <||> title =? "ipy" -?> return "\xf0320" -- 󰌠
         , title =? "newsboat" -?> return "\xf09e" -- 
         , title =? "pulsemixer" -?> return "\xf057e" -- 󰕾
         , title ^? "ranger:" -?> return "\xe5fe" -- 
