@@ -358,12 +358,13 @@ layout textHeight =
     lessBorders Screen $
     resetEmpty $
     ModifiedLayout (Fullscreen Nothing) $
-    ModifiedLayout (Limit 3 (0, 0) $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}) $
+    ModifiedLayout (Limit 3 (0, 0) tabbed) $
     avoidStruts $
     smartSpacingWithEdge (fi textHeight `div` 4) $
     configurableNavigation noNavigateBorders $
     borderResize $
-    (Columns [1, 1] (textHeight * 8) Nothing :: Columns Window)
+    Columns [1, 1] (textHeight * 8) Nothing where
+        tabbed = FocusFromStack Nothing $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
 
 data EllipsisShrinker = EllipsisShrinker
     deriving (Read, Show)
@@ -441,6 +442,27 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
 toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
     _ -> Nothing
+
+data FocusFromStack l a = FocusFromStack (Maybe a) (l a)
+    deriving (Read, Show)
+
+instance (LayoutClass l Window) => LayoutClass (FocusFromStack l) Window where
+    runLayout (W.Workspace tag (FocusFromStack _ layout) stack) rect = do
+        let focus = fmap W.focus stack
+        (rects, layout') <- tempFocus focus $ runLayout (W.Workspace tag layout stack) rect
+        return (rects, Just $ FocusFromStack focus $ fromMaybe layout layout')
+    handleMessage (FocusFromStack focus layout) m = case fromMessage m of
+        Just PropertyEvent{} -> tempFocus focus handle
+        Just ExposeEvent{} -> tempFocus focus handle
+        _ -> handle
+        where handle = fmap (FocusFromStack focus) <$> handleMessage layout m
+
+tempFocus focus action = do
+    ws <- gets windowset
+    modifyWindowSet $ maybe id W.focusWindow focus
+    r <- action
+    modifyWindowSet $ const ws
+    return r
 
 data Fullscreen a = Fullscreen (Maybe a)
     deriving (Read, Show)
