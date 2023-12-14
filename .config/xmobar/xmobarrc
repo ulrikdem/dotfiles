@@ -1,10 +1,10 @@
 Config
-    { template = "}%xmonad%{ %wi%%dynnetwork%%ip%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    { template = "}%xmonad%{ %dynnetwork%%wi%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
-            [ "-t", "<ssid> <fn=1>󰖩</fn> <quality>% <fc=gray25>│<raw=1: /></fc>"
-            , "-x", "<fc=black><raw=36:"
+            [ "-t", "<fc=,><ssid></fc><fn=1>󰖩</fn> <quality>% <fc=gray25>│<raw=1: /></fc>"
+            , "-x", "<raw=40:"
             , "-h", "green4"
             , "-n", "orange3"
             , "-l", "red3"
@@ -12,15 +12,12 @@ Config
             , "-L", "25"
             ] 10
         , Run DynNetwork
-            [ "-t", "<dev> <fn=1>󰁅</fn><rx>K <fn=1>󰁝</fn><tx>K <fc=gray25>│</fc> "
+            [ "-t", "<fn=1>󰇚</fn> <rx>K <fn=1>󰕒</fn> <tx>K <fc=gray25>│</fc> "
             , "-h", "green4"
             , "-l", "orange3"
             , "-H", "0"
             , "-L", "0"
             ] 10
-        , Run Com "sh"
-            [ "-c", "ip route show default | sed -E 's:.*src (\\S+).*:\\1 <fc=gray25>│</fc> :'"
-            ] "ip" 10
         , Run Cpu
             [ "-t", "<fn=0></fn> <total>% "
             , "-h", "red3"
