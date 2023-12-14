@@ -1,5 +1,5 @@
 Config
-    { template = "}%xmonad%{ %dynnetwork%%wi%%cpu%%cpufreq%%memory%%bright%%alsa:default:Master%%battery%%date%"
+    { template = "}%xmonad%{ %dynnetwork%%wi%%cpu%%cpufreq%%memory%%alsa:default:Master%%battery%%date%"
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
@@ -38,11 +38,6 @@ Config
             , "-H", "75"
             , "-L", "50"
             ] 10
-        , Run Brightness
-            [ "-t", "<fn=1>󰃟</fn> <fc=green4><percent></fc>% <fc=gray25>│</fc> "
-            , "--"
-            , "-D", "intel_backlight"
-            ] 1
         , Run Alsa "default" "Master"
             [ "-t", "<fn=1><status></fn> <fc=green4><volume></fc>% <fc=gray25>│</fc> "
             , "--"
