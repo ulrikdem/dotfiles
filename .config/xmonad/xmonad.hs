@@ -121,11 +121,11 @@ barLogHook screen@(S sid) prop = do
     let getIcon w win = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w ++ " windowactivate " ++ show win) "1"
             . xmobarAction ("xdotool set_desktop " ++ show index ++ " set_desktop_for_window " ++ show win ++ " " ++ show index) "3"
             <$> runQuery iconQuery win
-        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "\n" . xmobarFont 1)
+        getIcons w = fmap ((W.tag w,) . concat) . onFocusedZ (xmobarColor "gray50" "\n")
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w _ = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w) "1"
-            $ pad $ (++ xmobarColor "gray25" "\n" (M.findWithDefault "" w icons))
+            $ pad $ (++ xmobarFont 1 (xmobarColor "gray25" "\n" $ M.findWithDefault "" w icons))
             $ xmobarAction ("xdotool set_desktop " ++ show index ++ "; xdotool getactivewindow set_desktop_for_window " ++ show (workspaceIndex w)) "3" w
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
