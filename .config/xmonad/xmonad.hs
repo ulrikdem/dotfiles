@@ -234,8 +234,8 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("<XF86AudioMute>", spawn "amixer set Master toggle")
     , ("<XF86AudioLowerVolume>", spawn "amixer set Master 2%-")
     , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 2%+")
-    , ("<XF86MonBrightnessDown>", spawn "light -U 10")
-    , ("<XF86MonBrightnessUp>", spawn "light -A 10")
+    , ("<XF86MonBrightnessDown>", spawn "light -U 10; light-notify")
+    , ("<XF86MonBrightnessUp>", spawn "light -A 10; light-notify")
 
     , ("M-r", commandPrompt textHeight Shell (completionToCommand Shell) spawn =<< io getCommands)
     , ("M-S-r", commandPrompt textHeight Terminal (completionToCommand Shell) (spawnIn terminal []) =<< io getCommands)

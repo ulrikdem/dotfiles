@@ -1,0 +1,3 @@
+#!/bin/bash
+light=$(light)
+dunstify -t 1000 -i /usr/share/icons/Adwaita/symbolic/status/display-brightness-symbolic.svg -h string:x-dunst-stack-tag:light -h int:value:${light%.*} ${light%.*}
