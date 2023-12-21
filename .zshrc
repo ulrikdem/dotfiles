@@ -82,10 +82,6 @@ function preexec {
 
 VIRTUAL_ENV_DISABLE_PROMPT=1
 
-RPROMPT='%0F%K{$vi_mode_color} $vi_mode %k%f'
-RPROMPT2=$RPROMPT
-ZLE_RPROMPT_INDENT=0
-
 # Key Bindings {{{1
 
 bindkey -e
@@ -180,36 +176,15 @@ bindkeymaps '^A' incarg vicmd
 function decarg { NUMERIC=$((-${NUMERIC:-1})) incarg }
 bindkeymaps '^X' decarg vicmd
 
-function zle-line-pre-redraw {
-    local old_mode=$vi_mode old_cursor=$vi_mode_cursor
-    if [[ $KEYMAP = vicmd ]]; then
-        case $REGION_ACTIVE in
-            0) vi_mode=NORMAL vi_mode_color=green;;
-            1) vi_mode=VISUAL vi_mode_color=magenta;;
-            2) vi_mode=V-LINE vi_mode_color=magenta;;
-        esac
-        vi_mode_cursor=2
-    elif [[ $ZLE_STATE = *overwrite* ]]; then
-        vi_mode=REPLACE vi_mode_color=red vi_mode_cursor=4
-    else
-        vi_mode=INSERT vi_mode_color=blue vi_mode_cursor=6
-    fi
-    [[ $vi_mode != $old_mode ]] && zle reset-prompt
-    [[ $vi_mode_cursor != $old_cursor ]] && echo -n "\e[$vi_mode_cursor q"
-}
-zle -N zle-line-pre-redraw
-
-function zle-line-init {
-    zle-line-pre-redraw
+function smkx {
     (($+terminfo[smkx])) && echoti smkx
 }
-function zle-line-finish {
-    vi_mode_cursor=2
-    echo -n "\e[$vi_mode_cursor q"
+function rmkx {
     (($+terminfo[rmkx])) && echoti rmkx
 }
-zle -N zle-line-init
-zle -N zle-line-finish
+autoload -U add-zle-hook-widget
+add-zle-hook-widget line-init smkx
+add-zle-hook-widget line-finish rmkx
 
 stty -ixon
 
@@ -318,6 +293,38 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
 fi
 
 zle_highlight=(suffix:fg=8 region:fg=8,standout paste:none)
+
+# Vi Mode Indicator {{{1
+
+RPROMPT='%0F%K{$vi_mode_color} $vi_mode %k%f'
+RPROMPT2=$RPROMPT
+ZLE_RPROMPT_INDENT=0
+
+function vi_mode_update {
+    local old_mode=$vi_mode old_cursor=$vi_mode_cursor
+    if [[ $KEYMAP = vicmd ]]; then
+        case $REGION_ACTIVE in
+            0) vi_mode=NORMAL vi_mode_color=green;;
+            1) vi_mode=VISUAL vi_mode_color=magenta;;
+            2) vi_mode=V-LINE vi_mode_color=magenta;;
+        esac
+        vi_mode_cursor=2
+    elif [[ $ZLE_STATE = *overwrite* ]]; then
+        vi_mode=REPLACE vi_mode_color=red vi_mode_cursor=4
+    else
+        vi_mode=INSERT vi_mode_color=blue vi_mode_cursor=6
+    fi
+    [[ $vi_mode != $old_mode ]] && zle reset-prompt
+    [[ $vi_mode_cursor != $old_cursor ]] && echo -n "\e[$vi_mode_cursor q"
+}
+add-zle-hook-widget line-init vi_mode_update
+add-zle-hook-widget line-pre-redraw vi_mode_update
+
+function vi_mode_reset {
+    vi_mode_cursor=2
+    echo -n "\e[$vi_mode_cursor q"
+}
+add-zle-hook-widget line-finish vi_mode_reset
 
 # FZF {{{1
 
