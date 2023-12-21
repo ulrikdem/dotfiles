@@ -283,6 +283,7 @@ if [[ -f /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.
     ZSH_HIGHLIGHT_STYLES+=(
         path_prefix none
         path bold
+        autodirectory bold
         assign fg=cyan
         unknown-token fg=red
         bracket-error fg=red
