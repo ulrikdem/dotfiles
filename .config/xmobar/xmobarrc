@@ -3,8 +3,15 @@ Config
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
-            [ "-t", "<fc=,><ssid></fc> <fn=1>󰖩</fn> <fc=gray30><raw=1:│/></fc>"
-            , "-x", "<raw=38:"
+            [ "-t", "<fc=,><ssid></fc> <fn=1><qualitybar></fn> <fc=gray30><raw=1:│/></fc>"
+            , "-x", "<raw=52:"
+            , "-h", "green4"
+            , "-n", "orange3"
+            , "-l", "red3"
+            , "-H", "50"
+            , "-L", "25"
+            , "-W", "0"
+            , "-f", "󰤯󰤟󰤢󰤥󰤨"
             ] 10
         , Run DynNetwork
             [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray30>KB/s │</fc>"
