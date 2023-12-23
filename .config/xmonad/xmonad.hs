@@ -244,12 +244,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-w", do
         workspaceIndex <- getWorkspaceIndex
         i <- workspaceIndex . W.tag <$> getWorkspace
-        safeSpawn "rofi"
-            [ "-show", "window"
-            , "-window-command", "xdotool set_desktop_for_window {window} " ++ show i
-            , "-font", "monospace " ++ show fontSize
-            , "-yoffset", show $ barHeight textHeight
-            ])
+        safeSpawn "rofi" ["-show", "window", "-window-command", "xdotool set_desktop_for_window {window} " ++ show i])
 
     , ("M-u", focusUrgent)
     , ("M-S-u", clearUrgents >> logHook)

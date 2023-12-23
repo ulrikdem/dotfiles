@@ -1,6 +1,9 @@
 configuration {
+    font: "monospace 9";
+
     monitor: -1;
     location: 2;
+    yoffset: 23;
     fixed-num-lines: false;
 
     modes: [window];
