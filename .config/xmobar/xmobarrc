@@ -4,41 +4,24 @@ Config
     , commands =
         [ Run Wireless ""
             [ "-t", "<fc=,><ssid></fc> <fn=1><qualitybar></fn> <fc=gray30><raw=1:│/></fc>"
-            , "-x", "<raw=52:"
-            , "-h", "green4"
-            , "-n", "orange3"
-            , "-l", "red3"
-            , "-H", "50"
-            , "-L", "25"
+            , "-x", "<raw=37:"
             , "-W", "0"
             , "-f", "󰤯󰤟󰤢󰤥󰤨"
             ] 10
         , Run DynNetwork
             [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray30>KB/s │</fc>"
-            , "-h", "green4"
-            , "-l", "orange3"
-            , "-H", "0"
             , "-L", "0"
+            , "-l", "gray30"
             ] 10
         , Run Cpu
-            [ "-t", " <fn=0></fn> <fn=2><vbar></fn>"
-            , "-h", "red3,gray30"
-            , "-n", "orange3,gray30"
-            , "-l", "green4,gray30"
-            , "-H", "75"
-            , "-L", "50"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray30><vbar></fc></fn>"
             ] 10
         , Run CpuFreq
             [ "-t", " <max> <fc=gray30>GHz</fc> <fc=gray30>│</fc>"
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", " <fn=0></fn> <fn=2><usedvbar></fn> <fc=gray30>│</fc>"
-            , "-h", "red3,gray30"
-            , "-n", "orange3,gray30"
-            , "-l", "green4,gray30"
-            , "-H", "75"
-            , "-L", "50"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray30><usedvbar></fc></fn> <fc=gray30>│</fc>"
             ] 10
         , Run Alsa "default" "Master"
             [ "-t", " <fn=1><status></fn> <fc=gray30>│</fc>"
@@ -47,18 +30,13 @@ Config
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
-            [ "-t", " <fn=1><leftbar></fn><acstatus> <fc=gray30>│</fc>"
-            , "-h", "green4"
-            , "-n", "orange3"
-            , "-l", "red3"
-            , "-H", "50"
-            , "-L", "25"
+            [ "-t", " <fn=1><leftbar></fn> <fn=0><fc=gray30><acstatus></fc></fn> <fc=gray30>│</fc>"
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
-            , "-i", "<fn=1>󱐋</fn>"
-            , "-O", "<fn=1>󱐋</fn>"
-            , "-o", " <fc=gray50><timeleft></fc>"
+            , "-i", ""
+            , "-O", ""
+            , "-o", "<timeleft>"
             ] 10
         , Run Date " %Y-%m-%d %H:%M:%S " "date" 10
         ]
