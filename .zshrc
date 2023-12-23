@@ -248,7 +248,6 @@ alias la='ls -lha'
 (($+commands[bsdtar])) && alias tar=bsdtar
 (($+commands[git])) && alias g=git
 (($+commands[ipython])) && alias ipy=ipython
-(($+commands[nmcli])) && alias nmup='nmcli connection up' nmdown='nmcli connection down'
 (($+commands[nvim])) && alias vi=nvim vim=nvim
 (($+commands[nvr] && $+NVIM_LISTEN_ADDRESS)) && alias vi=nvr vim=nvr
 (($+commands[ranger])) && alias r=ranger
