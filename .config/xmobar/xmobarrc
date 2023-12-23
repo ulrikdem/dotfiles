@@ -3,11 +3,11 @@ Config
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
-            [ "-t", "<fc=,><ssid></fc> <fn=1>󰖩</fn> <fc=gray25><raw=1:│/></fc>"
+            [ "-t", "<fc=,><ssid></fc> <fn=1>󰖩</fn> <fc=gray30><raw=1:│/></fc>"
             , "-x", "<raw=38:"
             ] 10
         , Run DynNetwork
-            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray25>KB/s │</fc>"
+            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray30>KB/s │</fc>"
             , "-h", "green4"
             , "-l", "orange3"
             , "-H", "0"
@@ -15,32 +15,32 @@ Config
             ] 10
         , Run Cpu
             [ "-t", " <fn=0></fn> <fn=2><vbar></fn>"
-            , "-h", "red3,gray25"
-            , "-n", "orange3,gray25"
-            , "-l", "green4,gray25"
+            , "-h", "red3,gray30"
+            , "-n", "orange3,gray30"
+            , "-l", "green4,gray30"
             , "-H", "75"
             , "-L", "50"
             ] 10
         , Run CpuFreq
-            [ "-t", " <max> <fc=gray25>GHz</fc> <fc=gray25>│</fc>"
+            [ "-t", " <max> <fc=gray30>GHz</fc> <fc=gray30>│</fc>"
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", " <fn=0></fn> <fn=2><usedvbar></fn> <fc=gray25>│</fc>"
-            , "-h", "red3,gray25"
-            , "-n", "orange3,gray25"
-            , "-l", "green4,gray25"
+            [ "-t", " <fn=0></fn> <fn=2><usedvbar></fn> <fc=gray30>│</fc>"
+            , "-h", "red3,gray30"
+            , "-n", "orange3,gray30"
+            , "-l", "green4,gray30"
             , "-H", "75"
             , "-L", "50"
             ] 10
         , Run Alsa "default" "Master"
-            [ "-t", " <fn=1><status></fn> <fc=gray25>│</fc>"
+            [ "-t", " <fn=1><status></fn> <fc=gray30>│</fc>"
             , "--"
             , "-O", "<fc=gray50>󰕾</fc>"
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
-            [ "-t", " <fn=1><leftbar></fn><acstatus> <fc=gray25>│</fc>"
+            [ "-t", " <fn=1><leftbar></fn><acstatus> <fc=gray30>│</fc>"
             , "-h", "green4"
             , "-n", "orange3"
             , "-l", "red3"
