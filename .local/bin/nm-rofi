@@ -1,0 +1,18 @@
+#!/bin/bash
+set -e
+
+readarray -t connections < <(nmcli -g active,uuid,name connection show --order active:type:name)
+n=${#connections[@]}
+
+active=
+for ((i = 0; i < n; ++i)); do
+    [[ ${connections[$i]} = y* ]] && active=$active$i,
+done
+
+i=$(printf '%s\n' "${connections[@]}" | cut -d : -f 3- | rofi -dmenu -p network ${active:+-a $active} -i -no-custom -format i)
+[[ -n $i ]]
+
+[[ ${connections[$i]} = y* ]] && action=down task=deactivate || action=up task=activate
+[[ ${connections[$i]} =~ :([^:]*):(.*) ]]
+nmcli connection $action uuid "${BASH_REMATCH[1]}" && message=${task^}d || message="Failed to $task"
+dunstify -t 5000 "$message ${BASH_REMATCH[2]}"
