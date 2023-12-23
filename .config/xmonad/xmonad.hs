@@ -109,7 +109,7 @@ statusBar textHeight screen@(S i) = return $ statusBarGeneric cmd $ barLogHook s
     prop = "_XMONAD_LOG_" ++ show i
     cmd = "xmobar -p 'TopH " ++ show (barHeight textHeight) ++ "' -x " ++ show i
         ++ " -C '[Run UnsafeNamedXPropertyLog \"" ++ prop ++ "\" \"xmonad\"]'"
-        ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "'"
+        ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "' -N 'Monospace " ++ show (fontSize - 1) ++ "'"
         ++ " -D \"$(xrdb -get Xft.dpi)\""
 
 barHeight textHeight = h + h `mod` 2 - 1 where
