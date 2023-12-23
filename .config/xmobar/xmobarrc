@@ -39,10 +39,10 @@ Config
             , "-L", "50"
             ] 10
         , Run Alsa "default" "Master"
-            [ "-t", " <fn=1><status></fn> <fc=green4><volume></fc>% <fc=gray25>│</fc>"
+            [ "-t", " <fn=1><status></fn> <fc=gray25>│</fc>"
             , "--"
             , "-O", "<fc=gray50>󰕾</fc>"
-            , "-o", "<fc=gray50>󰝟</fc>"
+            , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
             [ "-t", " <fn=1><acstatus></fn> <left>% <timeleft> <fc=gray25>│</fc>"
