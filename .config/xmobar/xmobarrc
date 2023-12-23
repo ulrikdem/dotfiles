@@ -7,7 +7,7 @@ Config
             , "-x", "<raw=38:"
             ] 10
         , Run DynNetwork
-            [ "-t", " <fn=1>󰇚</fn> <rx>K <fn=1>󰕒</fn> <tx>K <fc=gray25>│</fc>"
+            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray25>KB/s │</fc>"
             , "-h", "green4"
             , "-l", "orange3"
             , "-H", "0"
@@ -22,7 +22,7 @@ Config
             , "-L", "50"
             ] 10
         , Run CpuFreq
-            [ "-t", " <fc=green4><max></fc>GHz <fc=gray25>│</fc>"
+            [ "-t", " <max> <fc=gray25>GHz</fc> <fc=gray25>│</fc>"
             , "-d", "1"
             ] 10
         , Run Memory
