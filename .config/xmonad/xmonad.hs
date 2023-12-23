@@ -231,9 +231,9 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
 
-    , ("<XF86AudioMute>", spawn "amixer set Master toggle")
-    , ("<XF86AudioLowerVolume>", spawn "amixer set Master 2%-")
-    , ("<XF86AudioRaiseVolume>", spawn "amixer set Master 2%+")
+    , ("<XF86AudioMute>", spawn "volume toggle")
+    , ("<XF86AudioLowerVolume>", spawn "volume 2%-")
+    , ("<XF86AudioRaiseVolume>", spawn "volume 2%+")
     , ("<XF86MonBrightnessDown>", spawn "light -U 10; light-notify")
     , ("<XF86MonBrightnessUp>", spawn "light -A 10; light-notify")
 

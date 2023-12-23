@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+[[ $(amixer set Master "$@" | tail -n 1) =~ '['([0-9]+)'%] ['(on|off)']' ]]
+volume=${BASH_REMATCH[1]}
+[[ ${BASH_REMATCH[2]} = on ]] && icon=high || icon=muted
+dunstify -t 1000 -i /usr/share/icons/Adwaita/symbolic/status/audio-volume-$icon-symbolic.svg -h string:x-dunst-stack-tag:volume -h int:value:$volume $volume
