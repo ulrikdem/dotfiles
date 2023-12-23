@@ -125,11 +125,11 @@ barLogHook screen@(S sid) prop = do
             <$> mapZM_ (getIcon $ W.tag w) (W.stack w)
     icons <- withWindowSet $ fmap (M.fromList . catMaybes) . mapM getIcons . W.workspaces
     let rename w _ = xmobarAction ("xdotool set_desktop_viewport " ++ show sid ++ " " ++ w) "1"
-            $ pad $ xmobarColor "gray30" "\n" $ (++ xmobarFont 1 (M.findWithDefault "" w icons))
+            $ pad $ xmobarColor "gray33" "\n" $ (++ xmobarFont 1 (M.findWithDefault "" w icons))
             $ xmobarAction ("xdotool set_desktop " ++ show index ++ "; xdotool getactivewindow set_desktop_for_window " ++ show (workspaceIndex w)) "3" w
         showTag tag = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
-            return $ Just $ if hasTag' == Just True then " <fc=gray30>[" ++ tag ++ "]</fc>" else ""
+            return $ Just $ if hasTag' == Just True then " <fc=gray33>[" ++ tag ++ "]</fc>" else ""
     current <- gets $ W.current . windowset
     let color = if screen == W.screen current then [0x00, 0x8B, 0x00] {- green4 -} else [0x80, 0x80, 0x80] {- gray50 -}
         showColor [r, g, b] = let hex i = showHex (i `div` 16) . showHex (i `mod` 16) in ('#' :) . hex r . hex g . hex b
@@ -137,7 +137,7 @@ barLogHook screen@(S sid) prop = do
         highlight color = xmobarBorder "Bottom" (showColor color "") 2 . background (map (`div` 4) color)
         pp = filterOutWsPP [scratchpadWorkspaceTag] def
             { ppCurrent = highlight color
-            , ppVisible = highlight [0x4C, 0x4C, 0x4C] -- gray30
+            , ppVisible = highlight [0x54, 0x54, 0x54] -- gray33
             , ppUrgent = highlight [0xCD, 0x85, 0x00] -- orange3
             , ppHidden = background [0, 0, 0]
             , ppHiddenNoWindows = background [0, 0, 0]
@@ -146,7 +146,7 @@ barLogHook screen@(S sid) prop = do
             , ppTitleSanitize = id
             , ppExtras = [showTag "scratchpad"]
             , ppOrder = \(workspaces : layout : title : tags) -> [workspaces, title ++ concat tags]
-            , ppSep = "<fc=gray30>│</fc> "
+            , ppSep = "<fc=gray17>│</fc> "
             , ppWsSep = ""
             }
     screenWorkspace screen >>= flip whenJust (modifyWindowSet . W.view)

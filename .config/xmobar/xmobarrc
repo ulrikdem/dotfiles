@@ -3,34 +3,34 @@ Config
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
-            [ "-t", "<fc=,><ssid></fc> <fn=1><qualitybar></fn> <fc=gray30><raw=1:│/></fc>"
+            [ "-t", "<fc=,><ssid></fc> <fn=1><qualitybar></fn> <fc=gray17><raw=1:│/></fc>"
             , "-x", "<raw=37:"
             , "-W", "0"
             , "-f", "󰤯󰤟󰤢󰤥󰤨"
             ] 10
         , Run DynNetwork
-            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray30>KB/s │</fc>"
+            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray33>KB/s</fc> <fc=gray17>│</fc>"
             , "-L", "0"
-            , "-l", "gray30"
+            , "-l", "gray33"
             ] 10
         , Run Cpu
-            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray30><vbar></fc></fn>"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
             ] 10
         , Run CpuFreq
-            [ "-t", " <max> <fc=gray30>GHz</fc> <fc=gray30>│</fc>"
+            [ "-t", " <max> <fc=gray33>GHz</fc> <fc=gray17>│</fc>"
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray30><usedvbar></fc></fn> <fc=gray30>│</fc>"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
             ] 10
         , Run Alsa "default" "Master"
-            [ "-t", " <fn=1><status></fn> <fc=gray30>│</fc>"
+            [ "-t", " <fn=1><status></fn> <fc=gray17>│</fc>"
             , "--"
             , "-O", "<fc=gray50>󰕾</fc>"
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
-            [ "-t", " <fn=1><leftbar></fn> <fn=0><fc=gray30><acstatus></fc></fn> <fc=gray30>│</fc>"
+            [ "-t", " <fn=1><leftbar></fn> <fn=0><fc=gray33><acstatus></fc></fn> <fc=gray17>│</fc>"
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
