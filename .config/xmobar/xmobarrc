@@ -1,5 +1,5 @@
 Config
-    { template = "}%xmonad%{%dynnetwork%%wi%%cpu%%cpufreq%%memory%%alsa:default:Master%%battery%%date%"
+    { template = "}%xmonad%{%dynnetwork%%wi%%alsa:default:Master%%memory%%cpu%%cpufreq%%battery%%date%"
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
