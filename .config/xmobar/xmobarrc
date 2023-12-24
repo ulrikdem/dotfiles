@@ -29,12 +29,12 @@ Config
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
-            [ "-t", " <fn=1><leftbar></fn> <fn=0><fc=gray33><acstatus></fc></fn> <fc=gray17>│</fc>"
+            [ "-t", " <fn=1><leftbar></fn> <fn=0><acstatus></fn> <fc=gray17>│</fc>"
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
-            , "-i", ""
-            , "-O", ""
+            , "-i", "<fc=gray33></fc>"
+            , "-O", "<fc=gray33></fc>"
             , "-o", "<timeleft>"
             ] 10
         , Run Date " %Y-%m-%d %H:%M:%S " "date" 10
