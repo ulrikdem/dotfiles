@@ -3,8 +3,7 @@ Config
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
-            [ "-t", "<fc=,><ssid></fc> <fn=1><qualitybar></fn> <fc=gray17><raw=1:│/></fc>"
-            , "-x", "<raw=37:"
+            [ "-t", " <fn=1><qualitybar></fn> <fc=gray17>│</fc>"
             , "-W", "0"
             , "-f", "󰤯󰤟󰤢󰤥󰤨"
             ] 10
