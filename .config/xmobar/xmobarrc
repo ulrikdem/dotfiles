@@ -23,7 +23,7 @@ Config
             [ "-t", "<action=`alacritty -T htop -e htop -s PERCENT_MEM`> <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> </action><fc=gray17>│</fc>"
             ] 10
         , Run Alsa "default" "Master"
-            [ "-t", "<action=`volume toggle`><action=`volume 2%+` button=4><action=`volume 2%-` button=5> <fn=1><status></fn> </action></action></action><fc=gray17>│</fc>"
+            [ "-t", "<action=`volume toggle`><action=`volume 0+` button=3><action=`volume 2%+` button=4><action=`volume 2%-` button=5> <fn=1><status></fn> </action></action></action></action><fc=gray17>│</fc>"
             , "--"
             , "-O", "<fc=gray50>󰕾</fc>"
             , "-o", "<fc=gray50>󰖁</fc>"
