@@ -21,6 +21,8 @@ Config
             ] 10
         , Run Memory
             [ "-t", "<action=`alacritty -T htop -e htop -s PERCENT_MEM`> <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> </action><fc=gray17>│</fc>"
+            , "-H", "80"
+            , "-h", "red3,gray17"
             ] 10
         , Run Alsa "default" "Master"
             [ "-t", "<action=`volume toggle`><action=`volume 0+` button=3><action=`volume 2%+` button=4><action=`volume 2%-` button=5> <fn=1><status></fn> </action></action></action></action><fc=gray17>│</fc>"
@@ -30,6 +32,8 @@ Config
             ]
         , Run Battery
             [ "-t", " <fn=1><leftbar></fn> <fn=0><acstatus></fn> <fc=gray17>│</fc>"
+            , "-L", "20"
+            , "-l", "red3"
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
