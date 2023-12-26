@@ -131,7 +131,7 @@ barLogHook screen@(S sid) prop = do
             hasTag' <- withWindowSet $ mapM (hasTag tag) . W.peek
             return $ Just $ if hasTag' == Just True then " <fc=gray33>[" ++ tag ++ "]</fc>" else ""
     current <- gets $ W.current . windowset
-    let color = if screen == W.screen current then [0x00, 0x8B, 0x00] {- green4 -} else [0x80, 0x80, 0x80] {- gray50 -}
+    let color = if screen == W.screen current then [0xCD, 0x00, 0x00] {- red3 -} else [0x80, 0x80, 0x80] {- gray50 -}
         showColor [r, g, b] = let hex i = showHex (i `div` 16) . showHex (i `mod` 16) in ('#' :) . hex r . hex g . hex b
         background color = intercalate (showColor color ":0") . lines . xmobarColor "gray50" "\n"
         highlight color = xmobarBorder "Bottom" (showColor color "") 2 . background (map (`div` 4) color)
