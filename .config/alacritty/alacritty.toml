@@ -1,0 +1,61 @@
+font.size = 9
+
+keyboard.bindings = [
+    { action = "CreateNewWindow", key = "Return", mods = "Control" },
+    { action = "Paste", key = "P", mode = "Vi|~Search" },
+    { action = "ScrollPageUp", key = "PageUp", mode = "Vi" },
+    { action = "ScrollPageDown", key = "PageDown", mode = "Vi" },
+    { action = "SemanticLeft", key = "Left", mods = "Shift", mode = "Vi|~Search" },
+    { action = "SemanticRight", key = "Right", mods = "Shift", mode = "Vi|~Search" },
+    { action = "WordLeft", key = "Left", mods = "Control", mode = "Vi|~Search" },
+    { action = "WordRight", key = "Right", mods = "Control", mode = "Vi|~Search" },
+    { action = "First", key = "Home", mode = "Vi|~Search" },
+    { action = "Last", key = "End", mode = "Vi|~Search" },
+    { action = "FirstOccupied", key = 7, mods = "Shift", mode = "Vi|~Search" },
+    { action = "Last", key = 5, mods = "Shift", mode = "Vi|~Search" },
+    { action = "Bracket", key = 6, mods = "Shift", mode = "Vi|~Search" },
+    { action = "SearchBackward", key = 53, mods = "Shift", mode = "Vi|~Search" },
+    { action = "SearchFocusNext", key = "G", mods = "Control", mode = "Search" },
+    { action = "SearchFocusPrevious", key = "T", mods = "Control", mode = "Search" },
+    { action = "SearchDeleteWord", key = "Back", mods = "Control", mode = "Search" },
+    { chars = "\u0017", key = "Back", mods = "Control", mode = "~Vi|~Search" },
+]
+
+cursor.vi_mode_style.shape = "Block"
+
+colors.normal = { black = "#1c1b19", red = "#ef2f27", green = "#519f50", yellow = "#fbb829", blue = "#2c78bf", magenta = "#e02c6d", cyan = "#0aaeb3", white = "#baa67f" }
+colors.bright = { black = "#918175", red = "#f75341", green = "#98bc37", yellow = "#fed06e", blue = "#68a8e4", magenta = "#ff5c8f", cyan = "#2be4d0", white = "#fce8c3" }
+colors.primary = { background = "#1c1b19", foreground = "#fce8c3" }
+colors.cursor = { background = "#fce8c3", text = "#1c1b19" }
+colors.vi_mode_cursor = { background = "#fce8c3", text = "#1c1b19" }
+colors.search.matches = { background = "#fed06e", foreground = "#1c1b19" }
+colors.search.focused_match = { background = "#fbb829", foreground = "#1c1b19" }
+colors.hints.start = { background = "#ef2f27", foreground = "#1c1b19" }
+colors.hints.end = { background = "#1c1b19", foreground = "#ef2f27" }
+
+hints.alphabet = "ntesiroahdufyw"
+
+[[hints.enabled]]
+hyperlinks = true
+regex = '(file|https?)://[[:graph:]--"<>\\^`{|}]+'
+post_processing = true
+command = "xdg-open"
+mouse = { enabled = true, mods = "Control|Shift" }
+binding = { key = "O", mods = "Control|Shift" }
+
+[[hints.enabled]]
+regex = '(file|https?)://[[:graph:]--"<>\\^`{|}]+'
+post_processing = true
+action = "Paste"
+binding = { key = "U", mods = "Control|Shift" }
+
+[[hints.enabled]]
+regex = "(/?[[:word:].-]+|~[[:word:].-]*)(/[[:word:].-]+)+/?"
+post_processing = true
+action = "Paste"
+binding = { key = "P", mods = "Control|Shift" }
+
+[[hints.enabled]]
+regex = "[[:xdigit:]]{6,}"
+action = "Paste"
+binding = { key = "H", mods = "Control|Shift" }
