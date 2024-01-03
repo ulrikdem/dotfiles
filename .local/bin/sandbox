@@ -21,7 +21,8 @@ add-path() {
     args+=(--$1 "${OPTARG%%=*}" "$(realpath -ms -- "${OPTARG#*=}")")
 }
 
-while getopts nxbr:w:d: opt; do
+bind_args=
+while getopts nxbRWr:w:d: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
@@ -34,13 +35,21 @@ while getopts nxbr:w:d: opt; do
         b)
             path=$(sed -E 's/^unix:path=([^,]*).*/\1/' <<<$DBUS_SESSION_BUS_ADDRESS)
             args+=(--bind "$path" "$path");;
+        R) bind_args=ro-bind;;
+        W) bind_args=bind;;
         r) add-path ro-bind;;
         w) add-path bind;;
         d) add-path dev-bind-try;;
-        ?) echo 'sandbox [-n] [-x] [-b] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
+        ?) echo 'sandbox [-n] [-x] [-b] [-R] [-W] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
+
+if [[ -n $bind_args ]]; then
+    for arg; do
+        [[ -e $arg ]] && args+=(--$bind_args "$arg" "$(realpath -s -- "$arg")")
+    done
+fi
 
 (($#)) || set zsh
 exec bwrap "${args[@]}" "$@"
