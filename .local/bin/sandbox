@@ -40,7 +40,7 @@ while getopts nxbRWr:w:d: opt; do
         r) add-path ro-bind;;
         w) add-path bind;;
         d) add-path dev-bind-try;;
-        ?) echo 'sandbox [-n] [-x] [-b] [-R] [-W] [-r path]... [-w path]... [-d path]...' >&2; exit 1;;
+        ?) echo 'sandbox [-nxbRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
