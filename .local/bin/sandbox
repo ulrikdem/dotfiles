@@ -8,7 +8,9 @@ args=(
     --dir /tmp
     --dir /var/tmp
     --symlink /run /var/run
+    --bind /tmp/sandbox-share ~/sandbox-share
 )
+mkdir -pm 700 /tmp/sandbox-share
 
 for path in /bin /sbin /lib* /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults"; do
     [[ -L $path ]] && args+=(--symlink "$(readlink -- "$path")" "$path") || args+=(--ro-bind-try "$path" "$path")
