@@ -1,7 +1,7 @@
 typeset -U path
 path=(~/.local/bin $path)
 
-type firefox >/dev/null && export BROWSER=firefox
+[[ -z $BROWSER ]] && type firefox >/dev/null && export BROWSER=firefox
 
 [[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim MANPAGER='nvim +Man!' ABDUCO_CMD='nvim +terminal'
 
