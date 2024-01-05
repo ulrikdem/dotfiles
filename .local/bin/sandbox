@@ -12,7 +12,7 @@ args=(
 )
 mkdir -pm 700 /tmp/sandbox-share
 
-for path in /bin /sbin /lib* /usr /opt /etc ~/.config/{mimeapps.list,highlight/themes/vim.theme} ~/.local/share/nvim/plugged "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults"; do
+for path in /bin /sbin /lib* /usr /opt /etc ~/.config/highlight/themes/vim.theme ~/.local/share/nvim/plugged "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults"; do
     [[ -L $path ]] && args+=(--symlink "$(readlink -- "$path")" "$path") || args+=(--ro-bind-try "$path" "$path")
 done
 while read -rd '' path; do
@@ -52,6 +52,39 @@ if [[ -n $bind_args ]]; then
         [[ -e $arg ]] && args+=(--$bind_args "$arg" "$(realpath -s -- "$arg")")
     done
 fi
+
+fifo=$(mktemp -u "$XDG_RUNTIME_DIR/sandbox-url.XXXXXXXXXX")
+mkfifo -- "$fifo"
+tail -f -- "$fifo" | while read -rd '' url; do
+    xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
+done &>/dev/null &
+job=$(jobs -p %)
+exec {fd}> >(cat; kill $job; rm -- "$fifo")
+args+=(--bind "$fifo" "$XDG_RUNTIME_DIR/sandbox-url" --sync-fd $fd)
+
+exec {browser}<<'EOF'
+#!/bin/bash
+printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
+EOF
+exec {desktop}<<EOF
+[Desktop Entry]
+Type=Application
+Name=Browser
+Exec=browser %U
+MimeType=x-scheme-handler/http;x-scheme-handler/https;
+EOF
+exec {mimeapps}< <(cat <(grep -v '^x-scheme-handler/http' ~/.config/mimeapps.list 2>/dev/null) - <<EOF
+[Default Applications]
+x-scheme-handler/http=browser.desktop
+x-scheme-handler/https=browser.desktop
+EOF
+)
+args+=(
+    --perms 755 --file $browser ~/.local/bin/browser
+    --file $desktop ~/.local/share/applications/browser.desktop
+    --file $mimeapps ~/.config/mimeapps.list
+    --setenv BROWSER browser
+)
 
 (($#)) || set zsh
 exec bwrap "${args[@]}" "$@"
