@@ -24,7 +24,8 @@ add-path() {
 }
 
 bind_args=
-while getopts nxbRWr:w:d: opt; do
+policy=()
+while getopts nxRWr:w:d:b:B: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
@@ -34,15 +35,14 @@ while getopts nxbRWr:w:d: opt; do
             for path in /dev/{dri,nvidia*}; do
                 args+=(--dev-bind-try "$path" "$path")
             done;;
-        b)
-            path=$(sed -E 's/^unix:path=([^,]*).*/\1/' <<<$DBUS_SESSION_BUS_ADDRESS)
-            args+=(--bind "$path" "$path");;
         R) bind_args=ro-bind;;
         W) bind_args=bind;;
         r) add-path ro-bind;;
         w) add-path bind;;
         d) add-path dev-bind-try;;
-        ?) echo 'sandbox [-nxbRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [command [arg]...]' >&2; exit 1;;
+        b) policy+=(--talk="$OPTARG");;
+        B) policy+=(--own="$OPTARG");;
+        ?) echo 'sandbox [-nxRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-b busname]... [-B busname]... [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
@@ -53,14 +53,23 @@ if [[ -n $bind_args ]]; then
     done
 fi
 
-fifo=$(mktemp -u "$XDG_RUNTIME_DIR/sandbox-url.XXXXXXXXXX")
-mkfifo -- "$fifo"
-tail -f -- "$fifo" | while read -rd '' url; do
+temp=$(mktemp -d "$XDG_RUNTIME_DIR/sandbox.XXXXXXXXXX")
+mkfifo -- "$temp/url"
+tail -f -- "$temp/url" | while read -rd '' url; do
     xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
 done &>/dev/null &
 job=$(jobs -p %)
-exec {fd}> >(cat; kill $job; rm -- "$fifo")
-args+=(--bind "$fifo" "$XDG_RUNTIME_DIR/sandbox-url" --sync-fd $fd)
+exec {fd}> >(
+    xdg-dbus-proxy --fd=0 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 2>/dev/null
+    kill $job
+    rm -r -- "$temp"
+)
+args+=(
+    --bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url"
+    --bind "$temp/bus" "$XDG_RUNTIME_DIR/bus"
+    --setenv DBUS_SESSION_BUS_ADDRESS unix:path="$XDG_RUNTIME_DIR/bus"
+    --sync-fd $fd
+)
 
 exec {browser}<<'EOF'
 #!/bin/bash
