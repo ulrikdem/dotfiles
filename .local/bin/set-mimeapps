@@ -1,8 +1,6 @@
 #!/bin/bash
 
 declare -A mimeapps
-mimeapps[x-scheme-handler/terminal]=Alacritty
-
 set-mimeapp() {
     if [[ -n ${mimeapps[$1]} ]]; then
         [[ ${mimeapps[$1]} != "$2" ]] && echo "prefer ${mimeapps[$1]} to $2 for $1" >&2
@@ -26,9 +24,10 @@ for app; do
         echo "could not find $app.desktop" >&2
         continue
     fi
-    for mime in $(sed -n 's/;/ /g;s/^MimeType\s*=//p' "$path"); do
+    for mime in $(sed -n 's/;/ /g;s/^MimeType=//p' "$path"); do
         set-mimeapp "$mime" "$app"
     done
+    grep -q '^Categories=.*TerminalEmulator' "$path" && set-mimeapp x-scheme-handler/terminal "$app"
 done
 
 cat <(printf '# set-mimeapps %s\n[Default Applications]\n' "$*") <(for mime in "${!mimeapps[@]}"; do
