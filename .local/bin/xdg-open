@@ -32,7 +32,7 @@ def run_cmd(cmd, quiet):
         subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 Mimeo.run_cmd = run_cmd
 
-args = ['-q', '--'] + sys.argv[1:]
+args = ['--by-content-first', '--'] + sys.argv[1:]
 if not (sys.stdin.isatty() and sys.stdout.isatty()):
     args = ['--term', 'alacritty -e %s'] + args
 Mimeo.run_main(args)
