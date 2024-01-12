@@ -54,14 +54,17 @@ if [[ -n $bind_args ]]; then
 fi
 
 temp=$(mktemp -d "$XDG_RUNTIME_DIR/sandbox.XXXXXXXXXX")
+mkfifo -- "$temp/proxy"
+xdg-dbus-proxy --fd=3 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 3<>"$temp/proxy" &
+read -N 1 <"$temp/proxy"
+
 mkfifo -- "$temp/url"
 tail -f -- "$temp/url" | while read -rd '' url; do
     xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
 done &>/dev/null &
-job=$(jobs -p %)
 exec {fd}> >(
-    xdg-dbus-proxy --fd=0 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 2>/dev/null
-    kill $job
+    cat
+    kill $(jobs -p)
     rm -r -- "$temp"
 )
 args+=(
