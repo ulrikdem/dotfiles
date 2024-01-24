@@ -3,7 +3,7 @@ Config
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
-            [ "-t", "<action=`nm-rofi`><action=`nm-connection-editor` button=3> <fn=1><qualitybar></fn> </action></action><fc=gray17>│</fc>"
+            [ "-t", " <fn=1><qualitybar></fn> <fc=gray17>│</fc>"
             , "-W", "0"
             , "-f", "󰤯󰤟󰤢󰤥󰤨"
             ] 10
@@ -13,19 +13,19 @@ Config
             , "-l", "gray33"
             ] 10
         , Run Cpu
-            [ "-t", "<action=`alacritty -T htop -e htop -s PERCENT_CPU`> <fn=0></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
             ] 10
         , Run CpuFreq
-            [ "-t", " <max> <fc=gray33>GHz</fc> </action><fc=gray17>│</fc>"
+            [ "-t", " <max> <fc=gray33>GHz</fc> <fc=gray17>│</fc>"
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", "<action=`alacritty -T htop -e htop -s PERCENT_MEM`> <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> </action><fc=gray17>│</fc>"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
             , "-H", "80"
             , "-h", "red3,gray17"
             ] 10
         , Run Alsa "default" "Master"
-            [ "-t", "<action=`volume toggle`><action=`volume 0+` button=3><action=`volume 2%+` button=4><action=`volume 2%-` button=5> <fn=1><status></fn> </action></action></action></action><fc=gray17>│</fc>"
+            [ "-t", " <fn=1><status></fn> <fc=gray17>│</fc>"
             , "--"
             , "-O", "<fc=gray50>󰕾</fc>"
             , "-o", "<fc=gray50>󰖁</fc>"
