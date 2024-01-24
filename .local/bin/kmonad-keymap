@@ -152,8 +152,8 @@ kp = layer_add("kp")
 
 layer("num",
     _,       _,       _,       _,                                           _,       _,       _,       _,
-    _,       XX,      "[",     "]",     "cmps",  XX,      kp,      "7",     "8",     "9",     ";",     _,
-    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  XX,      XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
+    _,       XX,      "[",     "]",     "cmps",  "up",    kp,      "7",     "8",     "9",     ";",     _,
+    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  "down",  XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
              XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
                                         _,       "ret",   _,
 )
