@@ -8,7 +8,9 @@ import XMonad.Hooks.ManageHelpers
 overrideConfig = id
 
 leaderMap =
-    [ ("f", "firefox", False)
+    [ ("c", "nm-rofi", False)
+    , ("S-c", "nm-connection-editor", False)
+    , ("f", "firefox", False)
     , ("S-f", "firefox --private-window", False)
     , ("h", "htop", True)
     , ("i", "ipython", True)
