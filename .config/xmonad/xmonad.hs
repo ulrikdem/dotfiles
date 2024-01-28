@@ -222,7 +222,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-t", withFocused $ windows . W.sink)
 
     , ("M-s", allNamedScratchpadAction
-        [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        [ NS "" (terminal ++ " --class xmonad-scratchpad,Alacritty") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
 
@@ -268,7 +268,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     [ ("M-<Space> " ++ mod ++ mod' ++ key, f command)
     | mod <- ["", "M-"]
     , (key, command, term) <- leaderMap
-    , (mod', f) <- if term then [("", spawnIn terminal []), ("S-", spawnIn terminal ["--class=Alacritty,xmonad-scratchpad"])]
+    , (mod', f) <- if term then [("", spawnIn terminal []), ("S-", spawnIn terminal ["--class=xmonad-scratchpad,Alacritty"])]
                            else [("", spawn)]
     ]
 

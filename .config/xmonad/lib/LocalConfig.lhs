@@ -16,7 +16,7 @@ leaderMap =
     , ("i", "ipython", True)
     , ("m", "mpv --player-operation-mode=pseudo-gui", False)
     , ("n", "newsboat", True)
-    , ("p", "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class Alacritty,xmonad-float -T pulsemixer -e pulsemixer", False)
+    , ("p", "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class xmonad-float,Alacritty -T pulsemixer -e pulsemixer", False)
     , ("t", "thunderbird", False)
     , ("v", "nvim", True)
     ]
