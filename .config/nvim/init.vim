@@ -647,6 +647,8 @@ Plug 'tpope/vim-fugitive'
 
 Plug 'junegunn/gv.vim'
 autocmd vimrc FileType GV setlocal nolist
+autocmd vimrc FileType GV nmap <buffer> <Up> <Up>o
+autocmd vimrc FileType GV nmap <buffer> <Down> <Down>o
 
 autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
 function! s:ToggleGitStatus() abort
