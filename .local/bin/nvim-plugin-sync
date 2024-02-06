@@ -1,0 +1,18 @@
+#!/bin/bash
+shopt -s nullglob
+
+export GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~
+dir=.config/nvim/pack/plugins
+
+git submodule update --init --depth 1
+
+for module in "$GIT_DIR/modules/$dir"/*/*; do
+    path=${module#$GIT_DIR/modules/}
+    git config -f ~/.gitmodules -l --name-only | grep -qxF "submodule.$path.path" && continue
+    git config --local --remove-section "submodule.$path"
+    rm -rf ~/"$path" "$module"
+done
+
+for doc in ~/$dir/*/*/doc; do
+    nvim -es <<<"helptags $doc"
+done

@@ -1,0 +1,24 @@
+#!/bin/bash
+set -e
+
+usage() {
+    echo 'nvim-plugin-rm [-o] <name>' >&2
+    exit 1
+}
+
+export GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~
+
+dir=.config/nvim/pack/plugins/start
+while getopts o opt; do
+    case $opt in
+        o) dir=${dir%start}opt;;
+        ?) usage;;
+    esac
+done
+shift $((OPTIND - 1))
+
+(($# == 1)) || usage
+
+git submodule deinit ~/"$dir/$1"
+git rm ~/"$dir/$1"
+rm -rf "$GIT_DIR/modules/$dir/$1"

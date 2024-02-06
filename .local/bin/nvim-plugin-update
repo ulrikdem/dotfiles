@@ -1,0 +1,2 @@
+#!/bin/bash
+git --git-dir ~/.dotfiles.git --work-tree ~ submodule foreach nvim-plugin-update-single
