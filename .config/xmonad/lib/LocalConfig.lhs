@@ -28,7 +28,7 @@ iconQuery = composeOne
         , title =? "newsboat" -?> return "\xf09e" -- 
         , title =? "pulsemixer" -?> return "\xf057e" -- 󰕾
         , title ^? "ranger:" -?> return "\xe5fe" -- 
-        , title $? " - nvim" -?> return "\xe62b" -- 
+        , title $? " - nvim" -?> return "\xf36f" -- 
         , return $ Just "\xe795" -- 
         ]
     , className =? "Evince" <||> className =? "Zathura" -?> return "\xf0219" -- 󰈙
