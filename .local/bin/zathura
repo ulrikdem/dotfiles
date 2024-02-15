@@ -1,0 +1,2 @@
+#!/bin/bash
+exec sandbox -xR /usr/bin/zathura "$@"
