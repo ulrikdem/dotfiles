@@ -1,3 +1,4 @@
+set double-click-follow false
 set guioptions ""
 set recolor-keephue true
 set scroll-page-aware true
