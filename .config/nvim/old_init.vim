@@ -1101,6 +1101,7 @@ if executable('nvr')
 endif
 if executable('zathura')
     let g:vimtex_view_method = 'zathura'
+    let g:vimtex_view_zathura_options = '-n '.shellescape(v:servername)
 endif
 let g:vimtex_view_use_temp_files = v:true
 let g:vimtex_view_forward_search_on_start = v:false
