@@ -355,11 +355,12 @@ layout textHeight =
     ModifiedLayout (Fullscreen Nothing) $
     ModifiedLayout (Limit 3 (0, 0) tabbed) $
     avoidStruts $
-    smartSpacingWithEdge (fi textHeight `div` 4) $
+    smartSpacingWithEdge (fi gapWidth) $
     configurableNavigation noNavigateBorders $
-    borderResize $
+    borderResizeNear gapWidth $
     Columns [1, 1] (textHeight * 8) Nothing where
         tabbed = FocusFromStack Nothing $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
+        gapWidth = textHeight `div` 4
 
 data EllipsisShrinker = EllipsisShrinker
     deriving (Read, Show)
