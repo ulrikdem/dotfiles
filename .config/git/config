@@ -1,6 +1,3 @@
-[include]
-path = user
-
 [pull]
 ff = only
 
@@ -22,3 +19,6 @@ cmd = nvim $MERGED +Gdiffsplit!
 
 [includeIf "gitdir:~/.dotfiles.git"]
 path = dotfiles
+
+[include]
+path = user
