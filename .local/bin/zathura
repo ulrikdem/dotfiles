@@ -1,7 +1,10 @@
 #!/bin/bash
-args=(-xRB 'org.pwmt.zathura.*')
-if [[ $1 = -n ]]; then
-    args+=(-r "${5%pdf}synctex.gz" -r ~/.cache/vimtex/nvim_servernames.log -w "$2")
-    shift 2
+prefix=()
+if [[ ! -v SANDBOX ]]; then
+    prefix=(sandbox -xRB 'org.pwmt.zathura.*')
+    if [[ $1 = -n ]]; then
+        prefix+=(-r "${5%pdf}synctex.gz" -r ~/.cache/vimtex/nvim_servernames.log -w "$2")
+        shift 2
+    fi
 fi
-exec sandbox "${args[@]}" /usr/bin/zathura "$@"
+exec "${prefix[@]}" /usr/bin/zathura "$@"
