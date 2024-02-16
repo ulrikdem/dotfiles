@@ -3,7 +3,8 @@ prefix=()
 if [[ ! -v SANDBOX ]]; then
     prefix=(sandbox -xRB 'org.pwmt.zathura.*')
     if [[ $1 = -n ]]; then
-        prefix+=(-r "${5%pdf}synctex.gz" -r ~/.cache/vimtex/nvim_servernames.log -w "$2")
+        prefix+=(-r ~/.cache/vimtex/nvim_servernames.log -w "$2")
+        [[ -r ${5%pdf}synctex.gz ]] && prefix+=(-r "${5%pdf}synctex.gz")
         shift 2
     fi
 fi
