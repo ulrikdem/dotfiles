@@ -1,8 +1,23 @@
+[alias]
+glog = log --graph --pretty='%C(auto)%as %h%d %s %Cblue(%an)'
+pushf = push --force-with-lease
+
 [diff]
 algorithm = histogram
 tool = nvimdiff
 
+[fetch]
+prune = true
+
+[interactive]
+singleKey = true
+
+[log]
+date = iso
+
 [merge]
+autoStash = true
+conflictStyle = zdiff3
 tool = fugitive
 
 [mergetool]
@@ -10,6 +25,13 @@ keepBackup = false
 
 [mergetool "fugitive"]
 cmd = nvim $MERGED +Gdiffsplit!
+
+[rebase]
+autoStash = true
+autoSquash = true
+
+[url "https://github.com/"]
+insteadOf = github:
 
 [includeIf "gitdir:~/.dotfiles.git"]
 path = dotfiles
