@@ -1,7 +1,7 @@
 #!/bin/bash
 prefix=()
 if [[ ! -v SANDBOX ]]; then
-    prefix=(sandbox -xRB 'org.pwmt.zathura.*')
+    prefix=(sandbox -xRB 'org.pwmt.zathura.*' -w /run/cups/cups.sock)
     if [[ $1 = -n ]]; then
         prefix+=(-r ~/.cache/vimtex/nvim_servernames.log -w "$2")
         [[ -r ${5%pdf}synctex.gz ]] && prefix+=(-r "${5%pdf}synctex.gz")
