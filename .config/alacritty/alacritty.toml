@@ -9,8 +9,6 @@ keyboard.bindings = [
     { action = "SemanticRight", key = "Right", mods = "Shift", mode = "Vi|~Search" },
     { action = "WordLeft", key = "Left", mods = "Control", mode = "Vi|~Search" },
     { action = "WordRight", key = "Right", mods = "Control", mode = "Vi|~Search" },
-    { action = "First", key = "Home", mode = "Vi|~Search" },
-    { action = "Last", key = "End", mode = "Vi|~Search" },
     { action = "SearchFocusNext", key = "G", mods = "Control", mode = "Search" },
     { action = "SearchFocusPrevious", key = "T", mods = "Control", mode = "Search" },
     { action = "SearchDeleteWord", key = "Back", mods = "Control", mode = "Search" },
