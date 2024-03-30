@@ -1,7 +1,7 @@
 font.size = 9
 
 keyboard.bindings = [
-    { action = "SpawnNewInstance", key = "Return", mods = "Control" },
+    { action = "CreateNewWindow", key = "Return", mods = "Control" },
     { action = "Paste", key = "P", mode = "Vi|~Search" },
     { action = "ScrollPageUp", key = "PageUp", mode = "Vi" },
     { action = "ScrollPageDown", key = "PageDown", mode = "Vi" },
