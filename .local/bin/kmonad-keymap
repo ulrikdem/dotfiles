@@ -92,12 +92,12 @@ a_met = tap_hold("a", lmet)
 r_alt = tap_hold("r", lalt)
 s_sft = tap_hold("s", lsft)
 t_ctl = tap_hold("t", lctl)
+g_alt = tap_hold("g", ralt)
+m_alt = tap_hold("m", ralt)
 n_ctl = tap_hold("n", rctl)
 e_sft = tap_hold("e", rsft)
 i_alt = tap_hold("i", lalt)
 o_met = tap_hold("o", rmet)
-x_alt = tap_hold("x", ralt)
-dot_alt = tap_hold(".", ralt)
 
 spc_nav = tap_hold("spc", layer_toggle("nav"))
 ret_num = tap_hold("ret", around(layer_toggle("num"), tap_macro_release(around(layer_rem("kp"), layer_rem("kp-shift")))))
@@ -106,8 +106,8 @@ ret_fn = tap_hold("ret", layer_toggle("fn"))
 layer("base",
     "`",     "!",     "^",     "$",                                         "\\_",   "-",     "=",     "bspc",
     "tab",   "q",     "w",     "f",     "p",     "b",     "j",     "l",     "u",     "y",     ";",     "\\\\",
-    "esc",   a_met,   r_alt,   s_sft,   t_ctl,   "g",     "m",     n_ctl,   e_sft,   i_alt,   o_met,   "'",
-             "z",     x_alt,   "c",     "d",     "v",     "k",     "h",     ",",     dot_alt, "/",
+    "esc",   a_met,   r_alt,   s_sft,   t_ctl,   g_alt,   m_alt,   n_ctl,   e_sft,   i_alt,   o_met,   "'",
+             "z",     "x",     "c",     "d",     "v",     "k",     "h",     ",",     ".",     "/",
                                         ret_fn,  ret_num, spc_nav,
 )
 
@@ -123,17 +123,18 @@ A_met = tap_hold("A", lmet)
 R_alt = tap_hold("R", lalt)
 S_sft = tap_hold("S", lsft)
 T_ctl = tap_hold("T", lctl)
+G_alt = tap_hold("G", ralt)
+M_alt = tap_hold("M", ralt)
 N_ctl = tap_hold("N", rctl)
 E_sft = tap_hold("E", rsft)
 I_alt = tap_hold("I", lalt)
 O_met = tap_hold("O", rmet)
-X_alt = tap_hold("X", ralt)
 
 layer("caps",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       "Q",     "W",     "F",     "P",     "B",     "J",     "L",     "U",     "Y",     _,       _,
-    _,       A_met,   R_alt,   S_sft,   T_ctl,   "G",     "M",     N_ctl,   E_sft,   I_alt,   O_met,   _,
-             "Z",     X_alt,   "C",     "D",     "V",     "K",     "H",     _,       _,       _,
+    _,       A_met,   R_alt,   S_sft,   T_ctl,   G_alt,   M_alt,   N_ctl,   E_sft,   I_alt,   O_met,   _,
+             "Z",     "X",     "C",     "D",     "V",     "K",     "H",     _,       _,       _,
                                         _,       _,       _,
 )
 
@@ -141,20 +142,19 @@ lt_met = tap_hold("<", lmet)
 lp_alt = tap_hold("\\(", lalt)
 rp_sft = tap_hold("\\)", lsft)
 gt_ctl = tap_hold(">", lctl)
+dn_alt = tap_hold("down", ralt)
 _4_ctl = tap_hold("4", rctl)
 _5_sft = tap_hold("5", rsft)
 _6_alt = tap_hold("6", lalt)
 _0_met = tap_hold("0", rmet)
-lb_alt = tap_hold("{", ralt)
-_3_alt = tap_hold("3", ralt)
 
 kp = layer_add("kp")
 
 layer("num",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       XX,      "[",     "]",     "cmps",  "up",    kp,      "7",     "8",     "9",     ";",     _,
-    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  "down",  XX,      _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
-             XX,      lb_alt,  "}",     ".",     ",",     XX,      "1",     "2",     _3_alt,  "/",
+    _,       lt_met,  lp_alt,  rp_sft,  gt_ctl,  dn_alt,  ralt,    _4_ctl,  _5_sft,  _6_alt,  _0_met,  _,
+             XX,      "{",     "}",     ".",     ",",     XX,      "1",     "2",     "3",     "/",
                                         _,       "ret",   _,
 )
 
@@ -179,8 +179,8 @@ layer("kp-shift",
 layer("fn",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       XX,      XX,      XX,      XX,      XX,      "pause", "f7",    "f8",    "f9",    "f12",   _,
-    _,       lmet,    lalt,    lsft,    lctl,    XX,      "slck",  "f4",    "f5",    "f6",    "f11",   _,
-             XX,      ralt,    "caps",  XX,      XX,      "sys",   "f1",    "f2",    "f3",    "f10",
+    _,       lmet,    lalt,    lsft,    lctl,    ralt,    "slck",  "f4",    "f5",    "f6",    "f11",   _,
+             XX,      XX,      "caps",  XX,      XX,      "sys",   "f1",    "f2",    "f3",    "f10",
                                         "ret",   _,       _,
 )
 
@@ -192,8 +192,8 @@ qwerty = layer_reset("qwerty")
 layer("nav",
     _,       _,       _,       _,                                           _,       _,       _,       _,
     _,       qwerty,  XX,      game,    gamenum, "brup",  "volu",  "home",  "up",    "end",   "pgup",  _,
-    _,       lmet,    lalt,    lsft,    lctl,    "brdn",  "vold",  "left",  "down",  "rght",  "pgdn",  _,
-             XX,      ralt,    capswrd, XX,      XX,      "mute",  "ins",   XX,      XX,      "del",
+    _,       lmet,    lalt,    lsft,    lctl,    ralt,    "mute",  "left",  "down",  "rght",  "pgdn",  _,
+             XX,      XX,      capswrd, XX,      "brdn",  "vold",  "ins",   XX,      XX,      "del",
                                         _,       _,       "spc",
 )
 
@@ -224,8 +224,8 @@ layer("game-num",
 layer("game-nav",
     "f5",    "f6",    "f7",    "f8",                                        XX,      XX,      XX,      _,
     _,       _,       "home",  "up",    "end",   "volu",  XX,      _,       _,       _,       _,       _,
-    _,       _,       "left",  "down",  "rght",  "vold",  XX,      _,       _,       _,       _,       _,
-             _,       XX,      "bspc",  "del",   "mute",  XX,      _,       _,       _,       _,
+    _,       _,       "left",  "down",  "rght",  "mute",  XX,      _,       _,       _,       _,       _,
+             _,       XX,      "bspc",  "del",   "vold",  XX,      _,       _,       _,       _,
                                         _,       _,       _,
 )
 
