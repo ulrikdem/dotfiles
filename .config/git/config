@@ -2,6 +2,9 @@
 glog = log --graph --pretty='%C(auto)%as %h%d %s %Cblue(%an)'
 pushf = push --force-with-lease
 
+[commit]
+cleanup = scissors
+
 [diff]
 algorithm = histogram
 tool = nvimdiff
