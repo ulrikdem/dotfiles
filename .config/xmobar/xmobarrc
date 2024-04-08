@@ -20,7 +20,7 @@ Config
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
+            [ "-t", " <fn=1></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
             , "-H", "80"
             , "-h", "red3,gray17"
             ] 10
@@ -31,14 +31,14 @@ Config
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
-            [ "-t", " <fn=1><leftbar></fn> <fn=0><acstatus></fn> <fc=gray17>│</fc>"
+            [ "-t", " <fn=1><leftbar></fn> <acstatus> <fc=gray17>│</fc>"
             , "-L", "20"
             , "-l", "red3"
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
-            , "-i", "<fc=gray33></fc>"
-            , "-O", "<fc=gray33></fc>"
+            , "-i", "<fn=1><fc=gray33></fc></fn>"
+            , "-O", "<fn=1><fc=gray33></fc></fn>"
             , "-o", "<timeleft>"
             ] 10
         , Run Date " %Y-%m-%d %H:%M:%S " "date" 10

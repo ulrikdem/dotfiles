@@ -25,22 +25,22 @@ iconQuery = composeOne
     [ className =? "Alacritty" -?> composeOne
         [ title =? "htop" -?> return "\xf0128" -- 󰄨
         , title =? "ipython" <||> title =? "ipy" -?> return "\xf0320" -- 󰌠
-        , title =? "newsboat" -?> return "\xf09e" -- 
+        , title =? "newsboat" -?> return "\xf046b" -- 󰑫
         , title =? "pulsemixer" -?> return "\xf057e" -- 󰕾
-        , title ^? "ranger:" -?> return "\xe5fe" -- 
+        , title ^? "ranger:" -?> return "\xf07c" -- 
         , title $? " - nvim" -?> return "\xf36f" -- 
         , return $ Just "\xe795" -- 
         ]
     , className =? "Evince" <||> className =? "Zathura" -?> return "\xf0219" -- 󰈙
-    , className =? "firefox" -?> return "\xf269" -- 
+    , className =? "firefox" -?> return "\xf0239" -- 󰈹
     , className =? "Gimp" -?> return "\xf1fc" -- 
     , className ^? "libreoffice" <||> className =? "Soffice" -?> return "\xf0214" -- 󰈔
     , className =? "mpv" -?> return "\xf144" -- 
     , className =? "Nm-connection-editor" -?> return "\xf06f3" -- 󰛳
-    , className =? "Sxiv" -?> return "\xf02e9" -- 󰋩
+    , className =? "Sxiv" -?> return "\xf03e" -- 
     , className =? "thunderbird" -?> return "\xf01ee" -- 󰇮
     , className =? "webview" <&&> title $? "JupyterLab" -?> return "\xf0320" -- 󰌠
-    , className $? ".exe" -?> return "\xf000" -- 
+    , className $? ".exe" -?> return "\xedae" -- 
     , return $ Just "\xf05af" -- 󰖯
     ]
 
