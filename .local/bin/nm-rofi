@@ -15,10 +15,10 @@ for ((i = 0; i < n; ++i)); do
         wireguard) icon=󰖂;;
         *) icon=󰛳;;
     esac
-    lines+=("$icon ${BASH_REMATCH[1]}")
+    lines+=("$icon	${BASH_REMATCH[1]}")
 done
 
-i=$(printf '%s\n' "${lines[@]}" | rofi -dmenu -p network ${active:+-a $active} -i -no-custom -format i)
+i=$(printf '%s\n' "${lines[@]}" | rofi -dmenu -p network ${active:+-a $active} -i -no-custom -format i -theme-str 'element-text { tab-stops: [3ch]; }')
 [[ -n $i ]]
 
 [[ ${connections[$i]} = y* ]] && action=down task=deactivate || action=up task=activate
