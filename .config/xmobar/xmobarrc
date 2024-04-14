@@ -20,7 +20,7 @@ Config
             , "-d", "1"
             ] 10
         , Run Memory
-            [ "-t", " <fn=1></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
             , "-H", "80"
             , "-h", "red3,gray17"
             ] 10
@@ -37,8 +37,8 @@ Config
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
-            , "-i", "<fn=1><fc=gray33></fc></fn>"
-            , "-O", "<fn=1><fc=gray33></fc></fn>"
+            , "-i", "<fc=gray33></fc>"
+            , "-O", "<fc=gray33></fc>"
             , "-o", "<timeleft>"
             ] 10
         , Run Date " %Y-%m-%d %H:%M:%S " "date" 10
