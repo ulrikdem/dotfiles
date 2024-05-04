@@ -68,7 +68,7 @@ def stop():
 def bar():
     from inotify_simple import INotify, flags
     inotify = INotify()
-    inotify.add_watch(os.path.dirname(path), flags.CLOSE_WRITE)
+    inotify.add_watch(os.path.dirname(path), flags.CREATE | flags.CLOSE_WRITE | flags.MOVED_TO)
     basename = os.path.basename(path)
     print(flush=True)
     modified = True
