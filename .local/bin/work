@@ -66,11 +66,14 @@ def stop():
     file.write(f"/{stop.isoformat(timespec='minutes')}\n".encode())
 
 def bar():
-    from inotify_simple import INotify, flags
-    inotify = INotify()
-    inotify.add_watch(os.path.dirname(path), flags.CREATE | flags.CLOSE_WRITE | flags.MOVED_TO)
-    basename = os.path.basename(path)
     print(flush=True)
+    try:
+        from inotify_simple import INotify, flags
+        inotify = INotify()
+        inotify.add_watch(os.path.dirname(path), flags.CREATE | flags.CLOSE_WRITE | flags.MOVED_TO)
+    except (ModuleNotFoundError, FileNotFoundError):
+        sleep(1e9)
+    basename = os.path.basename(path)
     modified = True
     while True:
         if modified:
