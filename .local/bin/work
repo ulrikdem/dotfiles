@@ -1,0 +1,104 @@
+#!/usr/bin/env python3
+
+from collections import defaultdict
+from datetime import date, datetime, time, timedelta
+from time import sleep
+import os
+import os.path
+import sys
+
+path = os.path.expanduser("~/.work/current")
+
+def compute_totals():
+    totals = defaultdict(lambda: [timedelta(), timedelta()])
+    active = False
+    for line_num, line in enumerate(open(path)):
+        if active:
+            return None, False, f"line {line_num}: Missing stop time"
+        try:
+            active = "/" not in line
+            if active:
+                start = datetime.fromisoformat(line.strip())
+                stop = datetime.now()
+            else:
+                start, stop = line.strip().split("/")
+                start = datetime.fromisoformat(start)
+                try:
+                    stop = datetime.combine(start, time.fromisoformat(stop))
+                except ValueError:
+                    stop = datetime.fromisoformat(stop)
+        except ValueError as error:
+            return None, False, f"line {line_num + 1}: {error}"
+        delta = stop - start
+        totals[start.date()][0] += delta
+        totals[date.fromisocalendar(*start.isocalendar()[:2], day=7)][1] += delta
+    return totals, active, None
+
+def format_time(time):
+    minutes = time // timedelta(minutes=1)
+    return f"{minutes // 60}:{minutes % 60:02}"
+
+def report():
+    totals, active, error = compute_totals()
+    if error:
+        sys.exit(f"error: {error}")
+    line = "---------------------"
+    print(line)
+    for d, [daily, weekly] in sorted(totals.items()):
+        if daily:
+            print(f"{d}\t{format_time(daily):>5}")
+        if weekly:
+            print(f"{d:%G-W%V}\t{format_time(weekly):>5}\n{line}")
+
+def start():
+    print(datetime.now().isoformat(timespec="minutes"), file=open(path, "a"))
+
+def stop():
+    stop = datetime.now()
+    file = open(path, "r+b")
+    for line in file:
+        pass
+    if b"/" not in line:
+        start = datetime.fromisoformat(line.strip().decode())
+        if start.date() == stop.date():
+            stop = stop.time()
+        file.seek(len(line.rstrip()) - len(line), os.SEEK_END)
+    file.write(f"/{stop.isoformat(timespec='minutes')}\n".encode())
+
+def bar():
+    from inotify_simple import INotify, flags
+    inotify = INotify()
+    inotify.add_watch(os.path.dirname(path), flags.CLOSE_WRITE)
+    basename = os.path.basename(path)
+    print(flush=True)
+    modified = True
+    while True:
+        if modified:
+            try:
+                totals, active, error = compute_totals()
+            except FileNotFoundError:
+                sleep(0.1)
+                continue
+            last_update = datetime.now()
+            if active:
+                total = sorted(filter(lambda x: x[1][0], totals.items()))[-1][1][0]
+        now = datetime.now()
+        if active or error:
+            prefix, suffix = ("<fc=red3>", "</fc>") if error else ("", " " + format_time(total + (now - last_update)))
+            print(f" {prefix}<fn=1>󱃐</fn>{suffix} <fc=gray17>│</fc>", flush=True)
+        else:
+            print(flush=True)
+        events = inotify.read(timeout=60_000 - now.second * 1000 - now.microsecond // 1000 if active else None, read_delay=100)
+        modified = any(e.name == basename for e in events)
+
+match sys.argv[1:]:
+    case []:
+        report()
+    case ["start"]:
+        start()
+    case ["stop"]:
+        stop()
+    case ["bar"]:
+        bar()
+    case _:
+        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [start|stop|bar]")

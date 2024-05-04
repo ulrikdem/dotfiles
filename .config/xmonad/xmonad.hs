@@ -230,6 +230,8 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-i", spawn "unicode-input")
     , ("M-l", spawn "lock")
     , ("M-S-l", spawn "systemctl suspend")
+    , ("M-S-[", spawn "work start")
+    , ("M-S-]", spawn "work stop")
 
     , ("<XF86AudioMute>", spawn "volume toggle")
     , ("<XF86AudioLowerVolume>", spawn "volume 2%-")

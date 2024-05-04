@@ -1,5 +1,5 @@
 Config
-    { template = "}%xmonad%{ %dynnetwork%%wi%%alsa:default:Master%%memory%%cpu%%cpufreq%%battery%%date%"
+    { template = "}%xmonad%{ %dynnetwork%%wi%%alsa:default:Master%%memory%%cpu%%cpufreq%%battery%%work%%date%"
     , fgColor = "gray50"
     , commands =
         [ Run Wireless ""
@@ -41,6 +41,7 @@ Config
             , "-O", "<fc=gray33></fc>"
             , "-o", "<timeleft>"
             ] 10
+        , Run CommandReader "work bar" "work"
         , Run Date " %Y-%m-%d %H:%M:%S " "date" 10
         ]
     }
