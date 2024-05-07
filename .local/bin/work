@@ -70,7 +70,7 @@ def bar():
     try:
         from inotify_simple import INotify, flags
         inotify = INotify()
-        inotify.add_watch(os.path.dirname(path), flags.CREATE | flags.CLOSE_WRITE | flags.MOVED_TO)
+        inotify.add_watch(os.path.dirname(path), flags.CREATE | flags.CLOSE_WRITE | flags.MOVED_TO | flags.MOVED_FROM | flags.DELETE)
     except (ModuleNotFoundError, FileNotFoundError):
         sleep(1e9)
     basename = os.path.basename(path)
@@ -80,8 +80,7 @@ def bar():
             try:
                 totals, active, error = compute_totals()
             except FileNotFoundError:
-                sleep(0.1)
-                continue
+                active = False
             last_update = datetime.now()
             if active:
                 total = sorted(filter(lambda x: x[1][0], totals.items()))[-1][1][0]
