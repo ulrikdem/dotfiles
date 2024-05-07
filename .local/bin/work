@@ -50,20 +50,24 @@ def report():
         if weekly:
             print(f"{d:%G-W%V}\t{format_time(weekly):>5}\n{line}")
 
-def start():
-    print(datetime.now().isoformat(timespec="minutes"), file=open(path, "a"))
-
-def stop():
-    stop = datetime.now()
-    file = open(path, "r+b")
-    for line in file:
-        pass
-    if b"/" not in line:
+def toggle():
+    line = b"/"
+    try:
+        file = open(path, "r+b")
+        for line in file:
+            pass
+    except FileNotFoundError:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        file = open(path, "ab")
+    if b"/" in line:
+        file.write(f"{datetime.now().isoformat(timespec='minutes')}\n".encode())
+    else:
         start = datetime.fromisoformat(line.strip().decode())
+        stop = datetime.now()
         if start.date() == stop.date():
             stop = stop.time()
         file.seek(len(line.rstrip()) - len(line), os.SEEK_END)
-    file.write(f"/{stop.isoformat(timespec='minutes')}\n".encode())
+        file.write(f"/{stop.isoformat(timespec='minutes')}\n".encode())
 
 def bar():
     print(flush=True)
@@ -96,11 +100,9 @@ def bar():
 match sys.argv[1:]:
     case []:
         report()
-    case ["start"]:
-        start()
-    case ["stop"]:
-        stop()
+    case ["toggle"]:
+        toggle()
     case ["bar"]:
         bar()
     case _:
-        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [start|stop|bar]")
+        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|bar]")
