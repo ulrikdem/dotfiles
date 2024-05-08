@@ -37,6 +37,7 @@ import XMonad.Hooks.UrgencyHook
 
 import XMonad.Layout.BorderResize
 import XMonad.Layout.Decoration
+import XMonad.Layout.FocusTracking
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
@@ -351,13 +352,13 @@ layout textHeight =
     lessBorders Screen $
     resetEmpty $
     ModifiedLayout (Fullscreen Nothing) $
-    ModifiedLayout (Limit 3 (0, 0) tabbed) $
+    ModifiedLayout (Limit 3 tabbed) $
     avoidStruts $
     smartSpacingWithEdge (fi gapWidth) $
     configurableNavigation noNavigateBorders $
     borderResizeNear gapWidth $
     Columns [1, 1] (textHeight * 8) Nothing where
-        tabbed = FocusFromStack Nothing $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
+        tabbed = focusTracking $ FocusFromStack Nothing $ tabbedBottom EllipsisShrinker theme{decoHeight = textHeight * 5 `div` 4}
         gapWidth = textHeight `div` 4
 
 data EllipsisShrinker = EllipsisShrinker
@@ -409,17 +410,14 @@ instance (Eq a) => LayoutClass Columns a where
         | otherwise = return Nothing
     description _ = "Columns"
 
-data Limit l a = Limit Int (Int, Int) (l a)
+data Limit l a = Limit Int (l a)
     deriving (Read, Show)
 
 instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
-    modifyLayoutWithUpdate (Limit n state extraLayout) (W.Workspace tag mainLayout stack) rect = do
+    modifyLayoutWithUpdate (Limit n extraLayout) (W.Workspace tag mainLayout stack) rect = do
         let focus = fromMaybe 0 $ length . W.up <$> stack
             (mainWins, extraWins) = splitAt (n - 1) $ W.integrate' stack
-            state' = (length extraWins, if focus >= n - 1 then focus - n + 1
-                                        else if length extraWins > fst state then 0
-                                        else max 0 $ snd state + length extraWins - fst state)
-            extraStack = toStack (snd state') extraWins
+            extraStack = toStack (max 0 $ focus - n + 1) extraWins
             extraFocus = fmap W.focus extraStack
             mainStack = toStack (min focus $ n - 1) $ mainWins ++ maybeToList extraFocus
         (rects, mainLayout') <- runLayout (W.Workspace tag mainLayout mainStack) rect
@@ -428,10 +426,10 @@ instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
                 (rects, extraLayout') <- runLayout (W.Workspace tag extraLayout extraStack) rect
                 return (before ++ rects ++ after, extraLayout')
             (_, []) -> (rects,) <$> handleMessage extraLayout (SomeMessage Hide)
-        return ((rects, mainLayout'), Just $ Limit n state' $ fromMaybe extraLayout extraLayout')
-    handleMess (Limit n state extraLayout) m = case fromMessage m of
-        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) state extraLayout
-        _ -> fmap (Limit n state) <$> handleMessage extraLayout m
+        return ((rects, mainLayout'), Just $ Limit n $ fromMaybe extraLayout extraLayout')
+    handleMess (Limit n extraLayout) m = case fromMessage m of
+        Just (ModifyLimit f) -> return $ Just $ Limit (max 1 $ f n) extraLayout
+        _ -> fmap (Limit n) <$> handleMessage extraLayout m
 
 toStack i list = case splitAt i list of
     (up, focus : down) -> Just $ W.Stack focus (reverse up) down
