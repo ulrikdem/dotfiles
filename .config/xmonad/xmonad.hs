@@ -37,6 +37,7 @@ import XMonad.Hooks.UrgencyHook
 
 import XMonad.Layout.BorderResize
 import XMonad.Layout.Decoration
+import XMonad.Layout.FocusTracking
 import XMonad.Layout.LayoutModifier
 import XMonad.Layout.NoBorders
 import XMonad.Layout.Spacing
@@ -350,6 +351,7 @@ instance XPrompt Open where
 layout textHeight =
     lessBorders Screen $
     resetEmpty $
+    focusTracking $
     ModifiedLayout (Fullscreen Nothing) $
     ModifiedLayout (Limit 3 (0, 0) tabbed) $
     avoidStruts $
