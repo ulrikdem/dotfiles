@@ -25,7 +25,6 @@ import XMonad.Actions.CycleWS
 import XMonad.Actions.FlexibleResize
 import XMonad.Actions.PhysicalScreens
 import XMonad.Actions.Promote
-import XMonad.Actions.RotSlaves
 import XMonad.Actions.SwapWorkspaces
 import XMonad.Actions.TagWindows
 
@@ -198,8 +197,6 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-e", windows W.focusDown)
     , ("M-S-n", windows W.swapUp)
     , ("M-S-e", windows W.swapDown)
-    , ("M-C-n", rotAllUp)
-    , ("M-C-e", rotAllDown)
 
     , ("M-<Up>", sendMessage $ Go U)
     , ("M-<Down>", sendMessage $ Go D)
