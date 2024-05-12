@@ -1,3 +1,8 @@
+window.csd {
+    border-radius: 0;
+    outline: none;
+}
+
 window.solid-csd {
     box-shadow: none;
     padding: 0;
