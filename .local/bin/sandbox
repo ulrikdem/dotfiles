@@ -54,25 +54,19 @@ if [[ -n $bind_args ]]; then
 fi
 
 temp=$(mktemp -d "$XDG_RUNTIME_DIR/sandbox.XXXXXXXXXX")
+
 mkfifo -- "$temp/proxy"
-xdg-dbus-proxy --fd=3 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 3<>"$temp/proxy" &
-read -N 1 <"$temp/proxy"
+if ((${#policy[@]})); then
+    xdg-dbus-proxy --fd=3 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 3<>"$temp/proxy" &
+    read -N 1 <"$temp/proxy"
+    args+=(--bind "$temp/bus" "$XDG_RUNTIME_DIR/bus" --setenv DBUS_SESSION_BUS_ADDRESS unix:path="$XDG_RUNTIME_DIR/bus")
+fi
 
 mkfifo -- "$temp/url"
 tail -f -- "$temp/url" | while read -rd '' url; do
     xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
 done &>/dev/null &
-exec {fd}> >(
-    cat
-    kill $(jobs -p)
-    rm -r -- "$temp"
-)
-args+=(
-    --bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url"
-    --bind "$temp/bus" "$XDG_RUNTIME_DIR/bus"
-    --setenv DBUS_SESSION_BUS_ADDRESS unix:path="$XDG_RUNTIME_DIR/bus"
-    --sync-fd $fd
-)
+args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
 
 exec {browser}<<'EOF'
 #!/bin/bash
@@ -97,6 +91,13 @@ args+=(
     --file $mimeapps ~/.config/mimeapps.list
     --setenv BROWSER browser
 )
+
+exec {fd}> >(
+    cat
+    kill $(jobs -p)
+    rm -r -- "$temp"
+)
+args+=(--sync-fd $fd)
 
 (($#)) || set zsh
 exec bwrap "${args[@]}" "$@"
