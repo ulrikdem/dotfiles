@@ -248,8 +248,8 @@ alias la='ls -lha'
 (($+commands[bsdtar])) && alias tar=bsdtar
 (($+commands[git])) && alias g=git
 (($+commands[ipython])) && alias ipy=ipython
-(($+commands[nvim])) && alias vi=nvim vim=nvim
-(($+commands[nvr] && $+NVIM_LISTEN_ADDRESS)) && alias vi=nvr vim=nvr
+(($+commands[nvim])) && alias vi=nvim
+(($+commands[nvim] && $+NVIM)) && alias vi='nvim --server "$NVIM" --remote'
 (($+commands[ranger])) && alias r=ranger
 (($+commands[xdg-open])) && alias open=xdg-open
 

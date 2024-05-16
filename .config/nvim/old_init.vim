@@ -495,11 +495,10 @@ autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>ff
     \ '<Cmd>FZF '.fnameescape(fnamemodify(getcwd(), ':~')).'<CR>'
 autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>fF
     \ '<Cmd>FZF '.fnameescape(expand('%:p:~:h')).'<CR>'
-autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), extend([
+autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), [
     \ '--prompt='.substitute(fnamemodify(getcwd(), ':~'), '/\?$', '/', ''),
-\ ], executable('nvr') ? [
-    \ '--bind=ctrl-c:reload:nvr --remote-expr "DeleteBuffer(''$(printf %s {} \| sed "s/''/''''/g")'')"',
-\ ] : []), {l -> #{filename: l}})<CR>
+    \ '--bind=ctrl-c:reload:nvim --server '.shellescape(v:servername).' --remote-expr "DeleteBuffer(''$(printf %s {} \| sed "s/''/''''/g")'')"',
+\ ], {l -> #{filename: l}})<CR>
 function! s:ListBuffers() abort
     return map(filter(getbufinfo(#{buflisted: v:true}),
         \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
@@ -891,9 +890,7 @@ function! s:InitLspBuffer() abort
     if isdirectory(g:plugs.fzf.dir)
         nnoremap <buffer> <Leader>gs <Cmd>call CocActionAsync('documentSymbols',
             \ {e, s -> <SID>FzfFromQuickfix([], map(s, {i, s -> <SID>SymbolToQuickfix(s)}))})<CR>
-        if executable('nvr')
-            nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
-        endif
+        nnoremap <buffer> <Leader>gS <Cmd>call <SID>FzfFromWorkspaceSymbols()<CR>
     endif
 
     autocmd CursorHold <buffer> call CocActionAsync('highlight')
@@ -946,7 +943,7 @@ endfunction
 
 function! s:FzfFromWorkspaceSymbols() abort
     let l:ProcessItems = s:FzfFromQuickfix(['--bind=change:top+reload:
-        \nvr --remote-expr "WorkspaceSymbolQuery(''$(printf %s {q} | sed "s/''/''''/g")'')" | tail -c +2'], [])
+        \nvim --server '.shellescape(v:servername).' --remote-expr "WorkspaceSymbolQuery(''$(printf %s {q} | sed "s/''/''''/g")'')" | tail -c +2'], [])
     let l:last_query = ''
     let l:results = ''
     function! WorkspaceSymbolQuery(query) abort closure
@@ -1096,9 +1093,6 @@ Plug 'lervag/vimtex'
 Plug 'neoclide/coc-vimtex'
 let g:vimtex_indent_on_ampersands = v:false
 let g:vimtex_indent_bib_enabled = v:false
-if executable('nvr')
-    let g:vimtex_compiler_progname = 'nvr'
-endif
 if executable('zathura')
     let g:vimtex_view_method = 'zathura'
     let g:vimtex_view_zathura_options = '-n '.shellescape(v:servername)
