@@ -202,6 +202,7 @@ function! s:UpdateSrceryColorScheme() abort
     call s:Highlight('IncSearch', #{fg: 'SrceryBlack', bg: 'SrceryYellow', attr: 'NONE'})
     call s:Highlight('PmenuThumb', #{bg: 'SrceryXgray5'})
     highlight! link PmenuSbar Pmenu
+    highlight! link CurSearch IncSearch
     highlight! link Operator SrceryBrightWhite
     highlight! link vimUserFunc SrceryBrightWhite
     highlight! link QuickFixLine Visual
