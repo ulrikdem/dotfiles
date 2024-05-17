@@ -69,6 +69,12 @@ def toggle():
         file.seek(len(line.rstrip()) - len(line), os.SEEK_END)
         file.write(f"/{stop.isoformat(timespec='minutes')}\n".encode())
 
+def undo():
+    file = open(path, "r+b")
+    for line in file:
+        pass
+    file.truncate(file.tell() - len(line) + max(line.find(b"/"), 0))
+
 def bar():
     print(flush=True)
     try:
@@ -102,7 +108,9 @@ match sys.argv[1:]:
         report()
     case ["toggle"]:
         toggle()
+    case ["undo"]:
+        undo()
     case ["bar"]:
         bar()
     case _:
-        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|bar]")
+        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|undo|bar]")
