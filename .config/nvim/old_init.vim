@@ -29,12 +29,25 @@ endtry
 
 " Misc settings {{{1
 
+if exists('$SSH_TTY')
+    let g:clipboard = #{
+        \ copy: {
+            \ '*': v:lua.require'vim.ui.clipboard.osc52'.copy('*'),
+            \ '+': v:lua.require'vim.ui.clipboard.osc52'.copy('+'),
+        \ },
+        \ paste: {
+            \ '*': {-> [getreg('"', v:true, v:true), getregtype('"')]},
+            \ '+': {-> [getreg('"', v:true, v:true), getregtype('"')]},
+        \ },
+    \ }
+endif
+
 set clipboard=unnamed
 set cursorline
 set linebreak breakindent showbreak=↪
 set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a mousemodel=extend
-set scrolloff=4
+set scrolloff=4 smoothscroll
 set shortmess+=IA
 set splitbelow splitright
 set title titlestring=%F\ -\ nvim titlelen=0
@@ -88,7 +101,6 @@ let g:mapleader = ' '
 set notimeout
 
 Plug 'tpope/vim-abolish'
-Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-surround'
@@ -375,7 +387,7 @@ if executable('rg')
     set grepprg=rg\ --column\ --color=ansi
     set grepformat=[0m[35m%f[0m:[0m[32m%l[0m:[0m%c[0m:%m
 else
-    set grepprg=grep\ -rn
+    set grepprg=grep\ -rIn
 endif
 
 let s:match_start = "\e[31m"
