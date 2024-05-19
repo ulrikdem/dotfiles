@@ -117,16 +117,6 @@ let g:wordmotion_mappings = {
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
 
-Plug 'psliwka/vim-smoothie'
-let g:smoothie_no_default_mappings = v:true
-autocmd vimrc User Plug_vim_smoothie call s:MapSmoothie()
-function! s:MapSmoothie() abort
-    nnoremap <C-D> <Cmd>call smoothie#downwards()<CR>
-    nnoremap <C-U> <Cmd>call smoothie#upwards()<CR>
-    xnoremap <C-D> <Cmd>call smoothie#downwards()<CR>
-    xnoremap <C-U> <Cmd>call smoothie#upwards()<CR>
-endfunction
-
 map <expr> <M-r> <SID>ShowRelativeNumber()
 function! s:ShowRelativeNumber() abort
     setlocal relativenumber
