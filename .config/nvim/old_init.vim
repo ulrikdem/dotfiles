@@ -47,6 +47,7 @@ set cursorline
 set linebreak breakindent showbreak=↪
 set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a mousemodel=extend
+set number relativenumber numberwidth=3
 set scrolloff=4 smoothscroll
 set shortmess+=IA
 set splitbelow splitright
@@ -117,15 +118,6 @@ let g:wordmotion_mappings = {
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
 
-map <expr> <M-r> <SID>ShowRelativeNumber()
-function! s:ShowRelativeNumber() abort
-    setlocal relativenumber
-    redraw
-    let l:char = getchar()
-    setlocal norelativenumber
-    return type(l:char) == v:t_number ? nr2char(l:char) : l:char
-endfunction
-
 nmap <expr> <M-[> <SID>StartBracketRepeat('[')
 nmap <expr> <M-]> <SID>StartBracketRepeat(']')
 function! s:StartBracketRepeat(bracket) abort
@@ -170,9 +162,12 @@ Plug 'godlygeek/tabular'
 
 autocmd vimrc ColorScheme * call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
+    highlight! link LineNr NonText
+    highlight clear CursorLineNr
+    highlight clear CursorLine
     highlight DiffDelete ctermfg=52 ctermbg=52 guifg=#5F0000 guibg=#5F0000
-    highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#008700
-    highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#0000AF
+    highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#005F00
+    highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#00005F
     highlight DiffText ctermfg=NONE ctermbg=19 guifg=NONE guibg=#0000AF guisp=#0000AF
     highlight link manUnderline manItalic
     highlight link manOptionDesc NONE
@@ -187,8 +182,6 @@ autocmd vimrc ColorScheme srcery call s:UpdateSrceryColorScheme()
 function! s:UpdateSrceryColorScheme() abort
     call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
     call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
-    call s:Highlight('CursorLine', #{bg: 'SrceryXgray1'})
-    call s:Highlight('CursorLineNr', #{bg: 'SrceryXgray1'})
     call s:Highlight('TermCursor', #{fg: 'SrceryBlack', bg: 'Normal', attr: 'NONE'})
     call s:Highlight('Folded', #{attr: 'NONE'})
     call s:Highlight('Visual', #{bg: 'SrceryXgray4', attr: 'NONE'})
@@ -204,6 +197,7 @@ function! s:UpdateSrceryColorScheme() abort
     highlight! link Removed diffRemoved
     highlight! link Changed diffChanged
     highlight! link QuickFixLine Visual
+    highlight! link qfLineNr SrceryWhite
     highlight! link Directory SrceryGreen
     highlight! link Error SrceryRedBold
     highlight! link ErrorMsg SrceryRedBold
@@ -437,7 +431,7 @@ Plug 'lambdalisue/suda.vim'
 autocmd vimrc BufEnter * let &titlestring = (&buftype ==# 'terminal' ? '[Terminal]' : '%F').' - nvim'
 autocmd vimrc TermOpen * set titlestring=[Terminal]\ -\ nvim
 
-autocmd vimrc TermOpen * setlocal matchpairs= nocursorline
+autocmd vimrc TermOpen * setlocal nonumber norelativenumber matchpairs=
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
