@@ -184,39 +184,35 @@ function! s:UpdateColorScheme() abort
     highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#008700
     highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#0000AF
     highlight DiffText ctermfg=NONE ctermbg=19 guifg=NONE guibg=#0000AF guisp=#0000AF
-    highlight manBold cterm=bold gui=bold
-    highlight manItalic cterm=italic gui=italic
     highlight link manUnderline manItalic
-    highlight link manTitle manSectionHeading
     highlight link manOptionDesc NONE
 endfunction
 
 Plug 'srcery-colors/srcery-vim'
-let g:srcery_bg_passthrough = v:true
+let g:srcery_bg = ['NONE', 'NONE']
 let g:srcery_italic = v:true
 autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateSrceryColorScheme()
 function! s:UpdateSrceryColorScheme() abort
-    execute 'highlight Normal guibg='.synIDattr(hlID('SrceryBlack'), 'fg', 'gui')
     call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
     call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
     call s:Highlight('CursorLine', #{bg: 'SrceryXgray1'})
     call s:Highlight('CursorLineNr', #{bg: 'SrceryXgray1'})
     call s:Highlight('TermCursor', #{fg: 'SrceryBlack', bg: 'Normal', attr: 'NONE'})
-    call s:Highlight('CocErrorVirtualText', #{bg: 'SrceryXgray1'})
-    call s:Highlight('CocWarningVirtualText', #{bg: 'SrceryXgray1'})
-    call s:Highlight('CocInfoVirtualText', #{bg: 'SrceryXgray1'})
-    call s:Highlight('CocHintVirtualText', #{bg: 'SrceryXgray1'})
     call s:Highlight('Folded', #{attr: 'NONE'})
     call s:Highlight('Visual', #{bg: 'SrceryXgray4', attr: 'NONE'})
     call s:Highlight('Search', #{fg: 'SrceryBlack', bg: 'SrceryBrightYellow', attr: 'NONE'})
     call s:Highlight('IncSearch', #{fg: 'SrceryBlack', bg: 'SrceryYellow', attr: 'NONE'})
     call s:Highlight('PmenuThumb', #{bg: 'SrceryXgray5'})
     highlight! link PmenuSbar Pmenu
+    highlight! link NormalFloat Pmenu
     highlight! link CurSearch IncSearch
-    highlight! link Operator SrceryBrightWhite
     highlight! link vimUserFunc SrceryBrightWhite
+    highlight! link @variable Identifier
+    highlight! link Added diffAdded
+    highlight! link Removed diffRemoved
+    highlight! link Changed diffChanged
     highlight! link QuickFixLine Visual
     highlight! link Directory SrceryGreen
     highlight! link Error SrceryRedBold
@@ -844,9 +840,6 @@ autocmd vimrc User CocNvimInit call coc#config('suggest', #{
 
 autocmd vimrc ColorScheme * call s:UpdateCocColors()
 function! s:UpdateCocColors() abort
-    for l:level in ['Error', 'Warning', 'Info', 'Hint']
-        call s:Highlight('Coc'.l:level.'VirtualText', #{fg: 'Coc'.l:level.'Float', attr: 'italic'})
-    endfor
     highlight link CocHighlightText CocBold
     highlight link CocUnderline CocBold
     highlight link CocHoverRange NONE
