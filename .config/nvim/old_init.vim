@@ -80,7 +80,7 @@ endfunction
 
 " Misc mappings {{{1
 
-nnoremap <C-S> <Cmd>update<CR>
+nnoremap <C-S> <Cmd>write<CR>
 nnoremap ZT <Cmd>silent only \| quit<CR>
 
 nnoremap <M-Left> <C-W>h
