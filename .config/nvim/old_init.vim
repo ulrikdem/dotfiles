@@ -180,14 +180,14 @@ autocmd vimrc User Plug_srcery_vim colorscheme srcery
 
 autocmd vimrc ColorScheme srcery call s:UpdateSrceryColorScheme()
 function! s:UpdateSrceryColorScheme() abort
-    call s:Highlight('StatusLine', #{bg: 'SrceryXgray5'})
-    call s:Highlight('StatusLineNC', #{bg: 'SrceryXgray5', attr: 'NONE'})
-    call s:Highlight('TermCursor', #{fg: 'SrceryBlack', bg: 'Normal', attr: 'NONE'})
+    call s:Highlight('StatusLine', #{bg: 'xgray5'})
+    call s:Highlight('StatusLineNC', #{bg: 'xgray5', attr: 'NONE'})
+    call s:Highlight('TermCursor', #{fg: 'black', bg: 'bright_white', attr: 'NONE'})
     call s:Highlight('Folded', #{attr: 'NONE'})
-    call s:Highlight('Visual', #{bg: 'SrceryXgray4', attr: 'NONE'})
-    call s:Highlight('Search', #{fg: 'SrceryBlack', bg: 'SrceryBrightYellow', attr: 'NONE'})
-    call s:Highlight('IncSearch', #{fg: 'SrceryBlack', bg: 'SrceryYellow', attr: 'NONE'})
-    call s:Highlight('PmenuThumb', #{bg: 'SrceryXgray5'})
+    call s:Highlight('Visual', #{bg: 'xgray4', attr: 'NONE'})
+    call s:Highlight('Search', #{fg: 'black', bg: 'bright_yellow', attr: 'NONE'})
+    call s:Highlight('IncSearch', #{fg: 'black', bg: 'yellow', attr: 'NONE'})
+    call s:Highlight('PmenuThumb', #{bg: 'xgray5'})
     highlight! link PmenuSbar Pmenu
     highlight! link NormalFloat Pmenu
     highlight! link CurSearch IncSearch
@@ -210,14 +210,12 @@ endfunction
 
 function! s:Highlight(group, args) abort
     if has_key(a:args, 'fg')
-        let l:id = synIDtrans(hlID(a:args.fg))
         execute 'highlight' a:group
-            \ 'ctermfg='.synIDattr(l:id, 'fg', 'cterm') 'guifg='.synIDattr(l:id, 'fg', 'gui')
+            \ 'guifg='.g:srcery#palette[a:args.fg][0] 'ctermfg='.g:srcery#palette[a:args.fg][1]
     endif
     if has_key(a:args, 'bg')
-        let l:id = synIDtrans(hlID(a:args.bg))
         execute 'highlight' a:group
-            \ 'ctermbg='.synIDattr(l:id, 'fg', 'cterm') 'guibg='.synIDattr(l:id, 'fg', 'gui')
+            \ 'guibg='.g:srcery#palette[a:args.bg][0] 'ctermbg='.g:srcery#palette[a:args.bg][1]
     endif
     if has_key(a:args, 'attr')
         execute 'highlight' a:group 'cterm='.(a:args.attr) 'gui='.(a:args.attr)
@@ -226,10 +224,10 @@ endfunction
 
 function! s:GetSrceryColors(fg, bg) abort
     return [
-        \ synIDattr(hlID('Srcery'.a:fg), 'fg', 'gui'),
-        \ synIDattr(hlID('Srcery'.a:bg), 'fg', 'gui'),
-        \ synIDattr(hlID('Srcery'.a:fg), 'fg', 'cterm'),
-        \ synIDattr(hlID('Srcery'.a:bg), 'fg', 'cterm'),
+        \ g:srcery#palette[a:fg][0],
+        \ g:srcery#palette[a:bg][0],
+        \ g:srcery#palette[a:fg][1],
+        \ g:srcery#palette[a:bg][1],
     \ ]
 endfunction
 
@@ -326,12 +324,12 @@ autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call light
 
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
-    let l:common = s:GetSrceryColors('BrightWhite', 'Xgray5')
+    let l:common = s:GetSrceryColors('bright_white', 'xgray5')
     let l:palette = #{
         \ normal: #{
-            \ middle: [s:GetSrceryColors('BrightWhite', 'Xgray3')],
-            \ error: [s:GetSrceryColors('Black', 'Red')],
-            \ warning: [s:GetSrceryColors('Black', 'BrightOrange')],
+            \ middle: [s:GetSrceryColors('bright_white', 'xgray3')],
+            \ error: [s:GetSrceryColors('black', 'red')],
+            \ warning: [s:GetSrceryColors('black', 'bright_orange')],
         \ },
         \ inactive: #{
             \ left: [l:common],
@@ -339,19 +337,19 @@ function! s:UpdateLightlineColors() abort
         \ },
         \ tabline: #{
             \ left: [l:common],
-            \ tabsel: [s:GetSrceryColors('Black', 'Blue')],
+            \ tabsel: [s:GetSrceryColors('black', 'blue')],
         \ },
     \ }
     for [l:mode, l:color] in [
-        \ ['normal', 'Green'],
-        \ ['insert', 'Blue'],
-        \ ['replace', 'Red'],
-        \ ['visual', 'Magenta'],
-        \ ['command', 'Orange'],
-        \ ['fake', 'Yellow'],
+        \ ['normal', 'green'],
+        \ ['insert', 'blue'],
+        \ ['replace', 'red'],
+        \ ['visual', 'magenta'],
+        \ ['command', 'orange'],
+        \ ['fake', 'yellow'],
     \ ]
         let l:palette[l:mode] = get(l:palette, l:mode, {})
-        let l:palette[l:mode].left = [s:GetSrceryColors('Black', l:color), l:common]
+        let l:palette[l:mode].left = [s:GetSrceryColors('black', l:color), l:common]
         let l:palette[l:mode].right = l:palette[l:mode].left
     endfor
     let g:lightline#colorscheme#custom#palette = l:palette
