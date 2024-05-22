@@ -61,6 +61,19 @@ keymap.set("n", "glq", lsp.buf.format)
 keymap.set("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua lsp.buf.hover()<CR>", {remap = true})
 keymap.set("n", "<M-RightMouse>", "<LeftMouse><C-w>d", {remap = true})
 
+diagnostic.config({
+    severity_sort = true,
+    signs = false,
+    float = {header = ""},
+})
+
+keymap.set("n", "yoe", function()
+    diagnostic.enable(not diagnostic.is_enabled({bufnr = 0}), {bufnr = 0})
+end)
+keymap.set("n", "yok", function()
+    lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({bufnr = 0}), {bufnr = 0})
+end)
+
 nvim.create_autocmd("LspAttach", {
     group = augroup,
     callback = function(ev)
@@ -90,16 +103,3 @@ lsp.handlers["textDocument/documentHighlight"] = function(err, result, ctx, conf
     lsp.util.buf_clear_references(ctx.bufnr)
     on_document_highlight(err, result, ctx, config)
 end
-
-keymap.set("n", "yok", function()
-    lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({bufnr = 0}), {bufnr = 0})
-end)
-keymap.set("n", "yoe", function()
-    diagnostic.enable(not diagnostic.is_enabled({bufnr = 0}), {bufnr = 0})
-end)
-
-diagnostic.config({
-    severity_sort = true,
-    signs = false,
-    float = {header = ""},
-})
