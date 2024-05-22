@@ -40,6 +40,46 @@ end
 set_tab_mapping("<Tab>", "<C-n>")
 set_tab_mapping("<S-Tab>", "<C-p>")
 
+nvim.create_autocmd("CompleteChanged", {
+    group = augroup,
+    callback = function()
+        if v.event.completed_item.info and v.event.completed_item.info ~= "" then
+            local event = v.event
+            schedule(function()
+                local left_col = event.col - 1
+                local right_col = event.col + event.width + (event.scrollbar and 1 or 0)
+                local left_space = left_col - 2
+                local right_space = o.columns - right_col - 2
+                local target_width = 80
+                local right = target_width <= right_space or right_space >= left_space
+                local make_floating_popup_options = lsp.util.make_floating_popup_options
+                function lsp.util.make_floating_popup_options(width, height)
+                    return {
+                        relative = "editor",
+                        row = event.row,
+                        col = right and right_col or left_col,
+                        anchor = right and "NW" or "NE",
+                        width = width,
+                        height = height,
+                        border = {"", "", "", {" ", "NormalFloat"}, "", "", "", {" ", "NormalFloat"}},
+                        style = "minimal",
+                    }
+                end
+                lsp.util.open_floating_preview(
+                    split(event.completed_item.info, "\n"),
+                    tbl_get(event.completed_item.user_data, "nvim", "lsp", "completion_item", "documentation", "kind") == "markdown" and "markdown" or nil,
+                    {
+                        max_width = math.min(target_width, right and right_space or left_space),
+                        max_height = o.lines - o.cmdheight - event.row,
+                        close_events = {"CompleteChanged", "CompleteDone"},
+                    }
+                )
+                lsp.util.make_floating_popup_options = make_floating_popup_options
+            end)
+        end
+    end,
+})
+
 -- LSP {{{1
 
 -- Mappings use the proposed gl prefix: https://github.com/neovim/neovim/pull/28650
