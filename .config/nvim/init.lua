@@ -13,6 +13,16 @@ local augroup = nvim.create_augroup("init.lua", {})
 
 cmd.runtime("old_init.vim")
 
+-- Mappings {{{1
+
+-- Delete default mappings that set a new undo point
+if fn.maparg("<C-w>", "i") ~= "" then
+    keymap.del("i", "<C-w>")
+end
+if fn.maparg("<C-u>", "i") ~= "" then
+    keymap.del("i", "<C-u>")
+end
+
 -- Completion {{{1
 
 local cmp = require("cmp")
