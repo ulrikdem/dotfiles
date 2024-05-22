@@ -4,9 +4,10 @@
 
 -- Allow omitting vim. and vim.api.nvim_ prefixes
 setmetatable(_G, {__index = vim})
-nvim = setmetatable({}, {__index = function(_, key)
-    return api["nvim_" .. key]
-end})
+nvim = {}
+for k, v in pairs(api) do
+    nvim[k:sub(6)] = v
+end
 
 local augroup = nvim.create_augroup("init.lua", {})
 
