@@ -755,7 +755,7 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([
     \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
 
 set dictionary=/usr/share/dict/words
-set completeopt=menuone,noselect shortmess+=c
+set completeopt=menuone,noselect,popup shortmess+=c
 
 " Filetypes {{{1
 
