@@ -1,3 +1,4 @@
+bo.keywordprg = ":help"
 bo.omnifunc = "v:lua.lua_omnifunc"
 
 require("cmp").setup.buffer({
