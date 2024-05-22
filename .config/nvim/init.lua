@@ -26,26 +26,10 @@ cmp.setup({
         ["<C-Space>"] = cmp.mapping.complete(),
         ["<Tab>"] = cmp.mapping.select_next_item(),
         ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-        ["<C-y>"] = cmp.mapping.confirm({select = true}),
-        ["<C-n>"] = cmp.mapping(function(fallback)
-            if snippet.active({direction = 1}) then
-                snippet.jump(1)
-            else
-                fallback()
-            end
-        end, {"i", "s"}),
-        ["<C-p>"] = cmp.mapping(function(fallback)
-            if snippet.active({direction = -1}) then
-                snippet.jump(-1)
-            else
-                fallback()
-            end
-        end, {"i", "s"}),
         ["<PageDown>"] = cmp.mapping.scroll_docs(4),
         ["<PageUp>"] = cmp.mapping.scroll_docs(-4),
     }),
     preselect = cmp.PreselectMode.None,
-    experimental = {ghost_text = true},
     formatting = {expandable_indicator = false},
 })
 
@@ -55,7 +39,7 @@ cmp.setup({
 lsp_client_capabilities = tbl_deep_extend(
     "force",
     lsp.protocol.make_client_capabilities(),
-    require("cmp_nvim_lsp").default_capabilities()
+    require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
 )
 
 -- Mappings use the proposed gl prefix: https://github.com/neovim/neovim/pull/28650
