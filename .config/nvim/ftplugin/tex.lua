@@ -1,0 +1,1 @@
+b.completion_triggers = {"\\", "{"}

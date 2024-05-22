@@ -169,6 +169,8 @@ function! s:UpdateColorScheme() abort
     highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#005F00
     highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#00005F
     highlight DiffText ctermfg=NONE ctermbg=19 guifg=NONE guibg=#0000AF guisp=#0000AF
+    highlight LspReferenceText cterm=bold gui=bold
+    highlight LspSignatureActiveParameter cterm=bold gui=bold
     highlight link manUnderline manItalic
     highlight link manOptionDesc NONE
 endfunction
@@ -183,10 +185,17 @@ function! s:UpdateSrceryColorScheme() abort
     call s:Highlight('StatusLine', #{bg: 'xgray5'})
     call s:Highlight('StatusLineNC', #{bg: 'xgray5', attr: 'NONE'})
     call s:Highlight('TermCursor', #{fg: 'black', bg: 'bright_white', attr: 'NONE'})
+    call s:Highlight('DiagnosticUnderlineError', #{fg: 'none', sp: 'red', attr: 'undercurl'})
+    call s:Highlight('DiagnosticUnderlineWarn', #{fg: 'none', sp: 'orange', attr: 'undercurl'})
+    call s:Highlight('DiagnosticUnderlineInfo', #{fg: 'none', sp: 'yellow', attr: 'undercurl'})
+    call s:Highlight('DiagnosticUnderlineHint', #{fg: 'none', sp: 'blue', attr: 'undercurl'})
+    call s:Highlight('DiagnosticUnderlineOk', #{fg: 'none', sp: 'green', attr: 'undercurl'})
     call s:Highlight('Folded', #{attr: 'NONE'})
     call s:Highlight('Visual', #{bg: 'xgray4', attr: 'NONE'})
     call s:Highlight('Search', #{fg: 'black', bg: 'bright_yellow', attr: 'NONE'})
     call s:Highlight('IncSearch', #{fg: 'black', bg: 'yellow', attr: 'NONE'})
+    call s:Highlight('PmenuKind', #{fg: 'white', bg: 'xgray2'})
+    call s:Highlight('PmenuKindSel', #{fg: 'white', bg: 'blue'})
     call s:Highlight('PmenuThumb', #{bg: 'xgray5'})
     highlight! link PmenuSbar Pmenu
     highlight! link NormalFloat Pmenu
@@ -202,10 +211,15 @@ function! s:UpdateSrceryColorScheme() abort
     highlight! link Error SrceryRedBold
     highlight! link ErrorMsg SrceryRedBold
     highlight! link WarningMsg SrceryRed
-    highlight! link SpellBad CocErrorHighlight
-    highlight! link SpellLocal CocWarningHighlight
-    highlight! link SpellCap CocInfoHighlight
-    highlight! link SpellRare CocHintHighlight
+    highlight! link DiagnosticError SrceryRed
+    highlight! link DiagnosticWarn SrceryOrange
+    highlight! link DiagnosticInfo SrceryYellow
+    highlight! link DiagnosticHint SrceryBlue
+    highlight! link DiagnosticOk SrceryGreen
+    highlight! link SpellBad DiagnosticUnderlineError
+    highlight! link SpellLocal DiagnosticUnderlineWarn
+    highlight! link SpellCap DiagnosticUnderlineInfo
+    highlight! link SpellRare DiagnosticUnderlineHint
 endfunction
 
 function! s:Highlight(group, args) abort
@@ -216,6 +230,9 @@ function! s:Highlight(group, args) abort
     if has_key(a:args, 'bg')
         execute 'highlight' a:group
             \ 'guibg='.g:srcery#palette[a:args.bg][0] 'ctermbg='.g:srcery#palette[a:args.bg][1]
+    endif
+    if has_key(a:args, 'sp')
+        execute 'highlight' a:group 'guisp='.g:srcery#palette[a:args.sp][0]
     endif
     if has_key(a:args, 'attr')
         execute 'highlight' a:group 'cterm='.(a:args.attr) 'gui='.(a:args.attr)
@@ -237,7 +254,7 @@ Plug 'itchyny/lightline.vim'
 let g:lightline = #{
     \ active: #{
         \ left: [['mode'], ['filename'], ['truncate']],
-        \ right: [['ruler'], ['fileformat', 'fileencoding', 'filetype'], []],
+        \ right: [['ruler'], ['fileformat', 'fileencoding', 'filetype'], ['warnings', 'errors']],
     \ },
     \ inactive: #{
         \ left: [['filename'], ['truncate', 'space']],
@@ -260,8 +277,14 @@ let g:lightline = #{
         \ fileencoding: 'StatusLineFileEncoding',
         \ filetype: 'StatusLineFileType',
     \ },
-    \ component_expand: {},
-    \ component_type: {},
+    \ component_expand: {
+        \ 'errors': 'StatusLineErrors',
+        \ 'warnings': 'StatusLineWarnings',
+    \ },
+    \ component_type: {
+        \ 'errors': 'error',
+        \ 'warnings': 'warning',
+    \ },
     \ tabline: #{
         \ left: [['tabs']],
         \ right: [],
@@ -304,6 +327,16 @@ endfunction
 function! s:NarrowWindow() abort
     return winwidth(0) < 80
 endfunction
+
+function! StatusLineErrors() abort
+    let l:count = v:lua.diagnostic.count(0)[0]
+    return l:count ? l:count.'✖' : ''
+endfunction
+function! StatusLineWarnings() abort
+    let l:count = v:lua.diagnostic.count(0)[1]
+    return l:count ? l:count.'⚠' : ''
+endfunction
+autocmd vimrc User Plug_lightline_vim autocmd vimrc DiagnosticChanged * call lightline#update()
 
 function! TabLabel(tab) abort
     let l:win = tabpagewinnr(a:tab)
@@ -722,16 +755,7 @@ autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([
     \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
 
 set dictionary=/usr/share/dict/words
-set completeopt=menuone,noselect,noinsert shortmess+=c
-
-set complete-=t
-let s:start_completion = "\<C-N>"
-inoremap <silent><expr> <Tab> <SID>TabMap('<Tab>', '<C-N>')
-inoremap <silent><expr> <S-Tab> <SID>TabMap('<S-Tab>', '<C-P>')
-function! s:TabMap(tab, key) abort
-    return pumvisible() ? empty(reg_recording()) ? a:key : '' :
-        \ col('.') <= 1 || getline('.')[col('.') - 2] =~ '\s' ? a:tab : s:start_completion
-endfunction
+set completeopt=menuone,noselect,popup shortmess+=c
 
 " Filetypes {{{1
 
