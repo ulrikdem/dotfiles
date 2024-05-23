@@ -44,7 +44,7 @@ endif
 
 set clipboard=unnamed
 set cursorline
-set linebreak breakindent showbreak=↪
+set linebreak breakindent
 set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a mousemodel=extend
 set number relativenumber numberwidth=3
