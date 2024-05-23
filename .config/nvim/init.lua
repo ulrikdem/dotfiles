@@ -23,6 +23,8 @@ if fn.maparg("<C-u>", "i") ~= "" then
     keymap.del("i", "<C-u>")
 end
 
+keymap.set("n", "gcu", "gcgc", {remap = true})
+
 -- Completion {{{1
 
 local cmp = require("cmp")
