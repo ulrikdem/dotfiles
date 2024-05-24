@@ -29,7 +29,7 @@ endtry
 
 " Misc settings {{{1
 
-if exists('$SSH_TTY')
+if !(exists('$DISPLAY') || exists('$WAYLAND_DISPLAY'))
     let g:clipboard = #{
         \ copy: {
             \ '*': v:lua.require'vim.ui.clipboard.osc52'.copy('*'),
