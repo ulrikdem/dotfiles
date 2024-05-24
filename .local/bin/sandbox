@@ -23,12 +23,14 @@ add-path() {
     args+=(--$1 "${OPTARG%%=*}" "$(realpath -ms -- "${OPTARG#*=}")")
 }
 
+env_args=(--unsetenv DISPLAY --unsetenv WAYLAND_DISPLAY)
 bind_args=
 policy=()
 while getopts nxRWr:w:d:b:B: opt; do
     case $opt in
         n) args+=(--share-net);;
         x)
+            env_args=()
             for path in ${XAUTHORITY:+"$XAUTHORITY"} "/tmp/.X11-unix/X${DISPLAY#:}" ${WAYLAND_DISPLAY:+"$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"} "$XDG_RUNTIME_DIR"/{pipewire-0,pulse/native} /sys/dev{,ices}; do
                 args+=(--ro-bind-try "$path" "$path")
             done
@@ -100,4 +102,4 @@ exec {fd}> >(
 args+=(--sync-fd $fd)
 
 (($#)) || set zsh
-exec bwrap "${args[@]}" "$@"
+exec bwrap "${args[@]}" "${env_args[@]}" "$@"
