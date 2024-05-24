@@ -212,7 +212,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-=", modifyColumns (+))
     , ("M-C--", sendMessage $ ModifyLimit pred)
     , ("M-C-=", sendMessage $ ModifyLimit succ)
-    , ("M-\\", fmap W.stack getWorkspace >>= flip whenJust (sendMessage . ModifyLimit . const . length))
+    , ("M-\\", flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack =<< getWorkspace)
     , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
 
@@ -416,7 +416,7 @@ data Limit l a = Limit Int (Int, Int) (l a)
 
 instance (LayoutClass l a, Read (l a), Eq a) => LayoutModifier (Limit l) a where
     modifyLayoutWithUpdate (Limit n state extraLayout) (W.Workspace tag mainLayout stack) rect = do
-        let focus = fromMaybe 0 $ length . W.up <$> stack
+        let focus = maybe 0 (length . W.up) stack
             (mainWins, extraWins) = splitAt (n - 1) $ W.integrate' stack
             state' = (length extraWins, if focus >= n - 1 then focus - n + 1
                                         else if length extraWins > fst state then 0
@@ -460,7 +460,7 @@ tempFocus focus action = do
     modifyWindowSet $ const ws
     return r
 
-data Fullscreen a = Fullscreen (Maybe a)
+newtype Fullscreen a = Fullscreen (Maybe a)
     deriving (Read, Show)
 
 instance LayoutModifier Fullscreen Window where
