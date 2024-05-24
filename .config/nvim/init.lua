@@ -66,7 +66,12 @@ keymap.set("n", "<M-RightMouse>", "<LeftMouse><C-w>d", {remap = true})
 diagnostic.config({
     severity_sort = true,
     signs = false,
-    float = {header = ""},
+    float = {header = "", prefix = ""},
+    virtual_text = {
+        format = function(d)
+            return d.message:gsub("\n%s*", "  ")
+        end,
+    },
 })
 
 keymap.set("n", "yoe", function()
