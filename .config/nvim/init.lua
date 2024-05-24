@@ -54,11 +54,11 @@ lsp_client_capabilities = tbl_deep_extend(
     require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
 )
 
--- Mappings use the proposed gl prefix: https://github.com/neovim/neovim/pull/28650
-keymap.set("n", "gln", lsp.buf.rename)
-keymap.set({"n", "x"}, "gll", lsp.buf.code_action)
-keymap.set("n", "glr", lsp.buf.references)
-keymap.set("n", "glq", lsp.buf.format)
+-- Mappings use the proposed gr prefix: https://github.com/neovim/neovim/pull/28650
+keymap.set("n", "grn", lsp.buf.rename)
+keymap.set({"n", "x"}, "gra", lsp.buf.code_action)
+keymap.set("n", "grr", lsp.buf.references)
+keymap.set("n", "grq", lsp.buf.format)
 
 keymap.set("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua lsp.buf.hover()<CR>", {remap = true})
 keymap.set("n", "<M-RightMouse>", "<LeftMouse><C-w>d", {remap = true})
