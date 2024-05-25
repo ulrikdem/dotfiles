@@ -1,5 +1,5 @@
 if fn.executable("haskell-language-server-wrapper") ~= 0 and uri_from_bufnr(0):match("^file:") then
-    nvim.create_autocmd({"LspAttach", "CursorHold"}, {
+    nvim.create_autocmd({"LspAttach", "TextChanged", "InsertLeave"}, {
         buffer = nvim.get_current_buf(),
         callback = function(ev)
             local on_codelens = lsp.codelens.on_codelens
