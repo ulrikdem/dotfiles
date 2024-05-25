@@ -4,10 +4,29 @@ if fn.executable("haskell-language-server-wrapper") ~= 0 and uri_from_bufnr(0):m
         callback = function(ev)
             local on_codelens = lsp.codelens.on_codelens
             function lsp.codelens.on_codelens(err, result, ctx, config)
-                for _, lens in ipairs(result) do
-                    lens.command.title = " " .. lens.command.title:gsub("^import%s[^(]*", ""):gsub("%s+", " ")
+                local count = #(result or {})
+                if count == 0 then
+                    on_codelens(err, result, ctx, config)
+                    return
                 end
-                on_codelens(err, result, ctx, config)
+                local client = lsp.get_client_by_id(ctx.client_id)
+                local function resolved(lens)
+                    if lens.command then
+                        lens.command.title = " " .. lens.command.title:gsub("^import%s[^(]*", ""):gsub("%s+", " ")
+                    end
+                    count = count - 1
+                    if count == 0 then on_codelens(err, result, ctx, config) end
+                end
+                for i, lens in ipairs(result) do
+                    if lens.command then
+                        resolved(lens)
+                    else
+                        client.request(lsp.protocol.Methods.codeLens_resolve, lens, function(_, lens)
+                            result[i] = lens
+                            resolved(lens)
+                        end, ctx.bufnr)
+                    end
+                end
             end
             lsp.codelens.refresh({bufnr = ev.buf})
             lsp.codelens.on_codelens = on_codelens
