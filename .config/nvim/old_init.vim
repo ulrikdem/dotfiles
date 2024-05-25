@@ -43,7 +43,7 @@ if !(exists('$DISPLAY') || exists('$WAYLAND_DISPLAY'))
 endif
 
 set clipboard=unnamed
-set cursorline
+set cursorline cursorlineopt=number
 set linebreak breakindent
 set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a mousemodel=extend
@@ -164,10 +164,9 @@ autocmd vimrc ColorScheme * call s:UpdateColorScheme()
 function! s:UpdateColorScheme() abort
     highlight! link LineNr NonText
     highlight clear CursorLineNr
-    highlight clear CursorLine
     highlight DiffDelete ctermfg=52 ctermbg=52 guifg=#5F0000 guibg=#5F0000
-    highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#005F00
-    highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#00005F
+    highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#008700
+    highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#0000AF
     highlight DiffText ctermfg=NONE ctermbg=19 guifg=NONE guibg=#0000AF guisp=#0000AF
     highlight LspReferenceText cterm=bold gui=bold
     highlight LspSignatureActiveParameter cterm=bold gui=bold
