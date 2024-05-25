@@ -105,8 +105,8 @@ nvim.create_autocmd("LspAttach", {
     end,
 })
 
-on_document_highlight = on_document_highlight or lsp.handlers["textDocument/documentHighlight"]
-lsp.handlers["textDocument/documentHighlight"] = function(err, result, ctx, config)
+on_document_highlight = on_document_highlight or lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight]
+lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight] = function(err, result, ctx, config)
     lsp.util.buf_clear_references(ctx.bufnr)
     on_document_highlight(err, result, ctx, config)
 end
