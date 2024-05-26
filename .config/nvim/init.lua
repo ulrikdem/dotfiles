@@ -5,9 +5,7 @@
 -- Allow omitting vim. and vim.api.nvim_ prefixes
 setmetatable(_G, {__index = vim})
 nvim = {}
-for k, v in pairs(api) do
-    nvim[k:sub(6)] = v
-end
+for k, v in pairs(api) do nvim[k:sub(6)] = v end
 
 local augroup = nvim.create_augroup("init", {})
 
@@ -16,12 +14,8 @@ cmd.runtime("old_init.vim")
 -- Mappings {{{1
 
 -- Delete default mappings that set a new undo point
-if fn.maparg("<C-w>", "i") ~= "" then
-    keymap.del("i", "<C-w>")
-end
-if fn.maparg("<C-u>", "i") ~= "" then
-    keymap.del("i", "<C-u>")
-end
+if fn.maparg("<C-w>", "i") ~= "" then keymap.del("i", "<C-w>") end
+if fn.maparg("<C-u>", "i") ~= "" then keymap.del("i", "<C-u>") end
 
 keymap.set("n", "gcu", "gcgc", {remap = true})
 
@@ -67,11 +61,7 @@ diagnostic.config({
     severity_sort = true,
     signs = false,
     float = {header = "", prefix = ""},
-    virtual_text = {
-        format = function(d)
-            return d.message:gsub("\n%s*", "  ")
-        end,
-    },
+    virtual_text = {format = function(d) return d.message:gsub("\n%s*", "  ") end},
 })
 
 keymap.set("n", "yoe", function()
