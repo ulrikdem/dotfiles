@@ -9,7 +9,7 @@ for k, v in pairs(api) do
     nvim[k:sub(6)] = v
 end
 
-local augroup = nvim.create_augroup("init.lua", {})
+local augroup = nvim.create_augroup("init", {})
 
 cmd.runtime("old_init.vim")
 
@@ -84,11 +84,13 @@ end)
 nvim.create_autocmd("LspAttach", {
     group = augroup,
     callback = function(ev)
+        local augroup = nvim.create_augroup("init_lsp_" .. ev.buf, {})
         local client = lsp.get_client_by_id(ev.data.client_id)
         local signature_triggers = tbl_get(client.server_capabilities, 'signatureHelpProvider', 'triggerCharacters')
         if signature_triggers then
             nvim.create_autocmd("InsertCharPre", {
                 buffer = ev.buf,
+                group = augroup,
                 callback = function()
                     if list_contains(signature_triggers, v.char) then
                         nvim.feedkeys(keycode("<Cmd>lua lsp.buf.signature_help()<CR>"), "", false)
@@ -99,6 +101,7 @@ nvim.create_autocmd("LspAttach", {
         if client.server_capabilities.documentHighlightProvider then
             nvim.create_autocmd({"CursorHold", "CursorHoldI"}, {
                 buffer = ev.buf,
+                group = augroup,
                 callback = lsp.buf.document_highlight,
             })
         end
