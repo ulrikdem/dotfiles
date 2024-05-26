@@ -19,6 +19,18 @@ if fn.maparg("<C-u>", "i") ~= "" then keymap.del("i", "<C-u>") end
 
 keymap.set("n", "gcu", "gcgc", {remap = true})
 
+-- Remap do and dp/dx to use a motion
+function diffget_operator() cmd.diffget({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
+function diffput_operator() cmd.diffput({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
+-- The use of <Cmd> clears the count so that it doesn't affect the motion
+keymap.set("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = v.count<CR>g@")
+keymap.set("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = v.count<CR>g@")
+keymap.set("n", "dx", "dp", {remap = true})
+-- Map doo and dpp/dxx to the original behavior
+keymap.set("n", "doo", "do")
+keymap.set("n", "dpp", "dp")
+keymap.set("n", "dpx", "dp")
+
 -- Completion {{{1
 
 local cmp = require("cmp")
