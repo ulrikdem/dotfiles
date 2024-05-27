@@ -328,11 +328,11 @@ function! s:NarrowWindow() abort
 endfunction
 
 function! StatusLineErrors() abort
-    let l:count = v:lua.diagnostic.count(0)[0]
+    let l:count = v:lua.vim.diagnostic.count(0)[0]
     return l:count ? l:count.'✖' : ''
 endfunction
 function! StatusLineWarnings() abort
-    let l:count = v:lua.diagnostic.count(0)[1]
+    let l:count = v:lua.vim.diagnostic.count(0)[1]
     return l:count ? l:count.'⚠' : ''
 endfunction
 autocmd vimrc User Plug_lightline_vim autocmd vimrc DiagnosticChanged * call lightline#update()

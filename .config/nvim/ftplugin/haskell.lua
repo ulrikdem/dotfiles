@@ -1,16 +1,16 @@
-if fn.executable("haskell-language-server-wrapper") ~= 0 and uri_from_bufnr(0):match("^file:") then
-    nvim.create_autocmd({"LspAttach", "TextChanged", "InsertLeave"}, {
+if vim.fn.executable("haskell-language-server-wrapper") ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
+    vim.api.nvim_create_autocmd({"LspAttach", "TextChanged", "InsertLeave"}, {
         buffer = 0,
-        group = nvim.create_augroup("haskell_" .. nvim.get_current_buf(), {}),
+        group = vim.api.nvim_create_augroup("haskell_" .. vim.api.nvim_get_current_buf(), {}),
         callback = function(ev)
-            local on_codelens = lsp.codelens.on_codelens
-            function lsp.codelens.on_codelens(err, result, ctx, config)
+            local on_codelens = vim.lsp.codelens.on_codelens
+            function vim.lsp.codelens.on_codelens(err, result, ctx, config)
                 local count = #(result or {})
                 if count == 0 then
                     on_codelens(err, result, ctx, config)
                     return
                 end
-                local client = lsp.get_client_by_id(ctx.client_id)
+                local client = vim.lsp.get_client_by_id(ctx.client_id)
                 local function resolved(lens)
                     if lens.command then
                         lens.command.title = " " .. lens.command.title:gsub("^import%s[^(]*", ""):gsub("%s+", " ")
@@ -22,23 +22,23 @@ if fn.executable("haskell-language-server-wrapper") ~= 0 and uri_from_bufnr(0):m
                     if lens.command then
                         resolved(lens)
                     else
-                        client.request(lsp.protocol.Methods.codeLens_resolve, lens, function(_, lens)
+                        client.request(vim.lsp.protocol.Methods.codeLens_resolve, lens, function(_, lens)
                             result[i] = lens
                             resolved(lens)
                         end, ctx.bufnr)
                     end
                 end
             end
-            lsp.codelens.refresh({bufnr = ev.buf})
-            lsp.codelens.on_codelens = on_codelens
+            vim.lsp.codelens.refresh({bufnr = ev.buf})
+            vim.lsp.codelens.on_codelens = on_codelens
         end,
     })
 
-    lsp.start({
+    vim.lsp.start({
         name = "haskell-language-server",
         cmd = {"haskell-language-server-wrapper", "--lsp"},
         capabilities = lsp_client_capabilities,
-        root_dir = fs.root(0, function(name)
+        root_dir = vim.fs.root(0, function(name)
             return ({
                 ["hie.yaml"] = true,
                 ["stack.yaml"] = true,
