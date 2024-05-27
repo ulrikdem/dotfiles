@@ -53,5 +53,9 @@ if vim.fn.executable("lua-language-server") ~= 0 then
         root_dir = in_runtime and runtime[1]
             or vim.fs.root(0, {".luarc.json", ".luarc.jsonc"}) or vim.fs.root(0, ".git"),
         settings = {Lua = settings},
+        on_attach = function(_, bufnr)
+            -- This is not set by default because we set keywordprg above
+            vim.keymap.set("n", "K", vim.lsp.buf.hover, {buffer = bufnr})
+        end,
     })
 end
