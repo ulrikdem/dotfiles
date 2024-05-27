@@ -15,8 +15,8 @@ if vim.fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
 vim.keymap.set("n", "gcu", "gcgc", {remap = true})
 
 -- Remap do and dp/dx to use a motion
-function diffget_operator() vim.cmd.diffget({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
-function diffput_operator() vim.cmd.diffput({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
+function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
+function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
 vim.keymap.set("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
 vim.keymap.set("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
@@ -61,7 +61,7 @@ cmp.setup({
 -- LSP {{{1
 
 -- Must be included when configuring servers
-lsp_client_capabilities = vim.tbl_deep_extend(
+_G.lsp_client_capabilities = vim.tbl_deep_extend(
     "force",
     vim.lsp.protocol.make_client_capabilities(),
     require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
@@ -117,7 +117,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     end,
 })
 
-on_document_highlight = on_document_highlight or vim.lsp.handlers[vim.lsp.protocol.Methods.textDocument_documentHighlight]
+_G.on_document_highlight = on_document_highlight or vim.lsp.handlers[vim.lsp.protocol.Methods.textDocument_documentHighlight]
 vim.lsp.handlers[vim.lsp.protocol.Methods.textDocument_documentHighlight] = function(err, result, ctx, config)
     vim.lsp.util.buf_clear_references(ctx.bufnr)
     on_document_highlight(err, result, ctx, config)
