@@ -38,13 +38,9 @@ if vim.fn.executable("haskell-language-server-wrapper") ~= 0 and vim.uri_from_bu
         name = "haskell-language-server",
         cmd = {"haskell-language-server-wrapper", "--lsp"},
         capabilities = lsp_client_capabilities,
-        root_dir = vim.fs.root(0, function(name)
-            return ({
-                ["hie.yaml"] = true,
-                ["stack.yaml"] = true,
-                ["package.yaml"] = true,
-                ["cabal.project"] = true
-            })[name] or name:match("%.cabal$")
-        end),
+        root_dir = vim.fs.root(0, "hie.yaml")
+            or vim.fs.root(0, {"cabal.project", "stack.yaml"})
+            or vim.fs.root(0, function(name) return name == "package.yaml" or name:match("%.cabal$") end)
+            or vim.fs.root(0, ".git"),
     })
 end
