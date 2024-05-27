@@ -34,6 +34,15 @@ keymap.set("n", "dpx", "dp")
 -- Completion {{{1
 
 local cmp = require("cmp")
+
+local function maybe_complete(fallback)
+    if nvim.get_current_line():sub(1, nvim.win_get_cursor(0)[2]):match("[^%s]$") then
+        cmp.complete()
+    else
+        fallback()
+    end
+end
+
 cmp.setup({
     sources = {
         {name = "nvim_lsp"},
@@ -41,9 +50,12 @@ cmp.setup({
         {name = "buffer", group_index = 1, option = {get_bufnrs = nvim.list_bufs}},
     },
     mapping = cmp.mapping.preset.insert({
-        ["<C-Space>"] = cmp.mapping.complete(),
-        ["<Tab>"] = cmp.mapping.select_next_item(),
-        ["<S-Tab>"] = cmp.mapping.select_prev_item(),
+        ["<Tab>"] = cmp.mapping(function(fallback)
+            if not cmp.select_next_item() then maybe_complete(fallback) end
+        end),
+        ["<S-Tab>"] = cmp.mapping(function(fallback)
+            if not cmp.select_prev_item() then maybe_complete(fallback) end
+        end),
         ["<PageDown>"] = cmp.mapping.scroll_docs(4),
         ["<PageUp>"] = cmp.mapping.scroll_docs(-4),
     }),
