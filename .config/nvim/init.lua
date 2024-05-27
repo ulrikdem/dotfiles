@@ -2,37 +2,40 @@
 
 -- vim: foldmethod=marker
 
-local augroup = vim.api.nvim_create_augroup("init", {})
+local api = vim.api
+local augroup = api.nvim_create_augroup("init", {})
 
 vim.cmd.runtime("old_init.vim")
 
 -- Mappings {{{1
 
+local map = vim.keymap.set
+
 -- Delete default mappings that set a new undo point
 if vim.fn.maparg("<C-w>", "i") ~= "" then vim.keymap.del("i", "<C-w>") end
 if vim.fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
 
-vim.keymap.set("n", "gcu", "gcgc", {remap = true})
+map("n", "gcu", "gcgc", {remap = true})
 
 -- Remap do and dp/dx to use a motion
 _G.diff_bufnr = 0
 function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
 function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
-vim.keymap.set("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
-vim.keymap.set("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
-vim.keymap.set("n", "dx", "dp", {remap = true})
+map("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
+map("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
+map("n", "dx", "dp", {remap = true})
 -- Map doo and dpp/dxx to the original behavior
-vim.keymap.set("n", "doo", "do")
-vim.keymap.set("n", "dpp", "dp")
-vim.keymap.set("n", "dpx", "dp")
+map("n", "doo", "do")
+map("n", "dpp", "dp")
+map("n", "dpx", "dp")
 
 -- Completion {{{1
 
 local cmp = require("cmp")
 
 local function maybe_complete(fallback)
-    if vim.api.nvim_get_current_line():sub(1, vim.api.nvim_win_get_cursor(0)[2]):match("[^%s]$") then
+    if api.nvim_get_current_line():sub(1, api.nvim_win_get_cursor(0)[2]):match("[^%s]$") then
         cmp.complete()
     else
         fallback()
@@ -43,7 +46,7 @@ cmp.setup({
     sources = {
         {name = "nvim_lsp"},
         {name = "path"},
-        {name = "buffer", group_index = 1, option = {get_bufnrs = vim.api.nvim_list_bufs}},
+        {name = "buffer", group_index = 1, option = {get_bufnrs = api.nvim_list_bufs}},
     },
     mapping = cmp.mapping.preset.insert({
         ["<Tab>"] = cmp.mapping(function(fallback)
@@ -61,21 +64,23 @@ cmp.setup({
 
 -- LSP {{{1
 
+local lsp = vim.lsp
+
 -- Must be included when configuring servers
 _G.lsp_client_capabilities = vim.tbl_deep_extend(
     "force",
-    vim.lsp.protocol.make_client_capabilities(),
+    lsp.protocol.make_client_capabilities(),
     require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
 )
 
 -- Mappings use the proposed gr prefix: https://github.com/neovim/neovim/pull/28650
-vim.keymap.set("n", "grn", vim.lsp.buf.rename)
-vim.keymap.set({"n", "x"}, "gra", vim.lsp.buf.code_action)
-vim.keymap.set("n", "grr", vim.lsp.buf.references)
-vim.keymap.set("n", "grq", vim.lsp.buf.format)
+map("n", "grn", lsp.buf.rename)
+map({"n", "x"}, "gra", lsp.buf.code_action)
+map("n", "grr", lsp.buf.references)
+map("n", "grq", lsp.buf.format)
 
-vim.keymap.set("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
-vim.keymap.set("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
+map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
+map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
 
 vim.diagnostic.config({
     severity_sort = true,
@@ -84,43 +89,43 @@ vim.diagnostic.config({
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
 
-vim.keymap.set("n", "yoe", function()
+map("n", "yoe", function()
     vim.diagnostic.enable(not vim.diagnostic.is_enabled({bufnr = 0}), {bufnr = 0})
 end)
-vim.keymap.set("n", "yok", function()
-    vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled({bufnr = 0}), {bufnr = 0})
+map("n", "yok", function()
+    lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({bufnr = 0}), {bufnr = 0})
 end)
 
-vim.api.nvim_create_autocmd("LspAttach", {
+api.nvim_create_autocmd("LspAttach", {
     group = augroup,
     callback = function(ev)
-        local augroup = vim.api.nvim_create_augroup("init_lsp_" .. ev.buf, {})
-        local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        local augroup = api.nvim_create_augroup("init_lsp_" .. ev.buf, {})
+        local client = lsp.get_client_by_id(ev.data.client_id)
         if not client then return end
         local signature_triggers = vim.tbl_get(client.server_capabilities, 'signatureHelpProvider', 'triggerCharacters')
         if signature_triggers then
-            vim.api.nvim_create_autocmd("InsertCharPre", {
+            api.nvim_create_autocmd("InsertCharPre", {
                 buffer = ev.buf,
                 group = augroup,
                 callback = function()
                     if vim.list_contains(signature_triggers, vim.v.char) then
-                        vim.api.nvim_feedkeys(vim.keycode("<Cmd>lua vim.lsp.buf.signature_help()<CR>"), "", false)
+                        api.nvim_feedkeys(vim.keycode("<Cmd>lua vim.lsp.buf.signature_help()<CR>"), "", false)
                     end
                 end,
             })
         end
-        if client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
-            vim.api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
+        if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
+            api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
                 buffer = ev.buf,
                 group = augroup,
-                callback = vim.lsp.buf.document_highlight
+                callback = lsp.buf.document_highlight
             })
         end
     end,
 })
 
-_G.on_document_highlight = on_document_highlight or vim.lsp.handlers[vim.lsp.protocol.Methods.textDocument_documentHighlight]
-vim.lsp.handlers[vim.lsp.protocol.Methods.textDocument_documentHighlight] = function(err, result, ctx, config)
-    vim.lsp.util.buf_clear_references(ctx.bufnr)
+_G.on_document_highlight = on_document_highlight or lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight]
+lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight] = function(err, result, ctx, config)
+    lsp.util.buf_clear_references(ctx.bufnr)
     on_document_highlight(err, result, ctx, config)
 end
