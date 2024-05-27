@@ -102,7 +102,7 @@ api.nvim_create_autocmd("LspAttach", {
         local augroup = api.nvim_create_augroup("init_lsp_" .. ev.buf, {})
         local client = lsp.get_client_by_id(ev.data.client_id)
         if not client then return end
-        local signature_triggers = vim.tbl_get(client.server_capabilities, 'signatureHelpProvider', 'triggerCharacters')
+        local signature_triggers = vim.tbl_get(client.server_capabilities, "signatureHelpProvider", "triggerCharacters")
         if signature_triggers then
             api.nvim_create_autocmd("InsertCharPre", {
                 buffer = ev.buf,
