@@ -85,7 +85,7 @@ diagnostic.config({
     severity_sort = true,
     signs = false,
     float = {header = "", prefix = ""},
-    virtual_text = {format = function(d) return d.message:gsub("\n%s*", "  ") end},
+    virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
 
 keymap.set("n", "yoe", function()
