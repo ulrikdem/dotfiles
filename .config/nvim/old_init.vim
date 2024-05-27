@@ -16,9 +16,6 @@ try
                 silent execute 'doautocmd vimrc User Plug_'.substitute(l:plug, '\W', '_', 'g')
             endif
         endfor
-        if exists('g:colors_name')
-            silent execute 'doautocmd vimrc ColorScheme' g:colors_name
-        endif
     endfunction
 catch
     command! -nargs=+ Plug
@@ -158,95 +155,6 @@ endif
 
 Plug 'godlygeek/tabular'
 
-" Colorscheme {{{1
-
-autocmd vimrc ColorScheme * call s:UpdateColorScheme()
-function! s:UpdateColorScheme() abort
-    highlight! link LineNr NonText
-    highlight clear CursorLineNr
-    highlight DiffDelete ctermfg=52 ctermbg=52 guifg=#5F0000 guibg=#5F0000
-    highlight DiffAdd ctermfg=NONE ctermbg=22 guifg=NONE guibg=#005F00 guisp=#008700
-    highlight DiffChange ctermfg=NONE ctermbg=17 guifg=NONE guibg=#00005F guisp=#0000AF
-    highlight DiffText ctermfg=NONE ctermbg=19 guifg=NONE guibg=#0000AF guisp=#0000AF
-    highlight LspReferenceText cterm=bold gui=bold
-    highlight LspSignatureActiveParameter cterm=bold gui=bold
-    highlight link manUnderline manItalic
-    highlight link manOptionDesc NONE
-endfunction
-
-Plug 'srcery-colors/srcery-vim'
-let g:srcery_bg = ['NONE', 'NONE']
-let g:srcery_italic = v:true
-autocmd vimrc User Plug_srcery_vim colorscheme srcery
-
-autocmd vimrc ColorScheme srcery call s:UpdateSrceryColorScheme()
-function! s:UpdateSrceryColorScheme() abort
-    call s:Highlight('StatusLine', #{bg: 'xgray5'})
-    call s:Highlight('StatusLineNC', #{bg: 'xgray5', attr: 'NONE'})
-    call s:Highlight('TermCursor', #{fg: 'black', bg: 'bright_white', attr: 'NONE'})
-    call s:Highlight('DiagnosticUnderlineError', #{fg: 'none', sp: 'red', attr: 'undercurl'})
-    call s:Highlight('DiagnosticUnderlineWarn', #{fg: 'none', sp: 'orange', attr: 'undercurl'})
-    call s:Highlight('DiagnosticUnderlineInfo', #{fg: 'none', sp: 'yellow', attr: 'undercurl'})
-    call s:Highlight('DiagnosticUnderlineHint', #{fg: 'none', sp: 'blue', attr: 'undercurl'})
-    call s:Highlight('DiagnosticUnderlineOk', #{fg: 'none', sp: 'green', attr: 'undercurl'})
-    call s:Highlight('Folded', #{attr: 'NONE'})
-    call s:Highlight('Visual', #{bg: 'xgray4', attr: 'NONE'})
-    call s:Highlight('Search', #{fg: 'black', bg: 'bright_yellow', attr: 'NONE'})
-    call s:Highlight('IncSearch', #{fg: 'black', bg: 'yellow', attr: 'NONE'})
-    call s:Highlight('PmenuKind', #{fg: 'white', bg: 'xgray2'})
-    call s:Highlight('PmenuKindSel', #{fg: 'white', bg: 'blue'})
-    call s:Highlight('PmenuThumb', #{bg: 'xgray5'})
-    highlight! link PmenuSbar Pmenu
-    highlight! link NormalFloat Pmenu
-    highlight! link CurSearch IncSearch
-    highlight! link vimUserFunc SrceryBrightWhite
-    highlight! link @variable Identifier
-    highlight! link Added diffAdded
-    highlight! link Removed diffRemoved
-    highlight! link Changed diffChanged
-    highlight! link QuickFixLine Visual
-    highlight! link qfLineNr SrceryWhite
-    highlight! link Directory SrceryGreen
-    highlight! link Error SrceryRedBold
-    highlight! link ErrorMsg SrceryRedBold
-    highlight! link WarningMsg SrceryRed
-    highlight! link DiagnosticError SrceryRed
-    highlight! link DiagnosticWarn SrceryOrange
-    highlight! link DiagnosticInfo SrceryYellow
-    highlight! link DiagnosticHint SrceryBlue
-    highlight! link DiagnosticOk SrceryGreen
-    highlight! link SpellBad DiagnosticUnderlineError
-    highlight! link SpellLocal DiagnosticUnderlineWarn
-    highlight! link SpellCap DiagnosticUnderlineInfo
-    highlight! link SpellRare DiagnosticUnderlineHint
-endfunction
-
-function! s:Highlight(group, args) abort
-    if has_key(a:args, 'fg')
-        execute 'highlight' a:group
-            \ 'guifg='.g:srcery#palette[a:args.fg][0] 'ctermfg='.g:srcery#palette[a:args.fg][1]
-    endif
-    if has_key(a:args, 'bg')
-        execute 'highlight' a:group
-            \ 'guibg='.g:srcery#palette[a:args.bg][0] 'ctermbg='.g:srcery#palette[a:args.bg][1]
-    endif
-    if has_key(a:args, 'sp')
-        execute 'highlight' a:group 'guisp='.g:srcery#palette[a:args.sp][0]
-    endif
-    if has_key(a:args, 'attr')
-        execute 'highlight' a:group 'cterm='.(a:args.attr) 'gui='.(a:args.attr)
-    endif
-endfunction
-
-function! s:GetSrceryColors(fg, bg) abort
-    return [
-        \ g:srcery#palette[a:fg][0],
-        \ g:srcery#palette[a:bg][0],
-        \ g:srcery#palette[a:fg][1],
-        \ g:srcery#palette[a:bg][1],
-    \ ]
-endfunction
-
 " Statusline {{{1
 
 Plug 'itchyny/lightline.vim'
@@ -354,14 +262,21 @@ endfunction
 autocmd vimrc User Plug_lightline_vim set noshowmode
 autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
 
-autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme srcery call s:UpdateLightlineColors()
+autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme * call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
-    let l:common = s:GetSrceryColors('bright_white', 'xgray5')
+    if &background == 'dark'
+        let [l:fg, l:bg] = ['NvimLight', 'NvimDark']
+    else
+        let [l:fg, l:bg] = ['NvimDark', 'NvimLight']
+    endif
+    execute 'highlight StatusLine guibg='.l:bg.'Gray4' 'ctermbg='.7
+    execute 'highlight StatusLineNC guibg='.l:bg.'Gray4' 'ctermbg='.7
+    let l:common = [l:fg.'Gray2', l:bg.'Gray4', 0, 7]
     let l:palette = #{
         \ normal: #{
-            \ middle: [s:GetSrceryColors('bright_white', 'xgray3')],
-            \ error: [s:GetSrceryColors('black', 'red')],
-            \ warning: [s:GetSrceryColors('black', 'bright_orange')],
+            \ middle: [[l:fg.'Gray2', l:bg.'Gray3', 15, 8]],
+            \ error: [[l:bg.'Gray2', l:fg.'Red', 0, 9]],
+            \ warning: [[l:bg.'Gray2', l:fg.'Yellow', 0, 11]],
         \ },
         \ inactive: #{
             \ left: [l:common],
@@ -369,19 +284,19 @@ function! s:UpdateLightlineColors() abort
         \ },
         \ tabline: #{
             \ left: [l:common],
-            \ tabsel: [s:GetSrceryColors('black', 'blue')],
+            \ tabsel: [[l:bg.'Gray2', l:fg.'Blue', 0, 12]],
         \ },
     \ }
-    for [l:mode, l:color] in [
-        \ ['normal', 'green'],
-        \ ['insert', 'blue'],
-        \ ['replace', 'red'],
-        \ ['visual', 'magenta'],
-        \ ['command', 'orange'],
-        \ ['fake', 'yellow'],
+    for [l:mode, l:color, l:i] in [
+        \ ['normal', 'Green', 10],
+        \ ['insert', 'Blue', 12],
+        \ ['replace', 'Red', 9],
+        \ ['visual', 'Magenta', 13],
+        \ ['command', 'Cyan', 14],
+        \ ['fake', 'Yellow', 11],
     \ ]
         let l:palette[l:mode] = get(l:palette, l:mode, {})
-        let l:palette[l:mode].left = [s:GetSrceryColors('black', l:color), l:common]
+        let l:palette[l:mode].left = [[l:bg.'Gray2', l:fg.l:color, 0, l:i], l:common]
         let l:palette[l:mode].right = l:palette[l:mode].left
     endfor
     let g:lightline#colorscheme#custom#palette = l:palette
@@ -483,10 +398,8 @@ nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'/
 
 Plug 'justinmk/vim-dirvish'
 set suffixes-=.h
-autocmd vimrc ColorScheme srcery highlight link DirvishArg SrceryOrangeBold
-autocmd vimrc ColorScheme srcery highlight link DirvishPathTail SrceryBlue
-autocmd vimrc ColorScheme srcery highlight link DirvishSuffix SrceryBrightBlack
-highlight link DirvishPathHead NonText
+autocmd vimrc ColorScheme * highlight link DirvishSuffix Comment
+autocmd vimrc ColorScheme * highlight link DirvishPathHead NonText
 if $RANGER_LEVEL
     autocmd vimrc User Plug_vim_dirvish nmap <expr> -
         \ !v:count && bufnr('$') * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
@@ -561,14 +474,12 @@ function! s:InitQuickfixBuffer() abort
     if exists('w:added_qf_matches')
         return
     endif
-    call matchadd('QuickFixMatch', s:match_start.'.\{-}'.s:match_end)
+    call matchadd('String', s:match_start.'.\{-}'.s:match_end)
     call matchadd('Conceal', '\e\[\d*m')
     setlocal conceallevel=2 concealcursor=nvc
     setlocal nolist
     let w:added_qf_matches = v:true
 endfunction
-autocmd vimrc ColorScheme * highlight QuickFixMatch ctermfg=Red guifg=Red
-autocmd vimrc ColorScheme srcery highlight! link QuickFixMatch SrceryRed
 
 autocmd vimrc QuickFixCmdPost [^l]* call s:OpenQuickfix('window')
 function! s:OpenQuickfix(cmd) abort
@@ -837,8 +748,6 @@ if executable('gdb')
     packadd termdebug
     let g:termdebug_wide = 1
 
-    autocmd vimrc ColorScheme srcery highlight link debugPC DiffChange
-    autocmd vimrc ColorScheme srcery highlight link debugBreakpoint SrceryRedBold
     autocmd vimrc OptionSet signcolumn setglobal signcolumn&
 
     command! -nargs=* -complete=file Debug call s:Debug('gdb', <q-args>)
