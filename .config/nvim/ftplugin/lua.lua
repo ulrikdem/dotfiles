@@ -40,6 +40,9 @@ if vim.fn.executable("lua-language-server") ~= 0 then
                 pathStrict = true,
                 version = "LuaJIT",
             },
+            diagnostics = {
+                disable = {"duplicate-set-field", "redefined-local"},
+            },
         })
     end
 

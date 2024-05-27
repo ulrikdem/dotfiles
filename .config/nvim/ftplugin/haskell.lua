@@ -19,13 +19,13 @@ if vim.fn.executable("haskell-language-server-wrapper") ~= 0 and vim.uri_from_bu
                     if count == 0 then on_codelens(err, result, ctx, config) end
                 end
                 for i, lens in ipairs(result) do
-                    if lens.command then
-                        resolved(lens)
-                    else
+                    if not lens.command and client then
                         client.request(vim.lsp.protocol.Methods.codeLens_resolve, lens, function(_, lens)
                             result[i] = lens
                             resolved(lens)
                         end, ctx.bufnr)
+                    else
+                        resolved(lens)
                     end
                 end
             end

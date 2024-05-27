@@ -15,6 +15,7 @@ if vim.fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
 vim.keymap.set("n", "gcu", "gcgc", {remap = true})
 
 -- Remap do and dp/dx to use a motion
+_G.diff_bufnr = 0
 function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
 function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
@@ -55,7 +56,7 @@ cmp.setup({
         ["<PageUp>"] = cmp.mapping.scroll_docs(-4),
     }),
     preselect = cmp.PreselectMode.None,
-    formatting = {expandable_indicator = false},
+    formatting = {expandable_indicator = false}, --- @diagnostic disable-line: missing-fields
 })
 
 -- LSP {{{1
@@ -95,6 +96,7 @@ vim.api.nvim_create_autocmd("LspAttach", {
     callback = function(ev)
         local augroup = vim.api.nvim_create_augroup("init_lsp_" .. ev.buf, {})
         local client = vim.lsp.get_client_by_id(ev.data.client_id)
+        if not client then return end
         local signature_triggers = vim.tbl_get(client.server_capabilities, 'signatureHelpProvider', 'triggerCharacters')
         if signature_triggers then
             vim.api.nvim_create_autocmd("InsertCharPre", {
