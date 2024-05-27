@@ -74,8 +74,8 @@ vim.keymap.set({"n", "x"}, "gra", vim.lsp.buf.code_action)
 vim.keymap.set("n", "grr", vim.lsp.buf.references)
 vim.keymap.set("n", "grq", vim.lsp.buf.format)
 
-vim.keymap.set("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>", {remap = true})
-vim.keymap.set("n", "<M-RightMouse>", "<LeftMouse><C-w>d", {remap = true})
+vim.keymap.set("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
+vim.keymap.set("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
 
 vim.diagnostic.config({
     severity_sort = true,
