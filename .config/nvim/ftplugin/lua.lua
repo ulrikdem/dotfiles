@@ -30,6 +30,7 @@ if vim.fn.executable("lua-language-server") ~= 0 then
         },
     }
 
+    local root_dir
     if in_runtime then
         settings = vim.tbl_deep_extend("force", settings, {
             workspace = {
@@ -44,14 +45,16 @@ if vim.fn.executable("lua-language-server") ~= 0 then
                 disable = {"duplicate-set-field", "redefined-local"},
             },
         })
+        root_dir = runtime[1]
+    else
+        root_dir = vim.fs.root(0, {".luarc.json", ".luarc.jsonc", ".git"})
     end
 
     vim.lsp.start({
         name = "lua-language-server",
-        cmd = {"lua-language-server"},
+        cmd = vim.iter({{"sandbox"}, root_dir and {"-r", root_dir} or {}, {"lua-language-server"}}):flatten():totable(),
+        root_dir = root_dir,
         capabilities = lsp_client_capabilities,
-        root_dir = in_runtime and runtime[1]
-            or vim.fs.root(0, {".luarc.json", ".luarc.jsonc"}) or vim.fs.root(0, ".git"),
         settings = {Lua = settings},
         on_attach = function(_, bufnr)
             -- This is not set by default because we set keywordprg above
