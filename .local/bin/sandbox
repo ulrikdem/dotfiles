@@ -1,8 +1,17 @@
 #!/bin/bash
 
+declare -A default_args=(
+    [--unshare-cgroup]=
+    [--unshare-ipc]=
+    [--unshare-net]=
+    [--unshare-pid]=
+    [--unshare-user]=
+    [--unshare-uts]=
+    [--unsetenv DISPLAY]=
+    [--unsetenv WAYLAND_DISPLAY]=
+)
 args=(
     --setenv SANDBOX ''
-    --unshare-all
     --proc /proc
     --dev /dev
     --dir /tmp
@@ -23,14 +32,14 @@ add-path() {
     args+=(--$1 "${OPTARG%%=*}" "$(realpath -ms -- "${OPTARG#*=}")")
 }
 
-env_args=(--unsetenv DISPLAY --unsetenv WAYLAND_DISPLAY)
 bind_args=
 policy=()
-while getopts nxRWr:w:d:b:B: opt; do
+while getopts ns:xRWr:w:d:b:B: opt; do
     case $opt in
-        n) args+=(--share-net);;
+        n) unset default_args[--unshare-net];;
+        s) unset default_args["--unshare-$OPTARG"];;
         x)
-            env_args=()
+            unset default_args['--unsetenv DISPLAY'] default_args['--unsetenv WAYLAND_DISPLAY']
             for path in ${XAUTHORITY:+"$XAUTHORITY"} "/tmp/.X11-unix/X${DISPLAY#:}" ${WAYLAND_DISPLAY:+"$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"} "$XDG_RUNTIME_DIR"/{pipewire-0,pulse/native} /sys/dev{,ices}; do
                 args+=(--ro-bind-try "$path" "$path")
             done
@@ -44,7 +53,7 @@ while getopts nxRWr:w:d:b:B: opt; do
         d) add-path dev-bind-try;;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-b busname]... [-B busname]... [command [arg]...]' >&2; exit 1;;
+        ?) echo 'sandbox [-nxRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-b busname]... [-B busname]... [-s namespace]... [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
@@ -102,4 +111,4 @@ exec {fd}> >(
 args+=(--sync-fd $fd)
 
 (($#)) || set zsh
-exec bwrap "${args[@]}" "${env_args[@]}" "$@"
+exec bwrap ${!default_args[@]} "${args[@]}" "$@"
