@@ -46,5 +46,3 @@ element normal urgent {
 element selected urgent {
     text-color: @selected-normal-foreground;
 }
-
-/* vim:set filetype=css: */
