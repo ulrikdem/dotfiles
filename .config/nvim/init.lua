@@ -36,6 +36,17 @@ map("o", "gv", "<Cmd>normal! gv<CR>")
 map("n", "<C-Tab>", "gt")
 map("n", "<C-S-Tab>", "gT")
 
+-- Autocommands {{{1
+
+api.nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "sh,zsh",
+    callback = function(ev)
+        -- The default :ShKeywordPrg and :ZshKeywordPrg are broken in nvim
+        vim.bo[ev.buf].keywordprg = ":Man"
+    end
+})
+
 -- Completion {{{1
 
 local cmp = require("cmp")
