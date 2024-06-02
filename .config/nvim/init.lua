@@ -47,6 +47,13 @@ api.nvim_create_autocmd("FileType", {
     end
 })
 
+api.nvim_create_autocmd("TextYankPost", {
+    group = augroup,
+    callback = function()
+        vim.highlight.on_yank({higroup = "Visual", on_visual = false})
+    end,
+})
+
 -- Completion {{{1
 
 local cmp = require("cmp")
