@@ -30,6 +30,9 @@ map("n", "doo", "do")
 map("n", "dpp", "dp")
 map("n", "dpx", "dp")
 
+-- The mappings above don't work in visual mode. As alternative, allow gv in operator-pending mode
+map("o", "gv", "<Cmd>normal! gv<CR>")
+
 -- Completion {{{1
 
 local cmp = require("cmp")
