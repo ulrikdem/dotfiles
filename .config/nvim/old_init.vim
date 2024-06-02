@@ -262,6 +262,7 @@ endfunction
 autocmd vimrc User Plug_lightline_vim set noshowmode
 autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
 
+autocmd vimrc User Plug_lightline_vim call s:UpdateLightlineColors()
 autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme * call s:UpdateLightlineColors()
 function! s:UpdateLightlineColors() abort
     if &background == 'dark'
