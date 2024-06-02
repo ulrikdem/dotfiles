@@ -1,8 +1,4 @@
 local buf_path = vim.api.nvim_buf_get_name(0)
-if buf_path:match("^fugitive:") then
-    buf_path = vim.fn.FugitiveReal(buf_path)
-end
-
 local runtime = vim.api.nvim_get_runtime_file("", true)
 local in_runtime = vim.iter(runtime):any(function(path)
     return vim.startswith(buf_path, vim.fs.normalize(path) .. "/")
@@ -15,7 +11,7 @@ if in_runtime then
     vim.bo.omnifunc = "v:lua.vim.lua_omnifunc"
 end
 
-if vim.fn.executable("lua-language-server") ~= 0 then
+if vim.fn.executable("lua-language-server") ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
     -- https://luals.github.io/wiki/settings/
     local settings = {
         completion = {
@@ -52,7 +48,11 @@ if vim.fn.executable("lua-language-server") ~= 0 then
 
     vim.lsp.start({
         name = "lua-language-server",
-        cmd = vim.iter({{"sandbox"}, root_dir and {"-r", root_dir} or {}, {"lua-language-server"}}):flatten():totable(),
+        cmd = vim.iter({
+            {"sandbox"},
+            root_dir and {"-r", root_dir} or {},
+            {"lua-language-server"}
+        }):flatten():totable(),
         root_dir = root_dir,
         capabilities = lsp_client_capabilities,
         settings = {Lua = settings},
