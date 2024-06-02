@@ -47,7 +47,7 @@ if vim.fn.executable("lua-language-server") ~= 0 then
         })
         root_dir = runtime[1]
     else
-        root_dir = vim.fs.root(0, {".luarc.json", ".luarc.jsonc", ".git"})
+        root_dir = vim.fs.root(0, {".luarc.json", ".luarc.jsonc"}) or vim.fs.root(0, ".git")
     end
 
     vim.lsp.start({
