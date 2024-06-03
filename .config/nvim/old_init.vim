@@ -405,10 +405,6 @@ if $RANGER_LEVEL
     autocmd vimrc User Plug_vim_dirvish nmap <expr> -
         \ !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
-if executable('xdg-open')
-    autocmd vimrc FileType dirvish nnoremap <buffer> <M-CR>
-        \ <Cmd>silent execute '!xdg-open' shellescape(getline('.'))<CR>
-endif
 
 Plug 'junegunn/fzf', #{do: './install --bin'}
 let g:fzf_action = {
