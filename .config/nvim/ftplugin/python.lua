@@ -6,10 +6,11 @@ if vim.fn.executable("pyright-langserver") ~= 0 and vim.uri_from_bufnr(0):match(
     vim.lsp.start({
         name = "pyright",
         cmd = vim.iter({
-            {"sandbox", "-s", "pid"}, -- Share pid namespace, because it periodically checks that client is running
+            "sandbox",
+            "-s", "pid", -- Share pid namespace, because it periodically checks that client is running
             root_dir and {"-r", root_dir} or {},
             vim.env.VIRTUAL_ENV and {"-r", vim.env.VIRTUAL_ENV} or {},
-            {"pyright-langserver", "--stdio"}
+            "pyright-langserver", "--stdio",
         }):flatten():totable(),
         root_dir = root_dir,
         capabilities = lsp_client_capabilities,

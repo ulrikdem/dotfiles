@@ -49,9 +49,9 @@ if vim.fn.executable("lua-language-server") ~= 0 and vim.uri_from_bufnr(0):match
     vim.lsp.start({
         name = "lua-language-server",
         cmd = vim.iter({
-            {"sandbox"},
+            "sandbox",
             root_dir and {"-r", root_dir} or {},
-            {"lua-language-server"}
+            "lua-language-server",
         }):flatten():totable(),
         root_dir = root_dir,
         capabilities = lsp_client_capabilities,

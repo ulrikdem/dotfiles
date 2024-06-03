@@ -6,9 +6,9 @@ if vim.fn.executable("ccls") ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
     vim.lsp.start({
         name = "ccls",
         cmd = vim.iter({
-            {"sandbox"},
+            "sandbox",
             root_dir and {"-w", root_dir} or {},
-            {"ccls"},
+            "ccls",
         }):flatten():totable(),
         -- Does not accept nil root_dir. Use filetype to enable separate servers with different clang args
         root_dir = root_dir or ("/" .. vim.bo.filetype),
