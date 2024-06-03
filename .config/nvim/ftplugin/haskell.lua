@@ -34,13 +34,26 @@ if vim.fn.executable("haskell-language-server-wrapper") ~= 0 and vim.uri_from_bu
         end,
     })
 
+    local root_dir = vim.fs.root(0, "hie.yaml")
+        or vim.fs.root(0, {"cabal.project", "stack.yaml"})
+        or vim.fs.root(0, function(name) return name == "package.yaml" or name:match("%.cabal$") end)
+        or vim.fs.root(0, ".git")
+
+    local tool_dirs = vim.tbl_map(vim.fs.normalize, {"~/.cabal", "~/.stack", "~/.ghcup"})
+    local cache_dirs = vim.tbl_map(vim.fs.normalize, {"~/.cache/hie-bios", "~/.cache/ghcide"})
+    for _, dir in ipairs(cache_dirs) do vim.fn.mkdir(dir, "p") end
+
     vim.lsp.start({
         name = "haskell-language-server",
-        cmd = {"haskell-language-server-wrapper", "--lsp"},
+        cmd = vim.iter({
+            "sandbox",
+            root_dir and {"-w", root_dir, vim.tbl_map(function(dir) return {"-w", dir} end, cache_dirs), "-n"} or {},
+            vim.tbl_map(function(dir) return vim.fn.isdirectory(dir) ~= 0 and {"-w", dir} or {} end, tool_dirs),
+            "haskell-language-server-wrapper", "--lsp",
+        }):flatten(3):totable(),
+        root_dir = root_dir,
         capabilities = lsp_client_capabilities,
-        root_dir = vim.fs.root(0, "hie.yaml")
-            or vim.fs.root(0, {"cabal.project", "stack.yaml"})
-            or vim.fs.root(0, function(name) return name == "package.yaml" or name:match("%.cabal$") end)
-            or vim.fs.root(0, ".git"),
+        -- https://haskell-language-server.readthedocs.io/en/stable/configuration.html
+        settings = {},
     })
 end
