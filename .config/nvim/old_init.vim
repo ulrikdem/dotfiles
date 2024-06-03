@@ -403,7 +403,7 @@ autocmd vimrc ColorScheme * highlight link DirvishSuffix Comment
 autocmd vimrc ColorScheme * highlight link DirvishPathHead NonText
 if $RANGER_LEVEL
     autocmd vimrc User Plug_vim_dirvish nmap <expr> -
-        \ !v:count && bufnr('$') * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
+        \ !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
 if executable('xdg-open')
     autocmd vimrc FileType dirvish nnoremap <buffer> <M-CR>
