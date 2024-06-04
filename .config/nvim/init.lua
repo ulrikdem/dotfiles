@@ -90,13 +90,6 @@ cmp.setup({
 
 local lsp = vim.lsp
 
--- Must be included when configuring servers
-_G.lsp_client_capabilities = vim.tbl_deep_extend(
-    "force",
-    lsp.protocol.make_client_capabilities(),
-    require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
-)
-
 -- Mappings use the proposed gr prefix: https://github.com/neovim/neovim/pull/28650
 map("n", "grn", lsp.buf.rename)
 map({"n", "x"}, "gra", lsp.buf.code_action)
@@ -119,6 +112,19 @@ end)
 map("n", "yok", function()
     lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({bufnr = 0}), {bufnr = 0})
 end)
+
+--- @param config vim.lsp.ClientConfig
+function _G.start_lsp(config)
+    -- Callers should set config.name to the name of the executable
+    if vim.fn.executable(config.name) ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
+        config.capabilities = vim.tbl_deep_extend(
+            "force",
+            lsp.protocol.make_client_capabilities(),
+            require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
+        )
+        vim.lsp.start(config)
+    end
+end
 
 api.nvim_create_autocmd("LspAttach", {
     group = augroup,
