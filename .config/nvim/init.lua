@@ -107,10 +107,10 @@ vim.diagnostic.config({
 })
 
 map("n", "yoe", function()
-    vim.diagnostic.enable(not vim.diagnostic.is_enabled({bufnr = 0}), {bufnr = 0})
+    vim.diagnostic.enable(not vim.diagnostic.is_enabled())
 end)
 map("n", "yok", function()
-    lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({bufnr = 0}), {bufnr = 0})
+    lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({}))
 end)
 
 --- @param config vim.lsp.ClientConfig
