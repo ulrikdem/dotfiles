@@ -122,7 +122,13 @@ function _G.start_lsp(config)
             lsp.protocol.make_client_capabilities(),
             require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
         )
-        vim.lsp.start(config)
+        vim.lsp.start(config, {
+            bufnr = 0,
+            reuse_client = function(client, config)
+                -- The default considers nil root_dirs to be distinct, resulting in a new client for each buffer
+                return client.name == config.name and client.root_dir == config.root_dir
+            end,
+        })
     end
 end
 
