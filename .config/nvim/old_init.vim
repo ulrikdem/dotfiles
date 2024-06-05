@@ -46,7 +46,7 @@ set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a mousemodel=extend
 set number relativenumber numberwidth=3
 set scrolloff=4 smoothscroll
-set shortmess+=IA
+set shortmess+=I
 set splitbelow splitright
 set title titlestring=%F\ -\ nvim titlelen=0
 set updatetime=100
