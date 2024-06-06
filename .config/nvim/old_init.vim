@@ -215,8 +215,6 @@ autocmd vimrc TermOpen * setlocal nonumber norelativenumber matchpairs=
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
 
-tnoremap <M-Esc> <C-\><C-N>
-
 tnoremap <M-Left> <Cmd>wincmd h<CR>
 tnoremap <M-Down> <Cmd>wincmd j<CR>
 tnoremap <M-Up> <Cmd>wincmd k<CR>
