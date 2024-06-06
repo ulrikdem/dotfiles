@@ -88,7 +88,6 @@ for s:i in range(1, 10)
     execute 'nnoremap <M-'.(s:i % 10).'>' s:i.'gt'
 endfor
 
-nmap <C-LeftMouse> <LeftMouse><C-]>
 nnoremap <C-RightMouse> <C-O>
 
 noremap! <C-BS> <C-W>
