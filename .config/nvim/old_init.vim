@@ -44,7 +44,7 @@ set cursorline cursorlineopt=number
 set linebreak breakindent
 set list listchars=tab:→\ ,trail:·,nbsp:·
 set mouse=a mousemodel=extend
-set number relativenumber numberwidth=3
+set relativenumber numberwidth=3
 set scrolloff=4 smoothscroll
 set shortmess+=I
 set splitbelow splitright
