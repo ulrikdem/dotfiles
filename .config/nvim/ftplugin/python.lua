@@ -13,5 +13,8 @@ start_lsp({
     }):flatten():totable(),
     root_dir = root_dir,
     -- https://microsoft.github.io/pyright/#/settings
-    settings = {},
+    settings = {
+        -- Set something here so that didChangeConfiguration is sent, otherwise pyright only works without root_dir
+        python = vim.empty_dict(),
+    },
 })
