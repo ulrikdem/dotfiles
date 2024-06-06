@@ -7,6 +7,10 @@ local augroup = api.nvim_create_augroup("init", {})
 
 vim.cmd.runtime("old_init.vim")
 
+-- Options {{{1
+
+local o = vim.o
+
 -- Mappings {{{1
 
 local map = vim.keymap.set
@@ -35,6 +39,56 @@ map("o", "gv", "<Cmd>normal! gv<CR>")
 
 map("n", "<C-Tab>", "gt")
 map("n", "<C-S-Tab>", "gT")
+
+-- Statusline etc {{{1
+
+o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)} %{v:lua.statusline_modified()}"
+    .. "%=%{v:lua.statusline_diagnostics()}%l,%c%V %P "
+vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
+
+o.title = true
+o.titlestring = "%{v:lua.statusline_path(0, v:true)} - nvim"
+o.titlelen = 0
+
+o.tabline = "%!v:lua.tabline()"
+
+function _G.tabline()
+    local s = "%T" -- For some reason the first item has no effect, so add a useless one
+    for i, tab in ipairs(api.nvim_list_tabpages()) do
+        s = s .. "%" .. i .. "T"
+            .. (tab == api.nvim_get_current_tabpage() and "%#TabLineSel#" or "%#TabLine#")
+            .. " %.40(%{v:lua.statusline_path(nvim_tabpage_get_win(" .. tab .. "))}%) "
+    end
+    return s .. "%T%#TabLineFill#"
+end
+
+function _G.statusline_path(winid, absolute)
+    local name = api.nvim_buf_get_name(api.nvim_win_get_buf(winid))
+    if name:match("^term://") then
+        return name:gsub("^term://.-//%d+:", "term://")
+    elseif name:match("^fugitive://") then
+        return vim.fn.fnamemodify(vim.fn.FugitiveReal(name), absolute and ":~" or ":~:.")
+    end
+    return api.nvim_eval_statusline(absolute and "%F" or "%f", {winid = winid}).str
+end
+
+function _G.statusline_git()
+    local s = vim.fn.FugitiveStatusline()
+    local match = s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git:(.-)%(.*%)%]$")
+    return match and match .. "  " or ""
+end
+
+function _G.statusline_modified()
+    return o.modified and "+ " or ""
+end
+
+function _G.statusline_diagnostics()
+    local count = 0
+    for _, v in pairs(vim.diagnostic.count(0)) do count = count + v end
+    return count > 0 and count .. "⚠ " or ""
+end
+
+api.nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
 
 -- Autocommands {{{1
 

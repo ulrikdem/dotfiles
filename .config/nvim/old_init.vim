@@ -48,7 +48,6 @@ set number relativenumber numberwidth=3
 set scrolloff=4 smoothscroll
 set shortmess+=I
 set splitbelow splitright
-set title titlestring=%F\ -\ nvim titlelen=0
 set updatetime=100
 
 set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
@@ -211,9 +210,6 @@ Plug 'tpope/vim-eunuch'
 Plug 'lambdalisue/suda.vim'
 
 " Terminal {{{1
-
-autocmd vimrc BufEnter * let &titlestring = (&buftype ==# 'terminal' ? '[Terminal]' : '%F').' - nvim'
-autocmd vimrc TermOpen * set titlestring=[Terminal]\ -\ nvim
 
 autocmd vimrc TermOpen * setlocal nonumber norelativenumber matchpairs=
 autocmd vimrc TermOpen * startinsert
