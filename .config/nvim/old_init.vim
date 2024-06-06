@@ -115,29 +115,23 @@ let g:wordmotion_mappings = {
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
 
-nmap <expr> <M-[> <SID>StartBracketRepeat('[')
-nmap <expr> <M-]> <SID>StartBracketRepeat(']')
-function! s:StartBracketRepeat(bracket) abort
-    let g:fake_mode = a:bracket.'-REPEAT'
-    redrawstatus
-    return a:bracket."\<Char-0xA0>"
-endfunction
+nmap <M-[> [<Char-0xA0>
+nmap <M-]> ]<Char-0xA0>
 
-nnoremap [<Char-0xA0><Esc> <Cmd>unlet g:fake_mode \| redrawstatus<CR>
-nnoremap ]<Char-0xA0><Esc> <Cmd>unlet g:fake_mode \| redrawstatus<CR>
-nmap <expr> [<Char-0xA0> <SID>RepeatBracket('[', '<M-[>')
-nmap <expr> ]<Char-0xA0> <SID>RepeatBracket(']', '<M-]>')
-function! s:RepeatBracket(bracket, restart) abort
+nnoremap [<Char-0xA0><Esc> <Nop>
+nnoremap ]<Char-0xA0><Esc> <Nop>
+nmap <expr> [<Char-0xA0> <SID>RepeatBracket('[')
+nmap <expr> ]<Char-0xA0> <SID>RepeatBracket(']')
+function! s:RepeatBracket(bracket) abort
     let l:char = getchar()
     let l:char = type(l:char) == v:t_number ? nr2char(l:char) : l:char
     if l:char == "\<M-[>" || l:char == "\<M-]>"
         return l:char
     elseif l:char =~ '^\d$'
-        return l:char.a:restart
+        return l:char.a:bracket."\<Char-0xA0>"
+    else
+        return a:bracket.l:char.'zz'.a:bracket."\<Char-0xA0>"
     endif
-    unlet g:fake_mode
-    redrawstatus
-    return a:bracket.l:char.'zz'.a:restart
 endfunction
 
 " Formatting {{{1
@@ -155,158 +149,6 @@ endif
 
 Plug 'godlygeek/tabular'
 
-" Statusline {{{1
-
-Plug 'itchyny/lightline.vim'
-let g:lightline = #{
-    \ active: #{
-        \ left: [['mode'], ['filename'], ['truncate']],
-        \ right: [['ruler'], ['fileformat', 'fileencoding', 'filetype'], ['warnings', 'errors']],
-    \ },
-    \ inactive: #{
-        \ left: [['filename'], ['truncate', 'space']],
-        \ right: [['ruler']],
-    \ },
-    \ component: #{
-        \ filename: '
-            \%{substitute(expand("%:p:~"), ''\v(.*/)?(.*/)$|.*'', ''\2'', "")}%t
-            \%{&modified ? " •" : ""}',
-        \ truncate: '%<',
-        \ space: ' ',
-        \ ruler: '%p%% %l:%v',
-    \ },
-    \ component_visible_condition: #{
-        \ truncate: 'v:false',
-    \ },
-    \ component_function: #{
-        \ mode: 'StatusLineMode',
-        \ fileformat: 'StatusLineFileFormat',
-        \ fileencoding: 'StatusLineFileEncoding',
-        \ filetype: 'StatusLineFileType',
-    \ },
-    \ component_expand: {
-        \ 'errors': 'StatusLineErrors',
-        \ 'warnings': 'StatusLineWarnings',
-    \ },
-    \ component_type: {
-        \ 'errors': 'error',
-        \ 'warnings': 'warning',
-    \ },
-    \ tabline: #{
-        \ left: [['tabs']],
-        \ right: [],
-    \ },
-    \ tab: #{
-        \ active: ['tab'],
-        \ inactive: ['tab'],
-    \ },
-    \ tab_component_function: #{
-        \ tab: 'TabLabel',
-    \ },
-    \ _mode_: #{f: 'fake'},
-\ }
-
-if $TERM ==# 'linux' || exists('$NO_POWERLINE')
-    let g:lightline.subseparator = #{left: '│', right: '│'}
-else
-    let g:lightline.separator = #{left: '', right: ''}
-    let g:lightline.subseparator = #{left: '', right: ''}
-endif
-
-function! StatusLineMode() abort
-    if exists('g:fake_mode')
-        call lightline#link('f')
-    endif
-    let l:mode = get(g:, 'fake_mode', lightline#mode())
-    return s:NarrowWindow() ? l:mode[0] : l:mode
-endfunction
-
-function! StatusLineFileFormat() abort
-    return s:NarrowWindow() || &fileformat ==# 'unix' ? '' : &fileformat
-endfunction
-function! StatusLineFileEncoding() abort
-    return s:NarrowWindow() || &fileencoding ==# 'utf-8' ? '' : &fileencoding
-endfunction
-function! StatusLineFileType() abort
-    return s:NarrowWindow() ? '' : &filetype
-endfunction
-
-function! s:NarrowWindow() abort
-    return winwidth(0) < 80
-endfunction
-
-function! StatusLineErrors() abort
-    let l:count = v:lua.vim.diagnostic.count(0)[0]
-    return l:count ? l:count.'✖' : ''
-endfunction
-function! StatusLineWarnings() abort
-    let l:count = v:lua.vim.diagnostic.count(0)[1]
-    return l:count ? l:count.'⚠' : ''
-endfunction
-autocmd vimrc User Plug_lightline_vim autocmd vimrc DiagnosticChanged * call lightline#update()
-
-function! TabLabel(tab) abort
-    let l:win = tabpagewinnr(a:tab)
-    let l:buf = tabpagebuflist(a:tab)[l:win - 1]
-    let l:name = substitute(expand('#'.l:buf.':p:~'), '.*/\ze.', '', '')
-    let l:type = getbufvar(l:buf, '&buftype')
-    if l:type ==# 'terminal'
-        let l:name = substitute(l:name, '.*#\ze.', '', '')
-    elseif l:type ==# 'quickfix'
-        let l:name = getwininfo(win_getid(l:win, a:tab))[0].loclist ?
-            \ '[Location List]' : '[Quickfix List]'
-    endif
-    return a:tab.': '.(empty(l:name) ? '[No Name]' : l:name)
-endfunction
-
-autocmd vimrc User Plug_lightline_vim set noshowmode
-autocmd vimrc User Plug_lightline_vim autocmd vimrc QuickFixCmdPost * call lightline#update()
-
-autocmd vimrc User Plug_lightline_vim call s:UpdateLightlineColors()
-autocmd vimrc User Plug_lightline_vim autocmd vimrc ColorScheme * call s:UpdateLightlineColors()
-function! s:UpdateLightlineColors() abort
-    if &background == 'dark'
-        let [l:fg, l:bg] = ['NvimLight', 'NvimDark']
-    else
-        let [l:fg, l:bg] = ['NvimDark', 'NvimLight']
-    endif
-    execute 'highlight StatusLine guibg='.l:bg.'Gray4' 'ctermbg='.7
-    execute 'highlight StatusLineNC guibg='.l:bg.'Gray4' 'ctermbg='.7
-    let l:common = [l:fg.'Gray2', l:bg.'Gray4', 0, 7]
-    let l:palette = #{
-        \ normal: #{
-            \ middle: [[l:fg.'Gray2', l:bg.'Gray3', 15, 8]],
-            \ error: [[l:bg.'Gray2', l:fg.'Red', 0, 9]],
-            \ warning: [[l:bg.'Gray2', l:fg.'Yellow', 0, 11]],
-        \ },
-        \ inactive: #{
-            \ left: [l:common],
-            \ right: [l:common],
-        \ },
-        \ tabline: #{
-            \ left: [l:common],
-            \ tabsel: [[l:bg.'Gray2', l:fg.'Blue', 0, 12]],
-        \ },
-    \ }
-    for [l:mode, l:color, l:i] in [
-        \ ['normal', 'Green', 10],
-        \ ['insert', 'Blue', 12],
-        \ ['replace', 'Red', 9],
-        \ ['visual', 'Magenta', 13],
-        \ ['command', 'Cyan', 14],
-        \ ['fake', 'Yellow', 11],
-    \ ]
-        let l:palette[l:mode] = get(l:palette, l:mode, {})
-        let l:palette[l:mode].left = [[l:bg.'Gray2', l:fg.l:color, 0, l:i], l:common]
-        let l:palette[l:mode].right = l:palette[l:mode].left
-    endfor
-    let g:lightline#colorscheme#custom#palette = l:palette
-    let g:lightline.colorscheme = 'custom'
-    call lightline#init()
-    call lightline#colorscheme()
-    call lightline#update()
-endfunction
-
 " Command execution {{{1
 
 if executable('rg')
@@ -321,10 +163,6 @@ let s:match_end = "\e[0m"
 
 Plug 'hauleth/asyncdo.vim'
 autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
-
-call add(g:lightline.active.right[2], 'asyncdo')
-let g:lightline.component.asyncdo = '%{exists("g:asyncdo") ? split(g:asyncdo.cmd)[0]."…" : ""}'
-let g:lightline.component_visible_condition.asyncdo = 'exists("g:asyncdo")'
 
 autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
     \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
@@ -625,22 +463,6 @@ endfunction
 set diffopt+=vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff
 map [h [c
 map ]h ]c
-
-call insert(g:lightline.active.left[1], 'git')
-call insert(g:lightline.inactive.left[0], 'git')
-let g:lightline.component_function.git = 'StatusLineGit'
-function! StatusLineGit() abort
-    if !exists('*FugitiveStatusline')
-        return ''
-    endif
-    let l:prefix = ' '
-    let l:status = FugitiveStatusline()
-    if l:status =~# '\[Git:.*(.*)\]'
-        return substitute(l:status, '\[Git:\(.*\)(.*)\]', l:prefix.'\1', '')
-    else
-        return substitute(l:status, '\[Git(\(.*\))\]', l:prefix.'\1', '')
-    endif
-endfunction
 
 autocmd vimrc User Plug_vim_fugitive autocmd vimrc SourcePost fugitive.vim call s:OverrideWorkTree()
 function! s:OverrideWorkTree() abort
