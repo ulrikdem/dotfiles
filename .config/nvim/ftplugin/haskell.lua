@@ -33,24 +33,33 @@ vim.api.nvim_create_autocmd({"LspAttach", "TextChanged", "InsertLeave"}, {
     end,
 })
 
-local root_dir = vim.fs.root(0, "hie.yaml")
-    or vim.fs.root(0, {"cabal.project", "stack.yaml"})
-    or vim.fs.root(0, function(name) return name == "package.yaml" or name:match("%.cabal$") end)
-    or vim.fs.root(0, ".git")
+local root_dir = find_root(
+    "hie.yaml",
+    {"cabal.project", "stack.yaml"},
+    function(n) return n == "package.yaml" or n:match(".%.cabal$") end,
+    ".git")
 
-local tool_dirs = vim.tbl_map(vim.fs.normalize, {"~/.cabal", "~/.stack", "~/.ghcup"})
-local cache_dirs = vim.tbl_map(vim.fs.normalize, {"~/.cache/hie-bios", "~/.cache/ghcide"})
-for _, dir in ipairs(cache_dirs) do vim.fn.mkdir(dir, "p") end
+local function existing_dirs(...)
+    return vim.iter({...})
+        :map(vim.fs.normalize)
+        :filter(function(dir) return vim.fn.isdirectory(dir) ~= 0 end)
+        :totable()
+end
 
 start_lsp({
-    name = "haskell-language-server-wrapper",
-    cmd = vim.iter({
-        "sandbox",
-        root_dir and {"-w", root_dir, vim.tbl_map(function(dir) return {"-w", dir} end, cache_dirs), "-n"} or {},
-        vim.tbl_map(function(dir) return vim.fn.isdirectory(dir) ~= 0 and {"-w", dir} or {} end, tool_dirs),
-        "haskell-language-server-wrapper", "--lsp",
-    }):flatten(3):totable(),
+    cmd = {"haskell-language-server-wrapper", "--lsp"},
     root_dir = root_dir,
+    sandbox = root_dir and {
+        args = {"-n"},
+        write = {
+            root_dir,
+            vim.fs.normalize("~/.cache/hie-bios"),
+            vim.fs.normalize("~/.cache/ghcide"),
+            unpack(existing_dirs("~/.cabal", "~/.stack", "~/.ghcup")),
+        },
+    } or {
+        read = existing_dirs("~/.ghcup"),
+    },
     -- https://haskell-language-server.readthedocs.io/en/stable/configuration.html
     settings = {},
 })

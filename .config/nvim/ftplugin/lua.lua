@@ -42,17 +42,13 @@ if in_runtime then
     })
     root_dir = runtime[1]
 else
-    root_dir = vim.fs.root(0, {".luarc.json", ".luarc.jsonc"}) or vim.fs.root(0, ".git")
+    root_dir = find_root({".luarc.json", ".luarc.jsonc"}, ".git")
 end
 
 start_lsp({
-    name = "lua-language-server",
-    cmd = vim.iter({
-        "sandbox",
-        root_dir and {"-r", root_dir} or {},
-        "lua-language-server",
-    }):flatten():totable(),
+    cmd = {"lua-language-server"},
     root_dir = root_dir,
+    sandbox = {read = {root_dir}},
     settings = {Lua = settings},
     on_attach = function(_, bufnr)
         -- This is not set by default because we set keywordprg above

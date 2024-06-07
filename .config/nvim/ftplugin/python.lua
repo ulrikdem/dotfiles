@@ -1,17 +1,13 @@
-local root_dir = vim.fs.root(0, {"pyrightconfig.json", "pyproject.toml"})
-    or vim.fs.root(0, {"setup.cfg", "setup.py", "requirements.txt"})
-    or vim.fs.root(0, ".git")
+local root_dir = find_root(
+    {"pyrightconfig.json", "pyproject.toml"},
+    {"setup.cfg", "setup.py", "requirements.txt"},
+    ".git")
 
 start_lsp({
-    name = "pyright-langserver",
-    cmd = vim.iter({
-        "sandbox",
-        "-s", "pid", -- Share pid namespace, because it periodically checks that client is running
-        root_dir and {"-r", root_dir} or {},
-        vim.env.VIRTUAL_ENV and {"-r", vim.env.VIRTUAL_ENV} or {},
-        "pyright-langserver", "--stdio",
-    }):flatten():totable(),
+    cmd = {"pyright-langserver", "--stdio"},
     root_dir = root_dir,
+    sandbox = {read = {root_dir, vim.env.VIRTUAL_ENV}},
+
     -- https://microsoft.github.io/pyright/#/settings
     settings = {
         -- Set something here so that didChangeConfiguration is sent, otherwise pyright only works without root_dir

@@ -167,15 +167,34 @@ map("n", "yok", function()
     lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({}))
 end)
 
---- @param config vim.lsp.ClientConfig
+--- @param ... string | string[] | fun(name: string, path: string): boolean
+--- @return string?
+function _G.find_root(...)
+    return vim.iter({...}):fold(nil, function(root, marker) return root or vim.fs.root(0, marker) end)
+end
+
+--- @class LspConfig: vim.lsp.ClientConfig
+--- @field sandbox? {args?: string[], read?: string[], write?: string[]}
+
+--- @param config LspConfig
 function _G.start_lsp(config)
-    -- Callers should set config.name to the name of the executable
-    if vim.fn.executable(config.name) ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
-        config.capabilities = vim.tbl_deep_extend(
-            "force",
+    if fn.executable(config.cmd[1]) ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
+        config.name = config.cmd[1]
+        if config.sandbox then
+            config.cmd = vim.iter({
+                -- LSP servers should check that the parent is still alive, else exit, so share the pid namspace
+                "sandbox", "-spid",
+                config.sandbox.args or {},
+                -- Use tbl_values to filter out nils
+                vim.tbl_map(function(p) return "-r" .. p end, vim.tbl_values(config.sandbox.read or {})),
+                vim.tbl_map(function(p) return "-w" .. p end, vim.tbl_values(config.sandbox.write or {})),
+                "--", config.cmd,
+            }):flatten():totable()
+            for _, dir in pairs(config.sandbox.write or {}) do fn.mkdir(dir, "p") end
+        end
+        config.capabilities = vim.tbl_deep_extend("force",
             lsp.protocol.make_client_capabilities(),
-            require("cmp_nvim_lsp").default_capabilities({snippetSupport = false})
-        )
+            require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}))
         vim.lsp.start(config, {
             bufnr = 0,
             reuse_client = function(client, config)

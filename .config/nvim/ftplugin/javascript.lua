@@ -1,20 +1,14 @@
-local root_dir = vim.fs.root(0, {"jsconfig.json", "tsconfig.json"})
-    or vim.fs.root(0, "package.json")
-    or vim.fs.root(0, ".git")
-
-local cache_dir = vim.fs.normalize("~/.cache/typescript")
-vim.fn.mkdir(cache_dir, "p")
+local root_dir = find_root({"jsconfig.json", "tsconfig.json"}, "package.json", ".git")
 
 start_lsp({
-    name = "typescript-language-server",
-    cmd = vim.iter({
-        "sandbox",
-        "-s", "pid", -- Share pid namespace, because it periodically checks that client is running
-        root_dir and {"-w", root_dir} or {},
-        "-n", "-w", cache_dir, -- Allow downloading type definitions
-        "typescript-language-server", "--stdio"
-    }):flatten():totable(),
+    cmd = {"typescript-language-server", "--stdio"},
     root_dir = root_dir,
+    sandbox = {
+        read = {root_dir},
+        -- Allow downloading type definitions to cache
+        args = {"-n"},
+        write = {vim.fs.normalize("~/.cache/typescript")},
+    },
 
     -- https://github.com/typescript-language-server/typescript-language-server/blob/master/docs/configuration.md
     init_options = {

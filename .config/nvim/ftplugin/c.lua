@@ -1,16 +1,15 @@
 -- This file is also sourced from the built-in cpp ftplugin
 
-local root_dir = vim.fs.root(0, {"compile_commands.json", ".ccls"}) or vim.fs.root(0, ".git")
+local root_dir = find_root({"compile_commands.json", ".ccls"}, ".git")
 
 start_lsp({
-    name = "ccls",
-    cmd = vim.iter({
-        "sandbox",
-        root_dir and {"-w", root_dir} or {},
-        "ccls",
-    }):flatten():totable(),
+    cmd = {"ccls"},
     -- Does not accept nil root_dir. Use filetype to enable separate servers with different clang args
     root_dir = root_dir or ("/" .. vim.bo.filetype),
+    sandbox = {
+        read = {root_dir},
+        write = {root_dir and root_dir .. "/.ccls-cache"},
+    },
     offset_encoding = "utf-32",
 
     -- https://github.com/MaskRay/ccls/wiki/Customization#initialization-options
