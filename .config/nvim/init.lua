@@ -7,6 +7,8 @@ local augroup = api.nvim_create_augroup("init", {})
 
 vim.cmd.runtime("old_init.vim")
 
+vim.cmd.colorscheme("ulrikdem")
+
 -- Options {{{1
 
 local o = vim.o
