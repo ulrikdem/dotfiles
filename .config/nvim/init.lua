@@ -140,6 +140,9 @@ cmp.setup({
     }),
     preselect = cmp.PreselectMode.None,
     formatting = {expandable_indicator = false}, --- @diagnostic disable-line: missing-fields
+    window = {
+        documentation = {winhighlight = "Normal:NormalFloat,Error:NormalFloat"},
+    },
 })
 
 -- LSP {{{1
