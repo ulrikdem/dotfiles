@@ -532,7 +532,6 @@ let g:mkdp_auto_close = v:false
 autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
     \ nnoremap <buffer> <Leader>mv <Cmd>MarkdownPreview<CR>
 
-autocmd vimrc BufNewFile,BufRead *.gv set filetype=dot
 autocmd vimrc FileType dot setlocal commentstring=//%s
 if executable('dot')
     autocmd vimrc FileType dot
