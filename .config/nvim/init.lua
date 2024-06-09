@@ -3,30 +3,29 @@
 -- vim: foldmethod=marker
 
 local api = vim.api
+local fn = vim.fn
+local lsp = vim.lsp
+local map = vim.keymap.set
+local o = vim.o
+
 local augroup = api.nvim_create_augroup("init", {})
 
 vim.cmd.runtime("old_init.vim")
 
 vim.cmd.colorscheme("ulrikdem")
 
--- Options {{{1
-
-local o = vim.o
-
 -- Mappings {{{1
 
-local map = vim.keymap.set
-
 -- Delete default mappings that set a new undo point
-if vim.fn.maparg("<C-w>", "i") ~= "" then vim.keymap.del("i", "<C-w>") end
-if vim.fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
+if fn.maparg("<C-w>", "i") ~= "" then vim.keymap.del("i", "<C-w>") end
+if fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
 
 map("n", "gcu", "gcgc", {remap = true})
 
 -- Remap do and dp/dx to use a motion
 _G.diff_bufnr = 0
-function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
-function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {vim.fn.line("'["), vim.fn.line("']")}}) end
+function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
+function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
 map("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
 map("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
@@ -69,13 +68,13 @@ function _G.statusline_path(winid, absolute)
     if name:match("^term://") then
         return name:gsub("^term://.-//%d+:", "term://")
     elseif name:match("^fugitive://") then
-        return vim.fn.fnamemodify(vim.fn.FugitiveReal(name), absolute and ":~" or ":~:.")
+        return fn.fnamemodify(fn.FugitiveReal(name), absolute and ":~" or ":~:.")
     end
     return api.nvim_eval_statusline(absolute and "%F" or "%f", {winid = winid}).str
 end
 
 function _G.statusline_git()
-    local s = vim.fn.FugitiveStatusline()
+    local s = fn.FugitiveStatusline()
     local match = s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git:(.-)%(.*%)%]$")
     return match and match .. "  " or ""
 end
@@ -146,8 +145,6 @@ cmp.setup({
 })
 
 -- LSP {{{1
-
-local lsp = vim.lsp
 
 -- Mappings use the proposed gr prefix: https://github.com/neovim/neovim/pull/28650
 map("n", "grn", lsp.buf.rename)
