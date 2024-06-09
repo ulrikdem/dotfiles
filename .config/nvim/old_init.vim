@@ -137,14 +137,6 @@ endfunction
 set expandtab tabstop=4 shiftwidth=0
 Plug 'tpope/vim-sleuth'
 
-if has('python3') && filereadable('/usr/share/clang/clang-format.py')
-    command! -range=% ClangFormat call ClangFormat('<line1>:<line2>')
-    function! ClangFormat(...) abort
-        let l:lines = a:0 ? a:1 : v:lnum.':'.(v:lnum + v:count - 1)
-        py3file /usr/share/clang/clang-format.py
-    endfunction
-endif
-
 Plug 'godlygeek/tabular'
 
 " Command execution {{{1
