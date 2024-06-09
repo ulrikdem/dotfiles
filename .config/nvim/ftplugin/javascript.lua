@@ -21,5 +21,7 @@ start_lsp({
             includeInlayVariableTypeHints = true,
         },
     },
-    settings = {implicitProjectConfiguration = {checkJs = true}},
+    settings = {
+        implicitProjectConfiguration = {checkJs = true},
+    },
 })
