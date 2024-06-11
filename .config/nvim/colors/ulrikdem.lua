@@ -27,7 +27,8 @@ local highlights = {
     CmpItemAbbrMatch = {fg = fg .. "Green"},
     CmpItemAbbrMatchFuzzy = {link = "CmpItemAbbrMatch"},
 
-    LspReferenceText = {bold = true},
+    LspReferenceText = {bg = bg .. "Gray3"},
+    LspReferenceWrite = {bg = bg .. "Gray4"},
 
     DiagnosticUnderlineError = {undercurl = true, sp = fg .. "Red"},
     DiagnosticUnderlineWarn = {undercurl = true, sp = fg .. "Yellow"},
