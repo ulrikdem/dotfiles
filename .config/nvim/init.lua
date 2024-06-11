@@ -7,6 +7,7 @@ local fn = vim.fn
 local lsp = vim.lsp
 local map = vim.keymap.set
 local o = vim.o
+local uv = vim.uv --- @type table
 
 local augroup = api.nvim_create_augroup("init", {})
 
@@ -210,13 +211,15 @@ end
 api.nvim_create_autocmd("LspAttach", {
     group = augroup,
     callback = function(ev)
-        local augroup = api.nvim_create_augroup("init_lsp_" .. ev.buf, {})
+        local bufnr = ev.buf
+        local augroup = api.nvim_create_augroup("init_lsp_" .. bufnr, {})
         local client = lsp.get_client_by_id(ev.data.client_id)
         if not client then return end
+
         local signature_triggers = vim.tbl_get(client.server_capabilities, "signatureHelpProvider", "triggerCharacters")
         if signature_triggers then
             api.nvim_create_autocmd("InsertCharPre", {
-                buffer = ev.buf,
+                buffer = bufnr,
                 group = augroup,
                 callback = function()
                     if vim.list_contains(signature_triggers, vim.v.char) then
@@ -225,29 +228,36 @@ api.nvim_create_autocmd("LspAttach", {
                 end,
             })
         end
+
         if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
-            api.nvim_create_autocmd("CursorHold", {
-                buffer = ev.buf,
-                group = augroup,
-                callback = lsp.buf.document_highlight,
-            })
-            api.nvim_create_autocmd("ModeChanged", {
-                buffer = ev.buf,
+            local timer = uv.new_timer()
+            api.nvim_create_autocmd({"CursorMoved", "ModeChanged"}, {
+                buffer = bufnr,
                 group = augroup,
                 callback = function()
-                    if vim.v.event.new_mode:match("^[^nc]") then
-                        lsp.util.buf_clear_references(ev.buf)
+                    if fn.mode() == "n" then
+                        local winid = api.nvim_get_current_win()
+                        timer:start(100, 0, vim.schedule_wrap(function()
+                            if fn.mode() == "n" and api.nvim_win_get_buf(winid) == bufnr then
+                                client.request(
+                                    lsp.protocol.Methods.textDocument_documentHighlight,
+                                    lsp.util.make_position_params(winid, client.offset_encoding),
+                                    function(err, result)
+                                        lsp.util.buf_clear_references(bufnr)
+                                        if result and fn.mode() == "n" then
+                                            lsp.util.buf_highlight_references(bufnr, result, client.offset_encoding)
+                                        elseif err then
+                                            lsp.log.error(client.name, tostring(err))
+                                        end
+                                    end,
+                                    bufnr)
+                            end
+                        end))
+                    elseif fn.mode() ~= "c" then
+                        lsp.util.buf_clear_references(bufnr)
                     end
                 end,
             })
         end
     end,
 })
-
-_G.on_document_highlight = on_document_highlight or lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight]
-lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight] = function(err, result, ctx, config)
-    if api.nvim_get_mode().mode:match("^[nc]") then
-        lsp.util.buf_clear_references(ctx.bufnr)
-        on_document_highlight(err, result, ctx, config)
-    end
-end

@@ -48,7 +48,6 @@ set relativenumber numberwidth=3
 set scrolloff=4 smoothscroll
 set shortmess+=I
 set splitbelow splitright
-set updatetime=100
 
 set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
 function! FoldText() abort
