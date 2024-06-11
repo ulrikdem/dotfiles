@@ -44,7 +44,7 @@ map("n", "<C-S-Tab>", "gT")
 -- Statusline etc {{{1
 
 o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)} %{v:lua.statusline_modified()}"
-    .. "%=%{v:lua.statusline_diagnostics()}%l,%c%V %P "
+    .. "%=%{v:lua.statusline_diagnostics()}%l/%L:%c%V "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
 o.title = true
