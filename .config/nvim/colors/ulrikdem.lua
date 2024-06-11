@@ -19,6 +19,10 @@ local highlights = {
     DiffChange = {bg = bg .. "Gray3"},
     DiffDelete = {bg = bg .. "Gray3", fg = bg .. "Gray3"},
 
+    -- These links are defined in the diff syntax, but not in the git syntax
+    diffAdded = {link = "Added"},
+    diffRemoved = {link = "Removed"},
+
     NormalFloat = {link = "Pmenu"},
     CmpItemAbbrMatch = {fg = fg .. "Green"},
     CmpItemAbbrMatchFuzzy = {link = "CmpItemAbbrMatch"},
