@@ -226,10 +226,19 @@ api.nvim_create_autocmd("LspAttach", {
             })
         end
         if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
-            api.nvim_create_autocmd({"CursorHold", "CursorHoldI"}, {
+            api.nvim_create_autocmd("CursorHold", {
                 buffer = ev.buf,
                 group = augroup,
-                callback = lsp.buf.document_highlight
+                callback = lsp.buf.document_highlight,
+            })
+            api.nvim_create_autocmd("ModeChanged", {
+                buffer = ev.buf,
+                group = augroup,
+                callback = function()
+                    if vim.v.event.new_mode:match("^[^nc]") then
+                        lsp.util.buf_clear_references(ev.buf)
+                    end
+                end,
             })
         end
     end,
@@ -237,6 +246,8 @@ api.nvim_create_autocmd("LspAttach", {
 
 _G.on_document_highlight = on_document_highlight or lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight]
 lsp.handlers[lsp.protocol.Methods.textDocument_documentHighlight] = function(err, result, ctx, config)
-    lsp.util.buf_clear_references(ctx.bufnr)
-    on_document_highlight(err, result, ctx, config)
+    if api.nvim_get_mode().mode:match("^[nc]") then
+        lsp.util.buf_clear_references(ctx.bufnr)
+        on_document_highlight(err, result, ctx, config)
+    end
 end
