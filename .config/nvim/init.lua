@@ -259,5 +259,14 @@ api.nvim_create_autocmd("LspAttach", {
                 end,
             })
         end
+
+        api.nvim_create_autocmd("LspDetach", {
+            buffer = bufnr,
+            group = augroup,
+            callback = function()
+                lsp.util.buf_clear_references(bufnr)
+                api.nvim_del_augroup_by_id(augroup)
+            end,
+        })
     end,
 })

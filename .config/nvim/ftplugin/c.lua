@@ -28,14 +28,26 @@ start_lsp({
 
     on_attach = function(_, bufnr)
         local cmp = require("cmp")
-        for _, c in ipairs({">", '"', "/"}) do
+        local keys = {">", '"', "/"}
+        for _, c in ipairs(keys) do
             vim.keymap.set("i", c, function()
-                if cmp.visible() and vim.api.nvim_get_current_line():sub(1, vim.api.nvim_win_get_cursor(0)[2]):match(c .. "$") then
+                local col = vim.api.nvim_win_get_cursor(0)[2]
+                if cmp.visible() and vim.api.nvim_get_current_line():sub(col, col) == c then
                     return "<C-y>"
                 else
                     return c
                 end
             end, {expr = true, remap = true, buffer = bufnr})
         end
+        vim.api.nvim_create_autocmd("LspDetach", {
+            buffer = bufnr,
+            group = vim.api.nvim_create_augroup("c_" .. bufnr, {}),
+            once = true,
+            callback = function()
+                for _, c in ipairs(keys) do
+                    vim.keymap.del("i", c, {buffer = bufnr})
+                end
+            end,
+        })
     end,
 })
