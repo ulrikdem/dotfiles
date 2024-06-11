@@ -525,12 +525,6 @@ endfunction
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
 
-Plug 'iamcco/markdown-preview.nvim', #{do: {-> mkdp#util#install()}}
-let g:mkdp_page_title = '${name}'
-let g:mkdp_auto_close = v:false
-autocmd vimrc User Plug_markdown_preview_nvim autocmd vimrc FileType markdown
-    \ nnoremap <buffer> <Leader>mv <Cmd>MarkdownPreview<CR>
-
 autocmd vimrc FileType dot setlocal commentstring=//%s
 if executable('dot')
     autocmd vimrc FileType dot
