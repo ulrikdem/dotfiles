@@ -218,12 +218,22 @@ api.nvim_create_autocmd("LspAttach", {
 
         local signature_triggers = vim.tbl_get(client.server_capabilities, "signatureHelpProvider", "triggerCharacters")
         if signature_triggers then
-            api.nvim_create_autocmd("InsertCharPre", {
+            local pattern = "[" .. vim.pesc(table.concat(signature_triggers)) .. "][%s]*$"
+            api.nvim_create_autocmd("TextChangedI", {
                 buffer = bufnr,
                 group = augroup,
                 callback = function()
-                    if vim.list_contains(signature_triggers, vim.v.char) then
-                        api.nvim_feedkeys(vim.keycode("<Cmd>lua vim.lsp.buf.signature_help()<CR>"), "", false)
+                    local lnum, col = unpack(api.nvim_win_get_cursor(0))
+                    local line = api.nvim_get_current_line():sub(1, col)
+                    while lnum > 1 and line:match("^%s*$") do
+                        lnum = lnum - 1
+                        line = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, true)[1]
+                    end
+                    if line and line:match(pattern) then
+                        client.request(
+                            lsp.protocol.Methods.textDocument_signatureHelp,
+                            lsp.util.make_position_params(0, client.offset_encoding),
+                            lsp.with(lsp.handlers.signature_help, {silent = true, focusable = false}))
                     end
                 end,
             })
