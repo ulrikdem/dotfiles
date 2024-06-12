@@ -231,30 +231,27 @@ api.nvim_create_autocmd("LspAttach", {
 
         if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
             local timer = uv.new_timer()
-            api.nvim_create_autocmd({"CursorMoved", "ModeChanged"}, {
+            api.nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
                 buffer = bufnr,
                 group = augroup,
-                callback = function()
-                    if fn.mode() == "n" then
-                        local winid = api.nvim_get_current_win()
-                        timer:start(100, 0, vim.schedule_wrap(function()
-                            if fn.mode() == "n" and api.nvim_win_get_buf(winid) == bufnr then
-                                client.request(
-                                    lsp.protocol.Methods.textDocument_documentHighlight,
-                                    lsp.util.make_position_params(winid, client.offset_encoding),
-                                    function(err, result)
-                                        lsp.util.buf_clear_references(bufnr)
-                                        if result and fn.mode() == "n" then
-                                            lsp.util.buf_highlight_references(bufnr, result, client.offset_encoding)
-                                        elseif err then
-                                            lsp.log.error(client.name, tostring(err))
-                                        end
-                                    end,
-                                    bufnr)
-                            end
-                        end))
-                    elseif fn.mode() ~= "c" then
+                callback = function(ev)
+                    if ev.event == "BufLeave" or fn.mode():match("[^nc]") then
                         lsp.util.buf_clear_references(bufnr)
+                    elseif fn.mode() == "n" then
+                        timer:start(100, 0, vim.schedule_wrap(function()
+                            if api.nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
+                            client.request(
+                                lsp.protocol.Methods.textDocument_documentHighlight,
+                                lsp.util.make_position_params(0, client.offset_encoding),
+                                function(err, refs)
+                                    lsp.util.buf_clear_references(bufnr)
+                                    if refs and api.nvim_get_current_buf() == bufnr and fn.mode() == "n" then
+                                        lsp.util.buf_highlight_references(bufnr, refs, client.offset_encoding)
+                                    elseif err then
+                                        lsp.log.error(client.name, tostring(err))
+                                    end
+                                end)
+                        end))
                     end
                 end,
             })
