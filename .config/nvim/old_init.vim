@@ -26,34 +26,6 @@ endtry
 
 " Misc settings {{{1
 
-if !(exists('$DISPLAY') || exists('$WAYLAND_DISPLAY'))
-    let g:clipboard = #{
-        \ copy: {
-            \ '*': v:lua.require'vim.ui.clipboard.osc52'.copy('*'),
-            \ '+': v:lua.require'vim.ui.clipboard.osc52'.copy('+'),
-        \ },
-        \ paste: {
-            \ '*': {-> [getreg('"', v:true, v:true), getregtype('"')]},
-            \ '+': {-> [getreg('"', v:true, v:true), getregtype('"')]},
-        \ },
-    \ }
-endif
-
-set clipboard=unnamed
-set cursorline cursorlineopt=number
-set linebreak breakindent
-set list listchars=tab:→\ ,trail:·,nbsp:·
-set mouse=a mousemodel=extend
-set relativenumber numberwidth=3
-set scrolloff=4 smoothscroll
-set shortmess+=I
-
-set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
-function! FoldText() abort
-    return repeat('·', v:foldlevel * 2).substitute(trim(foldtext()), '.\{-}:', '', '').
-        \ ' ('.(v:foldend - v:foldstart + 1).' lines) '
-endfunction
-
 command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
 
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
@@ -92,7 +64,6 @@ noremap! <C-BS> <C-W>
 tnoremap <C-BS> <C-W>
 
 let g:mapleader = ' '
-set notimeout
 
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-repeat'
@@ -132,7 +103,6 @@ endfunction
 
 " Formatting {{{1
 
-set expandtab tabstop=4 shiftwidth=0
 Plug 'tpope/vim-sleuth'
 
 Plug 'godlygeek/tabular'
@@ -443,7 +413,6 @@ function! s:ToggleDiff() abort
     endif
 endfunction
 
-set diffopt+=vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff
 map [h [c
 map ]h ]c
 
@@ -461,17 +430,11 @@ endfunction
 
 " Search and completion {{{1
 
-set ignorecase smartcase
-
-set wildignorecase wildmode=longest:full,full wildcharm=<Tab>
 cnoremap <expr> /
     \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? '<C-Y>' : '/'
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
     \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
-
-set dictionary=/usr/share/dict/words
-set completeopt=menuone,noselect,popup shortmess+=c
 
 " Filetypes {{{1
 

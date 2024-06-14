@@ -15,6 +15,69 @@ vim.cmd.runtime("old_init.vim")
 
 vim.cmd.colorscheme("ulrikdem")
 
+-- Options {{{1
+
+o.ignorecase = true
+o.smartcase = true
+
+o.wildignorecase = true
+o.wildmode = "longest:full,full"
+
+o.completeopt = "menuone,noselect,popup"
+o.dictionary = "/usr/share/dict/words"
+
+vim.opt.shortmess:append("Ic")
+
+o.cursorline = true
+o.cursorlineopt = "number"
+
+o.relativenumber = true
+o.numberwidth = 3
+
+o.scrolloff = 4
+o.smoothscroll = true
+
+o.linebreak = true
+o.breakindent = true
+
+o.tabstop = 4
+o.shiftwidth = 0
+o.expandtab = true
+
+o.list = true
+o.listchars = "tab:→ ,trail:·,nbsp:·"
+
+vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff")
+
+o.fillchars = "foldopen:▾,foldclose:▸"
+o.foldcolumn = "auto:9"
+o.foldtext = "v:lua.foldtext()"
+function _G.foldtext()
+    return ("%s %s (%d lines) "):format(
+        fn["repeat"]("·", vim.v.foldlevel * 2),
+        vim.trim(fn.foldtext():gsub("^.-:", "")),
+        vim.v.foldend - vim.v.foldstart + 1)
+end
+
+o.clipboard = "unnamed"
+if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) then
+    local osc52 = require("vim.ui.clipboard.osc52")
+    local function paste()
+        -- Use unnamed register, because many terminals don't allow paste via OSC 52
+        local r = fn.getreginfo('"')
+        return {r.regcontents, r.regtype}
+    end
+    vim.g.clipboard = {
+        copy = {["*"] = osc52.copy("*"), ["+"] = osc52.copy("+")},
+        paste = {["*"] = paste, ["+"] = paste},
+    }
+end
+
+o.mouse = "a"
+o.mousemodel = "extend"
+
+o.timeout = false
+
 -- Mappings {{{1
 
 -- Delete default mappings that set a new undo point
