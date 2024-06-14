@@ -9,10 +9,7 @@ local map = vim.keymap.set
 local o = vim.o
 local uv = vim.uv --- @type table
 
-local augroup = api.nvim_create_augroup("init", {})
-
 vim.cmd.runtime("old_init.vim")
-
 vim.cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
@@ -105,7 +102,27 @@ map("o", "gv", "<Cmd>normal! gv<CR>")
 map("n", "<C-Tab>", "gt")
 map("n", "<C-S-Tab>", "gT")
 
--- Statusline etc {{{1
+-- Autocommands {{{1
+
+local augroup = api.nvim_create_augroup("init", {})
+
+api.nvim_create_autocmd("TextYankPost", {
+    group = augroup,
+    callback = function()
+        vim.highlight.on_yank({higroup = "Visual", on_visual = false})
+    end,
+})
+
+api.nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "sh,zsh",
+    callback = function(ev)
+        -- The default :ShKeywordPrg and :ZshKeywordPrg are broken in nvim
+        vim.bo[ev.buf].keywordprg = ":Man"
+    end
+})
+
+-- Statusline {{{1
 
 o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)} %{v:lua.statusline_modified()}"
     .. "%=%{v:lua.statusline_diagnostics()}%l/%L:%c%V "
@@ -154,24 +171,6 @@ function _G.statusline_diagnostics()
 end
 
 api.nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
-
--- Autocommands {{{1
-
-api.nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "sh,zsh",
-    callback = function(ev)
-        -- The default :ShKeywordPrg and :ZshKeywordPrg are broken in nvim
-        vim.bo[ev.buf].keywordprg = ":Man"
-    end
-})
-
-api.nvim_create_autocmd("TextYankPost", {
-    group = augroup,
-    callback = function()
-        vim.highlight.on_yank({higroup = "Visual", on_visual = false})
-    end,
-})
 
 -- Completion {{{1
 
