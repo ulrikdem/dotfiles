@@ -77,30 +77,78 @@ o.timeout = false
 
 -- Mappings {{{1
 
+map("n", "<C-s>", "<Cmd>write<CR>")
+
+map({"!", "t"}, "<C-BS>", "<C-w>")
+
 -- Delete default mappings that set a new undo point
 if fn.maparg("<C-w>", "i") ~= "" then vim.keymap.del("i", "<C-w>") end
 if fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
 
 map("n", "gcu", "gcgc", {remap = true})
 
--- Remap do and dp/dx to use a motion
+map("n", "<C-RightMouse>", "<C-o>")
+
+map("c", "/", function()
+    return fn.pumvisible() ~= 0 and fn.getcmdline():sub(1, fn.getcmdpos() - 1):match("/$")
+        and "<C-y>" or "/"
+end, {expr = true})
+
+for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
+    map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
+    -- Terminal mappings are separate, because counts don't work with <C-\><C-n>
+    map("t", ("<M-%s>"):format(dir), ("<C-\\><C-n><C-w><%s>"):format(dir))
+end
+
+map("n", "<C-Tab>", "gt")
+map("n", "<C-S-Tab>", "gT")
+map("t", "<C-Tab>", "<C-\\><C-n>gt")
+map("t", "<C-S-Tab>", "<C-\\><C-n>gT")
+
+for i = 1, 10 do
+    map({"n", "t"}, ("<M-%d>"):format(i % 10), ("<C-\\><C-n>%dgt"):format(i))
+end
+
+map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
+
+-- Remap do and dp to use a motion
 _G.diff_bufnr = 0
 function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
 function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
 map("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
 map("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
-map("n", "dx", "dp", {remap = true})
--- Map doo and dpp/dxx to the original behavior
+-- Map doo and dpp to the original behavior
 map("n", "doo", "do")
 map("n", "dpp", "dp")
-map("n", "dpx", "dp")
 
 -- The mappings above don't work in visual mode. As alternative, allow gv in operator-pending mode
 map("o", "gv", "<Cmd>normal! gv<CR>")
 
-map("n", "<C-Tab>", "gt")
-map("n", "<C-S-Tab>", "gT")
+-- Remap to something more convenient in my keymap
+map("n", "dx", "dp", {remap = true})
+map("n", "dpx", "dp")
+map("", "[h", "[c", {remap = true})
+map("", "]h", "]c", {remap = true})
+
+-- Map <M-[> and <M-]> to enter a "mode" that prefixes every keypress with [ or ], respectively
+for _, bracket in ipairs({"[", "]"}) do
+    -- The intermediate mapping is only to improve the command shown in the bottom right
+    local intermediate = ("<lt>M-%s>"):format(bracket)
+    map("n", ("<M-%s>"):format(bracket), intermediate, {remap = true})
+    local function repeat_bracket()
+        local c = fn.getcharstr()
+        if c == vim.keycode("<M-[>") or c == vim.keycode("<M-]>") then
+            return c
+        elseif c:match("^%d$") then
+            return c .. vim.keycode(intermediate)
+        else
+            return bracket .. c .. "zz" .. vim.keycode(intermediate)
+        end
+    end
+    map("n", intermediate, repeat_bracket, {expr = true, replace_keycodes = false, remap = true})
+    map("n", intermediate .. "<Esc>", "")
+end
 
 -- Autocommands {{{1
 

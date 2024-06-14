@@ -46,23 +46,6 @@ endfunction
 
 " Misc mappings {{{1
 
-nnoremap <C-S> <Cmd>write<CR>
-nnoremap ZT <Cmd>silent only \| quit<CR>
-
-nnoremap <M-Left> <C-W>h
-nnoremap <M-Down> <C-W>j
-nnoremap <M-Up> <C-W>k
-nnoremap <M-Right> <C-W>l
-
-for s:i in range(1, 10)
-    execute 'nnoremap <M-'.(s:i % 10).'>' s:i.'gt'
-endfor
-
-nnoremap <C-RightMouse> <C-O>
-
-noremap! <C-BS> <C-W>
-tnoremap <C-BS> <C-W>
-
 let g:mapleader = ' '
 
 Plug 'tpope/vim-abolish'
@@ -81,25 +64,6 @@ let g:wordmotion_mappings = {
     \ 'aw': 'a<M-w>',
     \ '<C-R><C-W>': '<C-R><M-w>',
 \ }
-
-nmap <M-[> [<Char-0xA0>
-nmap <M-]> ]<Char-0xA0>
-
-nnoremap [<Char-0xA0><Esc> <Nop>
-nnoremap ]<Char-0xA0><Esc> <Nop>
-nmap <expr> [<Char-0xA0> <SID>RepeatBracket('[')
-nmap <expr> ]<Char-0xA0> <SID>RepeatBracket(']')
-function! s:RepeatBracket(bracket) abort
-    let l:char = getchar()
-    let l:char = type(l:char) == v:t_number ? nr2char(l:char) : l:char
-    if l:char == "\<M-[>" || l:char == "\<M-]>"
-        return l:char
-    elseif l:char =~ '^\d$'
-        return l:char.a:bracket."\<Char-0xA0>"
-    else
-        return a:bracket.l:char.'zz'.a:bracket."\<Char-0xA0>"
-    endif
-endfunction
 
 " Formatting {{{1
 
@@ -173,15 +137,6 @@ Plug 'lambdalisue/suda.vim'
 autocmd vimrc TermOpen * setlocal nonumber norelativenumber matchpairs=
 autocmd vimrc TermOpen * startinsert
 autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
-
-tnoremap <M-Left> <Cmd>wincmd h<CR>
-tnoremap <M-Down> <Cmd>wincmd j<CR>
-tnoremap <M-Up> <Cmd>wincmd k<CR>
-tnoremap <M-Right> <Cmd>wincmd l<CR>
-
-for s:i in range(1, 10)
-    execute 'tnoremap <M-'.(s:i % 10).'> <Cmd>tabnext' s:i.'<CR>'
-endfor
 
 nnoremap <Leader>ot <Cmd>terminal<CR>
 nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'//'.&shell).'<CR>'
@@ -413,9 +368,6 @@ function! s:ToggleDiff() abort
     endif
 endfunction
 
-map [h [c
-map ]h ]c
-
 autocmd vimrc User Plug_vim_fugitive autocmd vimrc SourcePost fugitive.vim call s:OverrideWorkTree()
 function! s:OverrideWorkTree() abort
     let l:WorkTree = funcref('FugitiveWorkTree')
@@ -429,9 +381,6 @@ function! s:OverrideWorkTree() abort
 endfunction
 
 " Search and completion {{{1
-
-cnoremap <expr> /
-    \ pumvisible() && getcmdpos() > 1 && getcmdline()[getcmdpos() - 2] == '/' ? '<C-Y>' : '/'
 
 autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
     \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
