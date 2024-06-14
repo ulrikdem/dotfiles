@@ -47,7 +47,6 @@ set mouse=a mousemodel=extend
 set relativenumber numberwidth=3
 set scrolloff=4 smoothscroll
 set shortmess+=I
-set splitbelow splitright
 
 set fillchars=foldopen:▾,foldclose:▸ foldcolumn=auto:9 foldtext=FoldText()
 function! FoldText() abort
