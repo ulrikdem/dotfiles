@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+venv=$(realpath -e -- "$1")
+shift
+exec sandbox -x -r "$venv" -r ~/.jupyter/lab/user-settings "$@" -- venv "$venv" sh -c 'python -m ipykernel install --user && exec jupyter-lab -y'
