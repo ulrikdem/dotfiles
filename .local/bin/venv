@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+export VIRTUAL_ENV=$(realpath -e -- "$1")
+shift
+(($#)) || set zsh
+PATH=$VIRTUAL_ENV/bin:$PATH exec "$@"
