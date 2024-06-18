@@ -183,11 +183,12 @@ o.titlelen = 0
 o.tabline = "%!v:lua.tabline()"
 
 function _G.tabline()
+    local max_width = math.max(math.floor(o.columns / #api.nvim_list_tabpages()) - 2, 1)
     local s = "%T" -- For some reason the first item has no effect, so add a useless one
     for i, tab in ipairs(api.nvim_list_tabpages()) do
         s = s .. "%" .. i .. "T"
             .. (tab == api.nvim_get_current_tabpage() and "%#TabLineSel#" or "%#TabLine#")
-            .. " %.40(%{v:lua.statusline_path(nvim_tabpage_get_win(" .. tab .. "))}%) "
+            .. " %." .. max_width .. "(%{v:lua.statusline_path(" .. api.nvim_tabpage_get_win(tab) .. ")}%) "
     end
     return s .. "%T%#TabLineFill#"
 end
