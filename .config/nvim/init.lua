@@ -172,8 +172,8 @@ api.nvim_create_autocmd("FileType", {
 
 -- Statusline {{{1
 
-o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)} %{v:lua.statusline_modified()}"
-    .. "%=%{v:lua.statusline_diagnostics()}%c%V %l/%L "
+o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)}%( %M%)"
+    .. "%= %{v:lua.statusline_diagnostics()}%c%V %l/%L "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
 o.title = true
@@ -208,10 +208,6 @@ function _G.statusline_git()
     local s = fn.FugitiveStatusline()
     local match = s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git:(.-)%(.*%)%]$")
     return match and match .. "  " or ""
-end
-
-function _G.statusline_modified()
-    return o.modified and "+ " or ""
 end
 
 function _G.statusline_diagnostics()
