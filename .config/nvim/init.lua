@@ -223,7 +223,7 @@ api.nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group =
 local cmp = require("cmp")
 
 local function maybe_complete(fallback)
-    if api.nvim_get_current_line():sub(1, api.nvim_win_get_cursor(0)[2]):match("[^%s]$") then
+    if api.nvim_get_current_line():sub(1, api.nvim_win_get_cursor(0)[2]):match("[^%s]") then
         cmp.complete()
     else
         fallback()
