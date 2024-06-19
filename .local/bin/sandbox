@@ -40,7 +40,7 @@ while getopts ns:xRWr:w:d:b:B: opt; do
         s) unset default_args["--unshare-$OPTARG"];;
         x)
             unset default_args['--unsetenv DISPLAY'] default_args['--unsetenv WAYLAND_DISPLAY']
-            for path in /sys/dev{,ices} ${XAUTHORITY:+"$XAUTHORITY"} "/tmp/.X11-unix/X${DISPLAY#:}" \
+            for path in /sys ${XAUTHORITY:+"$XAUTHORITY"} "/tmp/.X11-unix/X${DISPLAY#:}" \
                 ${WAYLAND_DISPLAY:+"$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY"} "$XDG_RUNTIME_DIR"/{pipewire-0,pulse/native}; do
                 args+=(--ro-bind-try "$path" "$path")
             done
