@@ -21,7 +21,7 @@ args=(
 )
 mkdir -pm 700 /tmp/sandbox-share
 
-for path in /bin /sbin /lib* /usr /opt /etc ~/.config/highlight/themes/vim.theme ~/.local/share/nvim/plugged "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults" ~/.dotfiles.git; do
+for path in /bin /sbin /lib* /usr /opt /etc ~/.local/share/nvim/plugged "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults" ~/.dotfiles.git; do
     [[ -L $path ]] && args+=(--symlink "$(readlink -- "$path")" "$path") || args+=(--ro-bind-try "$path" "$path")
 done
 while read -rd '' path; do

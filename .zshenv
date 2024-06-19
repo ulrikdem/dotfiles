@@ -12,9 +12,6 @@ export FZF_DEFAULT_OPTS='--color 16,info:8 --bind ctrl-w:backward-kill-word,alt-
 
 [[ -f ~/.config/ripgreprc ]] && export RIPGREP_CONFIG_PATH=~/.config/ripgreprc
 
-export HIGHLIGHT_OPTIONS="-t 4 -O xterm256"
-[[ -f ~/.config/highlight/themes/vim.theme ]] && HIGHLIGHT_OPTIONS+=" -D $HOME/.config/highlight -s vim"
-
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
 
 export WINEDLLOVERRIDES=winemenubuilder.exe=
