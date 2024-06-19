@@ -3,7 +3,6 @@
 fzf_args=(
     --ansi
     --tabstop 3
-    --tiebreak index
     --bind "tab:execute-silent(cut -f 2 <<<{} | head -c -1 >>'$1')+refresh-preview"
     --bind "ctrl-c:execute-silent(printf '' >'$1')+refresh-preview"
     --preview "cat -- '$1'"
