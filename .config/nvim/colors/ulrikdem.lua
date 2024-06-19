@@ -10,6 +10,7 @@ local highlights = {
     StatusLine = {bg = fg .. "Gray4", fg = bg .. "Gray2"},
     StatusLineNC = {bg = bg .. "Gray4", fg = fg .. "Gray2"},
     TabLineSel = {link = "StatusLine"},
+    TabLineFill = {bg = bg .. "Gray4", fg = fg .. "Gray4"},
 
     CursorLineNr = {fg = fg .. "Gray4"},
     Folded = {fg = fg .. "Gray4"},
