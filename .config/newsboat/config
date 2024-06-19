@@ -7,7 +7,6 @@ articlelist-format "%4i %f %D  %?T?[%T] &?%t"
 feed-sort-order lastupdated
 show-read-feeds no
 goto-next-feed no
-keep-articles-days 365
 reload-threads 4
 browser "nohup firefox -- %u >/dev/null 2>&1 &"
 macro v set browser "nohup mpv --force-window -- %u >/dev/null 2>&1 &"; open-in-browser-and-mark-read; set browser "nohup firefox -- %u >/dev/null 2>&1 &" -- "Play media and mark read"
