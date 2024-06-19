@@ -7,12 +7,14 @@ if vim.o.background == "light" then bg, fg = fg, bg end
 
 --- @type table<string, vim.api.keyset.highlight>
 local highlights = {
+    StatusLine = {bg = fg .. "Gray4", fg = bg .. "Gray2"},
     StatusLineNC = {bg = bg .. "Gray4", fg = fg .. "Gray2"},
     TabLineSel = {link = "StatusLine"},
 
-    CursorLineNr = {link = "Comment"},
-    Folded = {link = "Comment"},
-    QuickFixLine = {link = "CursorLine"},
+    CursorLineNr = {fg = fg .. "Gray4"},
+    Folded = {fg = fg .. "Gray4"},
+    QuickFixLine = {bg = bg .. "Gray3"},
+    ColorColumn = {bg = bg .. "Gray3"},
 
     DiffAdd = {link = "DiffText"},
     DiffText = {bg = bg .. "Blue"},
