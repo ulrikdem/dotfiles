@@ -255,6 +255,18 @@ cmp.setup({
     },
 })
 
+cmp.setup.cmdline({"/", "?"}, {
+    sources = {{name = "buffer"}},
+    mapping = cmp.mapping.preset.cmdline(),
+    completion = {autocomplete = false},
+    formatting = { --- @diagnostic disable-line: missing-fields
+        format = function(_, item)
+            item.kind = nil
+            return item
+        end,
+    },
+})
+
 -- LSP {{{1
 
 -- Mappings use the proposed gr prefix: https://github.com/neovim/neovim/pull/28650
