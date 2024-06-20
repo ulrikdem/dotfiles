@@ -197,9 +197,9 @@ end
 
 function _G.statusline_path(winid, absolute)
     local name = api.nvim_buf_get_name(api.nvim_win_get_buf(winid))
-    if name == "" then
+    if name == "" or o.buftype == "nofile" then
         return api.nvim_eval_statusline("%f", {winid = winid}).str
-    elseif name:match("^term://") then
+    elseif o.buftype == "terminal" then
         return name:gsub("^term://.-//%d+:", "term://")
     else
         return fn.fnamemodify(fn.FugitiveReal(name), absolute and ":~" or ":~:.")
