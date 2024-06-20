@@ -18,6 +18,9 @@ local settings = {
         showWord = "Disable",
         keywordSnippet = "Disable",
     },
+    diagnostics = {
+        workspaceDelay = -1,
+    },
     hint = {
         enable = true,
         setType = true,

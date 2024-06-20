@@ -9,8 +9,9 @@ start_lsp({
     sandbox = {read = {root_dir, vim.env.VIRTUAL_ENV}},
 
     -- https://microsoft.github.io/pyright/#/settings
-    settings = {
-        -- Set something here so that didChangeConfiguration is sent, otherwise pyright only works without root_dir
-        python = vim.empty_dict(),
+    settings = { -- This table can't be empty, otherwise pyright only works without root_dir
+        python = {
+            analysis = {diagnosticMode = "openFilesOnly"},
+        },
     },
 })
