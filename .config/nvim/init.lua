@@ -263,6 +263,9 @@ map({"n", "x"}, "gra", lsp.buf.code_action)
 map("n", "grr", lsp.buf.references)
 map("n", "grq", lsp.buf.format)
 
+map("n", "yok", function() lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({})) end)
+map("n", "yoe", function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end)
+
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
 
@@ -272,13 +275,6 @@ vim.diagnostic.config({
     float = {header = "", prefix = ""},
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
-
-map("n", "yoe", function()
-    vim.diagnostic.enable(not vim.diagnostic.is_enabled())
-end)
-map("n", "yok", function()
-    lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({}))
-end)
 
 --- @param ... string | string[] | fun(name: string, path: string): boolean
 --- @return string?
