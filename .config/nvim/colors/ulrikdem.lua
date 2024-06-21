@@ -9,11 +9,13 @@ if vim.o.background == "light" then bg, fg = fg, bg end
 local highlights = {
     StatusLine = {bg = fg .. "Gray4", fg = bg .. "Gray2"},
     StatusLineNC = {bg = bg .. "Gray4", fg = fg .. "Gray2"},
+
     TabLineSel = {link = "StatusLine"},
     TabLineFill = {bg = bg .. "Gray4", fg = fg .. "Gray4"},
 
     CursorLineNr = {fg = fg .. "Gray4"},
     Folded = {fg = fg .. "Gray4"},
+
     QuickFixLine = {bg = bg .. "Gray3"},
     ColorColumn = {bg = bg .. "Gray3"},
 
@@ -27,8 +29,11 @@ local highlights = {
     diffRemoved = {link = "Removed"},
 
     NormalFloat = {link = "Pmenu"},
+
     CmpItemAbbrMatch = {fg = fg .. "Green"},
     CmpItemAbbrMatchFuzzy = {link = "CmpItemAbbrMatch"},
+
+    SnippetTabstop = {bg = bg .. "Gray3"},
 
     LspReferenceText = {bg = bg .. "Gray3"},
     LspReferenceWrite = {bg = bg .. "Gray4"},

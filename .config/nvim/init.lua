@@ -89,6 +89,9 @@ map("n", "gcu", "gcgc", {remap = true})
 
 map("n", "<C-RightMouse>", "<C-o>")
 
+map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
+map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
+
 map("c", "/", function()
     return fn.pumvisible() ~= 0 and fn.getcmdline():sub(1, fn.getcmdpos() - 1):match("/$")
         and "<C-y>" or "/"
@@ -247,6 +250,7 @@ cmp.setup({
         end),
         ["<PageDown>"] = cmp.mapping.scroll_docs(4),
         ["<PageUp>"] = cmp.mapping.scroll_docs(-4),
+        ["<C-y>"] = cmp.mapping.confirm({select = true}),
     }),
     preselect = cmp.PreselectMode.None,
     formatting = { --- @diagnostic disable-line: missing-fields
