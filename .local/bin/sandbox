@@ -34,7 +34,8 @@ add-path() {
 
 bind_args=
 policy=()
-while getopts ns:xRWr:w:d:b:B: opt; do
+url_handler=0
+while getopts ns:xuRWr:w:d:b:B: opt; do
     case $opt in
         n) unset default_args[--unshare-net];;
         s) unset default_args["--unshare-$OPTARG"];;
@@ -47,6 +48,7 @@ while getopts ns:xRWr:w:d:b:B: opt; do
             for path in /dev/{dri,nvidia*}; do
                 args+=(--dev-bind-try "$path" "$path")
             done;;
+        u) url_handler=1;;
         R) bind_args=ro-bind;;
         W) bind_args=bind;;
         r) add-path ro-bind;;
@@ -54,7 +56,7 @@ while getopts ns:xRWr:w:d:b:B: opt; do
         d) add-path dev-bind-try;;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]...' \
+        ?) echo 'sandbox [-nxuRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]...' \
             '[-b busname]... [-B busname]... [-s namespace]... [command [arg]...]' >&2; exit 1;;
     esac
 done
@@ -75,35 +77,37 @@ if ((${#policy[@]})); then
     args+=(--bind "$temp/bus" "$XDG_RUNTIME_DIR/bus" --setenv DBUS_SESSION_BUS_ADDRESS unix:path="$XDG_RUNTIME_DIR/bus")
 fi
 
-mkfifo -- "$temp/url"
-tail -f -- "$temp/url" | while read -rd '' url; do
-    xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
-done &>/dev/null &
-args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
+if ((url_handler)); then
+    mkfifo -- "$temp/url"
+    tail -f -- "$temp/url" | while read -rd '' url; do
+        xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
+    done &>/dev/null &
+    args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
 
-exec {browser}<<'EOF'
-#!/bin/bash
-printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
-EOF
-exec {desktop}<<EOF
-[Desktop Entry]
-Type=Application
-Name=Browser
-Exec=browser %U
-MimeType=x-scheme-handler/http;x-scheme-handler/https;
-EOF
-exec {mimeapps}< <(cat <(grep -v '^x-scheme-handler/http' ~/.config/mimeapps.list 2>/dev/null) - <<EOF
-[Default Applications]
-x-scheme-handler/http=browser.desktop
-x-scheme-handler/https=browser.desktop
-EOF
-)
-args+=(
-    --perms 755 --file $browser ~/.local/bin/browser
-    --file $desktop ~/.local/share/applications/browser.desktop
-    --file $mimeapps ~/.config/mimeapps.list
-    --setenv BROWSER browser
-)
+    exec {browser}<<-'EOF'
+		#!/bin/bash
+		printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
+		EOF
+    exec {desktop}<<-EOF
+		[Desktop Entry]
+		Type=Application
+		Name=Browser
+		Exec=browser %U
+		MimeType=x-scheme-handler/http;x-scheme-handler/https;
+		EOF
+    exec {mimeapps}< <(cat <(grep -v '^x-scheme-handler/http' ~/.config/mimeapps.list 2>/dev/null) - <<-EOF
+		[Default Applications]
+		x-scheme-handler/http=browser.desktop
+		x-scheme-handler/https=browser.desktop
+		EOF
+    )
+    args+=(
+        --perms 755 --file $browser ~/.local/bin/browser
+        --file $desktop ~/.local/share/applications/browser.desktop
+        --file $mimeapps ~/.config/mimeapps.list
+        --setenv BROWSER browser
+    )
+fi
 
 exec {fd}> >(
     cat
@@ -114,3 +118,5 @@ args+=(--sync-fd $fd)
 
 (($#)) || set zsh
 exec bwrap ${!default_args[@]} "${args[@]}" "$@"
+
+# vim: tabstop=4
