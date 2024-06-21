@@ -68,53 +68,58 @@ if [[ -n $bind_args ]]; then
     done
 fi
 
-temp=$(mktemp -d "$XDG_RUNTIME_DIR/sandbox.XXXXXXXXXX")
+if ((${#policy[@]} || url_handler)); then
+    temp=$(mktemp -d "$XDG_RUNTIME_DIR/sandbox.XXXXXXXXXX")
 
-mkfifo -- "$temp/proxy"
-if ((${#policy[@]})); then
-    xdg-dbus-proxy --fd=3 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 3<>"$temp/proxy" &
-    read -N 1 <"$temp/proxy"
-    args+=(--bind "$temp/bus" "$XDG_RUNTIME_DIR/bus" --setenv DBUS_SESSION_BUS_ADDRESS unix:path="$XDG_RUNTIME_DIR/bus")
-fi
+    if ((${#policy[@]})); then
+        mkfifo -- "$temp/proxy"
+        xdg-dbus-proxy --fd=3 "$DBUS_SESSION_BUS_ADDRESS" "$temp/bus" --filter "${policy[@]}" 3<>"$temp/proxy" &
+        read -N 1 <"$temp/proxy"
+        args+=(
+            --bind "$temp/bus" "$XDG_RUNTIME_DIR/bus"
+            --setenv DBUS_SESSION_BUS_ADDRESS unix:path="$XDG_RUNTIME_DIR/bus"
+        )
+    fi
 
-if ((url_handler)); then
-    mkfifo -- "$temp/url"
-    tail -f -- "$temp/url" | while read -rd '' url; do
-        xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
-    done &>/dev/null &
-    args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
+    if ((url_handler)); then
+        mkfifo -- "$temp/url"
+        tail -f -- "$temp/url" | while read -rd '' url; do
+            xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
+        done &>/dev/null &
+        args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
 
-    exec {browser}<<-'EOF'
-		#!/bin/bash
-		printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
-		EOF
-    exec {desktop}<<-EOF
-		[Desktop Entry]
-		Type=Application
-		Name=Browser
-		Exec=browser %U
-		MimeType=x-scheme-handler/http;x-scheme-handler/https;
-		EOF
-    exec {mimeapps}< <(cat <(grep -v '^x-scheme-handler/http' ~/.config/mimeapps.list 2>/dev/null) - <<-EOF
-		[Default Applications]
-		x-scheme-handler/http=browser.desktop
-		x-scheme-handler/https=browser.desktop
-		EOF
+        exec {browser}<<-'EOF'
+			#!/bin/bash
+			printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
+			EOF
+        exec {desktop}<<-EOF
+			[Desktop Entry]
+			Type=Application
+			Name=Browser
+			Exec=browser %U
+			MimeType=x-scheme-handler/http;x-scheme-handler/https;
+			EOF
+        exec {mimeapps}< <(cat <(grep -v '^x-scheme-handler/http' ~/.config/mimeapps.list 2>/dev/null) - <<-EOF
+			[Default Applications]
+			x-scheme-handler/http=browser.desktop
+			x-scheme-handler/https=browser.desktop
+			EOF
+        )
+        args+=(
+            --perms 755 --file $browser ~/.local/bin/browser
+            --file $desktop ~/.local/share/applications/browser.desktop
+            --file $mimeapps ~/.config/mimeapps.list
+            --setenv BROWSER browser
+        )
+    fi
+
+    exec {fd}> >(
+        read
+        kill $(jobs -p)
+        rm -r -- "$temp"
     )
-    args+=(
-        --perms 755 --file $browser ~/.local/bin/browser
-        --file $desktop ~/.local/share/applications/browser.desktop
-        --file $mimeapps ~/.config/mimeapps.list
-        --setenv BROWSER browser
-    )
+    args+=(--sync-fd $fd)
 fi
-
-exec {fd}> >(
-    cat
-    kill $(jobs -p)
-    rm -r -- "$temp"
-)
-args+=(--sync-fd $fd)
 
 (($#)) || set zsh
 exec bwrap ${!default_args[@]} "${args[@]}" "$@"
