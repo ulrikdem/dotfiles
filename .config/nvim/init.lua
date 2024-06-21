@@ -249,7 +249,16 @@ cmp.setup({
         ["<PageUp>"] = cmp.mapping.scroll_docs(-4),
     }),
     preselect = cmp.PreselectMode.None,
-    formatting = {expandable_indicator = false}, --- @diagnostic disable-line: missing-fields
+    formatting = { --- @diagnostic disable-line: missing-fields
+        expandable_indicator = false,
+        format = function(entry, item)
+            if entry.source.name == "buffer" or entry.source.name == "omni" then
+                item.kind = item.menu -- Remove uninformative "Text" kind
+            end
+            item.menu = nil
+            return item
+        end,
+    },
     window = {
         documentation = {winhighlight = "Normal:NormalFloat,Error:NormalFloat"},
     },
