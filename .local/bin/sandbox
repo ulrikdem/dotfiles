@@ -121,6 +121,11 @@ if ((${#policy[@]} || url_handler)); then
     args+=(--sync-fd $fd)
 fi
 
+if ((!url_handler)) && [[ -e ~/.config/mimeapps.list ]]; then
+    exec {mimeapps}<~/.config/mimeapps.list
+    args+=(--file $mimeapps ~/.config/mimeapps.list)
+fi
+
 (($#)) || set zsh
 exec bwrap ${!default_args[@]} "${args[@]}" "$@"
 
