@@ -288,8 +288,12 @@ map({"n", "x"}, "gra", lsp.buf.code_action)
 map("n", "grr", lsp.buf.references)
 map("n", "grq", lsp.buf.format)
 
-map("n", "yok", function() lsp.inlay_hint.enable(not lsp.inlay_hint.is_enabled({})) end)
-map("n", "yoe", function() vim.diagnostic.enable(not vim.diagnostic.is_enabled()) end)
+for k, v in pairs({k = {lsp.inlay_hint, "inlay hints"}, e = {vim.diagnostic, "diagnostics"}}) do
+    map("n", "yo" .. k, function()
+        v[1].enable(not v[1].is_enabled())
+        api.nvim_echo({{v[2] .. ": " .. (v[1].is_enabled() and "enabled" or "disabled")}}, false, {})
+    end)
+end
 
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
