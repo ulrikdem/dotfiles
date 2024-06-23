@@ -155,7 +155,7 @@ end
 
 -- Autocommands {{{1
 
-local augroup = api.nvim_create_augroup("init", {})
+local augroup = api.nvim_create_augroup("init.lua", {})
 
 api.nvim_create_autocmd("TextYankPost", {
     group = augroup,
@@ -313,11 +313,13 @@ end
 
 --- @class LspConfig: vim.lsp.ClientConfig
 --- @field sandbox? {args?: string[], read?: string[], write?: string[]}
+--- @field on_detach? fun(client: vim.lsp.Client, bufnr: integer)
 
 --- @param config LspConfig
 function _G.start_lsp(config)
     if fn.executable(config.cmd[1]) ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
         config.name = config.cmd[1]
+
         if config.sandbox then
             config.cmd = vim.iter({
                 -- LSP servers should check that the parent is still alive, else exit, so share the pid namspace
@@ -330,9 +332,11 @@ function _G.start_lsp(config)
             }):flatten():totable()
             for _, dir in pairs(config.sandbox.write or {}) do fn.mkdir(dir, "p") end
         end
+
         config.capabilities = vim.tbl_deep_extend("force",
             lsp.protocol.make_client_capabilities(),
             require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}))
+
         vim.lsp.start(config, {
             bufnr = 0,
             reuse_client = function(client, config)
@@ -343,13 +347,20 @@ function _G.start_lsp(config)
     end
 end
 
+--- @param client_id integer
+function _G.lsp_augroup(client_id)
+    return api.nvim_create_augroup("lsp_client_" .. client_id, {clear = false})
+end
+
 api.nvim_create_autocmd("LspAttach", {
     group = augroup,
     callback = function(ev)
         local bufnr = ev.buf
-        local augroup = api.nvim_create_augroup("init_lsp_" .. bufnr, {})
         local client = lsp.get_client_by_id(ev.data.client_id)
         if not client then return end
+
+        local augroup = lsp_augroup(client.id)
+        api.nvim_clear_autocmds({buffer = bufnr, group = augroup})
 
         local signature_triggers = vim.tbl_get(client.server_capabilities, "signatureHelpProvider", "triggerCharacters")
         if signature_triggers then
@@ -405,9 +416,14 @@ api.nvim_create_autocmd("LspAttach", {
         api.nvim_create_autocmd("LspDetach", {
             buffer = bufnr,
             group = augroup,
-            callback = function()
-                lsp.util.buf_clear_references(bufnr)
-                api.nvim_del_augroup_by_id(augroup)
+            callback = function(ev)
+                if ev.data.client_id ~= client.id then return end
+                if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
+                    lsp.util.buf_clear_references(bufnr)
+                end
+                --- @diagnostic disable-next-line: undefined-field
+                if client.config.on_detach then client.config.on_detach(client, bufnr) end
+                api.nvim_clear_autocmds({buffer = bufnr, group = augroup})
             end,
         })
     end,

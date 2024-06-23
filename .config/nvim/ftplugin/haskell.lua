@@ -59,18 +59,12 @@ start_lsp({
     -- https://haskell-language-server.readthedocs.io/en/stable/configuration.html
     settings = {},
 
-    on_attach = function(_, bufnr)
-        local augroup = vim.api.nvim_create_augroup("haskell_" .. bufnr, {})
+    on_attach = function(client, bufnr)
         refresh_codelens({buf = bufnr})
         vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
             buffer = bufnr,
-            group = augroup,
+            group = lsp_augroup(client.id),
             callback = refresh_codelens,
-        })
-        vim.api.nvim_create_autocmd("LspDetach", {
-            buffer = bufnr,
-            group = augroup,
-            callback = function() vim.api.nvim_del_augroup_by_id(augroup) end,
         })
     end,
 })

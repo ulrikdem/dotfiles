@@ -1,6 +1,7 @@
 -- This file is also sourced from the built-in cpp ftplugin
 
 local root_dir = find_root({"compile_commands.json", ".ccls"}, ".git")
+local completion_end_symbols = {">", '"', "/"}
 
 start_lsp({
     cmd = {"ccls"},
@@ -28,26 +29,20 @@ start_lsp({
 
     on_attach = function(_, bufnr)
         local cmp = require("cmp")
-        local keys = {">", '"', "/"}
-        for _, c in ipairs(keys) do
-            vim.keymap.set("i", c, function()
+        for _, s in ipairs(completion_end_symbols) do
+            vim.keymap.set("i", s, function()
                 local col = vim.api.nvim_win_get_cursor(0)[2]
-                if cmp.visible() and vim.api.nvim_get_current_line():sub(col, col) == c then
+                if cmp.visible() and vim.api.nvim_get_current_line():sub(col, col) == s then
                     return "<C-y>"
                 else
-                    return c
+                    return s
                 end
             end, {expr = true, remap = true, buffer = bufnr})
         end
-        vim.api.nvim_create_autocmd("LspDetach", {
-            buffer = bufnr,
-            group = vim.api.nvim_create_augroup("c_" .. bufnr, {}),
-            once = true,
-            callback = function()
-                for _, c in ipairs(keys) do
-                    vim.keymap.del("i", c, {buffer = bufnr})
-                end
-            end,
-        })
+    end,
+    on_detach = function(_, bufnr)
+        for _, s in ipairs(completion_end_symbols) do
+            vim.keymap.del("i", s, {buffer = bufnr})
+        end
     end,
 })
