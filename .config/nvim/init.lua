@@ -15,6 +15,8 @@ vim.cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
 
+o.inccommand = "split"
+
 o.ignorecase = true
 o.smartcase = true
 
