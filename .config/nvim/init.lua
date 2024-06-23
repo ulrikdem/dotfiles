@@ -173,7 +173,7 @@ api.nvim_create_autocmd("FileType", {
 -- Statusline {{{1
 
 o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)}%( %m%)"
-    .. "%= %{v:lua.statusline_diagnostics()}%c%V %l/%L "
+    .. "%= %{v:lua.statusline_lsp_progress()}%{v:lua.statusline_diagnostics()}%c%V %l/%L "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
 o.title = true
@@ -219,6 +219,31 @@ function _G.statusline_diagnostics()
 end
 
 api.nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
+
+local lsp_progress = {}
+function _G.statusline_lsp_progress()
+    local s = ""
+    for _, client in ipairs(lsp.get_clients({bufnr = 0})) do
+        if lsp_progress[client.id] then s = s .. lsp_progress[client.id] end
+    end
+    return s
+end
+
+local lsp_progress_timer = vim.uv.new_timer()
+api.nvim_create_autocmd("LspProgress", {
+    group = augroup,
+    callback = function(ev)
+        local t = ev.data.params.value
+        lsp_progress[ev.data.client_id] = t.kind ~= "end"
+            and ("[%s%s] "):format(t.percentage and t.percentage .. "% " or "", t.title)
+            or nil
+        if not lsp_progress_timer:is_active() then
+            lsp_progress_timer:start(16, 0, vim.schedule_wrap(function()
+                vim.cmd.redrawstatus({bang = true})
+            end))
+        end
+    end,
+})
 
 -- Completion {{{1
 
