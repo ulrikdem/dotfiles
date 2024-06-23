@@ -450,8 +450,8 @@ api.nvim_create_autocmd("LspAttach", {
                 if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
                     lsp.util.buf_clear_references(bufnr)
                 end
-                --- @diagnostic disable-next-line: undefined-field
-                if client.config.on_detach then client.config.on_detach(client, bufnr) end
+                local config = client.config --[[ @as LspConfig ]]
+                if config.on_detach then config.on_detach(client, bufnr) end
                 api.nvim_clear_autocmds({buffer = bufnr, group = augroup})
             end,
         })
