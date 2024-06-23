@@ -33,6 +33,7 @@ o.relativenumber = true
 o.numberwidth = 3
 
 o.scrolloff = 4
+o.sidescrolloff = 8
 o.smoothscroll = true
 
 o.linebreak = true
