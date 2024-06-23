@@ -60,6 +60,10 @@ function _G.foldtext()
         vim.v.foldend - vim.v.foldstart + 1)
 end
 
+-- This is usually autodetected from the COLORTERM variable,
+-- but ssh doesn't propagate it without configuration on the client and server
+if vim.env.SSH_TTY then o.termguicolors = true end
+
 o.clipboard = "unnamed"
 if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) then
     local osc52 = require("vim.ui.clipboard.osc52")
