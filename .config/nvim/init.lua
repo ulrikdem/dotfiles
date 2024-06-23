@@ -7,7 +7,8 @@ local fn = vim.fn
 local lsp = vim.lsp
 local map = vim.keymap.set
 local o = vim.o
-local uv = vim.uv --- @type table
+
+vim.uv = vim.uv --- @type table
 
 vim.cmd.runtime("old_init.vim")
 vim.cmd.colorscheme("ulrikdem")
@@ -386,7 +387,7 @@ api.nvim_create_autocmd("LspAttach", {
         end
 
         if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
-            local timer = uv.new_timer()
+            local timer = vim.uv.new_timer()
             api.nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
                 buffer = bufnr,
                 group = augroup,

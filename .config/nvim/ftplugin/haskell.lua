@@ -1,32 +1,64 @@
-local function refresh_codelens(ev)
-    local on_codelens = vim.lsp.codelens.on_codelens
-    function vim.lsp.codelens.on_codelens(err, result, ctx, config)
-        local count = #(result or {})
+local lsp = vim.lsp
+local pending_requests = {} --- @type table<integer, true>
+
+--- @param client vim.lsp.Client
+--- @param bufnr integer
+--- @param method string
+--- @param params table
+--- @param handler fun(result: any)
+local function cancellable_request(client, bufnr, method, params, handler)
+    local request_id
+    _, request_id = client.request(method, params, function(err, result)
+        if request_id and pending_requests[request_id] then
+            pending_requests[request_id] = nil
+            if err then
+                lsp.log.error(client.name, tostring(err))
+            else
+                handler(result)
+            end
+        end
+    end, bufnr)
+    if request_id then pending_requests[request_id] = true end
+end
+
+--- @param client vim.lsp.Client
+--- @param bufnr integer
+local function refresh_codelens(client, bufnr)
+    for request_id, _ in pairs(pending_requests) do client.cancel_request(request_id) end
+    pending_requests = {}
+
+    cancellable_request(client, bufnr, lsp.protocol.Methods.textDocument_codeLens, {
+        textDocument = lsp.util.make_text_document_params(bufnr),
+    }, function(lenses) --- @param lenses lsp.CodeLens[]
+        local count = #lenses
         if count == 0 then
-            on_codelens(err, result, ctx, config)
+            lsp.codelens.clear(client.id, bufnr)
             return
         end
-        local client = vim.lsp.get_client_by_id(ctx.client_id)
+
+        --- @param lens lsp.CodeLens
         local function resolved(lens)
             if lens.command then
                 lens.command.title = " " .. lens.command.title:gsub("^import%s[^(]*", ""):gsub("%s+", " ")
             end
             count = count - 1
-            if count == 0 then on_codelens(err, result, ctx, config) end
-        end
-        for i, lens in ipairs(result) do
-            if not lens.command and client then
-                client.request(vim.lsp.protocol.Methods.codeLens_resolve, lens, function(_, lens)
-                    result[i] = lens
-                    resolved(lens)
-                end, ctx.bufnr)
-            else
-                resolved(lens)
+            if count == 0 then
+                lsp.codelens.save(lenses, bufnr, client.id)
+                lsp.codelens.display(lenses, bufnr, client.id)
             end
         end
-    end
-    vim.lsp.codelens.refresh({bufnr = ev.buf})
-    vim.lsp.codelens.on_codelens = on_codelens
+
+        for i, lens in ipairs(lenses) do
+            if lens.command then
+                resolved(lens)
+            else
+                cancellable_request(client, bufnr, lsp.protocol.Methods.codeLens_resolve, lens, function(lens)
+                    lenses[i] = lens
+                    resolved(lenses[i])
+                end)
+            end
+        end
+    end)
 end
 
 local root_dir = find_root(
@@ -56,15 +88,21 @@ start_lsp({
     } or {
         read = existing_dirs("~/.ghcup"),
     },
+
     -- https://haskell-language-server.readthedocs.io/en/stable/configuration.html
     settings = {},
 
     on_attach = function(client, bufnr)
-        refresh_codelens({buf = bufnr})
+        refresh_codelens(client, bufnr)
+        local timer = vim.uv.new_timer()
         vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
             buffer = bufnr,
             group = lsp_augroup(client.id),
-            callback = refresh_codelens,
+            callback = function()
+                timer:start(100, 0, vim.schedule_wrap(function()
+                    refresh_codelens(client, bufnr)
+                end))
+            end,
         })
     end,
 })
