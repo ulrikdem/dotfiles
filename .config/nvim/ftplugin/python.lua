@@ -14,4 +14,16 @@ start_lsp({
             analysis = {diagnosticMode = "openFilesOnly"},
         },
     },
+
+    on_attach = function(client, bufnr)
+        vim.api.nvim_buf_create_user_command(bufnr, "OrganizeImports", function()
+            client.request(vim.lsp.protocol.Methods.workspace_executeCommand, {
+                command = "pyright.organizeimports",
+                arguments = {vim.uri_from_bufnr(bufnr)},
+            })
+        end, {})
+    end,
+    on_detach = function(_, bufnr)
+        vim.api.nvim_buf_del_user_command(bufnr, "OrganizeImports")
+    end,
 })
