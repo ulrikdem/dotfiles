@@ -130,8 +130,6 @@ endif
 
 Plug 'tpope/vim-eunuch'
 
-Plug 'lambdalisue/suda.vim'
-
 " Terminal {{{1
 
 autocmd vimrc TermOpen * setlocal nonumber norelativenumber matchpairs=
