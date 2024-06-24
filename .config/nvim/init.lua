@@ -365,7 +365,8 @@ function _G.start_lsp(config)
 
         config.capabilities = vim.tbl_deep_extend("force",
             lsp.protocol.make_client_capabilities(),
-            require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}))
+            require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}),
+            config.capabilities or {})
 
         vim.lsp.start(config, {
             bufnr = 0,
