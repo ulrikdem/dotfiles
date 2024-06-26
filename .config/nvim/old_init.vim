@@ -187,26 +187,6 @@ function! DeleteBuffer(name) abort
     return join(s:ListBuffers(), "\n")
 endfunction
 
-nnoremap <M-o> <Cmd>call <SID>BufferJump(-1, '<C-O>')<CR>
-nnoremap <M-i> <Cmd>call <SID>BufferJump(1, '<C-I>')<CR>
-function! s:BufferJump(dir, key) abort
-    let [l:jumps, l:current] = getjumplist()
-    let l:i = l:current + a:dir
-    let l:buf = bufnr()
-    for l:j in range(v:count1)
-        while get(l:jumps, l:i, #{bufnr: -1}).bufnr == l:buf
-            let l:i += a:dir
-        endwhile
-        let l:buf = get(l:jumps, l:i, #{bufnr: -2}).bufnr
-    endfor
-    while get(l:jumps, l:i + 1, #{bufnr: -1}).bufnr == l:buf
-        let l:i += 1
-    endwhile
-    if l:i >= 0 && l:i < len(l:jumps)
-        execute 'normal' ((l:i - l:current) * a:dir).a:key
-    endif
-endfunction
-
 " Quickfix {{{1
 
 autocmd vimrc FileType qf call s:InitQuickfixBuffer()
