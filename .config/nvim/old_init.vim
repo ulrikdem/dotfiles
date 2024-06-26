@@ -166,7 +166,6 @@ let g:fzf_layout = #{
         \ highlight: 'WinSeparator',
     \ },
 \ }
-autocmd vimrc FileType fzf mode
 
 autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>ff
     \ '<Cmd>FZF '.fnameescape(fnamemodify(getcwd(), ':~')).'<CR>'
