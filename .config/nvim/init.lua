@@ -173,6 +173,20 @@ api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
+api.nvim_create_autocmd("TermOpen", {
+    group = augroup,
+    callback = function()
+        vim.wo[0][0].number = false
+        vim.wo[0][0].relativenumber = false
+        vim.bo.matchpairs = ""
+        vim.cmd.startinsert()
+        api.nvim_create_autocmd("BufEnter", {
+            buffer = 0,
+            callback = function() vim.cmd.startinsert() end,
+        })
+    end,
+})
+
 api.nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "sh,zsh",
