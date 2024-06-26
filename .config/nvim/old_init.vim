@@ -312,16 +312,9 @@ function! s:ToggleGitStatus() abort
     endif
     Git
     wincmd L
-    60 wincmd |
+    75 wincmd |
     set winfixwidth
     wincmd =
-endfunction
-
-autocmd vimrc User Plug_vim_fugitive autocmd vimrc FileType gitcommit call s:InitCommitWindow()
-function! s:InitCommitWindow() abort
-    wincmd L
-    execute &numberwidth + &textwidth 'wincmd |'
-    set winfixwidth
 endfunction
 
 nnoremap <Leader>td <Cmd>call <SID>ToggleDiff()<CR>
