@@ -8,7 +8,8 @@ local lsp = vim.lsp
 local map = vim.keymap.set
 local o = vim.o
 
-vim.uv = vim.uv --- @type table
+-- vim.uv is annotated with type uv, but uv is not defined (https://github.com/neovim/neovim/issues/26268)
+--- @alias uv table
 
 vim.cmd.runtime("old_init.vim")
 vim.cmd.colorscheme("ulrikdem")
