@@ -52,7 +52,6 @@ o.listchars = "tab:→ ,trail:·,nbsp:·"
 vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff")
 
 o.fillchars = "foldopen:▾,foldclose:▸"
-o.foldcolumn = "auto:9"
 o.foldtext = "v:lua.foldtext()"
 function _G.foldtext()
     return ("%s %s (%d lines) "):format(
