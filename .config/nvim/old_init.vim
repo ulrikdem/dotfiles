@@ -133,6 +133,11 @@ Plug 'tpope/vim-eunuch'
 " Terminal {{{1
 
 autocmd vimrc TermOpen * setlocal nonumber norelativenumber matchpairs=
+autocmd vimrc TermOpen * startinsert
+autocmd vimrc WinEnter * if &buftype ==# 'terminal' | startinsert | endif
+
+nnoremap <Leader>ot <Cmd>terminal<CR>
+nnoremap <expr> <Leader>oT '<Cmd>edit '.fnameescape('term://'.expand('%:p:h').'//'.&shell).'<CR>'
 
 " File navigation {{{1
 

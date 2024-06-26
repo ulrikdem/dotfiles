@@ -108,13 +108,17 @@ o.wildcharm = 9
 
 for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
     map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
+    -- Terminal mappings are separate, because counts don't work with <C-\><C-n>
+    map("t", ("<M-%s>"):format(dir), ("<C-\\><C-n><C-w><%s>"):format(dir))
 end
 
 map("n", "<C-Tab>", "gt")
 map("n", "<C-S-Tab>", "gT")
+map("t", "<C-Tab>", "<C-\\><C-n>gt")
+map("t", "<C-S-Tab>", "<C-\\><C-n>gT")
 
 for i = 1, 10 do
-    map("n", ("<M-%d>"):format(i % 10), i .. "gt")
+    map({"n", "t"}, ("<M-%d>"):format(i % 10), ("<C-\\><C-n>%dgt"):format(i))
 end
 
 map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
