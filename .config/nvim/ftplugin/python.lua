@@ -1,12 +1,19 @@
 local root_dir = find_root(
-    {"pyrightconfig.json", "pyproject.toml"},
+    {"pyrightconfig.json", "pyproject.toml", ".venv"},
     {"setup.cfg", "setup.py", "requirements.txt"},
     ".git")
+
+local venv = vim.env.VIRTUAL_ENV
+    -- Use the real path if .venv is a symlink, because venvs are not portable
+    or root_dir and vim.uv.fs_realpath(root_dir .. "/.venv")
 
 start_lsp({
     cmd = {"pyright-langserver", "--stdio"},
     root_dir = root_dir,
-    sandbox = {read = {root_dir, vim.env.VIRTUAL_ENV}},
+    sandbox = {
+        read = {root_dir, venv},
+        args = venv and {"venv", venv},
+    },
 
     -- https://microsoft.github.io/pyright/#/settings
     settings = { -- This table can't be empty, otherwise pyright only works without root_dir

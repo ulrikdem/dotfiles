@@ -433,11 +433,11 @@ function _G.start_lsp(config)
             config.cmd = vim.iter({
                 -- LSP servers should check that the parent is still alive, else exit, so share the pid namspace
                 "sandbox", "-spid",
-                config.sandbox.args or {},
                 -- Use tbl_values to filter out nils
                 vim.tbl_map(function(p) return "-r" .. p end, vim.tbl_values(config.sandbox.read or {})),
                 vim.tbl_map(function(p) return "-w" .. p end, vim.tbl_values(config.sandbox.write or {})),
-                "--", config.cmd,
+                config.sandbox.args or {},
+                config.cmd,
             }):flatten():totable()
             for _, dir in pairs(config.sandbox.write or {}) do fn.mkdir(dir, "p") end
         end
