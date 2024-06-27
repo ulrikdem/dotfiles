@@ -88,10 +88,10 @@ if ((${#policy[@]} || url_handler)); then
         done &>/dev/null &
         args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
 
-        exec {browser}<<-'EOF'
+        exec {browser}<<-'BASH'
 			#!/bin/bash
 			printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
-			EOF
+			BASH
         exec {desktop}<<-EOF
 			[Desktop Entry]
 			Type=Application
