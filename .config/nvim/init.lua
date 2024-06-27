@@ -166,6 +166,12 @@ end
 
 local augroup = api.nvim_create_augroup("init.lua", {})
 
+api.nvim_create_autocmd("FileType", {
+    group = augroup,
+    callback = function() pcall(vim.treesitter.start) end
+})
+vim.treesitter.language.register("bash", "sh")
+
 api.nvim_create_autocmd("TextYankPost", {
     group = augroup,
     callback = function()
