@@ -29,20 +29,6 @@ endtry
 command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
 
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
-autocmd vimrc VimResized * wincmd =
-
-autocmd vimrc BufEnter * call s:ResizeHelp()
-function! s:ResizeHelp() abort
-    if exists('w:checked_help')
-        return
-    endif
-    let w:checked_help = v:true
-    if &buftype ==# 'help'
-        wincmd L
-        80 wincmd |
-        set winfixwidth
-    endif
-endfunction
 
 " Misc mappings {{{1
 
@@ -302,10 +288,6 @@ function! s:ToggleGitStatus() abort
         return
     endif
     Git
-    wincmd L
-    75 wincmd |
-    set winfixwidth
-    wincmd =
 endfunction
 
 nnoremap <Leader>td <Cmd>call <SID>ToggleDiff()<CR>

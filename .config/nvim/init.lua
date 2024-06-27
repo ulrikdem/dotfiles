@@ -187,6 +187,31 @@ api.nvim_create_autocmd("TermOpen", {
     end,
 })
 
+api.nvim_create_autocmd("VimResized", {
+    group = augroup,
+    callback = function() vim.cmd.wincmd("=") end,
+})
+
+local function make_sidebar()
+    if o.winfixwidth then return end
+    vim.cmd.wincmd("L")
+    api.nvim_win_set_width(0, 78)
+    o.winfixwidth = true
+    vim.cmd.wincmd("=")
+end
+
+api.nvim_create_autocmd("BufWinEnter", {
+    group = augroup,
+    callback = function()
+        if o.buftype == "help" then make_sidebar() end
+    end,
+})
+api.nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "fugitive",
+    callback = function() make_sidebar() end,
+})
+
 api.nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "sh,zsh",
