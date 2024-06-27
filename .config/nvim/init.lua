@@ -192,10 +192,11 @@ api.nvim_create_autocmd("VimResized", {
     callback = function() vim.cmd.wincmd("=") end,
 })
 
+local sidebar_width = 78
 local function make_sidebar()
-    if o.winfixwidth then return end
-    vim.cmd.wincmd("L")
-    api.nvim_win_set_width(0, 78)
+    if o.columns <= sidebar_width * 2 or o.winfixwidth then return end
+    vim.cmd.wincmd("H")
+    api.nvim_win_set_width(0, sidebar_width)
     o.winfixwidth = true
     vim.cmd.wincmd("=")
 end
@@ -208,9 +209,10 @@ api.nvim_create_autocmd("BufWinEnter", {
 })
 api.nvim_create_autocmd("FileType", {
     group = augroup,
-    pattern = "fugitive",
+    pattern = "man,fugitive",
     callback = function() make_sidebar() end,
 })
+vim.env.MANWIDTH = sidebar_width + 1
 
 api.nvim_create_autocmd("FileType", {
     group = augroup,
