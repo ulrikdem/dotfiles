@@ -254,6 +254,8 @@ function _G.tabline()
     return s
 end
 
+--- @param winid integer
+--- @param absolute? boolean
 function _G.statusline_path(winid, absolute)
     local name = api.nvim_buf_get_name(api.nvim_win_get_buf(winid))
     if name == "" or o.buftype == "nofile" then
@@ -279,7 +281,7 @@ end
 
 api.nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
 
-local lsp_progress = {}
+local lsp_progress = {} --- @type table<integer, string?>
 function _G.statusline_lsp_progress()
     local s = ""
     for _, client in ipairs(lsp.get_clients({bufnr = 0})) do
@@ -308,6 +310,7 @@ api.nvim_create_autocmd("LspProgress", {
 
 local cmp = require("cmp")
 
+--- @param fallback fun()
 local function maybe_complete(fallback)
     if api.nvim_get_current_line():sub(1, api.nvim_win_get_cursor(0)[2]):match("[^%s]") then
         cmp.complete()

@@ -1,5 +1,5 @@
 local lsp = vim.lsp
-local pending_requests = {} --- @type table<integer, true>
+local pending_requests = {} --- @type table<integer, true?>
 
 --- @param client vim.lsp.Client
 --- @param bufnr integer
@@ -67,6 +67,8 @@ local root_dir = find_root(
     function(n) return n == "package.yaml" or n:match(".%.cabal$") end,
     ".git")
 
+--- @param ... string
+--- @return string[]
 local function existing_dirs(...)
     return vim.iter({...})
         :map(vim.fs.normalize)
