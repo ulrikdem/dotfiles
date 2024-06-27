@@ -401,6 +401,19 @@ vim.diagnostic.config({
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
 
+api.nvim_create_autocmd("InsertEnter", {
+    group = augroup,
+    callback = function()
+        if lsp.inlay_hint.is_enabled({}) then
+            lsp.inlay_hint.enable(false)
+            api.nvim_create_autocmd("InsertLeave", {
+                once = true,
+                callback = function() lsp.inlay_hint.enable() end,
+            })
+        end
+    end,
+})
+
 --- @param ... string | string[] | fun(name: string, path: string): boolean
 --- @return string?
 function _G.find_root(...)
