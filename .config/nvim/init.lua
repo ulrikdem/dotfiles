@@ -11,6 +11,24 @@ local o = vim.o
 -- vim.uv is annotated with type uv, but uv is not defined (https://github.com/neovim/neovim/issues/26268)
 --- @alias uv table
 
+--- @class vim.api.keyset.create_autocmd
+-- The original definition types these fields as any
+-- (which prevents inferring the type of the callback's parameter)
+--- @diagnostic disable: duplicate-doc-field
+--- @field group? string | integer
+--- @field pattern? string | string[]
+--- @field callback? fun(args: autocmd_args): boolean? | string
+--- @diagnostic enable: duplicate-doc-field
+
+--- @class autocmd_args
+--- @field event string
+--- @field match string
+--- @field file string
+--- @field buf integer
+--- @field id integer
+--- @field group? integer
+--- @field data any
+
 vim.cmd.runtime("old_init.vim")
 vim.cmd.colorscheme("ulrikdem")
 
@@ -186,17 +204,11 @@ api.nvim_create_autocmd("TermOpen", {
         vim.wo[0][0].relativenumber = false
         vim.bo.matchpairs = ""
         vim.cmd.startinsert()
-        api.nvim_create_autocmd("BufEnter", {
-            buffer = 0,
-            callback = function() vim.cmd.startinsert() end,
-        })
+        api.nvim_create_autocmd("BufEnter", {buffer = 0, command = "startinsert"})
     end,
 })
 
-api.nvim_create_autocmd("VimResized", {
-    group = augroup,
-    callback = function() vim.cmd.wincmd("=") end,
-})
+api.nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
 local sidebar_width = 78
 local function make_sidebar()
@@ -215,17 +227,17 @@ api.nvim_create_autocmd("BufWinEnter", {
 })
 api.nvim_create_autocmd("FileType", {
     group = augroup,
-    pattern = "man,fugitive",
+    pattern = {"man", "fugitive"},
     callback = function() make_sidebar() end,
 })
 vim.env.MANWIDTH = sidebar_width + 1
 
 api.nvim_create_autocmd("FileType", {
     group = augroup,
-    pattern = "sh,zsh",
-    callback = function(ev)
+    pattern = {"sh", "zsh"},
+    callback = function(args)
         -- The default :ShKeywordPrg and :ZshKeywordPrg are broken in nvim
-        vim.bo[ev.buf].keywordprg = ":Man"
+        vim.bo[args.buf].keywordprg = ":Man"
     end
 })
 
@@ -293,9 +305,9 @@ end
 local lsp_progress_timer = vim.uv.new_timer()
 api.nvim_create_autocmd("LspProgress", {
     group = augroup,
-    callback = function(ev)
-        local t = ev.data.params.value
-        lsp_progress[ev.data.client_id] = t.kind ~= "end"
+    callback = function(args)
+        local t = args.data.params.value
+        lsp_progress[args.data.client_id] = t.kind ~= "end"
             and ("[%s%s] "):format(t.percentage and t.percentage .. "% " or "", t.title)
             or nil
         if not lsp_progress_timer:is_active() then
@@ -439,9 +451,9 @@ end
 
 api.nvim_create_autocmd("LspAttach", {
     group = augroup,
-    callback = function(ev)
-        local bufnr = ev.buf
-        local client = lsp.get_client_by_id(ev.data.client_id)
+    callback = function(args)
+        local bufnr = args.buf
+        local client = lsp.get_client_by_id(args.data.client_id)
         if not client then return end
 
         local augroup = lsp_augroup(client.id)
@@ -475,8 +487,8 @@ api.nvim_create_autocmd("LspAttach", {
             api.nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
                 buffer = bufnr,
                 group = augroup,
-                callback = function(ev)
-                    if ev.event == "BufLeave" or fn.mode():match("[^nc]") then
+                callback = function(args)
+                    if args.event == "BufLeave" or fn.mode():match("[^nc]") then
                         lsp.util.buf_clear_references(bufnr)
                     elseif fn.mode() == "n" then
                         timer:start(100, 0, vim.schedule_wrap(function()
@@ -501,8 +513,8 @@ api.nvim_create_autocmd("LspAttach", {
         api.nvim_create_autocmd("LspDetach", {
             buffer = bufnr,
             group = augroup,
-            callback = function(ev)
-                if ev.data.client_id ~= client.id then return end
+            callback = function(args)
+                if args.data.client_id ~= client.id then return end
                 if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
                     lsp.util.buf_clear_references(bufnr)
                 end
