@@ -6,7 +6,7 @@ local settings = {
     },
 }
 
-local catalog_path = vim.fn.stdpath("cache") .. "/schemastore.json"
+local catalog_path = vim.fn.stdpath("data") .. "/schemastore.json"
 local function read_catalog()
     settings.json.schemas = vim.json.decode(table.concat(vim.fn.readfile(catalog_path))).schemas
 end
