@@ -4,6 +4,7 @@ pushf = push --force-with-lease
 
 [commit]
 cleanup = scissors
+verbose = true
 
 [diff]
 algorithm = histogram
