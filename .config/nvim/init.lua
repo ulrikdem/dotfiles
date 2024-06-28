@@ -8,9 +8,6 @@ local lsp = vim.lsp
 local map = vim.keymap.set
 local o = vim.o
 
--- vim.uv is annotated with type uv, but uv is not defined (https://github.com/neovim/neovim/issues/26268)
---- @alias uv table
-
 --- @class vim.api.keyset.create_autocmd
 -- The original definition types these fields as any
 -- (which prevents inferring the type of the callback's parameter)
