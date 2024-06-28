@@ -464,7 +464,7 @@ api.nvim_create_autocmd("LspAttach", {
                         lnum = lnum - 1
                         line = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, true)[1]
                     end
-                    if line and line:match(pattern) then
+                    if line:match(pattern) then
                         client.request(
                             lsp.protocol.Methods.textDocument_signatureHelp,
                             lsp.util.make_position_params(0, client.offset_encoding),
