@@ -8,24 +8,6 @@ local lsp = vim.lsp
 local map = vim.keymap.set
 local o = vim.o
 
---- @class vim.api.keyset.create_autocmd
--- The original definition types these fields as any
--- (which prevents inferring the type of the callback's parameter)
---- @diagnostic disable: duplicate-doc-field
---- @field group? string | integer
---- @field pattern? string | string[]
---- @field callback? fun(args: autocmd_args): boolean? | string
---- @diagnostic enable: duplicate-doc-field
-
---- @class autocmd_args
---- @field event string
---- @field match string
---- @field file string
---- @field buf integer
---- @field id integer
---- @field group? integer
---- @field data any
-
 vim.cmd.runtime("old_init.vim")
 vim.cmd.colorscheme("ulrikdem")
 
@@ -227,7 +209,7 @@ api.nvim_create_autocmd("FileType", {
     pattern = {"man", "fugitive"},
     callback = function() make_sidebar() end,
 })
-vim.env.MANWIDTH = sidebar_width + 1
+vim.env.MANWIDTH = tostring(sidebar_width + 1)
 
 api.nvim_create_autocmd("FileType", {
     group = augroup,
