@@ -3,13 +3,14 @@
 -- vim: foldmethod=marker
 
 local api = vim.api
+local cmd = vim.cmd
 local fn = vim.fn
 local lsp = vim.lsp
 local map = vim.keymap.set
 local o = vim.o
 
-vim.cmd.runtime("old_init.vim")
-vim.cmd.colorscheme("ulrikdem")
+cmd.runtime("old_init.vim")
+cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
 
@@ -122,8 +123,8 @@ map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
 
 -- Remap do and dp to use a motion
 _G.diff_bufnr = 0
-function _G.diffget_operator() vim.cmd.diffget({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
-function _G.diffput_operator() vim.cmd.diffput({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
+function _G.diffget_operator() cmd.diffget({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
+function _G.diffput_operator() cmd.diffput({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
 map("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
 map("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
@@ -182,7 +183,7 @@ api.nvim_create_autocmd("TermOpen", {
         vim.wo[0][0].number = false
         vim.wo[0][0].relativenumber = false
         vim.bo.matchpairs = ""
-        vim.cmd.startinsert()
+        cmd.startinsert()
         api.nvim_create_autocmd("BufEnter", {buffer = 0, command = "startinsert"})
     end,
 })
@@ -192,10 +193,10 @@ api.nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 local sidebar_width = 78
 local function make_sidebar()
     if o.columns <= sidebar_width * 2 or o.winfixwidth then return end
-    vim.cmd.wincmd("H")
+    cmd.wincmd("H")
     api.nvim_win_set_width(0, sidebar_width)
     o.winfixwidth = true
-    vim.cmd.wincmd("=")
+    cmd.wincmd("=")
 end
 
 api.nvim_create_autocmd("BufWinEnter", {
@@ -291,7 +292,7 @@ api.nvim_create_autocmd("LspProgress", {
             or nil
         if not lsp_progress_timer:is_active() then
             lsp_progress_timer:start(16, 0, vim.schedule_wrap(function()
-                vim.cmd.redrawstatus({bang = true})
+                cmd.redrawstatus({bang = true})
             end))
         end
     end,
@@ -426,7 +427,7 @@ function _G.start_lsp(config)
             require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}),
             config.capabilities or {})
 
-        vim.lsp.start(config, {
+        lsp.start(config, {
             bufnr = 0,
             reuse_client = function(client, config)
                 -- The default considers nil root_dirs to be distinct, resulting in a new client for each buffer
