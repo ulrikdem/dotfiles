@@ -26,8 +26,6 @@ endtry
 
 " Misc settings {{{1
 
-command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
-
 autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
 
 " Misc mappings {{{1
@@ -487,7 +485,6 @@ if executable('gdb')
             endif
 
             silent! delcommand Watch
-            command! -nargs=1 -complete=file Source -1 tabnew | source <args> | bwipeout
         endfunction
 
         Program

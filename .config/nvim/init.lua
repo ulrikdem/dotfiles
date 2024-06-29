@@ -14,43 +14,52 @@ cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
 
-o.inccommand = "split"
+local defaults = setmetatable({}, {
+    __newindex = function(_, k, v)
+        -- Don't override local options that have been changed from the global value
+        (o[k] == vim.go[k] and o or vim.go)[k] = v
+    end,
+})
+-- Convince language server this has the same type as vim.o
+if false then defaults = o end
 
-o.ignorecase = true
-o.smartcase = true
+defaults.inccommand = "split"
 
-o.wildignorecase = true
-o.wildmode = "longest:full,full"
+defaults.ignorecase = true
+defaults.smartcase = true
 
-o.completeopt = "menuone,noselect,popup"
-o.dictionary = "/usr/share/dict/words"
+defaults.wildignorecase = true
+defaults.wildmode = "longest:full,full"
+
+defaults.completeopt = "menuone,noselect,popup"
+defaults.dictionary = "/usr/share/dict/words"
 
 vim.opt.shortmess:append("Ic")
 
-o.cursorline = true
-o.cursorlineopt = "number"
+defaults.cursorline = true
+defaults.cursorlineopt = "number"
 
-o.relativenumber = true
-o.numberwidth = 3
+defaults.relativenumber = true
+defaults.numberwidth = 3
 
-o.scrolloff = 4
-o.sidescrolloff = 8
-o.smoothscroll = true
+defaults.scrolloff = 4
+defaults.sidescrolloff = 8
+defaults.smoothscroll = true
 
-o.linebreak = true
-o.breakindent = true
+defaults.linebreak = true
+defaults.breakindent = true
 
-o.tabstop = 4
-o.shiftwidth = 0
-o.expandtab = true
+defaults.tabstop = 4
+defaults.shiftwidth = 0
+defaults.expandtab = true
 
-o.list = true
-o.listchars = "tab:→ ,trail:·,nbsp:·"
+defaults.list = true
+defaults.listchars = "tab:→ ,trail:·,nbsp:·"
 
 vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff")
 
-o.fillchars = "foldopen:▾,foldclose:▸"
-o.foldtext = "v:lua.foldtext()"
+defaults.fillchars = "foldopen:▾,foldclose:▸"
+defaults.foldtext = "v:lua.foldtext()"
 function _G.foldtext()
     return ("%s %s (%d lines) "):format(
         fn["repeat"]("·", vim.v.foldlevel * 2),
@@ -60,9 +69,9 @@ end
 
 -- This is usually autodetected from the COLORTERM variable,
 -- but ssh doesn't propagate it without configuration on the client and server
-if vim.env.SSH_TTY then o.termguicolors = true end
+if vim.env.SSH_TTY then defaults.termguicolors = true end
 
-o.clipboard = "unnamed"
+defaults.clipboard = "unnamed"
 if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) then
     local osc52 = require("vim.ui.clipboard.osc52")
     local function paste()
@@ -76,10 +85,10 @@ if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) then
     }
 end
 
-o.mouse = "a"
-o.mousemodel = "extend"
+defaults.mouse = "a"
+defaults.mousemodel = "extend"
 
-o.timeout = false
+defaults.timeout = false
 
 -- Mappings {{{1
 
@@ -102,7 +111,7 @@ map("c", "/", function()
     return fn.pumvisible() ~= 0 and fn.getcmdline():sub(1, fn.getcmdpos() - 1):match("/$")
         and "<C-y><Tab>" or "/"
 end, {expr = true})
-o.wildcharm = 9
+defaults.wildcharm = 9
 
 for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
     map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
@@ -223,15 +232,15 @@ api.nvim_create_autocmd("FileType", {
 
 -- Statusline {{{1
 
-o.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)}%( %m%)"
+defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)}%( %m%)"
     .. "%= %{v:lua.statusline_lsp_progress()}%{v:lua.statusline_diagnostics()}%c%V %l/%L "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
-o.title = true
-o.titlestring = "%{v:lua.statusline_path(0, v:true)} - nvim"
-o.titlelen = 0
+defaults.title = true
+defaults.titlestring = "%{v:lua.statusline_path(0, v:true)} - nvim"
+defaults.titlelen = 0
 
-o.tabline = "%!v:lua.tabline()"
+defaults.tabline = "%!v:lua.tabline()"
 
 function _G.tabline()
     local tabs = api.nvim_list_tabpages()
