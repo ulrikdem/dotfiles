@@ -406,7 +406,8 @@ api.nvim_create_autocmd("InsertEnter", {
 --- @param ... string | string[] | fun(name: string, path: string): boolean
 --- @return string?
 function _G.find_root(...)
-    return vim.iter({...}):fold(nil, function(root, marker) return root or vim.fs.root(0, marker) end)
+    return vim.fs.root(0, ".lsp_root")
+        or vim.iter({...}):fold(nil, function(root, marker) return root or vim.fs.root(0, marker) end)
 end
 
 --- @class LspConfig: vim.lsp.ClientConfig
