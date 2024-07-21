@@ -12,7 +12,7 @@ start_lsp({
     root_dir = root_dir,
     sandbox = {
         read = {root_dir, venv},
-        args = venv and {"venv", venv},
+        args = venv and {"-e", "PATH=" .. venv .. "/bin:" .. vim.env.PATH},
     },
 
     -- https://microsoft.github.io/pyright/#/settings
