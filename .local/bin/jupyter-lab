@@ -1,2 +1,3 @@
 #!/bin/bash
-BROWSER=webview exec /usr/bin/jupyter-lab "$@"
+[[ -v SANDBOX && -v VIRTUAL_ENV ]] && python -m ipykernel install --user
+BROWSER=webview exec /usr/bin/jupyter-lab -y "$@"

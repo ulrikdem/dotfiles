@@ -1,6 +1,25 @@
 #!/bin/bash
-set -e
-export VIRTUAL_ENV=$(realpath -e -- "$1")
+
+arg=${1:-.}
 shift
-(($#)) || set zsh
-PATH=$VIRTUAL_ENV/bin:$PATH exec "$@"
+
+if [[ -f $arg/pyvenv.cfg ]]; then
+    venv=$arg
+elif [[ -d $arg/.venv ]]; then
+    venv=$arg/.venv
+else
+    echo "error: $arg contains neither pyvenv.cfg nor .venv" >&2
+    exit 1
+fi
+
+export VIRTUAL_ENV=$(realpath -- "$venv")
+
+[[ $1 = jupyter-lab ]] && set sandbox -xur ~/.jupyter/lab/user-settings "$@"
+
+if [[ $1 = sandbox ]]; then
+    shift
+    exec sandbox -w "$arg" -w "$VIRTUAL_ENV" -e PATH="$VIRTUAL_ENV/bin:$PATH" "$@"
+else
+    (($#)) || set zsh
+    PATH=$VIRTUAL_ENV/bin:$PATH exec "$@"
+fi
