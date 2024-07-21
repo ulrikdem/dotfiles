@@ -1,2 +1,4 @@
 .ccls-cache/
+.lsp_root
+.venv/
 compile_commands.json
