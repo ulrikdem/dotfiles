@@ -39,7 +39,7 @@ local function refresh_codelens(client, bufnr)
         --- @param lens lsp.CodeLens
         local function resolved(lens)
             if lens.command then
-                lens.command.title = " " .. lens.command.title:gsub("^import%s[^(]*", ""):gsub("%s+", " ")
+                lens.command.title = (" " .. lens.command.title):gsub("^ import%s[^(]*", "")
             end
             count = count - 1
             if count == 0 then
