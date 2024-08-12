@@ -1,2 +1,2 @@
 #!/bin/bash
-loginctl lock-session $(loginctl --no-legend list-sessions | grep "^[0-9]\+ $UID " | cut -d' ' -f1)
+loginctl lock-session $(loginctl list-sessions -j | jq -r ".[] | select(.uid == $UID and .class == \"user\") | .session")
