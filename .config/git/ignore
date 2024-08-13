@@ -1,6 +1,6 @@
 .ccls-cache/
 .lsp_root
-.venv/
+.venv
 compile_commands.json
 *_vimtex.pdf
 *_vimtex.synctex.gz
