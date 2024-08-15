@@ -6,7 +6,6 @@ start_lsp({
     root_dir = root_dir,
     sandbox = {
         args = {"-n"},
-        read = {root_dir},
-        write = {root_dir .. "/target", vim.fs.normalize("~/.cargo")},
+        write = {root_dir, vim.fs.normalize("~/.cargo")},
     },
 })

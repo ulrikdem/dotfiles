@@ -90,6 +90,7 @@ start_lsp({
     } or {
         read = existing_dirs("~/.ghcup"),
     },
+    offset_encoding = "utf-32",
 
     -- https://haskell-language-server.readthedocs.io/en/stable/configuration.html
     settings = {},
