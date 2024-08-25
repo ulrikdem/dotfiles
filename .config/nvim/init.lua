@@ -311,6 +311,10 @@ api.nvim_create_autocmd("LspProgress", {
 
 local cmp = require("cmp")
 
+function _G.get_listed_bufnrs()
+    return vim.tbl_map(function(info) return info.bufnr end, fn.getbufinfo({buflisted = 1}))
+end
+
 --- @param fallback fun()
 local function maybe_complete(fallback)
     if api.nvim_get_current_line():sub(1, api.nvim_win_get_cursor(0)[2]):match("[^%s]") then
@@ -324,7 +328,7 @@ cmp.setup({
     sources = {
         {name = "nvim_lsp"},
         {name = "path"},
-        {name = "buffer", group_index = 1, option = {get_bufnrs = api.nvim_list_bufs}},
+        {name = "buffer", group_index = 1, option = {get_bufnrs = get_listed_bufnrs}},
     },
     mapping = cmp.mapping.preset.insert({
         ["<Tab>"] = cmp.mapping(function(fallback)
