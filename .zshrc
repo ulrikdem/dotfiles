@@ -238,6 +238,7 @@ function git-files-wrapper {
 compdef "_arguments -s -S : -{n,x,u,R,W} '*-'{r,w,d,e}'+: :_default' '*-'{b,B}'+:' '*-s+:namespace:(cgroup ipc net pid user uts)' '(-): :{_command_names -e}' '*:: :_normal'" sandbox
 compdef "_arguments ':directory:_files -/' ': :{_command_names -e}' '*:: :_precommand'" venv
 compdef _precommand vpn
+compdef "_arguments ':subcommand:(toggle undo edit bar)'" work
 
 # Aliases and Functions {{{1
 
