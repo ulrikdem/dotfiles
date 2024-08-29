@@ -371,7 +371,9 @@ function! s:CleanTexFiles() abort
     for l:ext in ['_vimtex.pdf', '_vimtex.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm', '.vrb']
         call delete(fnamemodify(b:vimtex.tex, ':r').l:ext)
     endfor
-    call delete(fnamemodify(b:vimtex.tex, ':h').'/comment.cut')
+    for l:file in ['comment.cut', 'pdfa.xmpi']
+        call delete(fnamemodify(b:vimtex.tex, ':h').'/'.l:file)
+    endfor
     call delete(fnamemodify(b:vimtex.tex, ':h').'/_minted-'.fnamemodify(b:vimtex.tex, ':t:r'), 'rf')
 endfunction
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
