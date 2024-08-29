@@ -75,6 +75,9 @@ def undo():
         pass
     file.truncate(file.tell() - len(line) + max(line.find(b"/"), 0))
 
+def edit():
+    os.execlp("nvim", "nvim", "+", path)
+
 def bar():
     print(flush=True)
     try:
@@ -110,7 +113,9 @@ match sys.argv[1:]:
         toggle()
     case ["undo"]:
         undo()
+    case ["edit"]:
+        edit()
     case ["bar"]:
         bar()
     case _:
-        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|undo|bar]")
+        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|undo|edit|bar]")
