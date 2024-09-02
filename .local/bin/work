@@ -10,28 +10,34 @@ import sys
 path = os.path.expanduser("~/.work/current")
 
 def compute_totals():
-    totals = defaultdict(lambda: [timedelta(), timedelta()])
+    totals = defaultdict(lambda: [timedelta(), timedelta(), timedelta()])
     active = False
     for line_num, line in enumerate(open(path)):
         if active:
             return None, False, f"line {line_num}: Missing stop time"
         try:
-            active = "/" not in line
-            if active:
-                start = datetime.fromisoformat(line.strip())
-                stop = datetime.now()
+            if "!" in line:
+                week, hours = line.strip().split("!")
+                week = datetime.fromisoformat(week)
+                week = date.fromisocalendar(*week.isocalendar()[:2], day=7)
+                totals[week][2] += timedelta(hours=float(hours))
             else:
-                start, stop = line.strip().split("/")
-                start = datetime.fromisoformat(start)
-                try:
-                    stop = datetime.combine(start, time.fromisoformat(stop))
-                except ValueError:
-                    stop = datetime.fromisoformat(stop)
+                active = "/" not in line
+                if active:
+                    start = datetime.fromisoformat(line.strip())
+                    stop = datetime.now()
+                else:
+                    start, stop = line.strip().split("/")
+                    start = datetime.fromisoformat(start)
+                    try:
+                        stop = datetime.combine(start, time.fromisoformat(stop))
+                    except ValueError:
+                        stop = datetime.fromisoformat(stop)
+                delta = stop - start
+                totals[start.date()][0] += delta
+                totals[date.fromisocalendar(*start.isocalendar()[:2], day=7)][1] += delta
         except ValueError as error:
             return None, False, f"line {line_num + 1}: {error}"
-        delta = stop - start
-        totals[start.date()][0] += delta
-        totals[date.fromisocalendar(*start.isocalendar()[:2], day=7)][1] += delta
     return totals, active, None
 
 def format_time(time: timedelta):
@@ -42,16 +48,20 @@ def report():
     totals, _, error = compute_totals()
     if not totals:
         sys.exit(f"error: {error}")
-    line = "---------------------"
+    line = "---------------------------"
     print(line)
-    for d, [daily, weekly] in sorted(totals.items()):
+    overtime = timedelta()
+    for d, [daily, weekly, target] in sorted(totals.items()):
         if daily:
             print(f"{d}\t{format_time(daily):>5}")
-        if weekly:
-            print(f"{d:%G-W%V}\t{format_time(weekly):>5}\n{line}")
+        if weekly or target:
+            print(f"{d:%G-W%V}\t{format_time(weekly):>5}/{format_time(target)}\n{line}")
+            overtime += weekly - target
+    sign, overtime = ("+", overtime) if overtime >= timedelta() else ("-", -overtime)
+    print(f"{sign + format_time(overtime):>21}")
 
-def toggle():
-    line = b"/"
+def append_open():
+    line = b""
     try:
         file = open(path, "r+b")
         for line in file:
@@ -59,7 +69,12 @@ def toggle():
     except FileNotFoundError:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         file = open(path, "ab")
-    if b"/" in line:
+    incomplete = line != b"" and b"/" not in line and b"!" not in line
+    return file, line, incomplete
+
+def toggle():
+    file, line, incomplete = append_open()
+    if not incomplete:
         file.write(f"{datetime.now().isoformat(timespec='minutes')}\n".encode())
     else:
         start = datetime.fromisoformat(line.strip().decode())
@@ -69,11 +84,16 @@ def toggle():
         file.seek(len(line.rstrip()) - len(line), os.SEEK_END)
         file.write(f"/{stop.isoformat(timespec='minutes')}\n".encode())
 
+def target(hours: float):
+    file, line, incomplete = append_open()
+    if incomplete:
+        file.seek(-len(line), os.SEEK_END)
+    file.write(f"{date.today():%G-W%V}!{hours:g}\n".encode())
+    if incomplete:
+        file.write(line)
+
 def undo():
-    file = open(path, "r+b")
-    line = b""
-    for line in file:
-        pass
+    file, line, _ = append_open()
     file.truncate(file.tell() - len(line) + max(line.find(b"/"), 0))
 
 def edit():
@@ -114,6 +134,8 @@ match sys.argv[1:]:
         report()
     case ["toggle"]:
         toggle()
+    case ["target", hours]:
+        target(float(hours))
     case ["undo"]:
         undo()
     case ["edit"]:
@@ -121,4 +143,4 @@ match sys.argv[1:]:
     case ["bar"]:
         bar()
     case _:
-        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|undo|edit|bar]")
+        sys.exit(f"usage: {os.path.basename(sys.argv[0])} [toggle|target <hours>|undo|edit|bar]")
