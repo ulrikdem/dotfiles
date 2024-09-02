@@ -34,13 +34,13 @@ def compute_totals():
         totals[date.fromisocalendar(*start.isocalendar()[:2], day=7)][1] += delta
     return totals, active, None
 
-def format_time(time):
+def format_time(time: timedelta):
     minutes = time // timedelta(minutes=1)
     return f"{minutes // 60}:{minutes % 60:02}"
 
 def report():
-    totals, active, error = compute_totals()
-    if error:
+    totals, _, error = compute_totals()
+    if not totals:
         sys.exit(f"error: {error}")
     line = "---------------------"
     print(line)
@@ -71,6 +71,7 @@ def toggle():
 
 def undo():
     file = open(path, "r+b")
+    line = b""
     for line in file:
         pass
     file.truncate(file.tell() - len(line) + max(line.find(b"/"), 0))
@@ -86,25 +87,27 @@ def bar():
         inotify.add_watch(os.path.dirname(path), flags.CREATE | flags.CLOSE_WRITE | flags.MOVED_TO | flags.MOVED_FROM | flags.DELETE)
     except (ModuleNotFoundError, FileNotFoundError):
         sleep(1e9)
+        return
     basename = os.path.basename(path)
-    modified = True
+    total = timedelta()
     while True:
-        if modified:
-            try:
-                totals, active, error = compute_totals()
-            except FileNotFoundError:
-                active = False
-            last_update = datetime.now()
-            if active:
-                total = sorted(filter(lambda x: x[1][0], totals.items()))[-1][1][0]
-        now = datetime.now()
-        if active or error:
-            prefix, suffix = ("<fc=red3>", "</fc>") if error else ("", " " + format_time(total + (now - last_update)))
-            print(f" {prefix}<fn=1>󱃐</fn>{suffix} <fc=gray17>│</fc>", flush=True)
-        else:
-            print(flush=True)
-        events = inotify.read(timeout=60_000 - now.second * 1000 - now.microsecond // 1000 if active else None, read_delay=100)
-        modified = any(e.name == basename for e in events)
+        try:
+            totals, active, error = compute_totals()
+        except FileNotFoundError:
+            totals, active, error = None, False, None
+        last_update = datetime.now()
+        if totals and active:
+            total = sorted(filter(lambda x: x[1][0], totals.items()))[-1][1][0]
+        while True:
+            now = datetime.now()
+            if active or error:
+                prefix, suffix = ("<fc=red3>", "</fc>") if error else ("", " " + format_time(total + (now - last_update)))
+                print(f" {prefix}<fn=1>󱃐</fn>{suffix} <fc=gray17>│</fc>", flush=True)
+            else:
+                print(flush=True)
+            events = inotify.read(timeout=60_000 - now.second * 1000 - now.microsecond // 1000 if active else None, read_delay=100)
+            if any(e.name == basename for e in events):
+                break
 
 match sys.argv[1:]:
     case []:
