@@ -64,7 +64,7 @@ main = xmonad . conf =<< getTextHeight
 conf textHeight = overrideConfig
     $ withUrgencyHook NoUrgencyHook $ setEwmhActivateHook doAskUrgent $ ewmh
     $ dynamicSBs (statusBar textHeight) $ docks def
-        { startupHook = setDefaultCursor xC_left_ptr
+        { startupHook = setDefaultCursor xC_left_ptr <> checkKeymap (conf textHeight) (keymap textHeight)
         , handleEventHook = workspaceEventHook
         , manageHook = floatManageHook textHeight
         , logHook = floatLogHook
