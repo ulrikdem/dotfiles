@@ -16,8 +16,11 @@ args=(
     --dev /dev
     --dir /tmp
     --dir /var/tmp
+    --dir /run
     --symlink /run /var/run
-    --bind /tmp/sandbox-share ~/sandbox-share
+    --bind /tmp/sandbox-share /tmp/sandbox-share
+    --symlink /tmp/sandbox-share ~/sandbox-share
+    --dir "$PWD"
 )
 mkdir -pm 700 /tmp/sandbox-share
 
