@@ -138,7 +138,6 @@ let g:fzf_layout = #{
         \ height: 0.25,
         \ yoffset: 1,
         \ border: 'top',
-        \ highlight: 'WinSeparator',
     \ },
 \ }
 

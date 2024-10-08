@@ -8,7 +8,7 @@ path=(~/.local/bin $path)
 type less >/dev/null && export PAGER=less
 
 type fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L --strip-cwd-prefix'
-export FZF_DEFAULT_OPTS='--color 16,info:8 --bind ctrl-w:backward-kill-word,alt-bs:unix-word-rubout,tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all,change:top'
+export FZF_DEFAULT_OPTS='--color 16,info:gray,border:white,separator:black --bind ctrl-w:backward-kill-word,alt-bs:unix-word-rubout,tab:toggle-out,shift-tab:toggle-in,ctrl-space:toggle-all,change:top'
 
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
 
