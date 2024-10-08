@@ -22,7 +22,7 @@ local highlights = {
     DiffAdd = {link = "DiffText"},
     DiffText = {bg = bg .. "Blue"},
     DiffChange = {bg = bg .. "Gray3"},
-    DiffDelete = {bg = bg .. "Gray3", fg = bg .. "Gray3"},
+    DiffDelete = {bg = bg .. "Gray1", fg = bg .. "Gray1"},
 
     -- These links are defined in the diff syntax, but not in the git syntax
     diffAdded = {link = "Added"},
