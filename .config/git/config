@@ -1,5 +1,6 @@
 [alias]
 c = commit
+d = diff
 l = log --graph --pretty='%C(auto)%as %h%d %s %Cblue(%an)'
 pushf = push --force-with-lease
 s = status -sb
