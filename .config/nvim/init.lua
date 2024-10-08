@@ -131,12 +131,16 @@ end
 map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
 
 -- Remap do and dp to use a motion
-_G.diff_bufnr = 0
-function _G.diffget_operator() cmd.diffget({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
-function _G.diffput_operator() cmd.diffput({diff_bufnr, range = {fn.line("'["), fn.line("']")}}) end
+_G.diff_cmd, _G.diff_bufnr = "", 0
+function _G.diff_operator()
+    cmd[diff_cmd]({
+        diff_bufnr ~= 0 and diff_bufnr or nil,
+        range = {fn.line("'["), fn.line("']")},
+    })
+end
 -- The use of <Cmd> clears the count so that it doesn't affect the motion
-map("n", "do", "<Cmd>set operatorfunc=v:lua.diffget_operator | lua diff_bufnr = vim.v.count<CR>g@")
-map("n", "dp", "<Cmd>set operatorfunc=v:lua.diffput_operator | lua diff_bufnr = vim.v.count<CR>g@")
+map("n", "do", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffget', vim.v.count<CR>g@")
+map("n", "dp", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffput', vim.v.count<CR>g@")
 -- Map doo and dpp to the original behavior
 map("n", "doo", "do")
 map("n", "dpp", "dp")
