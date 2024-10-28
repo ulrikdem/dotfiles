@@ -46,7 +46,7 @@ setopt combining_chars
 # Parameters and Modules {{{1
 
 HISTFILE=~/.zsh_history
-HISTSIZE=10000
+HISTSIZE=100000
 SAVEHIST=$HISTSIZE
 
 KEYTIMEOUT=1
