@@ -190,6 +190,17 @@ api.nvim_create_autocmd("TextYankPost", {
     end,
 })
 
+api.nvim_create_autocmd("BufWritePre", {
+    group = augroup,
+    callback = function(args)
+        local dir = vim.fs.dirname(args.match)
+        if args.match:match("^/") and fn.isdirectory(dir) == 0 then
+            fn.mkdir(dir, "p")
+            print("created directory " .. dir .. "\n")
+        end
+    end,
+})
+
 api.nvim_create_autocmd("TermOpen", {
     group = augroup,
     callback = function()
