@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=doi-open
+Exec=doi-open %u
+MimeType=x-scheme-handler/doi;

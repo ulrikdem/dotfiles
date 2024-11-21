@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=arxiv-open
+Exec=arxiv-open %u
+MimeType=x-scheme-handler/arXiv;x-scheme-handler/arxiv;
