@@ -23,14 +23,14 @@ hints.alphabet = "ntesiroahdufyw"
 
 [[hints.enabled]]
 hyperlinks = true
-regex = '(file|https?)://[[:graph:]--"<>\\^`{|}]+'
+regex = '(file|https?)://[[:graph:]--"<>\\^`{|}]+|doi:10(\.[0-9]+)+/[^\pZ\pC]+|ar[Xx]iv:([0-9]{4}\.[0-9]{4,5}|[a-z-]+/[0-9]{7})'
 post_processing = true
 command = "xdg-open"
 mouse = { enabled = true, mods = "Control|Shift" }
 binding = { key = "O", mods = "Control|Shift" }
 
 [[hints.enabled]]
-regex = '(file|https?)://[[:graph:]--"<>\\^`{|}]+'
+regex = '(file|https?)://[[:graph:]--"<>\\^`{|}]+|doi:10(\.[0-9]+)+/[^\pZ\pC]+|ar[Xx]iv:([0-9]{4}\.[0-9]{4,5}|[a-z-]+/[0-9]{7})'
 post_processing = true
 action = "Paste"
 binding = { key = "U", mods = "Control|Shift" }
