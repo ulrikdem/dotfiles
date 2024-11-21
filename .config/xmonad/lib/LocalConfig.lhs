@@ -14,7 +14,7 @@ leaderMap =
     , ("S-f", "firefox --private-window", False)
     , ("h", "htop", True)
     , ("i", "ipython", True)
-    , ("m", "xdotool click --clearmodifiers 3 key --clearmodifiers l; sleep 0.1; mpv -- \"$(xsel)\"", False)
+    , ("m", "xdotool click --clearmodifiers 3; sleep 0.1; xdotool key --clearmodifiers l; sleep 0.1; mpv -- \"$(xsel)\"", False)
     , ("n", "newsboat", True)
     , ("p", "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class Alacritty,xmonad-float -T pulsemixer -e pulsemixer", False)
     , ("t", "thunderbird", False)
