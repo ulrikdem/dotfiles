@@ -1,47 +1,47 @@
 [alias]
-c = commit
-d = diff
-l = log --graph --pretty='%C(auto)%as %h%d %s %Cblue(%an)'
-pushf = push --force-with-lease
-s = status -sb
+    c = commit
+    d = diff
+    l = log --graph --pretty='%C(auto)%as %h%d %s %Cblue(%an)'
+    pushf = push --force-with-lease
+    s = status -sb
 
 [commit]
-cleanup = scissors
-verbose = true
+    cleanup = scissors
+    verbose = true
 
 [diff]
-algorithm = histogram
-tool = nvimdiff
+    algorithm = histogram
+    tool = nvimdiff
 
 [fetch]
-prune = true
+    prune = true
 
 [interactive]
-singleKey = true
+    singleKey = true
 
 [log]
-date = iso
+    date = iso
 
 [merge]
-autoStash = true
-conflictStyle = zdiff3
-tool = fugitive
+    autoStash = true
+    conflictStyle = zdiff3
+    tool = fugitive
 
 [mergetool]
-keepBackup = false
+    keepBackup = false
 
 [mergetool "fugitive"]
-cmd = nvim $MERGED +Gdiffsplit!
+    cmd = nvim $MERGED +Gdiffsplit!
 
 [rebase]
-autoStash = true
-autoSquash = true
+    autoStash = true
+    autoSquash = true
 
 [url "https://github.com/"]
-insteadOf = github:
+    insteadOf = github:
 
 [includeIf "gitdir:~/.dotfiles.git"]
-path = dotfiles
+    path = dotfiles
 
 [include]
-path = user
+    path = user
