@@ -270,6 +270,8 @@ fi
 (($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 (($+commands[g++])) && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
 
+(($+commands[nsenter])) && alias sandbox-enter='sudo nsenter -aew -S follow -G follow -t'
+
 (($+commands[sudo])) && alias sudo='sudo '
 (($+commands[xargs])) && alias xargs='xargs '
 
