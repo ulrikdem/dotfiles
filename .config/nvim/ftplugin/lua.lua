@@ -5,10 +5,8 @@ local in_runtime = vim.iter(runtime):any(function(path)
 end)
 
 if in_runtime then
-    -- Even with LSP, this allows opening help with K in visual mode, or
-    -- <C-x><C-o> to complete modules the server doesn't know about (e.g. vim.uv)
+    -- Allow opening help with K in visual mode
     vim.bo.keywordprg = ":help"
-    vim.bo.omnifunc = "v:lua.vim.lua_omnifunc"
 end
 
 -- https://luals.github.io/wiki/settings/
