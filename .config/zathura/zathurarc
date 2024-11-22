@@ -1,3 +1,4 @@
+set database null
 set double-click-follow false
 set guioptions ""
 set recolor-keephue true

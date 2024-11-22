@@ -1,11 +1,8 @@
 #!/bin/bash
 prefix=()
-if [[ ! -v SANDBOX ]]; then
-    prefix=(sandbox -xuRB 'org.pwmt.zathura.*' -w /run/cups/cups.sock)
-    if [[ $1 = -n ]]; then
-        prefix+=(-r ~/.cache/vimtex/nvim_servernames.log -w "$2")
-        [[ -r ${5%pdf}synctex.gz ]] && prefix+=(-r "${5%pdf}synctex.gz")
-        shift 2
-    fi
+if [[ $1 = --no-sandbox ]]; then
+    shift
+elif [[ ! -v SANDBOX ]]; then
+    prefix=(sandbox -xuRw /run/cups/cups.sock)
 fi
 exec "${prefix[@]}" /usr/bin/zathura "$@"
