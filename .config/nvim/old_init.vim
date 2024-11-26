@@ -359,20 +359,11 @@ endfor
 autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex,bib call s:InitVimtexBuffer()
 function! s:InitVimtexBuffer() abort
     nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
-    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR><Cmd>call <SID>CleanTexFiles()<CR>
-    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR><Cmd>call <SID>CleanTexFiles()<CR>
+    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR>
+    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR>
     nmap <buffer> <Leader>mv <Plug>(vimtex-view)
     nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
     setlocal foldlevel=9
-endfunction
-function! s:CleanTexFiles() abort
-    for l:ext in ['_vimtex.pdf', '_vimtex.synctex.gz', '.bbl', '.run.xml', '.nav', '.snm', '.vrb']
-        call delete(fnamemodify(b:vimtex.tex, ':r').l:ext)
-    endfor
-    for l:file in ['comment.cut', 'pdfa.xmpi']
-        call delete(fnamemodify(b:vimtex.tex, ':h').'/'.l:file)
-    endfor
-    call delete(fnamemodify(b:vimtex.tex, ':h').'/_minted-'.fnamemodify(b:vimtex.tex, ':t:r'), 'rf')
 endfunction
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
