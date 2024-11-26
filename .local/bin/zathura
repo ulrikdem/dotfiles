@@ -1,8 +1,18 @@
 #!/bin/bash
+shopt -s extglob
+
+synctex() {
+    for arg in "$@"; do
+        case $arg in
+            --synctex-forward?(=*)|--synctex-editor-command?(=*)|-x*) return 0;;
+            --) return 1;;
+        esac
+    done
+    return 1
+}
+
 prefix=()
-if [[ $1 = --no-sandbox ]]; then
-    shift
-elif [[ ! -v SANDBOX ]]; then
+if [[ ! -v SANDBOX ]] && ! synctex "$@"; then
     prefix=(sandbox -xuRw /run/cups/cups.sock)
 fi
 exec "${prefix[@]}" /usr/bin/zathura "$@"

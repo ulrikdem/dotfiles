@@ -348,7 +348,6 @@ let g:vimtex_indent_on_ampersands = v:false
 let g:vimtex_indent_bib_enabled = v:false
 if executable('zathura')
     let g:vimtex_view_method = 'zathura'
-    let g:vimtex_view_zathura_options = '--no-sandbox'
 endif
 let g:vimtex_view_use_temp_files = v:true
 let g:vimtex_view_forward_search_on_start = v:false
