@@ -2,5 +2,3 @@
 .lsp_root
 .venv
 compile_commands.json
-*_vimtex.pdf
-*_vimtex.synctex.gz
