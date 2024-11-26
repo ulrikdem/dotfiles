@@ -4,5 +4,6 @@ $silent = 1;
 $aux_dir = 'aux';
 # latexmk will only clean up empty directories, so we need to match all files in aux/ as well to be removed first
 # Account for another level of nesting, because minted uses a subdirectory of aux/
-# The %R case is not intended to match anything, but is necessary so latexmk doesn't interpret the whole pattern as an extension suffixed to %R
-$clean_ext = 'aux/{,*,*/*,%R} %R_vimtex.{pdf,synctex.gz}';
+# The aux/%R case is necessary so latexmk doesn't interpret the whole pattern as an extension suffixed to %R
+# Also remove synctex files (which are otherwise only removed in a full clean) and vimtex's temporary output files
+$clean_ext = 'aux/{,*,*/*,%R} {,_}%R.synctex{,.gz} _%R.pdf';
