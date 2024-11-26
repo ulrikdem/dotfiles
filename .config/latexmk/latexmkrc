@@ -1,3 +1,6 @@
+$pdf_mode = 1;
+$silent = 1;
+
 $aux_dir = 'aux';
 # latexmk will only clean up empty directories, so we need to match all files in aux/ as well to be removed first
 # Account for another level of nesting, because minted uses a subdirectory of aux/
