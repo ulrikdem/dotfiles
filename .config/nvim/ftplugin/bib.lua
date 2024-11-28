@@ -1,3 +1,5 @@
+vim.cmd.runtime("ftplugin/tex.lua")
+
 -- By default only format (including lowercasing keywords and consistently using curly braces)
 -- and apply reliable small fixes (month abbreviations and dashes in page ranges)
 local formatprg = "bibtex-tidy --blank-lines --no-align --no-remove-dupe-fields --no-escape --curly --months"

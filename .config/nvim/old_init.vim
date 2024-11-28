@@ -54,6 +54,8 @@ let g:wordmotion_mappings = {
 Plug 'tpope/vim-sleuth'
 
 Plug 'godlygeek/tabular'
+autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
+autocmd vimrc User Plug_tabular autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
 
 " Command execution {{{1
 
@@ -342,31 +344,6 @@ if executable('cargo')
 endif
 
 autocmd vimrc FileType mail,markdown,tex setlocal spell
-
-Plug 'lervag/vimtex'
-let g:vimtex_indent_on_ampersands = v:false
-let g:vimtex_indent_bib_enabled = v:false
-if executable('zathura')
-    let g:vimtex_view_method = 'zathura'
-endif
-let g:vimtex_view_use_temp_files = v:true
-let g:vimtex_view_forward_search_on_start = v:false
-let g:vimtex_fold_enabled = v:true
-let g:vimtex_fold_types = {}
-for s:key in ['envs', 'env_options', 'items', 'cmd_single', 'cmd_single_opt', 'cmd_multi', 'cmd_addplot']
-    let g:vimtex_fold_types[s:key] = #{enabled: v:false}
-endfor
-autocmd vimrc User Plug_vimtex autocmd vimrc FileType tex,bib call s:InitVimtexBuffer()
-function! s:InitVimtexBuffer() abort
-    nnoremap <buffer> <Leader>mm <Cmd>silent update \| VimtexCompileSS<CR>
-    nnoremap <buffer> <Leader>mc <Cmd>VimtexClean<CR>
-    nnoremap <buffer> <Leader>mC <Cmd>VimtexClean!<CR>
-    nmap <buffer> <Leader>mv <Plug>(vimtex-view)
-    nmap <buffer> <Leader>tc <Plug>(vimtex-toc-open)
-    setlocal foldlevel=9
-endfunction
-autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
-autocmd vimrc User Plug_tabular autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
 
 autocmd vimrc FileType dot setlocal commentstring=//%s
 if executable('dot')
