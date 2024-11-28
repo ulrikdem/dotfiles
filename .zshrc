@@ -235,7 +235,8 @@ function git-files-wrapper {
     fi
 }
 
-compdef "_arguments -s -S : -{n,x,u,R,W} '*-'{r,w,d,e}'+: :_default' '*-'{b,B}'+:' '*-s+:namespace:(cgroup ipc net pid user uts)' '*::: :{_normal -p sandbox}'" sandbox
+function _sandbox { [[ $words[1] = -- ]] && _bwrap || _normal -p sandbox }
+compdef "_arguments -s : -{n,x,u,R,W} '*-'{r,w,d,e}'+: :_default' '*-'{b,B}'+:' '*-s+:namespace:(cgroup ipc net pid user uts)' '*::: :_sandbox'" sandbox
 compdef "_arguments ':directory:_files -/' '*::: :{_normal -p venv}'" venv
 compdef _precommand vpn
 compdef "_arguments ':subcommand:(toggle target undo edit bar)'" work

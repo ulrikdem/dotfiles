@@ -60,8 +60,8 @@ while getopts ns:xuRWr:w:d:e:b:B: opt; do
         e) args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxuRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]...' \
-            '[-e var=value] [-b busname]... [-B busname]... [-s namespace]... [command [arg]...]' >&2; exit 1;;
+        ?) echo 'sandbox [-nxuRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-e var=value]' \
+            '[-b busname]... [-B busname]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
