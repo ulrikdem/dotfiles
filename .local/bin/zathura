@@ -2,7 +2,7 @@
 shopt -s extglob
 
 synctex() {
-    for arg in "$@"; do
+    for arg; do
         case $arg in
             --synctex-forward?(=*)|--synctex-editor-command?(=*)|-x*) return 0;;
             --) return 1;;
@@ -13,6 +13,9 @@ synctex() {
 
 prefix=()
 if [[ ! -v SANDBOX ]] && ! synctex "$@"; then
-    prefix=(sandbox -xuRw /run/cups/cups.sock)
+    prefix=(sandbox -xuw /run/cups/cups.sock)
+    for arg; do
+        [[ -e $arg && $(realpath -s -- "$arg") != /usr/* ]] && prefix+=(-r "$arg")
+    done
 fi
 exec "${prefix[@]}" /usr/bin/zathura "$@"
