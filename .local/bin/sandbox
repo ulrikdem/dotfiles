@@ -31,14 +31,41 @@ while read -rd '' path; do
     args+=(--ro-bind-try ~/"$path" ~/"$path")
 done < <(git --git-dir ~/.dotfiles.git ls-files -z)
 
-add-path() {
-    args+=(--$1 "${OPTARG%%=*}" "$(realpath -ms -- "${OPTARG#*=}")")
+add-mount() {
+    local src=${OPTARG%%=*} srces dest
+    readarray -td: srces < <(printf %s: "$src")
+    [[ $OPTARG = *=* ]] && dest=${OPTARG#*=} || dest=${srces[0]}
+    dest=$(realpath -s -- "$dest") || exit 1
+    if ((${#srces[@]} == 1)); then
+        if [[ $opt = r ]]; then
+            args+=(--ro-bind "$src" "$dest")
+        elif [[ -z $src ]]; then
+            args+=(--tmpfs "$dest")
+        elif [[ $(realpath -s -- "$src") = /dev/* ]]; then
+            args+=(--dev-bind "$src" "$dest")
+        else
+            args+=(--bind "$src" "$dest")
+        fi
+    else
+        for src in "${srces[@]::${#srces[@]}-1}"; do
+            args+=(--overlay-src "$src")
+        done
+        src=${srces[-1]}
+        if [[ $opt = r ]]; then
+            args+=(--overlay-src "$src" --ro-overlay "$dest")
+        elif [[ -z $src ]]; then
+            args+=(--tmp-overlay "$dest")
+        else
+            mkdir -p -- "$src"/{upper,work}
+            args+=(--overlay "$src"/{upper,work} "$dest")
+        fi
+    fi
 }
 
 bind_args=
 policy=()
 url_handler=0
-while getopts ns:xuRWr:w:d:e:b:B: opt; do
+while getopts ns:xuRWr:w:e:b:B: opt; do
     case $opt in
         n) unset default_args[--unshare-net];;
         s) unset default_args["--unshare-$OPTARG"];;
@@ -54,14 +81,12 @@ while getopts ns:xuRWr:w:d:e:b:B: opt; do
         u) url_handler=1;;
         R) bind_args=ro-bind;;
         W) bind_args=bind;;
-        r) add-path ro-bind;;
-        w) add-path bind;;
-        d) add-path dev-bind-try;;
+        [rw]) add-mount;;
         e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxuRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-e var[=value]]' \
-            '[-b busname]... [-B busname]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
+        ?) echo 'sandbox [-nxuRW] [-r src-path[:overlay]...[=dest-path]]... [-w src-path[:overlay]...[=dest-path]]...' \
+            '[-e var[=value]] [-b busname]... [-B busname]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
