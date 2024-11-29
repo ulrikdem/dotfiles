@@ -57,10 +57,10 @@ while getopts ns:xuRWr:w:d:e:b:B: opt; do
         r) add-path ro-bind;;
         w) add-path bind;;
         d) add-path dev-bind-try;;
-        e) args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}");;
+        e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxuRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-e var=value]' \
+        ?) echo 'sandbox [-nxuRW] [-r path[=path]]... [-w path[=path]]... [-d path[=path]]... [-e var[=value]]' \
             '[-b busname]... [-B busname]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
     esac
 done
