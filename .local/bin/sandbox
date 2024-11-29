@@ -32,9 +32,9 @@ while read -rd '' path; do
 done < <(git --git-dir ~/.dotfiles.git ls-files -z)
 
 add-mount() {
-    local src=${OPTARG%%=*} srces dest
+    local src=${OPTARG##*=} srces dest
     readarray -td: srces < <(printf %s: "$src")
-    [[ $OPTARG = *=* ]] && dest=${OPTARG#*=} || dest=${srces[0]}
+    [[ $OPTARG = *=* ]] && dest=${OPTARG%=*} || dest=${srces[0]}
     dest=$(realpath -s -- "$dest") || exit 1
     if ((${#srces[@]} == 1)); then
         if [[ $opt = r ]]; then
@@ -85,7 +85,7 @@ while getopts ns:xuRWr:w:e:b:B: opt; do
         e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxuRW] [-r src-path[:overlay]...[=dest-path]]... [-w src-path[:overlay]...[=dest-path]]...' \
+        ?) echo 'sandbox [-nxuRW] [-r [dest-path=]src-path[:overlay]...]... [-w [dest-path]=src-path[:overlay]...]...' \
             '[-e var[=value]] [-b busname]... [-B busname]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
     esac
 done
