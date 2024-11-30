@@ -235,8 +235,56 @@ function git-files-wrapper {
     fi
 }
 
-function _sandbox { [[ $words[1] = -- ]] && _bwrap || _normal -p sandbox }
-compdef "_arguments -s : -{n,x,u,R,W} '*-'{r,w,d,e}'+: :_default' '*-'{b,B}'+:' '*-s+:namespace:(cgroup ipc net pid user uts)' '*::: :_sandbox'" sandbox
+function _sandbox {
+    local curcontext=$curcontext state state_descr line
+    local -A opt_args
+    _arguments -s -C : -{n,x,u,R,W} '*-'{r,w}'+: :->mount' '*-e: :->var' '*-'{b,B}'+: :->dbus' \
+        '*-s+:namespace:(cgroup ipc net pid user uts)' '*::: :->command' && return
+    case $state in
+        mount)
+            if compset -S 1 '=*'; then
+                _files
+            else
+                compset -P '*='
+                if [[ $PREFIX$SUFFIX = *:* ]]; then
+                    _dir_list
+                else
+                    _files -r '/=: \t\n\-'
+                fi
+            fi;;
+        var)
+            if ! compset -P 1 '*='; then
+                local arg
+                compset -S '=*' || arg=-qS=
+                _parameters -g '*export*' $arg
+            else
+                _default
+            fi;;
+        dbus)
+            local name names=(
+                $(qdbus org.freedesktop.DBus /org/freedesktop/DBus ListNames | grep '^[^:]')
+                $(qdbus org.freedesktop.DBus /org/freedesktop/DBus ListActivatableNames)
+            ) 2>/dev/null
+            local completions=($names)
+            for name in $names; do
+                while [[ $name = *.* ]]; do
+                    name=${name%.*}
+                    completions+=("$name.*")
+                done
+            done
+            _describe 'dbus name' completions;;
+        command)
+            if [[ $words[1] = -- ]]; then
+                _bwrap
+            else
+                _normal -p sandbox
+            fi;;
+        *)
+            return 1;;
+    esac
+}
+
+compdef _sandbox sandbox
 compdef "_arguments ':directory:_files -/' '*::: :{_normal -p venv}'" venv
 compdef _precommand vpn
 compdef "_arguments ':subcommand:(toggle target undo edit bar)'" work
