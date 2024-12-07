@@ -6,7 +6,7 @@ if not g.vimtex_configured then
     g.vimtex_view_use_temp_files = true
     g.vimtex_doc_handlers = {"vimtex#doc#handlers#texdoc"}
     g.vimtex_ui_method = {confirm = "legacy", input = "legacy", select = "legacy"}
-    g.vimtex_toc_config = {show_help = false, layers = {"content"}, hide_line_numbers = false, fold_enable = true}
+    g.vimtex_toc_config = {split_pos = "vertical", show_help = false, layers = {"content"}, hide_line_numbers = false, fold_enable = true}
     g.vimtex_fold_enabled = true
     g.vimtex_indent_enabled = false
     g.vimtex_indent_bib_enabled = false

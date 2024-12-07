@@ -23,6 +23,9 @@ local defaults = setmetatable({}, {
 -- Convince language server this has the same type as vim.o
 if false then defaults = o end
 
+defaults.splitbelow = true
+defaults.splitright = true
+
 defaults.inccommand = "split"
 
 defaults.ignorecase = true
