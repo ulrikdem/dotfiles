@@ -14,7 +14,7 @@ source_keys = """
 """.split()
 
 blocks = [
-    ("defcfg", "fallthrough", "true"),
+    ("defcfg", "fallthrough", "true", "implicit-around", "around-only"),
     ("defsrc", *source_keys),
 ]
 sparse_layers = set()
