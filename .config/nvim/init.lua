@@ -217,7 +217,7 @@ api.nvim_create_autocmd("TermOpen", {
 
 api.nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
-local sidebar_width = 78
+local sidebar_width = 80
 local function make_sidebar()
     if o.columns <= sidebar_width * 2 or o.winfixwidth then return end
     cmd.wincmd("L")
