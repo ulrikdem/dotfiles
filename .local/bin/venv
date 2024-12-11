@@ -18,7 +18,7 @@ export VIRTUAL_ENV=$(realpath -- "$venv")
 
 if [[ $1 = sandbox ]]; then
     shift
-    exec sandbox -w "$arg" -w "$VIRTUAL_ENV" -e PATH="$VIRTUAL_ENV/bin:$PATH" "$@"
+    exec sandbox -w ":$arg" -w ":$VIRTUAL_ENV" -e PATH="$VIRTUAL_ENV/bin:$PATH" "$@"
 else
     (($#)) || set zsh
     PATH=$VIRTUAL_ENV/bin:$PATH exec "$@"

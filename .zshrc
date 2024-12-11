@@ -242,7 +242,7 @@ function _sandbox {
         '*-s+:namespace:(cgroup ipc net pid user uts)' '*::: :->command' && return
     case $state in
         mount)
-            if compset -S 1 '=*'; then
+            if compset -P : || compset -S 1 '=*'; then
                 _files
             else
                 compset -P '*='
