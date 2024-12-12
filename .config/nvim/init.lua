@@ -433,6 +433,15 @@ function _G.find_root(...)
         or vim.iter({...}):fold(nil, function(root, marker) return root or vim.fs.root(0, marker) end)
 end
 
+api.nvim_create_user_command("CdRoot", function()
+    local root_dir = find_root(".git") or vim.fs.dirname(api.nvim_buf_get_name(0))
+    for _, client in pairs(lsp.get_clients({bufnr = 0})) do
+        root_dir = client.root_dir or root_dir
+    end
+    print(root_dir)
+    api.nvim_set_current_dir(root_dir)
+end, {})
+
 --- @class LspConfig: vim.lsp.ClientConfig
 --- @field sandbox? {args?: string[], read?: string[], write?: string[]}
 --- @field on_detach? fun(client: vim.lsp.Client, bufnr: integer)
