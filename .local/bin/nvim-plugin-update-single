@@ -4,7 +4,7 @@ set -e
 git fetch origin
 [[ $(git rev-parse FETCH_HEAD) != $(git rev-parse HEAD) ]] || exit 0
 
-nvim +'GV HEAD..FETCH_HEAD' +tabonly +'normal o'
+nvim +'GV HEAD..FETCH_HEAD' +tabonly +'normal Go'
 git status -s
 
 read -p 'Checkout FETCH_HEAD? [y/N] ' -n 1
