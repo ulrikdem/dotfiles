@@ -492,8 +492,4 @@ if executable('gdb')
     endfunction
 endif
 
-" Local configuration {{{1
-
-runtime local_init.vim
-
 call s:InitPlugins()

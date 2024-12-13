@@ -1,13 +1,8 @@
 local buf_path = vim.api.nvim_buf_get_name(0)
-local runtime = vim.api.nvim_get_runtime_file("", true)
+local runtime = vim.tbl_map(vim.uv.fs_realpath, vim.api.nvim_get_runtime_file("", true))
 local in_runtime = vim.iter(runtime):any(function(path)
-    return vim.startswith(buf_path, vim.fs.normalize(path) .. "/")
+    return vim.startswith(buf_path, path .. "/")
 end)
-
-if in_runtime then
-    -- Allow opening help with K in visual mode
-    vim.bo.keywordprg = ":help"
-end
 
 -- https://luals.github.io/wiki/settings/
 local settings = {
@@ -26,8 +21,9 @@ local settings = {
     },
 }
 
-local root_dir
+local read_paths
 if in_runtime then
+    read_paths = runtime
     settings = vim.tbl_deep_extend("force", settings, {
         workspace = {
             library = runtime,
@@ -41,15 +37,16 @@ if in_runtime then
             disable = {"duplicate-set-field", "redefined-local"},
         },
     })
-    root_dir = runtime[1]
+    -- Allow opening help with K in visual mode
+    vim.bo.keywordprg = ":help"
 else
-    root_dir = find_root({".luarc.json", ".luarc.jsonc"}, ".git")
+    read_paths = {find_root({".luarc.json", ".luarc.jsonc"}, ".git")}
 end
 
 start_lsp({
     cmd = {"lua-language-server"},
-    root_dir = root_dir,
-    sandbox = {read = {root_dir}},
+    root_dir = read_paths[1],
+    sandbox = {read = read_paths},
     settings = {Lua = settings},
     on_attach = function(_, bufnr)
         -- This is not set by default because we set keywordprg above
