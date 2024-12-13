@@ -98,7 +98,7 @@ start_lsp({
     on_attach = function(client, bufnr)
         refresh_codelens(client, bufnr)
         local timer = vim.uv.new_timer()
-        vim.api.nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
+        nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
             buffer = bufnr,
             group = lsp_augroup(client.id),
             callback = function()

@@ -1,5 +1,5 @@
-local buf_path = vim.api.nvim_buf_get_name(0)
-local runtime = vim.tbl_map(vim.uv.fs_realpath, vim.api.nvim_get_runtime_file("", true))
+local buf_path = nvim_buf_get_name(0)
+local runtime = vim.tbl_map(vim.uv.fs_realpath, nvim_get_runtime_file("", true))
 local in_runtime = vim.iter(runtime):any(function(path)
     return vim.startswith(buf_path, path .. "/")
 end)
@@ -23,6 +23,15 @@ local settings = {
 
 local read_paths
 if in_runtime then
+    if not api_lua_path then
+        _G.api_lua_path = vim.fn.tempname() .. ".lua"
+        local lines = {"--- @meta"}
+        for k, _ in pairs(vim.api) do
+            table.insert(lines, ("_G.%s = vim.api.%s"):format(k, k))
+        end
+        vim.fn.writefile(lines, api_lua_path)
+    end
+    table.insert(runtime, api_lua_path)
     read_paths = runtime
     settings = vim.tbl_deep_extend("force", settings, {
         workspace = {

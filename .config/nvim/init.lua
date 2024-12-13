@@ -2,26 +2,25 @@
 
 -- vim: foldmethod=marker
 
-local api = vim.api
-local cmd = vim.cmd
+setmetatable(_G, {__index = vim.api})
+
 local fn = vim.fn
 local lsp = vim.lsp
 local map = vim.keymap.set
-local o = vim.o
 
-cmd.runtime("old_init.vim")
-cmd.colorscheme("ulrikdem")
+vim.cmd.runtime("old_init.vim")
+vim.cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
 
 local defaults = setmetatable({}, {
     __newindex = function(_, k, v)
         -- Don't override local options that have been changed from the global value
-        (o[k] == vim.go[k] and o or vim.go)[k] = v
+        (vim.o[k] == vim.go[k] and vim.o or vim.go)[k] = v
     end,
 })
 -- Convince language server this has the same type as vim.o
-if false then defaults = o end
+if false then defaults = vim.o end
 
 defaults.splitbelow = true
 defaults.splitright = true
@@ -136,7 +135,7 @@ map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
 -- Remap do and dp to use a motion
 _G.diff_cmd, _G.diff_bufnr = "", 0
 function _G.diff_operator()
-    cmd[diff_cmd]({
+    vim.cmd[diff_cmd]({
         diff_bufnr ~= 0 and diff_bufnr or nil,
         range = {fn.line("'["), fn.line("']")},
     })
@@ -178,22 +177,22 @@ end
 
 -- Autocommands {{{1
 
-local augroup = api.nvim_create_augroup("init.lua", {})
+local augroup = nvim_create_augroup("init.lua", {})
 
-api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
     group = augroup,
     callback = function() pcall(vim.treesitter.start) end
 })
 vim.treesitter.language.register("bash", "sh")
 
-api.nvim_create_autocmd("TextYankPost", {
+nvim_create_autocmd("TextYankPost", {
     group = augroup,
     callback = function()
         vim.highlight.on_yank({higroup = "Visual", on_visual = false})
     end,
 })
 
-api.nvim_create_autocmd("BufWritePre", {
+nvim_create_autocmd("BufWritePre", {
     group = augroup,
     callback = function(args)
         local dir = vim.fs.dirname(args.match)
@@ -204,42 +203,42 @@ api.nvim_create_autocmd("BufWritePre", {
     end,
 })
 
-api.nvim_create_autocmd("TermOpen", {
+nvim_create_autocmd("TermOpen", {
     group = augroup,
     callback = function()
         vim.wo[0][0].number = false
         vim.wo[0][0].relativenumber = false
         vim.bo.matchpairs = ""
-        cmd.startinsert()
-        api.nvim_create_autocmd("BufEnter", {buffer = 0, command = "startinsert"})
+        vim.cmd.startinsert()
+        nvim_create_autocmd("BufEnter", {buffer = 0, command = "startinsert"})
     end,
 })
 
-api.nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
+nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
 local sidebar_width = 80
 local function make_sidebar()
-    if o.columns <= sidebar_width * 2 or o.winfixwidth then return end
-    cmd.wincmd("L")
-    api.nvim_win_set_width(0, sidebar_width)
-    o.winfixwidth = true
-    cmd.wincmd("=")
+    if vim.o.columns <= sidebar_width * 2 or vim.o.winfixwidth then return end
+    vim.cmd.wincmd("L")
+    nvim_win_set_width(0, sidebar_width)
+    vim.o.winfixwidth = true
+    vim.cmd.wincmd("=")
 end
 
-api.nvim_create_autocmd("BufWinEnter", {
+nvim_create_autocmd("BufWinEnter", {
     group = augroup,
     callback = function()
-        if o.buftype == "help" then make_sidebar() end
+        if vim.o.buftype == "help" then make_sidebar() end
     end,
 })
-api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = {"man", "fugitive"},
     callback = function() make_sidebar() end,
 })
 vim.env.MANWIDTH = tostring(sidebar_width + 1)
 
-api.nvim_create_autocmd("FileType", {
+nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = {"sh", "zsh"},
     callback = function(args)
@@ -261,13 +260,13 @@ defaults.titlelen = 0
 defaults.tabline = "%!v:lua.tabline()"
 
 function _G.tabline()
-    local tabs = api.nvim_list_tabpages()
-    local current = api.nvim_get_current_tabpage()
-    local max_width = math.max(math.floor(o.columns / #tabs) - 3, 1)
+    local tabs = nvim_list_tabpages()
+    local current = nvim_get_current_tabpage()
+    local max_width = math.max(math.floor(vim.o.columns / #tabs) - 3, 1)
     local s = "%T" -- For some reason the first item has no effect, so add a useless one
     for i, tab in ipairs(tabs) do
         s = s .. (tab == current and "%#TabLineSel#" or "%#TabLine#") .. "%" .. i .. "T "
-            .. "%." .. max_width .. "(%{v:lua.statusline_path(" .. api.nvim_tabpage_get_win(tab) .. ")}%)"
+            .. "%." .. max_width .. "(%{v:lua.statusline_path(" .. nvim_tabpage_get_win(tab) .. ")}%)"
             .. " %T%#TabLineFill#" .. (tab == current and "▌" or tabs[i + 1] == current and "▐" or "│")
     end
     return s
@@ -276,10 +275,10 @@ end
 --- @param winid integer
 --- @param absolute? boolean
 function _G.statusline_path(winid, absolute)
-    local bufnr = api.nvim_win_get_buf(winid)
-    local name = api.nvim_buf_get_name(bufnr)
+    local bufnr = nvim_win_get_buf(winid)
+    local name = nvim_buf_get_name(bufnr)
     if name == "" or vim.bo[bufnr].buftype == "nofile" then
-        return api.nvim_eval_statusline("%f", {winid = winid}).str
+        return nvim_eval_statusline("%f", {winid = winid}).str
     elseif vim.bo[bufnr].buftype == "terminal" then
         return name:gsub("^term://.-//%d+:", "term://")
     else
@@ -299,7 +298,7 @@ function _G.statusline_diagnostics()
     return count > 0 and count .. "⚠ " or ""
 end
 
-api.nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
+nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
 
 local lsp_progress = {} --- @type table<integer, string?>
 function _G.statusline_lsp_progress()
@@ -311,7 +310,7 @@ function _G.statusline_lsp_progress()
 end
 
 local lsp_progress_timer = vim.uv.new_timer()
-api.nvim_create_autocmd("LspProgress", {
+nvim_create_autocmd("LspProgress", {
     group = augroup,
     callback = function(args)
         local t = args.data.params.value
@@ -320,7 +319,7 @@ api.nvim_create_autocmd("LspProgress", {
             or nil
         if not lsp_progress_timer:is_active() then
             lsp_progress_timer:start(16, 0, vim.schedule_wrap(function()
-                cmd.redrawstatus({bang = true})
+                vim.cmd.redrawstatus({bang = true})
             end))
         end
     end,
@@ -336,7 +335,7 @@ end
 
 --- @param fallback fun()
 local function maybe_complete(fallback)
-    if api.nvim_get_current_line():sub(1, api.nvim_win_get_cursor(0)[2]):match("[^%s]") then
+    if nvim_get_current_line():sub(1, nvim_win_get_cursor(0)[2]):match("[^%s]") then
         cmp.complete()
     else
         fallback()
@@ -399,7 +398,7 @@ map("n", "grq", lsp.buf.format)
 for k, v in pairs({k = {lsp.inlay_hint, "inlay hints"}, e = {vim.diagnostic, "diagnostics"}}) do
     map("n", "yo" .. k, function()
         v[1].enable(not v[1].is_enabled())
-        api.nvim_echo({{v[2] .. ": " .. (v[1].is_enabled() and "enabled" or "disabled")}}, false, {})
+        nvim_echo({{v[2] .. ": " .. (v[1].is_enabled() and "enabled" or "disabled")}}, false, {})
     end)
 end
 
@@ -413,12 +412,12 @@ vim.diagnostic.config({
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
 
-api.nvim_create_autocmd("InsertEnter", {
+nvim_create_autocmd("InsertEnter", {
     group = augroup,
     callback = function()
         if lsp.inlay_hint.is_enabled({}) then
             lsp.inlay_hint.enable(false)
-            api.nvim_create_autocmd("InsertLeave", {
+            nvim_create_autocmd("InsertLeave", {
                 once = true,
                 callback = function() lsp.inlay_hint.enable() end,
             })
@@ -433,13 +432,13 @@ function _G.find_root(...)
         or vim.iter({...}):fold(nil, function(root, marker) return root or vim.fs.root(0, marker) end)
 end
 
-api.nvim_create_user_command("CdRoot", function()
-    local root_dir = find_root(".git") or vim.fs.dirname(api.nvim_buf_get_name(0))
+nvim_create_user_command("CdRoot", function()
+    local root_dir = find_root(".git") or vim.fs.dirname(nvim_buf_get_name(0))
     for _, client in pairs(lsp.get_clients({bufnr = 0})) do
         root_dir = client.root_dir or root_dir
     end
     print(root_dir)
-    api.nvim_set_current_dir(root_dir)
+    nvim_set_current_dir(root_dir)
 end, {})
 
 --- @class LspConfig: vim.lsp.ClientConfig
@@ -481,10 +480,10 @@ end
 
 --- @param client_id integer
 function _G.lsp_augroup(client_id)
-    return api.nvim_create_augroup("lsp_client_" .. client_id, {clear = false})
+    return nvim_create_augroup("lsp_client_" .. client_id, {clear = false})
 end
 
-api.nvim_create_autocmd("LspAttach", {
+nvim_create_autocmd("LspAttach", {
     group = augroup,
     callback = function(args)
         local bufnr = args.buf
@@ -492,20 +491,20 @@ api.nvim_create_autocmd("LspAttach", {
         if not client then return end
 
         local augroup = lsp_augroup(client.id)
-        api.nvim_clear_autocmds({buffer = bufnr, group = augroup})
+        nvim_clear_autocmds({buffer = bufnr, group = augroup})
 
         local signature_triggers = vim.tbl_get(client.server_capabilities, "signatureHelpProvider", "triggerCharacters")
         if signature_triggers then
             local pattern = "[" .. vim.pesc(table.concat(signature_triggers)) .. "][%s]*$"
-            api.nvim_create_autocmd("TextChangedI", {
+            nvim_create_autocmd("TextChangedI", {
                 buffer = bufnr,
                 group = augroup,
                 callback = function()
-                    local lnum, col = unpack(api.nvim_win_get_cursor(0))
-                    local line = api.nvim_get_current_line():sub(1, col)
+                    local lnum, col = unpack(nvim_win_get_cursor(0))
+                    local line = nvim_get_current_line():sub(1, col)
                     while lnum > 1 and line:match("^%s*$") do
                         lnum = lnum - 1
-                        line = api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, true)[1]
+                        line = nvim_buf_get_lines(bufnr, lnum - 1, lnum, true)[1]
                     end
                     if line:match(pattern) then
                         client.request(
@@ -519,7 +518,7 @@ api.nvim_create_autocmd("LspAttach", {
 
         if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
             local timer = vim.uv.new_timer()
-            api.nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
+            nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
                 buffer = bufnr,
                 group = augroup,
                 callback = function(args)
@@ -527,13 +526,13 @@ api.nvim_create_autocmd("LspAttach", {
                         lsp.util.buf_clear_references(bufnr)
                     elseif fn.mode() == "n" then
                         timer:start(100, 0, vim.schedule_wrap(function()
-                            if api.nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
+                            if nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
                             client.request(
                                 lsp.protocol.Methods.textDocument_documentHighlight,
                                 lsp.util.make_position_params(0, client.offset_encoding),
                                 function(err, refs)
                                     lsp.util.buf_clear_references(bufnr)
-                                    if refs and api.nvim_get_current_buf() == bufnr and fn.mode() == "n" then
+                                    if refs and nvim_get_current_buf() == bufnr and fn.mode() == "n" then
                                         lsp.util.buf_highlight_references(bufnr, refs, client.offset_encoding)
                                     elseif err then
                                         lsp.log.error(client.name, tostring(err))
@@ -545,7 +544,7 @@ api.nvim_create_autocmd("LspAttach", {
             })
         end
 
-        api.nvim_create_autocmd("LspDetach", {
+        nvim_create_autocmd("LspDetach", {
             buffer = bufnr,
             group = augroup,
             callback = function(args)
@@ -555,7 +554,7 @@ api.nvim_create_autocmd("LspAttach", {
                 end
                 local config = client.config --[[ @as LspConfig ]]
                 if config.on_detach then config.on_detach(client, bufnr) end
-                api.nvim_clear_autocmds({buffer = bufnr, group = augroup})
+                nvim_clear_autocmds({buffer = bufnr, group = augroup})
             end,
         })
     end,

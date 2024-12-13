@@ -19,7 +19,7 @@ start_lsp({
     capabilities = {textDocument = {completion = {completionItem = {snippetSupport = true}}}},
 
     on_attach = function(client, bufnr)
-        vim.api.nvim_buf_create_user_command(bufnr, "UpdateSchemaStore", function()
+        nvim_buf_create_user_command(bufnr, "UpdateSchemaStore", function()
             vim.fn.mkdir(vim.fs.dirname(catalog_path), "p")
             vim.system({"wget", "-nv", "-O", catalog_path, "https://www.schemastore.org/api/json/catalog.json"}, {},
                 vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
@@ -28,12 +28,12 @@ start_lsp({
                         client.notify(vim.lsp.protocol.Methods.workspace_didChangeConfiguration, {settings = settings})
                         print("schema store updated")
                     else
-                        vim.api.nvim_echo({{result.stderr:gsub("\n", " "), "ErrorMsg"}}, true, {})
+                        nvim_echo({{result.stderr:gsub("\n", " "), "ErrorMsg"}}, true, {})
                     end
                 end))
         end, {})
     end,
     on_detach = function(_, bufnr)
-        vim.api.nvim_buf_del_user_command(bufnr, "UpdateSchemaStore")
+        nvim_buf_del_user_command(bufnr, "UpdateSchemaStore")
     end
 })
