@@ -277,9 +277,13 @@ end
 function _G.statusline_path(winid, absolute)
     local bufnr = nvim_win_get_buf(winid)
     local name = nvim_buf_get_name(bufnr)
-    if name == "" or vim.bo[bufnr].buftype == "nofile" then
+    local buftype = vim.bo[bufnr].buftype
+    if buftype == "quickfix" then
+        return nvim_eval_statusline("%q", {winid = winid}).str
+            .. (vim.w.quickfix_title and " " .. vim.w.quickfix_title or "")
+    elseif buftype == "nofile" or name == "" then
         return nvim_eval_statusline("%f", {winid = winid}).str
-    elseif vim.bo[bufnr].buftype == "terminal" then
+    elseif buftype == "terminal" then
         return name:gsub("^term://.-//%d+:", "term://")
     else
         return fn.fnamemodify(fn.FugitiveReal(name), absolute and ":~" or ":~:.")

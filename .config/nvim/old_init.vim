@@ -196,7 +196,7 @@ endfunction
 let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> #{filename: l, valid: v:true}}))}
 
 function! s:SetQuickfix(items) abort
-    call setqflist(a:items)
+    call setqflist([], ' ', #{title: 'fzf', items: a:items})
     call s:OpenQuickfix('window')
     cfirst
 endfunction
