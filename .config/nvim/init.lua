@@ -342,7 +342,7 @@ function _G.quickfixtextfunc(args)
     local bufnr = list.qfbufnr
 
     local lines = {}
-    local extmarks = {}
+    local highlights = {}
     local namespace = nvim_create_namespace("quickfix")
     local types = {
         E = {"error", "DiagnosticError"},
@@ -360,38 +360,42 @@ function _G.quickfixtextfunc(args)
 
     for i = args.start_idx, args.end_idx do
         local item = list.items[i]
+        local leading_space = (item.text:find("%S") or 1) - 1
         local line = ""
 
         if item.bufnr ~= 0 then
-            if item.bufnr ~= vim.tbl_get(list.items, i - 1, "bufnr") then
-                local virt_line = {{fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:."), "qfFileName"}}
-                table.insert(extmarks, {i - 1, 0, {virt_lines = {virt_line}, virt_lines_above = true}})
+            line = fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.")
+            -- Dim path for all but the first (consecutive) item for the same buffer
+            if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
+                table.insert(highlights, {i - 1, 0, #line, "NonText"})
             end
-            -- Show line number even if zero, to allow distinguishing items with and without a buffer
-            line = ("%4d "):format(item.lnum)
-            table.insert(extmarks, {i - 1, 0, {end_col = #line - 1, hl_group = "qfLineNr"}})
         end
+
+        line = line .. "|"
+        if item.lnum ~= 0 then
+            line = line .. ("%4d"):format(item.lnum)
+        end
+        line = line .. "|"
 
         local type = types[item.type:upper()]
         if type then
             local name, group = unpack(type)
-            table.insert(extmarks, {i - 1, #line, {end_col = #line + #name + 1, hl_group = group}})
-            line = line .. name .. ": "
+            line = line .. " " .. name .. ":"
+            table.insert(highlights, {i - 1, #line - 1 - #name, #line, group})
         end
 
         -- Highlight range from LSP location
         local range = vim.tbl_get(item, "user_data", "targetSelectionRange")
             or vim.tbl_get(item, "user_data", "range")
         if range and range.start.line == range["end"].line then
-            local col = #line + item.col - 1
+            local col = #line + item.col - leading_space
             -- This ignores offset_encoding, so will give the wrong end for ranges containing non-ASCII chars
             -- The start will be correct though, since we use item.col instead of range.start.character
             local length = range["end"].character - range.start.character
-            table.insert(extmarks, {i - 1, col, {end_col = col + length, hl_group = "String"}})
+            table.insert(highlights, {i - 1, col, col + length, "String"})
         end
 
-        line = line .. item.text:gsub("\n%s*", " ")
-        if line == "" then line = " " end -- Prevent fallback to default "|| "
+        line = line .. " " .. item.text:sub(leading_space + 1):gsub("\n%s*", " ")
         table.insert(lines, line)
     end
 
@@ -400,8 +404,9 @@ function _G.quickfixtextfunc(args)
         -- This can happen when updating the list from a DiagnosticChanged autocmd
         if qf_generation[bufnr] ~= generation then return end
 
-        for _, extmark in ipairs(extmarks) do
-            nvim_buf_set_extmark(bufnr, namespace, unpack(extmark))
+        for _, highlight in ipairs(highlights) do
+            local line, col, end_col, group = unpack(highlight)
+            nvim_buf_set_extmark(bufnr, namespace, line, col, {end_col = end_col, hl_group = group})
         end
     end)
 
@@ -412,12 +417,7 @@ nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "qf",
     callback = function()
-        vim.cmd.syntax("clear")
-        vim.wo[0][0].number = false
-        vim.wo[0][0].relativenumber = false
-        vim.wo[0][0].list = false
         vim.wo[0][0].wrap = false
-        vim.bo[0].vartabstop = "9,4" -- Adjust first tabstop to include line number
     end,
 })
 
