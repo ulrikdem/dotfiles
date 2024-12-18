@@ -38,17 +38,6 @@ Plug 'tpope/vim-speeddating'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-unimpaired'
 
-Plug 'chaoren/vim-wordmotion'
-let g:wordmotion_mappings = {
-    \ 'w': '<M-w>',
-    \ 'b': '<M-b>',
-    \ 'e': '<M-e>',
-    \ 'ge': 'g<M-e>',
-    \ 'iw': 'i<M-w>',
-    \ 'aw': 'a<M-w>',
-    \ '<C-R><C-W>': '<C-R><M-w>',
-\ }
-
 " Formatting {{{1
 
 Plug 'tpope/vim-sleuth'
