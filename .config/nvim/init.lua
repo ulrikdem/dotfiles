@@ -329,6 +329,98 @@ nvim_create_autocmd("LspProgress", {
     end,
 })
 
+-- Quickfix {{{1
+
+defaults.quickfixtextfunc = "v:lua.quickfixtextfunc"
+
+local qf_generation = {}
+
+function _G.quickfixtextfunc(args)
+    local list = args.quickfix == 1
+        and fn.getqflist({id = args.id, qfbufnr = 1, items = 1})
+        or fn.getloclist(args.winid, {id = args.id, qfbufnr = 1, items = 1})
+    local bufnr = list.qfbufnr
+
+    local lines = {}
+    local highlights = {}
+    local namespace = nvim_create_namespace("quickfix")
+    local types = {
+        E = {"error", "DiagnosticError"},
+        W = {"warning", "DiagnosticWarn"},
+        I = {"info", "DiagnosticInfo"},
+        N = {"note", "DiagnosticHint"},
+    }
+
+    -- Clear highlights when starting a new list
+    if args.start_idx == 1 then
+        nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
+        qf_generation[bufnr] = (qf_generation[bufnr] or 0) + 1
+    end
+    local generation = qf_generation[bufnr]
+
+    for i = args.start_idx, args.end_idx do
+        local item = list.items[i]
+        local leading_space = (item.text:find("%S") or 1) - 1
+        local line = ""
+
+        if item.bufnr ~= 0 then
+            line = fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.")
+            -- Dim path for all but the first (consecutive) item for the same buffer
+            if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
+                table.insert(highlights, {i - 1, 0, #line, "NonText"})
+            end
+        end
+
+        line = line .. "|"
+        if item.lnum ~= 0 then
+            line = line .. ("%4d"):format(item.lnum)
+        end
+        line = line .. "|"
+
+        local type = types[item.type:upper()]
+        if type then
+            local name, group = unpack(type)
+            line = line .. " " .. name .. ":"
+            table.insert(highlights, {i - 1, #line - 1 - #name, #line, group})
+        end
+
+        -- Highlight range from LSP location
+        local range = vim.tbl_get(item, "user_data", "targetSelectionRange")
+            or vim.tbl_get(item, "user_data", "range")
+        if range and range.start.line == range["end"].line then
+            local col = #line + item.col - leading_space
+            -- This ignores offset_encoding, so will give the wrong end for ranges containing non-ASCII chars
+            -- The start will be correct though, since we use item.col instead of range.start.character
+            local length = range["end"].character - range.start.character
+            table.insert(highlights, {i - 1, col, col + length, "String"})
+        end
+
+        line = line .. " " .. item.text:sub(leading_space + 1):gsub("\n%s*", " ")
+        table.insert(lines, line)
+    end
+
+    vim.schedule(function()
+        -- Cancel if the list has been replaced since this was scheduled
+        -- This can happen when updating the list from a DiagnosticChanged autocmd
+        if qf_generation[bufnr] ~= generation then return end
+
+        for _, highlight in ipairs(highlights) do
+            local line, col, end_col, group = unpack(highlight)
+            nvim_buf_set_extmark(bufnr, namespace, line, col, {end_col = end_col, hl_group = group})
+        end
+    end)
+
+    return lines
+end
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "qf",
+    callback = function()
+        vim.wo[0][0].wrap = false
+    end,
+})
+
 -- Completion {{{1
 
 local cmp = require("cmp")
