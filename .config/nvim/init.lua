@@ -402,27 +402,27 @@ function _G.quickfixtextfunc(args)
         if item.lnum ~= 0 then
             line = line .. ("%4d"):format(item.lnum)
         end
-        line = line .. "|"
+        line = line .. "| "
 
         local type = types[item.type:upper()]
         if type then
             local name, group = unpack(type)
-            line = line .. " " .. name .. ":"
-            table.insert(highlights, {i - 1, #line - 1 - #name, #line, group})
+            table.insert(highlights, {i - 1, #line, #line + #name + 1, group})
+            line = line .. name .. ": "
         end
 
         -- Highlight range from LSP location
         local range = vim.tbl_get(item, "user_data", "targetSelectionRange")
             or vim.tbl_get(item, "user_data", "range")
         if range and range.start.line == range["end"].line then
-            local col = #line + item.col - leading_space
+            local col = #line + (item.col - 1) - leading_space
             -- This ignores offset_encoding, so will give the wrong end for ranges containing non-ASCII chars
             -- The start will be correct though, since we use item.col instead of range.start.character
             local length = range["end"].character - range.start.character
             table.insert(highlights, {i - 1, col, col + length, "String"})
         end
 
-        line = line .. " " .. item.text:sub(leading_space + 1):gsub("\n%s*", " ")
+        line = line .. item.text:sub(leading_space + 1):gsub("\n%s*", " ")
         table.insert(lines, line)
     end
 
