@@ -6,33 +6,14 @@ augroup vimrc
     autocmd!
 augroup END
 
-try
-    call plug#begin(stdpath('data').'/plugged')
-
-    function! s:InitPlugins() abort
-        call plug#end()
-        for l:plug in get(g:, 'plugs_order', [])
-            if isdirectory(g:plugs[l:plug].dir)
-                silent execute 'doautocmd vimrc User Plug_'.substitute(l:plug, '\W', '_', 'g')
-            endif
-        endfor
-    endfunction
-catch
-    command! -nargs=+ Plug
-
-    function! s:InitPlugins() abort
-    endfunction
-endtry
-
 " Misc mappings {{{1
 
 let g:mapleader = ' '
 
 " Formatting {{{1
 
-Plug 'godlygeek/tabular'
-autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
-autocmd vimrc User Plug_tabular autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
+autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
+autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
 
 " Command execution {{{1
 
@@ -53,10 +34,10 @@ command! -bang -nargs=+ -complete=file Grep silent grep<bang> <args>
 nnoremap <Leader>gg <Cmd>Grep -Fwe '<cword>'<CR>
 nnoremap <Leader>gG <Cmd>Grep -Fwe '<cword>' %:p:.:h:S<CR>
 
-if executable('rg') && executable('igrep-format')
-    autocmd vimrc User Plug_fzf nnoremap <Leader>fg <Cmd>IGrep<CR>
-    autocmd vimrc User Plug_fzf nnoremap <Leader>fG <Cmd>IGrep -- %:p:.:h:S<CR>
-    autocmd vimrc User Plug_fzf command! -nargs=* -complete=file IGrep call s:IGrep(<q-args>)
+if executable('fzf') && executable('rg') && executable('igrep-format')
+    nnoremap <Leader>fg <Cmd>IGrep<CR>
+    nnoremap <Leader>fG <Cmd>IGrep -- %:p:.:h:S<CR>
+    command! -nargs=* -complete=file IGrep call s:IGrep(<q-args>)
     function! s:IGrep(args) abort
         let l:cmd = 'rg --null --column --color=ansi --smart-case --regexp {q} '.a:args.
             \ ' | igrep-format '.&columns
@@ -82,16 +63,13 @@ endif
 
 " File navigation {{{1
 
-Plug 'justinmk/vim-dirvish'
 set suffixes-=.h
 autocmd vimrc ColorScheme * highlight link DirvishSuffix Comment
 autocmd vimrc ColorScheme * highlight link DirvishPathHead NonText
 if $RANGER_LEVEL
-    autocmd vimrc User Plug_vim_dirvish nmap <expr> -
-        \ !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
+    nmap <expr> - !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
 
-Plug 'junegunn/fzf', #{do: './install --bin'}
 let g:fzf_action = {
     \ '': 'edit',
     \ 'ctrl-x': 'split',
@@ -107,11 +85,9 @@ let g:fzf_layout = #{
     \ },
 \ }
 
-autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>ff
-    \ '<Cmd>FZF '.fnameescape(fnamemodify(getcwd(), ':~')).'<CR>'
-autocmd vimrc User Plug_fzf nnoremap <expr> <Leader>fF
-    \ '<Cmd>FZF '.fnameescape(expand('%:p:~:h')).'<CR>'
-autocmd vimrc User Plug_fzf nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), [
+nnoremap <expr> <Leader>ff '<Cmd>FZF '.fnameescape(fnamemodify(getcwd(), ':~')).'<CR>'
+nnoremap <expr> <Leader>fF '<Cmd>FZF '.fnameescape(expand('%:p:~:h')).'<CR>'
+nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), [
     \ '--prompt='.substitute(fnamemodify(getcwd(), ':~'), '/\?$', '/', ''),
     \ '--bind=ctrl-c:reload:nvim --server '.shellescape(v:servername).' --remote-expr "DeleteBuffer(''$(printf %s {} \| sed "s/''/''''/g")'')"',
 \ ], {l -> #{filename: l}})<CR>
@@ -165,8 +141,7 @@ function! s:SetQuickfix(items) abort
     cfirst
 endfunction
 
-autocmd vimrc User Plug_fzf nnoremap <Leader>fq
-    \ <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
+nnoremap <Leader>fq <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
 function! s:FzfFromQuickfix(options, items) abort
     let l:valid_items = []
     function! s:ProcessItems(items) abort closure
@@ -236,7 +211,6 @@ endfunction
 
 " Git {{{1
 
-Plug 'junegunn/gv.vim'
 autocmd vimrc FileType GV setlocal nolist
 
 nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
@@ -287,7 +261,7 @@ endfunction
 
 " Search and completion {{{1
 
-autocmd vimrc User Plug_fzf nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
+nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
     \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
 
 " Filetypes {{{1
@@ -448,5 +422,3 @@ if executable('gdb')
         endif
     endfunction
 endif
-
-call s:InitPlugins()
