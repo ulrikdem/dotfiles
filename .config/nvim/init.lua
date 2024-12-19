@@ -363,17 +363,19 @@ nvim_create_autocmd("FileType", {
     end,
 })
 
+--- @type table<integer, {foldlevel: table<integer, integer | string>, foldtext: table<integer, string>}>
 _G.quickfix_data = quickfix_data or {}
 
 defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
 
+--- @param args {quickfix: integer, winid: integer, id: integer, start_idx: integer, end_idx: integer}
 function _G.quickfix_textfunc(args)
     local list = args.quickfix == 1
         and fn.getqflist({id = args.id, qfbufnr = true, items = true})
         or fn.getloclist(args.winid, {id = args.id, qfbufnr = true, items = true})
     local bufnr = list.qfbufnr
 
-    local lines = {}
+    local lines = {} --- @type string[]
     local highlights = {}
     local namespace = nvim_create_namespace("quickfix")
     local types = {
