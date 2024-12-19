@@ -24,10 +24,6 @@ catch
     endfunction
 endtry
 
-" Misc settings {{{1
-
-autocmd vimrc FocusGained,BufEnter,QuickFixCmdPost * checktime
-
 " Misc mappings {{{1
 
 let g:mapleader = ' '
