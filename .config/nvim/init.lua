@@ -353,16 +353,21 @@ nvim_create_autocmd("FileType", {
         end, {buffer = 0})
         map("n", "<M-CR>", "<CR>", {buffer = 0})
 
-        vim.wo[0][0].list = false
-        vim.wo[0][0].wrap = false
+        local wo = vim.wo[0][0]
+        wo.list = false
+        wo.wrap = false
+        wo.foldmethod = "expr"
+        wo.foldexpr = "v:lua.quickfix_foldexpr()"
+        wo.foldtext = "v:lua.quickfix_foldtext()"
+        wo.foldlevel = 1
     end,
 })
 
-defaults.quickfixtextfunc = "v:lua.quickfixtextfunc"
+_G.quickfix_data = quickfix_data or {}
 
-local qf_generation = {}
+defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
 
-function _G.quickfixtextfunc(args)
+function _G.quickfix_textfunc(args)
     local list = args.quickfix == 1
         and fn.getqflist({id = args.id, qfbufnr = true, items = true})
         or fn.getloclist(args.winid, {id = args.id, qfbufnr = true, items = true})
@@ -378,12 +383,11 @@ function _G.quickfixtextfunc(args)
         N = {"note", "DiagnosticHint"},
     }
 
-    -- Clear highlights when starting a new list
     if args.start_idx == 1 then
         nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
-        qf_generation[bufnr] = (qf_generation[bufnr] or 0) + 1
+        quickfix_data[bufnr] = {foldlevel = {}, foldtext = {}}
     end
-    local generation = qf_generation[bufnr]
+    local data = quickfix_data[bufnr]
 
     for i = args.start_idx, args.end_idx do
         local item = list.items[i]
@@ -395,6 +399,10 @@ function _G.quickfixtextfunc(args)
             -- Dim path for all but the first (consecutive) item for the same buffer
             if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
                 table.insert(highlights, {i - 1, 0, #line, "NonText"})
+                data.foldlevel[i] = 1
+            else
+                data.foldlevel[i] = ">1"
+                data.foldtext[i] = line
             end
         end
 
@@ -429,7 +437,7 @@ function _G.quickfixtextfunc(args)
     vim.schedule(function()
         -- Cancel if the list has been replaced since this was scheduled
         -- This can happen when updating the list from a DiagnosticChanged autocmd
-        if qf_generation[bufnr] ~= generation then return end
+        if quickfix_data[bufnr] ~= data then return end
 
         for _, highlight in ipairs(highlights) do
             local line, col, end_col, group = unpack(highlight)
@@ -438,6 +446,16 @@ function _G.quickfixtextfunc(args)
     end)
 
     return lines
+end
+
+function _G.quickfix_foldexpr()
+    return quickfix_data[nvim_get_current_buf()].foldlevel[vim.v.lnum] or 0
+end
+
+function _G.quickfix_foldtext()
+    return ("%s (%d lines) "):format(
+        quickfix_data[nvim_get_current_buf()].foldtext[vim.v.foldstart],
+        vim.v.foldend - vim.v.foldstart + 1)
 end
 
 -- Completion {{{1
