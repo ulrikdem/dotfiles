@@ -175,6 +175,8 @@ for _, bracket in ipairs({"[", "]"}) do
     map("n", intermediate .. "<Esc>", "")
 end
 
+vim.g.mapleader = " "
+
 -- Autocommands {{{1
 
 local augroup = nvim_create_augroup("init.lua", {})
@@ -331,14 +333,39 @@ nvim_create_autocmd("LspProgress", {
 
 -- Quickfix {{{1
 
+-- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
+nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
+nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
+
+map("n", "<Leader>tq", function()
+    vim.cmd(fn.getqflist({winid = true}).winid ~= 0 and "cclose" or "botright copen")
+end)
+map("n", "<Leader>tl", function()
+    vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
+end)
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "qf",
+    callback = function()
+        map("n", "<CR>", function()
+            vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
+        end, {buffer = 0})
+        map("n", "<M-CR>", "<CR>", {buffer = 0})
+
+        vim.wo[0][0].list = false
+        vim.wo[0][0].wrap = false
+    end,
+})
+
 defaults.quickfixtextfunc = "v:lua.quickfixtextfunc"
 
 local qf_generation = {}
 
 function _G.quickfixtextfunc(args)
     local list = args.quickfix == 1
-        and fn.getqflist({id = args.id, qfbufnr = 1, items = 1})
-        or fn.getloclist(args.winid, {id = args.id, qfbufnr = 1, items = 1})
+        and fn.getqflist({id = args.id, qfbufnr = true, items = true})
+        or fn.getloclist(args.winid, {id = args.id, qfbufnr = true, items = true})
     local bufnr = list.qfbufnr
 
     local lines = {}
@@ -412,14 +439,6 @@ function _G.quickfixtextfunc(args)
 
     return lines
 end
-
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "qf",
-    callback = function()
-        vim.wo[0][0].wrap = false
-    end,
-})
 
 -- Completion {{{1
 

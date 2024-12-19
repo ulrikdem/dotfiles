@@ -113,31 +113,14 @@ function! s:InitQuickfixBuffer() abort
     call matchadd('String', s:match_start.'.\{-}'.s:match_end)
     call matchadd('Conceal', '\e\[\d*m')
     setlocal conceallevel=2 concealcursor=nvc
-    setlocal nolist
     let w:added_qf_matches = v:true
-endfunction
-
-autocmd vimrc QuickFixCmdPost [^l]* call s:OpenQuickfix('window')
-function! s:OpenQuickfix(cmd) abort
-    let l:win = win_getid()
-    execute 'botright c'.a:cmd
-    call win_gotoid(l:win)
-endfunction
-
-nnoremap <Leader>tq <Cmd>call <SID>ToggleQuickfix()<CR>
-function! s:ToggleQuickfix() abort
-    if empty(filter(getwininfo(), {i, w -> w.quickfix && !w.loclist && w.tabnr == tabpagenr()}))
-        call s:OpenQuickfix('open')
-    else
-        cclose
-    endif
 endfunction
 
 let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> #{filename: l, valid: v:true}}))}
 
 function! s:SetQuickfix(items) abort
     call setqflist([], ' ', #{title: 'fzf', items: a:items})
-    call s:OpenQuickfix('window')
+    cwindow
     cfirst
 endfunction
 
