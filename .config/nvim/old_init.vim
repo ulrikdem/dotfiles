@@ -58,23 +58,12 @@ endif
 let s:match_start = "\e[31m"
 let s:match_end = "\e[0m"
 
-Plug 'hauleth/asyncdo.vim'
-autocmd vimrc User Plug_asyncdo_vim nnoremap <C-C> <Cmd>AsyncStop<CR>
+nnoremap <Leader>mm <Cmd>update \| make<CR>
+nnoremap <Leader>mc <Cmd>make clean<CR>
 
-autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=* -complete=file Make
-    \ cclose | call asyncdo#run(<bang>0, substitute(&makeprg, '\\|', '|', 'g'), <q-args>)
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mm <Cmd>silent update \| Make<CR>
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>mc <Cmd>Make clean<CR>
-
-autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file Grep
-    \ cclose | call asyncdo#run(<bang>0, #{
-        \ job: substitute(&grepprg, '\\|', '|', 'g'),
-        \ errorformat: &grepformat,
-    \ }, <q-args>)
-autocmd vimrc User Plug_asyncdo_vim command! -bang -nargs=+ -complete=file RGrep
-    \ Grep<bang> <args> %:p:.:h:S
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gg <Cmd>Grep -Fwe '<cword>'<CR>
-autocmd vimrc User Plug_asyncdo_vim nnoremap <Leader>gG <Cmd>RGrep -Fwe '<cword>'<CR>
+command! -bang -nargs=+ -complete=file Grep silent grep<bang> <args>
+nnoremap <Leader>gg <Cmd>Grep -Fwe '<cword>'<CR>
+nnoremap <Leader>gG <Cmd>Grep -Fwe '<cword>' %:p:.:h:S<CR>
 
 if executable('rg') && executable('igrep-format')
     autocmd vimrc User Plug_fzf nnoremap <Leader>fg <Cmd>IGrep<CR>
@@ -325,23 +314,17 @@ autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oc <Cmd>edit %:r.c<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oC <Cmd>edit %:r.cpp<CR>
 
 if executable('cargo')
-    autocmd vimrc FileType rust compiler cargo
-    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType rust
-        \ nnoremap <buffer> <Leader>mm <Cmd>silent update \| Make build<CR>
-    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType rust
-        \ nnoremap <buffer> <Leader>mr <Cmd>silent update \| Make build --release<CR>
+    autocmd vimrc FileType rust nnoremap <buffer> <Leader>mm <Cmd>update \| make build<CR>
+    autocmd vimrc FileType rust nnoremap <buffer> <Leader>mr <Cmd>update \| make build --release<CR>
 endif
 
 autocmd vimrc FileType mail,markdown,tex setlocal spell
 
 autocmd vimrc FileType dot setlocal commentstring=//%s
 if executable('dot')
-    autocmd vimrc FileType dot
-        \ let &l:makeprg = 'dot -T$* -o'.expand('%:p:r:S').'.$* '.expand('%:p:S')
-    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType dot
-        \ nnoremap <buffer> <Leader>mm <Cmd>silent update \| Make png<CR>
-    autocmd vimrc User Plug_asyncdo_vim autocmd vimrc FileType dot
-        \ nnoremap <buffer> <Leader>ms <Cmd>silent update \| Make svg<CR>
+    autocmd vimrc FileType dot let &l:makeprg = 'dot -T$* -o'.expand('%:p:r:S').'.$* '.expand('%:p:S')
+    autocmd vimrc FileType dot nnoremap <buffer> <Leader>mm <Cmd>update \| make png<CR>
+    autocmd vimrc FileType dot nnoremap <buffer> <Leader>ms <Cmd>update \| make svg<CR>
 endif
 if executable('xdg-open')
     autocmd vimrc FileType dot nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
