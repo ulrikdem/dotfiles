@@ -28,15 +28,7 @@ endtry
 
 let g:mapleader = ' '
 
-Plug 'tpope/vim-abolish'
-Plug 'tpope/vim-repeat'
-Plug 'tpope/vim-speeddating'
-Plug 'tpope/vim-surround'
-Plug 'tpope/vim-unimpaired'
-
 " Formatting {{{1
-
-Plug 'tpope/vim-sleuth'
 
 Plug 'godlygeek/tabular'
 autocmd vimrc User Plug_tabular autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
@@ -87,8 +79,6 @@ if executable('rg') && executable('igrep-format')
         \ }
     endfunction
 endif
-
-Plug 'tpope/vim-eunuch'
 
 " File navigation {{{1
 
@@ -246,18 +236,14 @@ endfunction
 
 " Git {{{1
 
-Plug 'tpope/vim-fugitive'
-
 Plug 'junegunn/gv.vim'
 autocmd vimrc FileType GV setlocal nolist
 
-autocmd vimrc User Plug_vim_fugitive nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
+nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
 function! s:ToggleGitStatus() abort
     let l:buf = filter(getbufinfo(), {i, b -> get(b.variables, 'fugitive_type', '') ==# 'index'})
     if !empty(l:buf)
         execute 'bdelete' l:buf[0].bufnr
-        return
-    elseif !exists(':Git')
         return
     endif
     Git
@@ -279,13 +265,16 @@ function! s:ToggleDiff() abort
             end
         endfor
         call win_gotoid(l:current_win)
-    elseif exists(':Gdiffsplit')
+    else
         Gdiffsplit!
     endif
 endfunction
 
-autocmd vimrc User Plug_vim_fugitive autocmd vimrc SourcePost fugitive.vim call s:OverrideWorkTree()
+autocmd vimrc SourcePost fugitive.vim call s:OverrideWorkTree()
 function! s:OverrideWorkTree() abort
+    if !exists('*FugitiveWorkTree')
+        return
+    endif
     let l:WorkTree = funcref('FugitiveWorkTree')
     function! FugitiveWorkTree(...) abort closure
         if exists('$GIT_WORK_TREE')

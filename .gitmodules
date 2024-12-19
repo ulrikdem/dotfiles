@@ -13,6 +13,27 @@
 [submodule ".config/nvim/pack/plugins/start/cmp-path"]
 	path = .config/nvim/pack/plugins/start/cmp-path
 	url = https://github.com/hrsh7th/cmp-path
+[submodule ".config/nvim/pack/plugins/start/vim-eunuch"]
+	path = .config/nvim/pack/plugins/start/vim-eunuch
+	url = https://github.com/tpope/vim-eunuch
+[submodule ".config/nvim/pack/plugins/start/vim-fugitive"]
+	path = .config/nvim/pack/plugins/start/vim-fugitive
+	url = https://github.com/tpope/vim-fugitive
+[submodule ".config/nvim/pack/plugins/start/vim-repeat"]
+	path = .config/nvim/pack/plugins/start/vim-repeat
+	url = https://github.com/tpope/vim-repeat
+[submodule ".config/nvim/pack/plugins/start/vim-sleuth"]
+	path = .config/nvim/pack/plugins/start/vim-sleuth
+	url = https://github.com/tpope/vim-sleuth
+[submodule ".config/nvim/pack/plugins/start/vim-speeddating"]
+	path = .config/nvim/pack/plugins/start/vim-speeddating
+	url = https://github.com/tpope/vim-speeddating
+[submodule ".config/nvim/pack/plugins/start/vim-surround"]
+	path = .config/nvim/pack/plugins/start/vim-surround
+	url = https://github.com/tpope/vim-surround
+[submodule ".config/nvim/pack/plugins/start/vim-unimpaired"]
+	path = .config/nvim/pack/plugins/start/vim-unimpaired
+	url = https://github.com/tpope/vim-unimpaired
 [submodule ".config/nvim/pack/plugins/start/vimtex"]
 	path = .config/nvim/pack/plugins/start/vimtex
 	url = https://github.com/lervag/vimtex
