@@ -282,7 +282,7 @@ function _G.statusline_path(winid, absolute)
     local buftype = vim.bo[bufnr].buftype
     if buftype == "quickfix" then
         return nvim_eval_statusline("%q", {winid = winid}).str
-            .. (vim.w.quickfix_title and " " .. vim.w.quickfix_title or "")
+            .. (vim.w[winid].quickfix_title and " " .. vim.w[winid].quickfix_title or "")
     elseif buftype == "nofile" or name == "" then
         return nvim_eval_statusline("%f", {winid = winid}).str
     elseif buftype == "terminal" then
