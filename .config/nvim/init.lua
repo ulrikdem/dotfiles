@@ -196,7 +196,7 @@ nvim_create_autocmd("BufWritePre", {
     group = augroup,
     callback = function(args)
         local dir = vim.fs.dirname(args.match)
-        if args.match:match("^/") and fn.isdirectory(dir) == 0 then
+        if args.match:match("^/") and not vim.uv.fs_stat(dir) then
             fn.mkdir(dir, "p")
             print("created directory " .. dir .. "\n")
         end
