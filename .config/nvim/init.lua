@@ -104,8 +104,6 @@ if fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
 
 map("n", "gcu", "gcgc", {remap = true})
 
-map("n", "<C-RightMouse>", "<C-o>")
-
 map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
 map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
@@ -344,14 +342,25 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
+local function update_tagstack()
+    local list, i = unpack(fn.getjumplist())
+    fn.settagstack(nvim_get_current_win(), {
+        items = {{from = {list[i].bufnr, list[i].lnum, list[i].col + 1, list[i].coladd}, tagname = "quickfix"}},
+    }, 't')
+end
+
 nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "qf",
     callback = function()
         map("n", "<CR>", function()
             vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
+            update_tagstack()
         end, {buffer = 0})
-        map("n", "<M-CR>", "<CR>", {buffer = 0})
+        map("n", "<M-CR>", function()
+            vim.cmd.normal({vim.keycode("<CR>"), bang = true})
+            update_tagstack()
+        end, {buffer = 0})
 
         local wo = vim.wo[0][0]
         wo.list = false
