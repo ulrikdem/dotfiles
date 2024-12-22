@@ -8,24 +8,26 @@ local venv = vim.env.VIRTUAL_ENV
     or root_dir and vim.uv.fs_realpath(root_dir .. "/.venv")
 
 start_lsp({
-    cmd = {"pyright-langserver", "--stdio"},
+    cmd = {"basedpyright-langserver", "--stdio"},
     root_dir = root_dir,
     sandbox = {
         read = {root_dir, venv},
         args = venv and {"-e", "PATH=" .. venv .. "/bin:" .. vim.env.PATH},
     },
 
-    -- https://microsoft.github.io/pyright/#/settings
+    -- https://docs.basedpyright.com/latest/configuration/language-server-settings/
     settings = { -- This table can't be empty, otherwise pyright only works without root_dir
-        python = {
-            analysis = {diagnosticMode = "openFilesOnly"},
+        basedpyright = {
+            analysis = {
+                typeCheckingMode = "standard",
+            },
         },
     },
 
     on_attach = function(client, bufnr)
         nvim_buf_create_user_command(bufnr, "OrganizeImports", function()
             client.request(vim.lsp.protocol.Methods.workspace_executeCommand, {
-                command = "pyright.organizeimports",
+                command = "basedpyright.organizeimports",
                 arguments = {vim.uri_from_bufnr(bufnr)},
             })
         end, {})
