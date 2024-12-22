@@ -377,7 +377,7 @@ _G.quickfix_data = quickfix_data or {}
 
 defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
 
---- @param args {quickfix: integer, winid: integer, id: integer, start_idx: integer, end_idx: integer}
+--- @param args quickfixtextfunc_args
 function _G.quickfix_textfunc(args)
     local list = args.quickfix == 1
         and fn.getqflist({id = args.id, qfbufnr = true, items = true})
