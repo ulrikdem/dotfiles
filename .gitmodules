@@ -13,9 +13,6 @@
 [submodule ".config/nvim/pack/plugins/start/cmp-path"]
 	path = .config/nvim/pack/plugins/start/cmp-path
 	url = https://github.com/hrsh7th/cmp-path
-[submodule ".config/nvim/pack/plugins/start/fzf"]
-	path = .config/nvim/pack/plugins/start/fzf
-	url = https://github.com/junegunn/fzf
 [submodule ".config/nvim/pack/plugins/start/gv.vim"]
 	path = .config/nvim/pack/plugins/start/gv.vim
 	url = https://github.com/junegunn/gv.vim

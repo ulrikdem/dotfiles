@@ -34,33 +34,6 @@ command! -bang -nargs=+ -complete=file Grep silent grep<bang> <args>
 nnoremap <Leader>gg <Cmd>Grep -Fwe '<cword>'<CR>
 nnoremap <Leader>gG <Cmd>Grep -Fwe '<cword>' %:p:.:h:S<CR>
 
-if executable('fzf') && executable('rg') && executable('igrep-format')
-    nnoremap <Leader>fg <Cmd>IGrep<CR>
-    nnoremap <Leader>fG <Cmd>IGrep -- %:p:.:h:S<CR>
-    command! -nargs=* -complete=file IGrep call s:IGrep(<q-args>)
-    function! s:IGrep(args) abort
-        let l:cmd = 'rg --null --column --color=ansi --smart-case --regexp {q} '.a:args.
-            \ ' | igrep-format '.&columns
-        call s:CustomFzf(substitute(l:cmd, '{q}', "''", ''), [
-            \ '--with-nth=-1..',
-            \ '--delimiter=\0',
-            \ '--ansi',
-            \ '--layout=reverse-list',
-            \ '--disabled',
-            \ '--bind=change:top+reload:'.l:cmd,
-        \ ], function("\<SID>ParseIGrep"))
-    endfunction
-    function! s:ParseIGrep(line) abort
-        let [l:file, l:line, l:col; l:text] = split(a:line, '\n')[:-2]
-        return #{
-            \ filename: l:file,
-            \ lnum: str2nr(l:line),
-            \ col: str2nr(l:col),
-            \ text: join(l:text, "\e"),
-        \ }
-    endfunction
-endif
-
 " File navigation {{{1
 
 set suffixes-=.h
@@ -69,39 +42,6 @@ autocmd vimrc ColorScheme * highlight link DirvishPathHead NonText
 if $RANGER_LEVEL
     nmap <expr> - !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
-
-let g:fzf_action = {
-    \ '': 'edit',
-    \ 'ctrl-x': 'split',
-    \ 'ctrl-v': 'vsplit',
-    \ 'ctrl-t': 'tab split',
-\ }
-let g:fzf_layout = #{
-    \ window: #{
-        \ width: 1,
-        \ height: 0.25,
-        \ yoffset: 1,
-        \ border: 'top',
-    \ },
-\ }
-
-nnoremap <expr> <Leader>ff '<Cmd>FZF '.fnameescape(fnamemodify(getcwd(), ':~')).'<CR>'
-nnoremap <expr> <Leader>fF '<Cmd>FZF '.fnameescape(expand('%:p:~:h')).'<CR>'
-nnoremap <Leader>fb <Cmd>call <SID>CustomFzf(<SID>ListBuffers(), [
-    \ '--prompt='.substitute(fnamemodify(getcwd(), ':~'), '/\?$', '/', ''),
-    \ '--bind=ctrl-c:reload:nvim --server '.shellescape(v:servername).' --remote-expr "DeleteBuffer(''$(printf %s {} \| sed "s/''/''''/g")'')"',
-\ ], {l -> #{filename: l}})<CR>
-function! s:ListBuffers() abort
-    return map(filter(getbufinfo(#{buflisted: v:true}),
-        \ {i, b -> !empty(b.name)}), {i, b -> fnamemodify(b.name, ':~:.')})
-endfunction
-function! DeleteBuffer(name) abort
-    let l:buf = bufadd(a:name)
-    if bufwinnr(l:buf) == -1
-        silent! execute 'bdelete' l:buf
-    endif
-    return join(s:ListBuffers(), "\n")
-endfunction
 
 " Quickfix {{{1
 
@@ -114,82 +54,6 @@ function! s:InitQuickfixBuffer() abort
     call matchadd('Conceal', '\e\[\d*m')
     setlocal conceallevel=2 concealcursor=nvc
     let w:added_qf_matches = v:true
-endfunction
-
-let g:fzf_action['ctrl-q'] = {l -> s:SetQuickfix(map(l, {i, l -> #{filename: l, valid: v:true}}))}
-
-function! s:SetQuickfix(items) abort
-    call setqflist([], ' ', #{title: 'fzf', items: a:items})
-    cwindow
-    cfirst
-endfunction
-
-nnoremap <Leader>fq <Cmd>cclose \| call <SID>FzfFromQuickfix([], getqflist())<CR>
-function! s:FzfFromQuickfix(options, items) abort
-    let l:valid_items = []
-    function! s:ProcessItems(items) abort closure
-        let l:valid_items = []
-        let l:lines = []
-        for l:item in a:items
-            if !get(l:item, 'valid', v:true)
-                continue
-            endif
-            let l:left = trim(substitute(l:item.text, "\t", ' ', 'g'), ' ')
-            if !empty(get(l:item, 'type', ''))
-                let l:left = s:match_start.'['.(l:item.type).'] '.s:match_end.l:left
-            endif
-            let l:file = has_key(l:item, 'filename') ? l:item.filename : bufname(l:item.bufnr)
-            let l:right = "\e[90m".fnamemodify(l:file, ':p:~:.').':'.(l:item.lnum)."\e[0m"
-            let l:pad = &columns - 3 - strwidth(substitute(l:left.l:right, '\e\[\d*m', '', 'g'))
-            call add(l:lines, len(l:valid_items).' '.l:left.repeat(' ', max([l:pad, 1])).l:right)
-            call add(l:valid_items, l:item)
-        endfor
-        return l:lines
-    endfunction
-    call s:CustomFzf(s:ProcessItems(a:items), extend([
-        \ '--with-nth=2..',
-        \ '--delimiter= ',
-        \ '--ansi',
-        \ '--layout=reverse-list',
-        \ '--tiebreak=begin',
-    \ ], a:options), {l -> l:valid_items[split(l)[0]]})
-    return funcref("\<SID>ProcessItems")
-endfunction
-
-function! s:CustomFzf(source, options, parse) abort
-    function! s:FzfSink(lines) abort closure
-        let l:key = remove(a:lines, 0)
-        if l:key ==# 'ctrl-q'
-            call s:SetQuickfix(map(a:lines, {i, l -> a:parse(l)}))
-        else
-            for l:line in a:lines
-                if empty(l:line)
-                    continue
-                endif
-                let l:item = a:parse(l:line)
-                let l:buf = has_key(l:item, 'bufnr') ? l:item.bufnr : bufadd(l:item.filename)
-                let l:lnum = get(l:item, 'lnum', 0)
-                if empty(l:key) && l:buf == bufnr()
-                    if l:lnum
-                        normal! m'
-                    endif
-                else
-                    execute g:fzf_action[l:key] '#'.l:buf
-                endif
-                if l:lnum
-                    call cursor(l:lnum, get(l:item, 'col', 1))
-                endif
-            endfor
-        endif
-    endfunction
-    call fzf#run(fzf#wrap(#{
-        \ source: a:source,
-        \ sinklist: funcref("\<SID>FzfSink"),
-        \ options: extend([
-            \ '--multi',
-            \ '--expect=ctrl-x,ctrl-v,ctrl-t,ctrl-q',
-        \ ], a:options),
-    \ }))
 endfunction
 
 " Git {{{1
@@ -241,11 +105,6 @@ function! s:OverrideWorkTree() abort
         endif
     endfunction
 endfunction
-
-" Search and completion {{{1
-
-nnoremap <Leader>f/ <Cmd>call <SID>FzfFromQuickfix([],
-    \ map(getbufline('%', 1, '$'), {i, l -> #{bufnr: bufnr(), lnum: i + 1, text: l}}))<CR>
 
 " Filetypes {{{1
 
