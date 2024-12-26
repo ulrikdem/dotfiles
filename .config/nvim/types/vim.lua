@@ -22,6 +22,24 @@ vim.env = {}
 --- @field group? integer
 --- @field data any
 
+--- @param name string
+--- @param command string | fun(opts: user_command_opts)
+--- @param opts vim.api.keyset.user_command
+function vim.api.nvim_create_user_command(name, command, opts) end
+
+--- @class user_command_opts
+--- @field name string
+--- @field bang boolean
+--- @field args string
+--- @field fargs string[]
+--- @field line1 integer
+--- @field line2 integer
+--- @field range integer
+--- @field count integer
+--- @field reg string
+--- @field mods string
+--- @field smods vim.api.keyset.parse_cmd.mods
+
 --- @param list vim.quickfix.entry[]
 --- @param action? " " | "a" | "r" | "f"
 --- @param what? vim.fn.setqflist.what
