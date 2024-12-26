@@ -407,20 +407,6 @@ if (($+commands[fzf])); then
             zle redisplay
         }
         bindkeymaps '^T' fzf-file-widget main
-
-        function fzf-cd-widget {
-            local dir=$(
-                unset REPORTTIME
-                fd -L0td --strip-cwd-prefix | fzf --read0 --height 11 --reverse --prompt 'cd: '
-            )
-            zle redisplay
-            if [[ -n $dir ]]; then
-                zle push-line
-                BUFFER="cd ${(q)dir}"
-                zle accept-line
-            fi
-        }
-        bindkeymaps '\ec' fzf-cd-widget main
     fi
 
     if (($+commands[awk])); then
