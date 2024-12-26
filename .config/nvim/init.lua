@@ -583,7 +583,7 @@ nvim_create_user_command("IGrep", function(opts)
     run_fzf({
         args = {
             "--prompt=grep: ",
-            ("--bind=change:top+reload:rg --column --color ansi -0Se {q} %s | igrep-format %d")
+            ("--bind=change:top+reload:rg --column --color ansi -H0Se {q} %s | igrep-format %d")
                 :format(opts.args, vim.o.columns),
             "--with-nth=-1",
             "--delimiter=\\0",

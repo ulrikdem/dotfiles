@@ -18,7 +18,7 @@ autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<C
 " Command execution {{{1
 
 if executable('rg')
-    set grepprg=rg\ --column\ --color=ansi
+    set grepprg=rg\ -H\ --column\ --color=ansi
     set grepformat=[0m[35m%f[0m:[0m[32m%l[0m:[0m%c[0m:%m
 else
     set grepprg=grep\ -rIn
@@ -30,9 +30,8 @@ let s:match_end = "\e[0m"
 nnoremap <Leader>mm <Cmd>update \| make<CR>
 nnoremap <Leader>mc <Cmd>make clean<CR>
 
-command! -bang -nargs=+ -complete=file Grep silent grep<bang> <args>
-nnoremap <Leader>gg <Cmd>Grep -Fwe '<cword>'<CR>
-nnoremap <Leader>gG <Cmd>Grep -Fwe '<cword>' %:p:.:h:S<CR>
+command! -nargs=+ -complete=file Grep silent grep! <args>
+nnoremap grg <Cmd>Grep -Fwe '<cword>'<CR>
 
 " File navigation {{{1
 
