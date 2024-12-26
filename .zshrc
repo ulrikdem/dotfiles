@@ -384,9 +384,7 @@ add-zle-hook-widget line-finish vi_mode_reset
 
 # FZF {{{1
 
-if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
-    source /usr/share/fzf/key-bindings.zsh
-
+if (($+commands[fzf])); then
     if (($+commands[fd])); then
         function fzf-file-widget {
             local words=(${(z)LBUFFER})
@@ -400,7 +398,7 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
                 cd -- ${(Q)${~dir}:-.}
                 unset REPORTTIME
                 fd -L0 --strip-cwd-prefix |
-                    fzf --read0 --height 40% --reverse --prompt "${(Q)dir:-./}" -q "$query" -m --print0 |
+                    fzf --read0 --height 11 --reverse --prompt "${(Q)dir:-./}" -q "$query" -m --print0 |
                     while read -rd $'\0' item; do
                         echo -nE - "$dir${(q)item} "
                     done
@@ -408,11 +406,12 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
             [[ -n $results ]] && LBUFFER=${LBUFFER:0:$#LBUFFER-$#word}$results
             zle redisplay
         }
+        bindkeymaps '^T' fzf-file-widget main
 
         function fzf-cd-widget {
             local dir=$(
                 unset REPORTTIME
-                fd -L0td --strip-cwd-prefix | fzf --read0 --height 40% --reverse --prompt 'cd '
+                fd -L0td --strip-cwd-prefix | fzf --read0 --height 11 --reverse --prompt 'cd: '
             )
             zle redisplay
             if [[ -n $dir ]]; then
@@ -421,13 +420,27 @@ if [[ -f /usr/share/fzf/key-bindings.zsh ]]; then
                 zle accept-line
             fi
         }
+        bindkeymaps '\ec' fzf-cd-widget main
+    fi
+
+    if (($+commands[awk])); then
+        function fzf-history-widget {
+            local result
+            result=$(
+                printf '%s\0' "${history[@]}" |
+                    awk -v RS='\0' -v ORS='\0' '{ if (!seen[$0]++) print $0 }' |
+                    fzf --read0 --height 11 --prompt 'history: ' -q "$LBUFFER" --scheme history
+            ) && LBUFFER=$result
+            zle redisplay
+        }
+        bindkeymaps '^R' fzf-history-widget main
     fi
 
     if (($+commands[rg] && $+commands[igrep-format])); then
         function fzf-grep-widget {
             local results=$(
                 unset REPORTTIME
-                fzf --height 40% --reverse --prompt 'grep ' --bind change:top+reload:'rg --column --color ansi -0Se {q} | igrep-format $COLUMNS' --with-nth -1 --delimiter '\0' --ansi --disabled -m |
+                fzf --height 11 --reverse --prompt 'grep: ' --bind change:top+reload:'rg --column --color ansi -0Se {q} | igrep-format $COLUMNS' --with-nth -1 --delimiter '\0' --ansi --disabled -m |
                     cut -f 1 -d $'\0' |
                     while read -r item; do
                         echo -nE - "${(q)item} "
