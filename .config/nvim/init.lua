@@ -94,7 +94,7 @@ defaults.timeout = false
 
 -- Mappings {{{1
 
-map("n", "<C-s>", "<Cmd>write<CR>")
+map("n", "<C-s>", vim.cmd.write)
 
 map({"!", "t"}, "<C-BS>", "<C-w>")
 
@@ -342,11 +342,12 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
-local function update_tagstack()
+local function after_jump()
+    vim.cmd("normal! zv")
     local list, i = unpack(fn.getjumplist())
     fn.settagstack(nvim_get_current_win(), {
         items = {{from = {list[i].bufnr, list[i].lnum, list[i].col + 1, list[i].coladd}, tagname = "quickfix"}},
-    }, 't')
+    }, "t")
 end
 
 nvim_create_autocmd("FileType", {
@@ -355,11 +356,11 @@ nvim_create_autocmd("FileType", {
     callback = function()
         map("n", "<CR>", function()
             vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
-            update_tagstack()
+            after_jump()
         end, {buffer = 0})
         map("n", "<M-CR>", function()
             vim.cmd.normal({vim.keycode("<CR>"), bang = true})
-            update_tagstack()
+            after_jump()
         end, {buffer = 0})
 
         local wo = vim.wo[0][0]
@@ -406,7 +407,8 @@ function _G.quickfix_textfunc(args)
         local line = ""
 
         if item.bufnr ~= 0 then
-            line = fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.")
+            local name = nvim_buf_get_name(item.bufnr)
+            line = name ~= "" and fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.") or "[No Name]"
             -- Dim path for all but the first (consecutive) item for the same buffer
             if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
                 table.insert(highlights, {i - 1, 0, #line, "NonText"})
@@ -468,6 +470,136 @@ function _G.quickfix_foldtext()
         quickfix_data[nvim_get_current_buf()].foldtext[vim.v.foldstart],
         vim.v.foldend - vim.v.foldstart + 1)
 end
+
+-- Fuzzy finder {{{1
+
+--- @class fzf_opts
+--- @field args? string[]
+--- @field cwd? string
+--- @field input? string[]
+--- @field to_quickfix fun(line: string): vim.quickfix.entry
+--- @field title string
+
+--- @param opts fzf_opts
+local function run_fzf(opts)
+    local bufnr = nvim_create_buf(false, true)
+    nvim_open_win(bufnr, true, {
+        relative = "editor",
+        anchor = "SW",
+        row = vim.o.lines - 1,
+        col = 0,
+        height = 11,
+        width = vim.o.columns,
+        border = {"", "─", "", "", "", "", "", ""},
+    })
+    vim.wo[0][0].winhighlight = "NormalFloat:Normal,FloatBorder:WinSeparator"
+
+    local output = fn.tempname()
+    local cmd = ("fzf --layout=reverse-list -m %s >%s"):format(
+        vim.iter(opts.args or {}):map(fn.shellescape):join(" "),
+        fn.shellescape(output))
+    local input
+    if opts.input then
+        input = fn.tempname()
+        cmd = cmd .. " <" .. fn.shellescape(input)
+        fn.writefile(opts.input, input)
+    end
+
+    fn.termopen(cmd, {
+        cwd = opts.cwd,
+        on_exit = function()
+            nvim_buf_delete(bufnr, {})
+            local lines = fn.readfile(output)
+            vim.uv.fs_unlink(output)
+            if input then vim.uv.fs_unlink(input) end
+
+            if #lines == 1 then
+                local item = opts.to_quickfix(lines[1])
+                if not (item.bufnr or item.filename) then return end
+                local bufnr = item.bufnr or fn.bufadd(item.filename)
+                vim.cmd("normal! m'")
+                nvim_win_set_buf(0, bufnr)
+                vim.bo.buflisted = true
+                if item.lnum and item.lnum > 0 then
+                    local set_cursor = item.vcol and item.vcol ~= 0 and fn.setcursorcharpos or fn.cursor
+                    set_cursor(item.lnum, item.col and item.col > 0 and item.col or 1)
+                    after_jump()
+                end
+            elseif #lines > 1 then
+                fn.setqflist({}, " ", {title = opts.title, items = vim.tbl_map(opts.to_quickfix, lines)})
+                vim.cmd("botright copen")
+            end
+        end,
+    })
+end
+
+map("n", "<Leader>ff", vim.cmd.Fzf)
+nvim_create_user_command("Fzf", function(opts)
+    local cwd = vim.fs.normalize(opts.args)
+    run_fzf({
+        args = {("--prompt=%s/"):format(fn.fnamemodify(cwd, ":~"):gsub("/$", ""))},
+        cwd = cwd,
+        to_quickfix = function(line) return {filename = line, valid = true} end,
+        title = "Files",
+    })
+end, {nargs = "?", complete = "file"})
+
+--- @return string[]
+local function list_buffers()
+    return vim.tbl_map(function(info)
+        return ("%d %s%s"):format(
+            info.bufnr,
+            info.name ~= "" and fn.fnamemodify(info.name, ":~:.") or "[No Name]",
+            vim.bo[info.bufnr].modified and " [+]" or "")
+    end, fn.getbufinfo({buflisted = 1}))
+end
+
+--- @param bufnr integer
+function _G.delete_buffer(bufnr)
+    if not vim.bo[bufnr].modified then
+        nvim_buf_delete(bufnr, {})
+    end
+    return fn.join(list_buffers(), "\n")
+end
+
+map("n", "<Leader>fb", function()
+    run_fzf({
+        args = {
+            "--prompt=buffer: ",
+            "--with-nth=2..",
+            ([[--bind=ctrl-d:reload:nvim --server %s --remote-expr "v:lua.delete_buffer($(printf %%s {} | cut -d ' ' -f 1))"]])
+                :format(fn.shellescape(vim.v.servername)),
+        },
+        input = list_buffers(),
+        to_quickfix = function(line)
+            return {bufnr = tonumber(vim.gsplit(line, " ")()), valid = true}
+        end,
+        title = "Buffers",
+    })
+end)
+
+map("n", "<Leader>fg", vim.cmd.IGrep)
+nvim_create_user_command("IGrep", function(opts)
+    run_fzf({
+        args = {
+            "--prompt=grep: ",
+            ("--bind=change:top+reload:rg --column --color ansi -0Se {q} %s | igrep-format %d")
+                :format(opts.args, vim.o.columns),
+            "--with-nth=-1",
+            "--delimiter=\\0",
+            "--ansi",
+            "--disabled",
+        },
+        input = {},
+        to_quickfix = function(line)
+            local parts = vim.split(line, "\n")
+            local filename, lnum, col = unpack(parts)
+            local text = vim.iter(parts):slice(4, #parts - 1):join("\x1b")
+            return {filename = filename, lnum = tonumber(lnum), col = tonumber(col), text = text}
+        end,
+        title = "Grep",
+    })
+end, {nargs = "*", complete = "file"})
 
 -- Completion {{{1
 
