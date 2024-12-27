@@ -376,6 +376,13 @@ nvim_create_autocmd("FileType", {
 --- @type table<integer, {foldlevel: table<integer, integer | string>, foldtext: table<integer, string>}>
 _G.quickfix_data = quickfix_data or {}
 
+local quickfix_types = {
+    E = {"error", "DiagnosticError"},
+    W = {"warning", "DiagnosticWarn"},
+    I = {"info", "DiagnosticInfo"},
+    N = {"note", "DiagnosticHint"},
+}
+
 defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
 
 --- @param args quickfixtextfunc_args
@@ -388,12 +395,6 @@ function _G.quickfix_textfunc(args)
     local lines = {} --- @type string[]
     local highlights = {}
     local namespace = nvim_create_namespace("quickfix")
-    local types = {
-        E = {"error", "DiagnosticError"},
-        W = {"warning", "DiagnosticWarn"},
-        I = {"info", "DiagnosticInfo"},
-        N = {"note", "DiagnosticHint"},
-    }
 
     if args.start_idx == 1 then
         nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
@@ -408,7 +409,7 @@ function _G.quickfix_textfunc(args)
 
         if item.bufnr ~= 0 then
             local name = nvim_buf_get_name(item.bufnr)
-            line = name ~= "" and fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.") or "[No Name]"
+            line = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
             -- Dim path for all but the first (consecutive) item for the same buffer
             if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
                 table.insert(highlights, {i - 1, 0, #line, "NonText"})
@@ -425,7 +426,7 @@ function _G.quickfix_textfunc(args)
         end
         line = line .. "| "
 
-        local type = types[item.type:upper()]
+        local type = quickfix_types[item.type:upper()]
         if type then
             local name, group = unpack(type)
             table.insert(highlights, {i - 1, #line, #line + #name + 1, group})
@@ -477,8 +478,10 @@ end
 --- @field args? string[]
 --- @field cwd? string
 --- @field input? string[]
+--- @field on_output? fun(lines: string[])
 --- @field to_quickfix fun(line: string): vim.quickfix.entry
 --- @field title string
+--- @field loclist_winid? integer
 
 --- @param opts fzf_opts
 local function run_fzf(opts)
@@ -513,6 +516,7 @@ local function run_fzf(opts)
             vim.uv.fs_unlink(output)
             if input then vim.uv.fs_unlink(input) end
 
+            if opts.on_output then opts.on_output(lines) end
             if #lines == 1 then
                 local item = opts.to_quickfix(lines[1])
                 if not (item.bufnr or item.filename) then return end
@@ -526,8 +530,14 @@ local function run_fzf(opts)
                     after_jump()
                 end
             elseif #lines > 1 then
-                fn.setqflist({}, " ", {title = opts.title, items = vim.tbl_map(opts.to_quickfix, lines)})
-                vim.cmd("botright copen")
+                local what = {title = opts.title, items = vim.tbl_map(opts.to_quickfix, lines)}
+                if opts.loclist_winid then
+                    fn.setloclist(opts.loclist_winid, {}, " ", what)
+                    vim.cmd("lopen")
+                else
+                    fn.setqflist({}, " ", what)
+                    vim.cmd("botright copen")
+                end
             end
         end,
     })
@@ -600,6 +610,52 @@ nvim_create_user_command("IGrep", function(opts)
         title = "Grep",
     })
 end, {nargs = "*", complete = "file"})
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "qf",
+    callback = function()
+        map("n", "s", function()
+            local list = fn.getwininfo(nvim_get_current_win())[1].loclist == 0
+                and fn.getqflist({title = true, items = true, winid = true})
+                or fn.getloclist(0, {title = true, items = true, winid = true, filewinid = true})
+            run_fzf({
+                args = {"--with-nth=2..", "--ansi", "--tiebreak=begin"},
+                input = vim.iter(list.items):enumerate():map(function(i, item)
+                    local location = ""
+                    if item.bufnr ~= 0 then
+                        local name = nvim_buf_get_name(item.bufnr)
+                        location = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
+                    end
+                    if item.lnum ~= 0 then location = location .. ":" .. item.lnum end
+                    local text = vim.trim(item.text:gsub("\n%s*", " ")):gsub("\t", " ")
+                    local type = quickfix_types[item.type:upper()]
+                    if type then text = type[1] .. ": " .. text end
+                    if text ~= "" then
+                        local clean_text = text:gsub("\x1b%[%d*m", "")
+                        local pad = vim.o.columns - fn.strwidth(clean_text) - fn.strwidth(location) - 3
+                        return ("%d %s%s\x1b[90m%s\x1b[0m"):format(i, text, (" "):rep(math.max(pad, 1)), location)
+                    else
+                        return ("%d %s"):format(i, location)
+                    end
+                end):totable(),
+                on_output = function(lines)
+                    if #lines == 1 then
+                        nvim_win_close(list.winid, false)
+                    else
+                        -- Return focus to quickfix window when cancelled
+                        nvim_set_current_win(list.winid)
+                    end
+                end,
+                to_quickfix = function(line)
+                    return list.items[tonumber(vim.gsplit(line, " ")())]
+                end,
+                title = list.title,
+                loclist_winid = list.filewinid,
+            })
+        end, {buffer = 0})
+    end,
+})
 
 -- Completion {{{1
 
