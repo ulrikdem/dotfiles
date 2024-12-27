@@ -709,11 +709,15 @@ cmp.setup({
 
 -- LSP {{{1
 
--- Mappings use the proposed gr prefix: https://github.com/neovim/neovim/pull/28650
 map("n", "grn", lsp.buf.rename)
 map({"n", "x"}, "gra", lsp.buf.code_action)
+map("n", "gO", lsp.buf.document_symbol)
 map("n", "grr", lsp.buf.references)
+map("n", "gri", lsp.buf.implementation)
+map("n", "grd", lsp.buf.declaration)
+map("n", "grt", lsp.buf.type_definition)
 map("n", "grq", lsp.buf.format)
+map("n", "grl", lsp.codelens.run)
 
 for k, v in pairs({k = {lsp.inlay_hint, "inlay hints"}, e = {vim.diagnostic, "diagnostics"}}) do
     map("n", "yo" .. k, function()
