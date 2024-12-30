@@ -547,7 +547,7 @@ map("n", "<Leader>ff", vim.cmd.Fzf)
 nvim_create_user_command("Fzf", function(opts)
     local cwd = vim.fs.normalize(opts.args)
     run_fzf({
-        args = {("--prompt=%s/"):format(fn.fnamemodify(cwd, ":~"):gsub("/$", ""))},
+        args = {("--prompt=%s/"):format(fn.fnamemodify(cwd, ":p:~"):gsub("/$", ""))},
         cwd = cwd,
         to_quickfix = function(line) return {filename = line, valid = true} end,
         title = "Files",
@@ -577,7 +577,7 @@ map("n", "<Leader>fb", function()
         args = {
             "--prompt=buffer: ",
             "--with-nth=2..",
-            ([[--bind=ctrl-d:reload:nvim --server %s --remote-expr "v:lua.delete_buffer($(printf %%s {} | cut -d ' ' -f 1))"]])
+            ([[--bind=ctrl-d:reload:nvim --server %s --remote-expr v:lua.delete_buffer\({1}\)]])
                 :format(fn.shellescape(vim.v.servername)),
         },
         input = list_buffers(),
