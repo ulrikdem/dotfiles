@@ -676,12 +676,9 @@ nvim_create_autocmd("FileType", {
                     end
                 end):totable(),
                 on_output = function(lines)
-                    if #lines == 1 then
-                        nvim_win_close(list.winid, false)
-                    else
-                        -- Return focus to quickfix window when cancelled
-                        nvim_set_current_win(list.winid)
-                    end
+                    -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
+                    nvim_set_current_win(list.winid)
+                    if #lines == 1 then nvim_win_close(list.winid, false) end
                 end,
                 to_quickfix = function(line)
                     return list.items[tonumber(vim.gsplit(line, " ")())]
