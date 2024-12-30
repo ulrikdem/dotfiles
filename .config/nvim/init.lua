@@ -467,17 +467,6 @@ function _G.quickfix_textfunc(args)
             line = line .. name .. ": "
         end
 
-        -- Highlight range from LSP location
-        local range = vim.tbl_get(item, "user_data", "targetSelectionRange")
-            or vim.tbl_get(item, "user_data", "range")
-        if range and range.start.line == range["end"].line then
-            local col = #line + (item.col - 1) - leading_space
-            -- This ignores offset_encoding, so will give the wrong end for ranges containing non-ASCII chars
-            -- The start will be correct though, since we use item.col instead of range.start.character
-            local length = range["end"].character - range.start.character
-            table.insert(highlights, {i - 1, col, col + length, "String"})
-        end
-
         local highlight_ranges = vim.tbl_get(item, "user_data", "highlight_ranges")
         for _, range in ipairs(highlight_ranges or {}) do
             table.insert(highlights, {
@@ -846,6 +835,25 @@ function _G.start_lsp(config)
             end,
         })
     end
+end
+
+_G.old_locations_to_items = old_locations_to_items or lsp.util.locations_to_items
+function lsp.util.locations_to_items(locations, offset_encoding)
+    --- @type vim.quickfix.entry[]
+    local items = old_locations_to_items(locations, offset_encoding)
+    for _, item in ipairs(items) do
+        --- @type lsp.Range
+        local range = item.user_data.range or item.user_data.targetSelectionRange
+        item.user_data = {
+            highlight_ranges = {
+                range.start.line == range["end"].line and {
+                    lsp.util._str_byteindex_enc(item.text, range.start.character, offset_encoding),
+                    lsp.util._str_byteindex_enc(item.text, range["end"].character, offset_encoding),
+                } or nil,
+            },
+        }
+    end
+    return items
 end
 
 --- @param client_id integer
