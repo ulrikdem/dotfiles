@@ -734,7 +734,6 @@ map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>"
 vim.diagnostic.config({
     severity_sort = true,
     signs = false,
-    float = {header = "", prefix = ""},
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
 
