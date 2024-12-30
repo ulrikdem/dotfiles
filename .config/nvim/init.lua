@@ -253,6 +253,8 @@ defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)}%(
     .. "%= %{v:lua.statusline_lsp_progress()}%{v:lua.statusline_diagnostics()}%c%V %l/%L "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
+defaults.rulerformat = "%l/%L"
+
 defaults.title = true
 defaults.titlestring = "%{v:lua.statusline_path(0, v:true)} - nvim"
 defaults.titlelen = 0
