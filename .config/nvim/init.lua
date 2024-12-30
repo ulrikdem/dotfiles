@@ -333,6 +333,38 @@ nvim_create_autocmd("LspProgress", {
 
 -- Quickfix {{{1
 
+nvim_create_user_command("Grep", function(opts)
+    vim.system({"rg", "--json", unpack(opts.fargs)}, {}, function(result)
+        if result.code == 2 then
+            return vim.schedule_wrap(nvim_err_write)(result.stderr)
+        elseif result.signal ~= 0 then
+            return vim.schedule_wrap(nvim_err_writeln)(("rg exited with signal %d"):format(result.signal))
+        end
+        local items = vim.iter(vim.gsplit(result.stdout, "\n", {trimempty = true}))
+            :map(vim.json.decode)
+            :filter(function(message) return message.type == "match" end)
+            :map(function(match)
+                return {
+                    filename = match.data.path.text or vim.base64.decode(match.data.path.bytes),
+                    lnum = match.data.line_number,
+                    col = match.data.submatches[1] and match.data.submatches[1].start + 1,
+                    text = (match.data.lines.text or vim.base64.decode(match.data.lines.bytes)):gsub("\n$", ""),
+                    user_data = {
+                        highlight_ranges = vim.tbl_map(function(submatch)
+                            return {submatch.start, submatch["end"]}
+                        end, match.data.submatches),
+                    },
+                }
+            end)
+            :totable()
+        vim.schedule(function()
+            fn.setqflist({}, " ", {title = "Grep " .. opts.args, items = items})
+            vim.cmd("botright copen")
+        end)
+    end)
+end, {nargs = "+", complete = "file"})
+map("n", "grg", "<Cmd>Grep -Fwe <cword><CR>")
+
 -- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
 nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
 nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
@@ -446,7 +478,20 @@ function _G.quickfix_textfunc(args)
             table.insert(highlights, {i - 1, col, col + length, "String"})
         end
 
-        line = line .. item.text:sub(leading_space + 1):gsub("\n%s*", " ")
+        local highlight_ranges = vim.tbl_get(item, "user_data", "highlight_ranges")
+        for _, range in ipairs(highlight_ranges or {}) do
+            table.insert(highlights, {
+                i - 1,
+                #line + math.max(range[1] - leading_space, 0),
+                #line + math.max(range[2] - leading_space, 0),
+                "String",
+            })
+        end
+
+        local text = item.text:sub(leading_space + 1)
+        if not highlight_ranges then text = text:gsub("\n%s*", " ") end
+        line = line .. text
+
         table.insert(lines, line)
     end
 
