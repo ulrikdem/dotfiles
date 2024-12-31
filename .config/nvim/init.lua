@@ -424,10 +424,10 @@ defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
 
 --- @param args quickfixtextfunc_args
 function _G.quickfix_textfunc(args)
-    local list = args.quickfix == 1
-        and fn.getqflist({id = args.id, qfbufnr = true, items = true})
-        or fn.getloclist(args.winid, {id = args.id, qfbufnr = true, items = true})
+    local what = {id = args.id, qfbufnr = true, title = true, items = true}
+    local list = args.quickfix == 1 and fn.getqflist(what) or fn.getloclist(args.winid, what)
     local bufnr = list.qfbufnr
+    local is_toc = vim.endswith(list.title, "TOC")
 
     local lines = {} --- @type string[]
     local highlights = {}
@@ -441,7 +441,7 @@ function _G.quickfix_textfunc(args)
 
     for i = args.start_idx, args.end_idx do
         local item = list.items[i]
-        local leading_space = (item.text:find("%S") or 1) - 1
+        local leading_space = is_toc and 0 or #item.text:match("%s*")
         local line = ""
 
         if item.bufnr ~= 0 then
@@ -670,7 +670,7 @@ local function quickfix_to_fzf(items)
         end
         if item.lnum and item.lnum ~= 0 then location = location .. ":" .. item.lnum end
 
-        local text = (item.text or ""):gsub("^[%s ]+", ""):gsub("\n%s*", " "):gsub("\t", " ")
+        local text = vim.trim(item.text or ""):gsub("\n%s*", " "):gsub("\t", " ")
         local type = quickfix_types[(item.type or ""):upper()]
         if type then text = type[1] .. ": " .. text end
         local container_names = vim.tbl_get(item, "user_data", "container_names")
@@ -942,10 +942,8 @@ function lsp.util.symbols_to_items(symbols, bufnr, items, depth, container_names
     depth = depth or 0
     for _, symbol in ipairs(symbols) do
         local range = symbol.selectionRange or symbol.location.range
-        local text = ("%s[%s] %s"):format(
-            ("  "):rep(depth), -- Indent with non-breaking space to prevent trimming
-            lsp.protocol.SymbolKind[symbol.kind] or "Unknown",
-            symbol.name)
+        local kind = lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
+        local text = ("%s[%s] %s"):format(("  "):rep(depth), kind, symbol.name)
         table.insert(items, {
             filename = symbol.location and vim.uri_to_fname(symbol.location.uri),
             bufnr = not symbol.location and bufnr or nil,
