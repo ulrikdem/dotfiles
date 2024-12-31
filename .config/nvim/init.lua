@@ -403,7 +403,7 @@ nvim_create_autocmd("FileType", {
         wo.foldmethod = "expr"
         wo.foldexpr = "v:lua.quickfix_foldexpr()"
         wo.foldtext = "v:lua.quickfix_foldtext()"
-        wo.foldlevel = 1
+        wo.foldlevel = 99
     end,
 })
 
@@ -480,6 +480,12 @@ function _G.quickfix_textfunc(args)
         local text = item.text:sub(leading_space + 1)
         if not highlight_ranges then text = text:gsub("\n%s*", " ") end
         line = line .. text
+
+        local foldlevel = vim.tbl_get(item, "user_data", "foldlevel")
+        if foldlevel then
+            data.foldlevel[i] = foldlevel
+            data.foldtext[i] = text
+        end
 
         table.insert(lines, line)
     end
@@ -664,9 +670,15 @@ nvim_create_autocmd("FileType", {
                         location = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
                     end
                     if item.lnum ~= 0 then location = location .. ":" .. item.lnum end
-                    local text = vim.trim(item.text:gsub("\n%s*", " ")):gsub("\t", " ")
+                    local text = item.text:gsub("^[%s ]+", ""):gsub("\n%s*", " "):gsub("\t", " ")
                     local type = quickfix_types[item.type:upper()]
                     if type then text = type[1] .. ": " .. text end
+                    local container_names = vim.tbl_get(item, "user_data", "container_names")
+                    if container_names then
+                        text = ("%s\x1b[90m%s\x1b[0m"):format(
+                            text,
+                            vim.iter(container_names):map(function(s) return " < " .. s end):join(""))
+                    end
                     if text ~= "" then
                         local clean_text = text:gsub("\x1b%[%d*m", "")
                         local pad = vim.o.columns - fn.strwidth(clean_text) - fn.strwidth(location) - 3
@@ -744,13 +756,32 @@ cmp.setup({
 
 map("n", "grn", lsp.buf.rename)
 map({"n", "x"}, "gra", lsp.buf.code_action)
-map("n", "gO", lsp.buf.document_symbol)
 map("n", "grr", lsp.buf.references)
 map("n", "gri", lsp.buf.implementation)
 map("n", "grd", lsp.buf.declaration)
 map("n", "grt", lsp.buf.type_definition)
 map("n", "grq", lsp.buf.format)
 map("n", "grl", lsp.codelens.run)
+
+map("n", "gO", function()
+    local bufnr = nvim_get_current_buf()
+    local winid = nvim_get_current_win()
+    lsp.buf_request_all(
+        bufnr,
+        lsp.protocol.Methods.textDocument_documentSymbol,
+        {textDocument = lsp.util.make_text_document_params()},
+        function(results)
+            local items = {}
+            for _, result in pairs(results) do
+                if result.error then return nvim_err_writeln(tostring(result.error)) end
+                lsp.util.symbols_to_items(result.result, bufnr, items)
+            end
+            -- The filename and line numbers are concealed when the title ends in TOC
+            fn.setloclist(winid, {}, " ", {title = "Symbols TOC", items = items})
+            nvim_set_current_win(winid)
+            vim.cmd.lopen()
+        end)
+end)
 
 for k, v in pairs({k = {lsp.inlay_hint, "inlay hints"}, e = {vim.diagnostic, "diagnostics"}}) do
     map("n", "yo" .. k, function()
@@ -849,6 +880,43 @@ function lsp.util.locations_to_items(locations, offset_encoding)
                 } or nil,
             },
         }
+    end
+    return items
+end
+
+--- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
+--- @param bufnr integer
+--- @param items? vim.quickfix.entry[]
+--- @param depth? integer
+--- @param container_names? string[]
+function lsp.util.symbols_to_items(symbols, bufnr, items, depth, container_names)
+    items = items or {}
+    depth = depth or 0
+    for _, symbol in ipairs(symbols) do
+        local range = symbol.selectionRange or symbol.location.range
+        local text = ("%s[%s] %s"):format(
+            ("  "):rep(depth), -- Indent with non-breaking space to prevent trimming
+            lsp.protocol.SymbolKind[symbol.kind] or "Unknown",
+            symbol.name)
+        table.insert(items, {
+            filename = symbol.location and vim.uri_to_fname(symbol.location.uri),
+            bufnr = not symbol.location and bufnr or nil,
+            lnum = range.start.line + 1,
+            col = range.start.character + 1, -- This neglects to take into account offset_encoding
+            text = symbol.detail and symbol.detail ~= "" and text .. ": " .. symbol.detail or text,
+            user_data = {
+                highlight_ranges = {{#text - #symbol.name, #text}},
+                container_names = symbol.containerName and {symbol.containerName} or container_names,
+                -- Only override foldlevel for DocumentSymbols, which have a hierarchy
+                foldlevel = symbol.range and (next(symbol.children or {}) and ">" .. depth + 1 or depth),
+            },
+        })
+        lsp.util.symbols_to_items(
+            symbol.children or {},
+            bufnr,
+            items,
+            depth + 1,
+            {symbol.name, unpack(container_names or {})})
     end
     return items
 end
