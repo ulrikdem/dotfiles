@@ -249,7 +249,7 @@ nvim_create_autocmd("FileType", {
 
 -- Statusline {{{1
 
-defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0)}%( %m%)"
+defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0, v:false, v:true)}%( %m%)"
     .. "%= %{v:lua.statusline_lsp_progress()}%{v:lua.statusline_diagnostics()}%c%V %l/%L "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
@@ -276,17 +276,19 @@ end
 
 --- @param winid integer
 --- @param absolute? boolean
-function _G.statusline_path(winid, absolute)
+--- @param title? boolean
+function _G.statusline_path(winid, absolute, title)
     local bufnr = nvim_win_get_buf(winid)
     local name = nvim_buf_get_name(bufnr)
     local buftype = vim.bo[bufnr].buftype
-    if buftype == "quickfix" then
+    if buftype == "terminal" then
+        return "[Terminal]"
+            .. (title and vim.b[bufnr].term_title ~= name and " " .. vim.b[bufnr].term_title or "")
+    elseif buftype == "quickfix" then
         return nvim_eval_statusline("%q", {winid = winid}).str
-            .. (vim.w[winid].quickfix_title and " " .. vim.w[winid].quickfix_title or "")
+            .. (title and vim.w[winid].quickfix_title and " " .. vim.w[winid].quickfix_title or "")
     elseif buftype == "nofile" or name == "" then
         return nvim_eval_statusline("%f", {winid = winid}).str
-    elseif buftype == "terminal" then
-        return name:gsub("^term://.-//%d+:", "term://")
     else
         return fn.fnamemodify(fn.FugitiveReal(name), absolute and ":~" or ":~:.")
     end
