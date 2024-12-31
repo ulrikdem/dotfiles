@@ -348,7 +348,10 @@ nvim_create_user_command("Grep", function(opts)
                     filename = match.data.path.text or vim.base64.decode(match.data.path.bytes),
                     lnum = match.data.line_number,
                     col = match.data.submatches[1] and match.data.submatches[1].start + 1,
-                    text = (match.data.lines.text or vim.base64.decode(match.data.lines.bytes)):gsub("\n$", ""),
+                    text = vim.re.gsub(
+                        (match.lines.text or vim.base64.decode(match.lines.bytes)):gsub("\n$", ""),
+                        vim.lpeg.P("\0"),
+                        "\n"),
                     user_data = {
                         highlight_ranges = vim.tbl_map(function(submatch)
                             return {submatch.start, submatch["end"]}
