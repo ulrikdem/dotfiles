@@ -653,6 +653,40 @@ nvim_create_user_command("IGrep", function(opts)
     })
 end, {nargs = "*", complete = "file"})
 
+-- @param items vim.quickfix.entry[]
+local function quickfix_to_fzf(items)
+    --- @param i integer
+    --- @param item vim.quickfix.entry
+    return vim.iter(items):enumerate():map(function(i, item)
+        local location = ""
+        if item.bufnr and item.bufnr ~= 0 then
+            local name = nvim_buf_get_name(item.bufnr)
+            location = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
+        elseif item.filename then
+            location = fn.fnamemodify(item.filename, ":~:.")
+        end
+        if item.lnum and item.lnum ~= 0 then location = location .. ":" .. item.lnum end
+
+        local text = (item.text or ""):gsub("^[%s ]+", ""):gsub("\n%s*", " "):gsub("\t", " ")
+        local type = quickfix_types[(item.type or ""):upper()]
+        if type then text = type[1] .. ": " .. text end
+        local container_names = vim.tbl_get(item, "user_data", "container_names")
+        if container_names then
+            text = ("%s\x1b[90m%s\x1b[0m"):format(
+                text,
+                vim.iter(container_names):map(function(s) return " < " .. s end):join(""))
+        end
+
+        if text ~= "" then
+            local clean_text = text:gsub("\x1b%[%d*m", "")
+            local pad = vim.o.columns - fn.strwidth(clean_text) - fn.strwidth(location) - 3
+            return ("%d %s%s\x1b[90m%s\x1b[0m"):format(i, text, (" "):rep(math.max(pad, 1)), location)
+        else
+            return ("%d %s"):format(i, location)
+        end
+    end):totable()
+end
+
 nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "qf",
@@ -663,30 +697,7 @@ nvim_create_autocmd("FileType", {
                 or fn.getloclist(0, {title = true, items = true, winid = true, filewinid = true})
             run_fzf({
                 args = {"--with-nth=2..", "--ansi", "--tiebreak=begin"},
-                input = vim.iter(list.items):enumerate():map(function(i, item)
-                    local location = ""
-                    if item.bufnr ~= 0 then
-                        local name = nvim_buf_get_name(item.bufnr)
-                        location = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
-                    end
-                    if item.lnum ~= 0 then location = location .. ":" .. item.lnum end
-                    local text = item.text:gsub("^[%s ]+", ""):gsub("\n%s*", " "):gsub("\t", " ")
-                    local type = quickfix_types[item.type:upper()]
-                    if type then text = type[1] .. ": " .. text end
-                    local container_names = vim.tbl_get(item, "user_data", "container_names")
-                    if container_names then
-                        text = ("%s\x1b[90m%s\x1b[0m"):format(
-                            text,
-                            vim.iter(container_names):map(function(s) return " < " .. s end):join(""))
-                    end
-                    if text ~= "" then
-                        local clean_text = text:gsub("\x1b%[%d*m", "")
-                        local pad = vim.o.columns - fn.strwidth(clean_text) - fn.strwidth(location) - 3
-                        return ("%d %s%s\x1b[90m%s\x1b[0m"):format(i, text, (" "):rep(math.max(pad, 1)), location)
-                    else
-                        return ("%d %s"):format(i, location)
-                    end
-                end):totable(),
+                input = quickfix_to_fzf(list.items),
                 on_output = function(lines)
                     -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
                     nvim_set_current_win(list.winid)
@@ -701,6 +712,40 @@ nvim_create_autocmd("FileType", {
         end, {buffer = 0})
     end,
 })
+
+map("n", "<Leader>fs", function()
+    local bufnr = nvim_get_current_buf()
+    local last_query = ""
+    local items = {}
+    function _G.workspace_symbols(query)
+        query = vim.gsplit(query, " ")() or ""
+        if query ~= last_query then
+            last_query = query
+            local results = lsp.buf_request_sync(bufnr, lsp.protocol.Methods.workspace_symbol, {query = query})
+            items = {}
+            for _, result in pairs(results or {}) do
+                if result.error then lsp.log.error(tostring(result.error)) end
+                lsp.util.symbols_to_items(result.result or {}, bufnr, items)
+            end
+        end
+        return fn.join(quickfix_to_fzf(items), "\n")
+    end
+    run_fzf({
+        args = {
+            "--prompt=symbol: ",
+            ([[--bind=change:top+reload:nvim --server %s --remote-expr "v:lua.workspace_symbols('$(printf %%s {q} | sed "s/'/''/g")')"]])
+                :format(fn.shellescape(vim.v.servername)),
+            "--with-nth=2..",
+            "--ansi",
+            "--tiebreak=begin",
+        },
+        input = {},
+        to_quickfix = function(line)
+            return items[tonumber(vim.gsplit(line, " ")())]
+        end,
+        title = "Symbols",
+    })
+end)
 
 -- Completion {{{1
 
