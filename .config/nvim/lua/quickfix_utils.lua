@@ -9,11 +9,16 @@ local function gsub(str, pattern, replace)
     local i = 1
     while true do
         local j, k = str:find(pattern, i)
-        if not j then
+        if not j or j < i then
             return new_str .. str:sub(i)
         end
         new_str = new_str .. str:sub(i, j - 1) .. replace
-        i = k + 1
+        if j <= k then
+            i = k + 1
+        else -- Empty match
+            new_str = new_str .. str:sub(j, j)
+            i = j + 1
+        end
     end
 end
 
