@@ -61,8 +61,7 @@ function M.to_fzf(item, columns, highlight)
     end
     if item.lnum and item.lnum ~= 0 then
         location = location .. ":" .. item.lnum
-    end
-    if not item.text or item.text == "" then
+    elseif not item.text or item.text == "" then
         return location
     end
 
