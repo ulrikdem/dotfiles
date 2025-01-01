@@ -335,6 +335,8 @@ nvim_create_autocmd("LspProgress", {
 
 -- Quickfix {{{1
 
+local quickfix_utils = require("quickfix_utils")
+
 nvim_create_user_command("Grep", function(opts)
     vim.system({"rg", "--json", unpack(opts.fargs)}, {}, function(result)
         if result.code == 2 then
@@ -342,26 +344,11 @@ nvim_create_user_command("Grep", function(opts)
         elseif result.signal ~= 0 then
             return vim.schedule_wrap(nvim_err_writeln)(("rg exited with signal %d"):format(result.signal))
         end
-        local items = vim.iter(vim.gsplit(result.stdout, "\n", {trimempty = true}))
-            :map(vim.json.decode)
-            :filter(function(message) return message.type == "match" end)
-            :map(function(match)
-                return {
-                    filename = match.data.path.text or vim.base64.decode(match.data.path.bytes),
-                    lnum = match.data.line_number,
-                    col = match.data.submatches[1] and match.data.submatches[1].start + 1,
-                    text = vim.re.gsub(
-                        (match.lines.text or vim.base64.decode(match.lines.bytes)):gsub("\n$", ""),
-                        vim.lpeg.P("\0"),
-                        "\n"),
-                    user_data = {
-                        highlight_ranges = vim.tbl_map(function(submatch)
-                            return {submatch.start, submatch["end"]}
-                        end, match.data.submatches),
-                    },
-                }
-            end)
-            :totable()
+        local items = {}
+        for line in vim.gsplit(result.stdout, "\n", {trimempty = true}) do
+            -- Has no effect when from_ripgrep returns nil
+            items[#items + 1] = quickfix_utils.from_ripgrep(line)
+        end
         vim.schedule(function()
             fn.setqflist({}, " ", {title = "Grep " .. opts.args, items = items})
             vim.cmd("botright copen")
@@ -415,13 +402,6 @@ nvim_create_autocmd("FileType", {
 --- @type table<integer, {foldlevel: table<integer, integer | string>, foldtext: table<integer, string>}>
 _G.quickfix_data = quickfix_data or {}
 
-local quickfix_types = {
-    E = {"error", "DiagnosticError"},
-    W = {"warning", "DiagnosticWarn"},
-    I = {"info", "DiagnosticInfo"},
-    N = {"note", "DiagnosticHint"},
-}
-
 defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
 
 --- @param args quickfixtextfunc_args
@@ -465,7 +445,7 @@ function _G.quickfix_textfunc(args)
         end
         line = line .. "| "
 
-        local type = quickfix_types[item.type:upper()]
+        local type = quickfix_utils.types[item.type:upper()]
         if type then
             local name, group = unpack(type)
             table.insert(highlights, {i - 1, #line, #line + #name + 1, group})
@@ -640,57 +620,22 @@ nvim_create_user_command("IGrep", function(opts)
     run_fzf({
         args = {
             "--prompt=grep: ",
-            ("--bind=change:top+reload:rg --column --color ansi -H0Se {q} %s | igrep-format %d")
-                :format(opts.args, vim.o.columns),
-            "--with-nth=-1",
-            "--delimiter=\\0",
+            ("--bind=change:top+reload:rg --json -Se {q} %s | nvim -l %s %d"):format(
+                opts.args,
+                fn.shellescape(nvim_get_runtime_file("scripts/igrep_format.lua", false)[1]),
+                vim.o.columns),
+            "--with-nth=2..",
+            "--delimiter=\t",
             "--ansi",
             "--disabled",
         },
         input = {},
         to_quickfix = function(line)
-            local parts = vim.split(line, "\n")
-            local filename, lnum, col = unpack(parts)
-            local text = vim.iter(parts):slice(4, #parts - 1):join("\x1b")
-            return {filename = filename, lnum = tonumber(lnum), col = tonumber(col), text = text}
+           return quickfix_utils.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
         end,
         title = "Grep",
     })
 end, {nargs = "*", complete = "file"})
-
--- @param items vim.quickfix.entry[]
-local function quickfix_to_fzf(items)
-    --- @param i integer
-    --- @param item vim.quickfix.entry
-    return vim.iter(items):enumerate():map(function(i, item)
-        local location = ""
-        if item.bufnr and item.bufnr ~= 0 then
-            local name = nvim_buf_get_name(item.bufnr)
-            location = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
-        elseif item.filename then
-            location = fn.fnamemodify(item.filename, ":~:.")
-        end
-        if item.lnum and item.lnum ~= 0 then location = location .. ":" .. item.lnum end
-
-        local text = vim.trim(item.text or ""):gsub("\n%s*", " "):gsub("\t", " ")
-        local type = quickfix_types[(item.type or ""):upper()]
-        if type then text = type[1] .. ": " .. text end
-        local container_names = vim.tbl_get(item, "user_data", "container_names")
-        if container_names then
-            text = ("%s\x1b[90m%s\x1b[0m"):format(
-                text,
-                vim.iter(container_names):map(function(s) return " < " .. s end):join(""))
-        end
-
-        if text ~= "" then
-            local clean_text = text:gsub("\x1b%[%d*m", "")
-            local pad = vim.o.columns - fn.strwidth(clean_text) - fn.strwidth(location) - 3
-            return ("%d %s%s\x1b[90m%s\x1b[0m"):format(i, text, (" "):rep(math.max(pad, 1)), location)
-        else
-            return ("%d %s"):format(i, location)
-        end
-    end):totable()
-end
 
 nvim_create_autocmd("FileType", {
     group = augroup,
@@ -702,7 +647,9 @@ nvim_create_autocmd("FileType", {
                 or fn.getloclist(0, {title = true, items = true, winid = true, filewinid = true})
             run_fzf({
                 args = {"--with-nth=2..", "--ansi", "--tiebreak=begin"},
-                input = quickfix_to_fzf(list.items),
+                input = vim.iter(list.items):enumerate():map(function(i, item)
+                    return i .. " " .. quickfix_utils.to_fzf(item)
+                end):totable(),
                 on_output = function(lines)
                     -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
                     nvim_set_current_win(list.winid)
@@ -733,7 +680,9 @@ map("n", "<Leader>fs", function()
                 lsp.util.symbols_to_items(result.result or {}, bufnr, items)
             end
         end
-        return fn.join(quickfix_to_fzf(items), "\n")
+        return vim.iter(items):enumerate():map(function(i, item)
+            return i .. " " .. quickfix_utils.to_fzf(item)
+        end):join("\n")
     end
     run_fzf({
         args = {

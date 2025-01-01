@@ -17,9 +17,6 @@ autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<C
 
 " Command execution {{{1
 
-let s:match_start = "\e[31m"
-let s:match_end = "\e[0m"
-
 nnoremap <Leader>mm <Cmd>update \| make<CR>
 nnoremap <Leader>mc <Cmd>make clean<CR>
 
@@ -31,19 +28,6 @@ autocmd vimrc ColorScheme * highlight link DirvishPathHead NonText
 if $RANGER_LEVEL
     nmap <expr> - !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
-
-" Quickfix {{{1
-
-autocmd vimrc FileType qf call s:InitQuickfixBuffer()
-function! s:InitQuickfixBuffer() abort
-    if exists('w:added_qf_matches')
-        return
-    endif
-    call matchadd('String', s:match_start.'.\{-}'.s:match_end)
-    call matchadd('Conceal', '\e\[\d*m')
-    setlocal conceallevel=2 concealcursor=nvc
-    let w:added_qf_matches = v:true
-endfunction
 
 " Git {{{1
 

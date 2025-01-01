@@ -422,12 +422,12 @@ if (($+commands[fzf])); then
         bindkeymaps '^R' fzf-history-widget main
     fi
 
-    if (($+commands[rg] && $+commands[igrep-format])); then
+    if (($+commands[rg] && $+commands[nvim])); then
         function fzf-grep-widget {
             local results=$(
                 unset REPORTTIME
-                fzf --height 11 --reverse --prompt 'grep: ' --bind change:top+reload:'rg --column --color ansi -0Se {q} | igrep-format $COLUMNS' --with-nth -1 --delimiter '\0' --ansi --disabled -m |
-                    cut -f 1 -d $'\0' |
+                fzf --height 11 --reverse --prompt 'grep: ' --bind change:top+reload:'rg --json -Se {q} | nvim -l ~/.config/nvim/scripts/igrep_format.lua $COLUMNS' --with-nth 2.. --delimiter '\t' --ansi --disabled -m |
+                    cut -f 1 |
                     while read -r item; do
                         echo -nE - "${(q)item} "
                     done
