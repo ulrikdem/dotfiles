@@ -702,6 +702,25 @@ map("n", "<Leader>fs", function()
     })
 end)
 
+--- @param opts {prompt?: string, format_item?: fun(any): string}
+function vim.ui.select(items, opts, on_choice)
+    opts = opts or {}
+    run_fzf({
+        args = {("--prompt=%s "):format((opts.prompt or "select:"):lower()), "--with-nth=2..", "+m"},
+        input = vim.iter(items):enumerate():map(function(i, item)
+            return i .. " " .. (opts.format_item or tostring)(item)
+        end):totable(),
+        on_output = function(lines)
+            if lines[1] then
+                local i = tonumber(vim.gsplit(lines[1], " ")())
+                on_choice(items[i], i)
+            else
+                on_choice(nil, nil)
+            end
+        end,
+    })
+end
+
 -- Completion {{{1
 
 local cmp = require("cmp")
