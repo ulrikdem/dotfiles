@@ -503,9 +503,13 @@ end
 
 --- @class fzf_opts
 --- @field args? string[]
+--- @field bind? table<string, string | {[1]: string, args: string, [2]: fun(...: string): string?}>
 --- @field cwd? string
 --- @field input? string[]
 --- @field on_output fun(lines: string[])
+
+--- @type {next_id: integer, [string]: fun(args: string): string?}
+_G.fzf_bound_functions = {next_id = 0}
 
 --- @param opts fzf_opts
 local function run_fzf(opts)
@@ -520,6 +524,23 @@ local function run_fzf(opts)
         border = {"", "─", "", "", "", "", "", ""},
     })
     vim.wo[0][0].winhighlight = "NormalFloat:Normal,FloatBorder:WinSeparator"
+
+    opts.args = opts.args or {}
+    local function_ids = {}
+    for key, action in pairs(opts.bind or {}) do
+        if type(action) == "table" then
+            local func = action[2]
+            local id = "_" .. fzf_bound_functions.next_id
+            fzf_bound_functions.next_id = fzf_bound_functions.next_id + 1
+            fzf_bound_functions[id] = function(args)
+                return func(unpack(vim.split(args, "\n")))
+            end
+            table.insert(function_ids, id)
+            action = ([[%s:nvim --server %s --remote-expr "v:lua.fzf_bound_functions.%s('$(printf '%%s\n' %s | sed "s/'/''/")')"]])
+                :format(action[1], fn.shellescape(vim.v.servername), id, action.args)
+        end
+        table.insert(opts.args, ("--bind=%s:%s"):format(key, action))
+    end
 
     local output = fn.tempname()
     local cmd = ("fzf --layout=reverse-list -m %s >%s"):format(
@@ -539,6 +560,7 @@ local function run_fzf(opts)
             local lines = fn.readfile(output)
             vim.uv.fs_unlink(output)
             if input then vim.uv.fs_unlink(input) end
+            for _, id in ipairs(function_ids) do fzf_bound_functions[id] = nil end
             opts.on_output(lines)
         end,
     })
@@ -587,33 +609,27 @@ nvim_create_user_command("Fzf", function(opts)
     })
 end, {nargs = "?", complete = "file"})
 
---- @return string[]
-local function list_buffers()
-    return vim.tbl_map(function(info)
-        return ("%d %s%s"):format(
-            info.bufnr,
-            info.name ~= "" and fn.fnamemodify(info.name, ":~:.") or "[No Name]",
-            vim.bo[info.bufnr].modified and " [+]" or "")
-    end, fn.getbufinfo({buflisted = 1}))
-end
-
---- @param bufnr integer
-function _G.delete_buffer(bufnr)
-    if not vim.bo[bufnr].modified then
-        nvim_buf_delete(bufnr, {})
-    end
-    return fn.join(list_buffers(), "\n")
-end
-
 map("n", "<Leader>fb", function()
+    local function buffers()
+        return vim.tbl_map(function(info)
+            return ("%d %s%s"):format(
+                info.bufnr,
+                info.name ~= "" and fn.fnamemodify(info.name, ":~:.") or "[No Name]",
+                vim.bo[info.bufnr].modified and " [+]" or "")
+        end, fn.getbufinfo({buflisted = 1}))
+    end
     run_fzf({
-        args = {
-            "--prompt=buffer: ",
-            "--with-nth=2..",
-            ([[--bind=ctrl-d:reload:nvim --server %s --remote-expr v:lua.delete_buffer\({1}\)]])
-                :format(fn.shellescape(vim.v.servername)),
+        args = {"--prompt=buffer: ", "--with-nth=2.."},
+        input = buffers(),
+        bind = {
+            ["ctrl-d"] = {"reload", args = "{1}", function(bufnr)
+                bufnr = tonumber(bufnr)
+                if bufnr and not vim.bo[bufnr].modified then
+                    nvim_buf_delete(bufnr, {})
+                end
+                return table.concat(buffers(), "\n")
+            end},
         },
-        input = list_buffers(),
         on_output = jump_or_setqflist("Buffers", function(line)
             return {bufnr = tonumber(vim.gsplit(line, " ")()), valid = true}
         end),
@@ -623,16 +639,12 @@ end)
 map("n", "<Leader>fg", vim.cmd.IGrep)
 nvim_create_user_command("IGrep", function(opts)
     run_fzf({
-        args = {
-            "--prompt=grep: ",
-            ("--bind=change:top+reload:rg --json -Se {q} %s | nvim -l %s %d"):format(
+        args = {"--prompt=grep: ", "--with-nth=2..", "--delimiter=\t", "--ansi", "--disabled"},
+        bind = {
+            change = ("top+reload:rg --json -Se {q} %s | nvim -l %s %d"):format(
                 opts.args,
                 fn.shellescape(nvim_get_runtime_file("scripts/igrep_format.lua", false)[1]),
                 vim.o.columns),
-            "--with-nth=2..",
-            "--delimiter=\t",
-            "--ansi",
-            "--disabled",
         },
         input = {},
         on_output = jump_or_setqflist("Grep", function(line)
@@ -671,29 +683,24 @@ map("n", "<Leader>fs", function()
     local bufnr = nvim_get_current_buf()
     local last_query = ""
     local items = {}
-    function _G.workspace_symbols(query)
-        query = vim.gsplit(query, " ")() or ""
-        if query ~= last_query then
-            last_query = query
-            local results = lsp.buf_request_sync(bufnr, lsp.protocol.Methods.workspace_symbol, {query = query})
-            items = {}
-            for _, result in pairs(results or {}) do
-                if result.error then lsp.log.error(tostring(result.error)) end
-                lsp.util.symbols_to_items(result.result or {}, bufnr, items)
-            end
-        end
-        return vim.iter(items):enumerate():map(function(i, item)
-            return i .. " " .. quickfix_utils.to_fzf(item)
-        end):join("\n")
-    end
     run_fzf({
-        args = {
-            "--prompt=symbol: ",
-            ([[--bind=change:top+reload:nvim --server %s --remote-expr "v:lua.workspace_symbols('$(printf %%s {q} | sed "s/'/''/g")')"]])
-                :format(fn.shellescape(vim.v.servername)),
-            "--with-nth=2..",
-            "--ansi",
-            "--tiebreak=begin",
+        args = {"--prompt=symbol: ", "--with-nth=2..", "--ansi", "--tiebreak=begin"},
+        bind = {
+            change = {"top+reload", args = "{q}", function(query)
+                query = vim.gsplit(query, " ")() or ""
+                if query ~= last_query then
+                    last_query = query
+                    local results = lsp.buf_request_sync(bufnr, lsp.protocol.Methods.workspace_symbol, {query = query})
+                    items = {}
+                    for _, result in pairs(results or {}) do
+                        if result.error then lsp.log.error(tostring(result.error)) end
+                        lsp.util.symbols_to_items(result.result or {}, bufnr, items)
+                    end
+                end
+                return vim.iter(items):enumerate():map(function(i, item)
+                    return i .. " " .. quickfix_utils.to_fzf(item)
+                end):join("\n")
+            end},
         },
         input = {},
         on_output = jump_or_setqflist("Symbols", function(line)
