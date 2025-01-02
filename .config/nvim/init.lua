@@ -505,10 +505,7 @@ end
 --- @field args? string[]
 --- @field cwd? string
 --- @field input? string[]
---- @field on_output? fun(lines: string[])
---- @field to_quickfix fun(line: string): vim.quickfix.entry
---- @field title string
---- @field loclist_winid? integer
+--- @field on_output fun(lines: string[])
 
 --- @param opts fzf_opts
 local function run_fzf(opts)
@@ -542,32 +539,40 @@ local function run_fzf(opts)
             local lines = fn.readfile(output)
             vim.uv.fs_unlink(output)
             if input then vim.uv.fs_unlink(input) end
-
-            if opts.on_output then opts.on_output(lines) end
-            if #lines == 1 then
-                local item = opts.to_quickfix(lines[1])
-                if not (item.bufnr or item.filename) then return end
-                local bufnr = item.bufnr or fn.bufadd(item.filename)
-                vim.cmd("normal! m'")
-                nvim_win_set_buf(0, bufnr)
-                vim.bo.buflisted = true
-                if item.lnum and item.lnum > 0 then
-                    local set_cursor = item.vcol and item.vcol ~= 0 and fn.setcursorcharpos or fn.cursor
-                    set_cursor(item.lnum, item.col and item.col > 0 and item.col or 1)
-                    after_jump()
-                end
-            elseif #lines > 1 then
-                local what = {title = opts.title, items = vim.tbl_map(opts.to_quickfix, lines)}
-                if opts.loclist_winid then
-                    fn.setloclist(opts.loclist_winid, {}, " ", what)
-                    vim.cmd("lopen")
-                else
-                    fn.setqflist({}, " ", what)
-                    vim.cmd("botright copen")
-                end
-            end
+            opts.on_output(lines)
         end,
     })
+end
+
+--- @param title string
+--- @param parse fun(line: string): vim.quickfix.entry
+--- @param loclist_winid? integer
+--- @return fun(lines: string[])
+local function jump_or_setqflist(title, parse, loclist_winid)
+    return function(lines)
+        if #lines == 1 then
+            local item = parse(lines[1])
+            if not (item.bufnr or item.filename) then return end
+            local bufnr = item.bufnr or fn.bufadd(item.filename)
+            vim.cmd("normal! m'")
+            nvim_win_set_buf(0, bufnr)
+            vim.bo.buflisted = true
+            if item.lnum and item.lnum > 0 then
+                local set_cursor = item.vcol and item.vcol ~= 0 and fn.setcursorcharpos or fn.cursor
+                set_cursor(item.lnum, item.col and item.col > 0 and item.col or 1)
+                after_jump()
+            end
+        elseif #lines > 1 then
+            local what = {title = title, items = vim.tbl_map(parse, lines)}
+            if loclist_winid then
+                fn.setloclist(loclist_winid, {}, " ", what)
+                vim.cmd("lopen")
+            else
+                fn.setqflist({}, " ", what)
+                vim.cmd("botright copen")
+            end
+        end
+    end
 end
 
 map("n", "<Leader>ff", vim.cmd.Fzf)
@@ -576,8 +581,9 @@ nvim_create_user_command("Fzf", function(opts)
     run_fzf({
         args = {("--prompt=%s/"):format(fn.fnamemodify(cwd, ":p:~"):gsub("/$", ""))},
         cwd = cwd,
-        to_quickfix = function(line) return {filename = line, valid = true} end,
-        title = "Files",
+        on_output = jump_or_setqflist("Files", function(line)
+            return {filename = line, valid = true}
+        end),
     })
 end, {nargs = "?", complete = "file"})
 
@@ -608,10 +614,9 @@ map("n", "<Leader>fb", function()
                 :format(fn.shellescape(vim.v.servername)),
         },
         input = list_buffers(),
-        to_quickfix = function(line)
+        on_output = jump_or_setqflist("Buffers", function(line)
             return {bufnr = tonumber(vim.gsplit(line, " ")()), valid = true}
-        end,
-        title = "Buffers",
+        end),
     })
 end)
 
@@ -630,10 +635,9 @@ nvim_create_user_command("IGrep", function(opts)
             "--disabled",
         },
         input = {},
-        to_quickfix = function(line)
+        on_output = jump_or_setqflist("Grep", function(line)
            return quickfix_utils.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
-        end,
-        title = "Grep",
+        end),
     })
 end, {nargs = "*", complete = "file"})
 
@@ -654,12 +658,10 @@ nvim_create_autocmd("FileType", {
                     -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
                     nvim_set_current_win(list.winid)
                     if #lines == 1 then nvim_win_close(list.winid, false) end
+                    jump_or_setqflist(list.title, function(line)
+                        return list.items[tonumber(vim.gsplit(line, " ")())]
+                    end, list.filewinid)(lines)
                 end,
-                to_quickfix = function(line)
-                    return list.items[tonumber(vim.gsplit(line, " ")())]
-                end,
-                title = list.title,
-                loclist_winid = list.filewinid,
             })
         end, {buffer = 0})
     end,
@@ -694,10 +696,9 @@ map("n", "<Leader>fs", function()
             "--tiebreak=begin",
         },
         input = {},
-        to_quickfix = function(line)
+        on_output = jump_or_setqflist("Symbols", function(line)
             return items[tonumber(vim.gsplit(line, " ")())]
-        end,
-        title = "Symbols",
+        end),
     })
 end)
 
