@@ -233,36 +233,37 @@ end
 
 --- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
 --- @param bufnr integer
---- @param items? vim.quickfix.entry[]
---- @param depth? integer
---- @param container_names? string[]
-function M.from_lsp_symbols(symbols, bufnr, items, depth, container_names)
-    items = items or {}
-    depth = depth or 0
-    for _, symbol in ipairs(symbols) do
-        local range = symbol.selectionRange or symbol.location.range
-        local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
-        local text = ("%s[%s] %s"):format(("  "):rep(depth), kind, symbol.name)
-        table.insert(items, {
-            filename = symbol.location and vim.uri_to_fname(symbol.location.uri),
-            bufnr = not symbol.location and bufnr or nil,
-            lnum = range.start.line + 1,
-            col = range.start.character + 1, -- This neglects to take into account offset_encoding
-            text = symbol.detail and symbol.detail ~= "" and text .. ": " .. symbol.detail or text,
-            user_data = {
-                highlight_ranges = {{#text - #symbol.name, #text}},
-                container_names = symbol.containerName and {symbol.containerName} or container_names,
-                -- Only override foldlevel for DocumentSymbols, which have a hierarchy
-                foldlevel = symbol.range and (next(symbol.children or {}) and ">" .. depth + 1 or depth),
-            },
-        })
-        M.from_lsp_symbols(
-            symbol.children or {},
-            bufnr,
-            items,
-            depth + 1,
-            {symbol.name, unpack(container_names or {})})
+function M.from_lsp_symbols(symbols, bufnr)
+    local items = {} --- @type vim.quickfix.entry[]
+
+    --- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
+    --- @param depth integer
+    --- @param container_names string[]
+    local function inner(symbols, depth, container_names)
+        for _, symbol in ipairs(symbols) do
+            local range = symbol.selectionRange or symbol.location.range
+            local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
+            local text = ("%s[%s] %s"):format(("  "):rep(depth), kind, symbol.name)
+            table.insert(items, {
+                filename = symbol.location and vim.uri_to_fname(symbol.location.uri),
+                bufnr = not symbol.location and bufnr or nil,
+                lnum = range.start.line + 1,
+                col = range.start.character + 1, -- This neglects to take into account offset_encoding
+                text = symbol.detail and symbol.detail ~= "" and text .. ": " .. symbol.detail or text,
+                user_data = {
+                    highlight_ranges = {{#text - #symbol.name, #text}},
+                    container_names = symbol.containerName and {symbol.containerName} or container_names,
+                    -- Only override foldlevel for DocumentSymbols, which have a hierarchy
+                    foldlevel = symbol.range and (next(symbol.children or {}) and ">" .. depth + 1 or depth),
+                },
+            })
+            if symbol.children then
+                inner(symbol.children, depth + 1, {symbol.name, unpack(container_names)})
+            end
+        end
     end
+
+    inner(symbols, 0, {})
     return items
 end
 

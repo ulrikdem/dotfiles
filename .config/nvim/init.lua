@@ -592,7 +592,7 @@ map("n", "<Leader>fs", function()
                     items = {}
                     for _, result in pairs(results or {}) do
                         if result.error then lsp.log.error(tostring(result.error)) end
-                        quickfix_utils.from_lsp_symbols(result.result or {}, bufnr, items)
+                        vim.list_extend(items, quickfix_utils.from_lsp_symbols(result.result or {}, bufnr))
                     end
                 end
                 return vim.iter(items):enumerate():map(function(i, item)
@@ -698,7 +698,7 @@ map("n", "gO", function()
             local items = {}
             for _, result in pairs(results) do
                 if result.error then return nvim_err_writeln(tostring(result.error)) end
-                quickfix_utils.from_lsp_symbols(result.result, bufnr, items)
+                vim.list_extend(items, quickfix_utils.from_lsp_symbols(result.result, bufnr))
             end
             -- The filename and line numbers are concealed when the title ends in TOC
             quickfix_utils.set_list({loclist_winid = winid, title = "Symbols TOC", items = items})
