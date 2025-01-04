@@ -158,28 +158,6 @@ function M.foldtext()
         vim.v.foldend - vim.v.foldstart + 1)
 end
 
---- @param json string
---- @return vim.quickfix.entry?
-function M.from_ripgrep(json)
-    local obj = vim.json.decode(json)
-    if obj.type == "match" then
-        local match = obj.data
-        local text = match.lines.text or vim.base64.decode(match.lines.bytes)
-        if vim.endswith(text, "\n") then text = text:sub(1, -2) end
-        return {
-            filename = match.path.text or vim.base64.decode(match.path.bytes),
-            lnum = match.line_number,
-            col = match.submatches[1] and match.submatches[1].start + 1,
-            text = gsub(text, "\0", "\n"),
-            user_data = {
-                highlight_ranges = vim.tbl_map(function(submatch)
-                    return {submatch.start, submatch["end"]}
-                end, match.submatches),
-            },
-        }
-    end
-end
-
 --- @param item vim.quickfix.entry
 --- @param columns? integer
 --- @param highlight? boolean
@@ -229,6 +207,28 @@ function M.to_fzf(item, columns, highlight)
     text = new_text .. text:sub(i + 1)
 
     return type .. text .. "\x1b[90m" .. container_names .. pad .. location .. "\x1b[m"
+end
+
+--- @param json string
+--- @return vim.quickfix.entry?
+function M.from_ripgrep(json)
+    local obj = vim.json.decode(json)
+    if obj.type == "match" then
+        local match = obj.data
+        local text = match.lines.text or vim.base64.decode(match.lines.bytes)
+        if vim.endswith(text, "\n") then text = text:sub(1, -2) end
+        return {
+            filename = match.path.text or vim.base64.decode(match.path.bytes),
+            lnum = match.line_number,
+            col = match.submatches[1] and match.submatches[1].start + 1,
+            text = gsub(text, "\0", "\n"),
+            user_data = {
+                highlight_ranges = vim.tbl_map(function(submatch)
+                    return {submatch.start, submatch["end"]}
+                end, match.submatches),
+            },
+        }
+    end
 end
 
 --- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]

@@ -338,6 +338,50 @@ nvim_create_autocmd("LspProgress", {
 package.loaded.quickfix_utils = nil -- Reload when sourcing init.lua
 local quickfix_utils = require("quickfix_utils")
 
+defaults.quickfixtextfunc = "v:lua.require'quickfix_utils'.textfunc"
+
+local function after_jump()
+    vim.cmd("normal! zv")
+    local list, i = unpack(fn.getjumplist())
+    fn.settagstack(nvim_get_current_win(), {
+        items = {{from = {list[i].bufnr, list[i].lnum, list[i].col + 1, list[i].coladd}, tagname = "quickfix"}},
+    }, "t")
+end
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "qf",
+    callback = function()
+        local wo = vim.wo[0][0]
+        wo.list = false
+        wo.wrap = false
+        wo.foldmethod = "expr"
+        wo.foldexpr = "v:lua.require'quickfix_utils'.foldexpr()"
+        wo.foldtext = "v:lua.require'quickfix_utils'.foldtext()"
+        wo.foldlevel = 99
+
+        map("n", "<CR>", function()
+            vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
+            after_jump()
+        end, {buffer = 0})
+        map("n", "<M-CR>", function()
+            vim.cmd.normal({vim.keycode("<CR>"), bang = true})
+            after_jump()
+        end, {buffer = 0})
+    end,
+})
+
+map("n", "<Leader>tq", function()
+    vim.cmd(fn.getqflist({winid = true}).winid ~= 0 and "cclose" or "botright copen")
+end)
+map("n", "<Leader>tl", function()
+    vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
+end)
+
+-- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
+nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
+nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
+
 nvim_create_user_command("Grep", function(opts)
     vim.system({"rg", "--json", unpack(opts.fargs)}, {}, function(result)
         if result.code == 2 then
@@ -354,50 +398,6 @@ nvim_create_user_command("Grep", function(opts)
     end)
 end, {nargs = "+", complete = "file"})
 map("n", "grg", "<Cmd>Grep -Fwe <cword><CR>")
-
--- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
-nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
-nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
-
-map("n", "<Leader>tq", function()
-    vim.cmd(fn.getqflist({winid = true}).winid ~= 0 and "cclose" or "botright copen")
-end)
-map("n", "<Leader>tl", function()
-    vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
-end)
-
-local function after_jump()
-    vim.cmd("normal! zv")
-    local list, i = unpack(fn.getjumplist())
-    fn.settagstack(nvim_get_current_win(), {
-        items = {{from = {list[i].bufnr, list[i].lnum, list[i].col + 1, list[i].coladd}, tagname = "quickfix"}},
-    }, "t")
-end
-
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "qf",
-    callback = function()
-        map("n", "<CR>", function()
-            vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
-            after_jump()
-        end, {buffer = 0})
-        map("n", "<M-CR>", function()
-            vim.cmd.normal({vim.keycode("<CR>"), bang = true})
-            after_jump()
-        end, {buffer = 0})
-
-        local wo = vim.wo[0][0]
-        wo.list = false
-        wo.wrap = false
-        wo.foldmethod = "expr"
-        wo.foldexpr = "v:lua.require'quickfix_utils'.foldexpr()"
-        wo.foldtext = "v:lua.require'quickfix_utils'.foldtext()"
-        wo.foldlevel = 99
-    end,
-})
-
-defaults.quickfixtextfunc = "v:lua.require'quickfix_utils'.textfunc"
 
 -- Fuzzy finder {{{1
 
