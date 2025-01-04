@@ -335,10 +335,10 @@ nvim_create_autocmd("LspProgress", {
 
 -- Quickfix {{{1
 
-package.loaded.quickfix_utils = nil -- Reload when sourcing init.lua
-local quickfix_utils = require("quickfix_utils")
+package.loaded.quickfix = nil -- Reload when sourcing init.lua
+local quickfix = require("quickfix")
 
-defaults.quickfixtextfunc = "v:lua.require'quickfix_utils'.textfunc"
+defaults.quickfixtextfunc = "v:lua.require'quickfix'.textfunc"
 
 local function after_jump()
     vim.cmd("normal! zv")
@@ -356,8 +356,8 @@ nvim_create_autocmd("FileType", {
         wo.list = false
         wo.wrap = false
         wo.foldmethod = "expr"
-        wo.foldexpr = "v:lua.require'quickfix_utils'.foldexpr()"
-        wo.foldtext = "v:lua.require'quickfix_utils'.foldtext()"
+        wo.foldexpr = "v:lua.require'quickfix'.foldexpr()"
+        wo.foldtext = "v:lua.require'quickfix'.foldtext()"
         wo.foldlevel = 99
 
         map("n", "<CR>", function()
@@ -392,9 +392,9 @@ nvim_create_user_command("Grep", function(opts)
         local items = {}
         for line in vim.gsplit(result.stdout, "\n", {trimempty = true}) do
             -- Has no effect when from_ripgrep returns nil
-            items[#items + 1] = quickfix_utils.from_ripgrep(line)
+            items[#items + 1] = quickfix.from_ripgrep(line)
         end
-        vim.schedule_wrap(quickfix_utils.set_list)({title = "Grep " .. opts.args, items = items})
+        vim.schedule_wrap(quickfix.set_list)({title = "Grep " .. opts.args, items = items})
     end)
 end, {nargs = "+", complete = "file"})
 map("n", "grg", "<Cmd>Grep -Fwe <cword><CR>")
@@ -485,7 +485,7 @@ local function jump_or_setqflist(title, parse, loclist_winid)
                 after_jump()
             end
         elseif #lines > 1 then
-            quickfix_utils.set_list({
+            quickfix.set_list({
                 loclist_winid = loclist_winid,
                 title = title,
                 items = vim.tbl_map(parse, lines),
@@ -545,7 +545,7 @@ nvim_create_user_command("IGrep", function(opts)
         },
         input = {},
         on_output = jump_or_setqflist("Grep", function(line)
-           return quickfix_utils.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
+           return quickfix.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
         end),
     })
 end, {nargs = "*", complete = "file"})
@@ -555,14 +555,14 @@ nvim_create_autocmd("FileType", {
     pattern = "qf",
     callback = function()
         map("n", "s", function()
-            local list = quickfix_utils.get_list({
+            local list = quickfix.get_list({
                 loclist_winid = fn.getwininfo(nvim_get_current_win())[1].loclist ~= 0 and 0 or nil,
                 title = true, items = true, winid = true, filewinid = true,
             })
             run_fzf({
                 args = {"--with-nth=2..", "--ansi", "--tiebreak=begin"},
                 input = vim.iter(list.items):enumerate():map(function(i, item)
-                    return i .. " " .. quickfix_utils.to_fzf(item)
+                    return i .. " " .. quickfix.to_fzf(item)
                 end):totable(),
                 on_output = function(lines)
                     -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
@@ -592,11 +592,11 @@ map("n", "<Leader>fs", function()
                     items = {}
                     for _, result in pairs(results or {}) do
                         if result.error then lsp.log.error(tostring(result.error)) end
-                        vim.list_extend(items, quickfix_utils.from_lsp_symbols(result.result or {}, bufnr))
+                        vim.list_extend(items, quickfix.from_lsp_symbols(result.result or {}, bufnr))
                     end
                 end
                 return vim.iter(items):enumerate():map(function(i, item)
-                    return i .. " " .. quickfix_utils.to_fzf(item)
+                    return i .. " " .. quickfix.to_fzf(item)
                 end):join("\n")
             end},
         },
@@ -698,10 +698,10 @@ map("n", "gO", function()
             local items = {}
             for _, result in pairs(results) do
                 if result.error then return nvim_err_writeln(tostring(result.error)) end
-                vim.list_extend(items, quickfix_utils.from_lsp_symbols(result.result, bufnr))
+                vim.list_extend(items, quickfix.from_lsp_symbols(result.result, bufnr))
             end
             -- The filename and line numbers are concealed when the title ends in TOC
-            quickfix_utils.set_list({loclist_winid = winid, title = "Symbols TOC", items = items})
+            quickfix.set_list({loclist_winid = winid, title = "Symbols TOC", items = items})
         end)
 end)
 
