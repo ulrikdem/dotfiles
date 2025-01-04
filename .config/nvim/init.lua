@@ -335,6 +335,7 @@ nvim_create_autocmd("LspProgress", {
 
 -- Quickfix {{{1
 
+package.loaded.quickfix_utils = nil -- Reload when sourcing init.lua
 local quickfix_utils = require("quickfix_utils")
 
 nvim_create_user_command("Grep", function(opts)
@@ -349,10 +350,7 @@ nvim_create_user_command("Grep", function(opts)
             -- Has no effect when from_ripgrep returns nil
             items[#items + 1] = quickfix_utils.from_ripgrep(line)
         end
-        vim.schedule(function()
-            fn.setqflist({}, " ", {title = "Grep " .. opts.args, items = items})
-            vim.cmd("botright copen")
-        end)
+        vim.schedule_wrap(quickfix_utils.set_list)({title = "Grep " .. opts.args, items = items})
     end)
 end, {nargs = "+", complete = "file"})
 map("n", "grg", "<Cmd>Grep -Fwe <cword><CR>")
@@ -393,111 +391,13 @@ nvim_create_autocmd("FileType", {
         wo.list = false
         wo.wrap = false
         wo.foldmethod = "expr"
-        wo.foldexpr = "v:lua.quickfix_foldexpr()"
-        wo.foldtext = "v:lua.quickfix_foldtext()"
+        wo.foldexpr = "v:lua.require'quickfix_utils'.foldexpr()"
+        wo.foldtext = "v:lua.require'quickfix_utils'.foldtext()"
         wo.foldlevel = 99
     end,
 })
 
---- @type table<integer, {foldlevel: table<integer, integer | string>, foldtext: table<integer, string>}>
-_G.quickfix_data = quickfix_data or {}
-
-defaults.quickfixtextfunc = "v:lua.quickfix_textfunc"
-
---- @param args quickfixtextfunc_args
-function _G.quickfix_textfunc(args)
-    local what = {id = args.id, qfbufnr = true, title = true, items = true}
-    local list = args.quickfix == 1 and fn.getqflist(what) or fn.getloclist(args.winid, what)
-    local bufnr = list.qfbufnr
-    local is_toc = vim.endswith(list.title, "TOC")
-
-    local lines = {} --- @type string[]
-    local highlights = {}
-    local namespace = nvim_create_namespace("quickfix")
-
-    if args.start_idx == 1 then
-        nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
-        quickfix_data[bufnr] = {foldlevel = {}, foldtext = {}}
-    end
-    local data = quickfix_data[bufnr]
-
-    for i = args.start_idx, args.end_idx do
-        local item = list.items[i]
-        local leading_space = is_toc and 0 or #item.text:match("%s*")
-        local line = ""
-
-        if item.bufnr ~= 0 then
-            local name = nvim_buf_get_name(item.bufnr)
-            line = name ~= "" and fn.fnamemodify(name, ":~:.") or "[No Name]"
-            -- Dim path for all but the first (consecutive) item for the same buffer
-            if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
-                table.insert(highlights, {i - 1, 0, #line, "NonText"})
-                data.foldlevel[i] = 1
-            else
-                data.foldlevel[i] = ">1"
-                data.foldtext[i] = line
-            end
-        end
-
-        line = line .. "|"
-        if item.lnum ~= 0 then
-            line = line .. ("%4d"):format(item.lnum)
-        end
-        line = line .. "| "
-
-        local type = quickfix_utils.types[item.type:upper()]
-        if type then
-            local name, group = unpack(type)
-            table.insert(highlights, {i - 1, #line, #line + #name + 1, group})
-            line = line .. name .. ": "
-        end
-
-        local highlight_ranges = vim.tbl_get(item, "user_data", "highlight_ranges")
-        for _, range in ipairs(highlight_ranges or {}) do
-            table.insert(highlights, {
-                i - 1,
-                #line + math.max(range[1] - leading_space, 0),
-                #line + math.max(range[2] - leading_space, 0),
-                "String",
-            })
-        end
-
-        local text = item.text:sub(leading_space + 1)
-        if not highlight_ranges then text = text:gsub("\n%s*", " ") end
-        line = line .. text
-
-        local foldlevel = vim.tbl_get(item, "user_data", "foldlevel")
-        if foldlevel then
-            data.foldlevel[i] = foldlevel
-            data.foldtext[i] = text
-        end
-
-        table.insert(lines, line)
-    end
-
-    vim.schedule(function()
-        -- Cancel if the list has been replaced since this was scheduled
-        -- This can happen when updating the list from a DiagnosticChanged autocmd
-        if quickfix_data[bufnr] ~= data then return end
-
-        for _, highlight in ipairs(highlights) do
-            local line, col, end_col, group = unpack(highlight)
-            nvim_buf_set_extmark(bufnr, namespace, line, col, {end_col = end_col, hl_group = group})
-        end
-    end)
-
-    return lines
-end
-
-function _G.quickfix_foldexpr()
-    return quickfix_data[nvim_get_current_buf()].foldlevel[vim.v.lnum] or 0
-end
-
-function _G.quickfix_foldtext()
-    return ("%s (%d lines) "):format(
-        quickfix_data[nvim_get_current_buf()].foldtext[vim.v.foldstart],
-        vim.v.foldend - vim.v.foldstart + 1)
-end
+defaults.quickfixtextfunc = "v:lua.require'quickfix_utils'.textfunc"
 
 -- Fuzzy finder {{{1
 
@@ -585,14 +485,11 @@ local function jump_or_setqflist(title, parse, loclist_winid)
                 after_jump()
             end
         elseif #lines > 1 then
-            local what = {title = title, items = vim.tbl_map(parse, lines)}
-            if loclist_winid then
-                fn.setloclist(loclist_winid, {}, " ", what)
-                vim.cmd("lopen")
-            else
-                fn.setqflist({}, " ", what)
-                vim.cmd("botright copen")
-            end
+            quickfix_utils.set_list({
+                loclist_winid = loclist_winid,
+                title = title,
+                items = vim.tbl_map(parse, lines),
+            })
         end
     end
 end
@@ -658,9 +555,10 @@ nvim_create_autocmd("FileType", {
     pattern = "qf",
     callback = function()
         map("n", "s", function()
-            local list = fn.getwininfo(nvim_get_current_win())[1].loclist == 0
-                and fn.getqflist({title = true, items = true, winid = true})
-                or fn.getloclist(0, {title = true, items = true, winid = true, filewinid = true})
+            local list = quickfix_utils.get_list({
+                loclist_winid = fn.getwininfo(nvim_get_current_win())[1].loclist ~= 0 and 0 or nil,
+                title = true, items = true, winid = true, filewinid = true,
+            })
             run_fzf({
                 args = {"--with-nth=2..", "--ansi", "--tiebreak=begin"},
                 input = vim.iter(list.items):enumerate():map(function(i, item)
@@ -694,7 +592,7 @@ map("n", "<Leader>fs", function()
                     items = {}
                     for _, result in pairs(results or {}) do
                         if result.error then lsp.log.error(tostring(result.error)) end
-                        lsp.util.symbols_to_items(result.result or {}, bufnr, items)
+                        quickfix_utils.from_lsp_symbols(result.result or {}, bufnr, items)
                     end
                 end
                 return vim.iter(items):enumerate():map(function(i, item)
@@ -800,12 +698,10 @@ map("n", "gO", function()
             local items = {}
             for _, result in pairs(results) do
                 if result.error then return nvim_err_writeln(tostring(result.error)) end
-                lsp.util.symbols_to_items(result.result, bufnr, items)
+                quickfix_utils.from_lsp_symbols(result.result, bufnr, items)
             end
             -- The filename and line numbers are concealed when the title ends in TOC
-            fn.setloclist(winid, {}, " ", {title = "Symbols TOC", items = items})
-            nvim_set_current_win(winid)
-            vim.cmd.lopen()
+            quickfix_utils.set_list({loclist_winid = winid, title = "Symbols TOC", items = items})
         end)
 end)
 
@@ -906,41 +802,6 @@ function lsp.util.locations_to_items(locations, offset_encoding)
                 } or nil,
             },
         }
-    end
-    return items
-end
-
---- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
---- @param bufnr integer
---- @param items? vim.quickfix.entry[]
---- @param depth? integer
---- @param container_names? string[]
-function lsp.util.symbols_to_items(symbols, bufnr, items, depth, container_names)
-    items = items or {}
-    depth = depth or 0
-    for _, symbol in ipairs(symbols) do
-        local range = symbol.selectionRange or symbol.location.range
-        local kind = lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
-        local text = ("%s[%s] %s"):format(("  "):rep(depth), kind, symbol.name)
-        table.insert(items, {
-            filename = symbol.location and vim.uri_to_fname(symbol.location.uri),
-            bufnr = not symbol.location and bufnr or nil,
-            lnum = range.start.line + 1,
-            col = range.start.character + 1, -- This neglects to take into account offset_encoding
-            text = symbol.detail and symbol.detail ~= "" and text .. ": " .. symbol.detail or text,
-            user_data = {
-                highlight_ranges = {{#text - #symbol.name, #text}},
-                container_names = symbol.containerName and {symbol.containerName} or container_names,
-                -- Only override foldlevel for DocumentSymbols, which have a hierarchy
-                foldlevel = symbol.range and (next(symbol.children or {}) and ">" .. depth + 1 or depth),
-            },
-        })
-        lsp.util.symbols_to_items(
-            symbol.children or {},
-            bufnr,
-            items,
-            depth + 1,
-            {symbol.name, unpack(container_names or {})})
     end
     return items
 end
