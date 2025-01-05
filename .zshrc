@@ -399,7 +399,7 @@ if (($+commands[fzf])); then
                 unset REPORTTIME
                 fd -L0 --strip-cwd-prefix |
                     fzf --read0 --height 11 --reverse --prompt "${(Q)dir:-./}" -q "$query" -m --print0 |
-                    while read -rd $'\0' item; do
+                    while read -rd '' item; do
                         echo -nE - "$dir${(q)item} "
                     done
             )
@@ -422,13 +422,13 @@ if (($+commands[fzf])); then
         bindkeymaps '^R' fzf-history-widget main
     fi
 
-    if (($+commands[rg] && $+commands[nvim])); then
+    if (($+commands[rg] && $+commands[nvim] && $+commands[jq])); then
         function fzf-grep-widget {
             local results=$(
                 unset REPORTTIME
                 fzf --height 11 --reverse --prompt 'grep: ' --bind change:top+reload:'rg --json -Se {q} | nvim -l ~/.config/nvim/scripts/igrep_format.lua $COLUMNS' --with-nth 2.. --delimiter '\t' --ansi --disabled -m |
-                    cut -f 1 |
-                    while read -r item; do
+                    cut -f 1 | jq --raw-output0 .data.path.text |
+                    while read -rd '' item; do
                         echo -nE - "${(q)item} "
                     done
             )
