@@ -60,7 +60,7 @@ zmodload zsh/zutil
 
 # Prompt and Title {{{1
 
-PROMPT='%F{blue}%B%n%b%8F@%F{blue}%B%m%f %~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}'${SANDBOX+ %8F[%F{blue}sandbox%8F]%f}'%(?.. %F{red}%?%f)
+PROMPT='%F{blue}%B%n%b%8F@%F{blue}%B%m%f %~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}'${SANDBOX+ %8F[%F{blue}sb%8F]%f}'%(?.. %F{red}%?%f)
 %F{blue}»%f '
 PROMPT2='%F{blue}»%f '
 
@@ -235,7 +235,7 @@ function git-files-wrapper {
     fi
 }
 
-function _sandbox {
+function _sb {
     local curcontext=$curcontext state state_descr line
     local -A opt_args
     _arguments -s -C : -{n,x,u,R,W} '*-'{r,w}'+: :->mount' '*-e: :->var' '*-'{b,B}'+: :->dbus' \
@@ -277,14 +277,14 @@ function _sandbox {
             if [[ $words[1] = -- ]]; then
                 _bwrap
             else
-                _normal -p sandbox
+                _normal -p sb
             fi;;
         *)
             return 1;;
     esac
 }
 
-compdef _sandbox sandbox
+compdef _sb sb
 compdef "_arguments ':directory:_files -/' '*::: :{_normal -p venv}'" venv
 compdef _precommand vpn
 compdef "_arguments ':subcommand:(toggle target undo edit bar)'" work
@@ -319,7 +319,7 @@ fi
 (($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
 (($+commands[g++])) && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
 
-(($+commands[nsenter])) && alias sandbox-enter='sudo nsenter -aew -S follow -G follow -t'
+(($+commands[nsenter])) && alias sbenter='sudo nsenter -aew -S follow -G follow -t'
 
 (($+commands[sudo])) && alias sudo='sudo '
 (($+commands[xargs])) && alias xargs='xargs '

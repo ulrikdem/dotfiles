@@ -14,11 +14,11 @@ fi
 
 export VIRTUAL_ENV=$(realpath -- "$venv")
 
-[[ $1 = jupyter-lab ]] && set sandbox -xur ~/.jupyter/lab/user-settings "$@"
+[[ $1 = jupyter-lab ]] && set sb -xur ~/.jupyter/lab/user-settings "$@"
 
-if [[ $1 = sandbox ]]; then
+if [[ $1 = sb ]]; then
     shift
-    exec sandbox -w ":$arg" -w ":$VIRTUAL_ENV" -e PATH="$VIRTUAL_ENV/bin:$PATH" "$@"
+    exec sb -w ":$arg" -w ":$VIRTUAL_ENV" -e PATH="$VIRTUAL_ENV/bin:$PATH" "$@"
 else
     (($#)) || set zsh
     PATH=$VIRTUAL_ENV/bin:$PATH exec "$@"

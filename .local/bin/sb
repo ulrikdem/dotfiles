@@ -18,11 +18,11 @@ args=(
     --dir /var/tmp
     --dir /run
     --symlink /run /var/run
-    --bind /tmp/sandbox-share /tmp/sandbox-share
-    --symlink /tmp/sandbox-share ~/sandbox-share
+    --bind /tmp/sb-share /tmp/sb-share
+    --symlink /tmp/sb-share ~/sb-share
     --dir "$PWD"
 )
-mkdir -pm 700 /tmp/sandbox-share
+mkdir -pm 700 /tmp/sb-share
 
 for path in /bin /sbin /lib* /usr /opt /etc "$XDG_RUNTIME_DIR/dconf-service/keyfile/defaults" ~/.dotfiles.git; do
     [[ -L $path ]] && args+=(--symlink "$(readlink -- "$path")" "$path") || args+=(--ro-bind-try "$path" "$path")
@@ -91,7 +91,7 @@ while getopts ns:xuRWr:w:e:b:B: opt; do
         e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sandbox [-nxuRW] [-r [dest-path=]src-path[:overlay]...]... [-r :path]... [-w [dest-path]=src-path[:overlay]...[:]]... [-w :path]...' \
+        ?) echo 'sb [-nxuRW] [-r [dest-path=]src-path[:overlay]...]... [-r :path]... [-w [dest-path=]src-path[:overlay]...[:]]... [-w :path]...' \
             '[-e var[=value]]... [-b busname]... [-B busname]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
     esac
 done
@@ -104,7 +104,7 @@ if [[ -n $bind_args ]]; then
 fi
 
 if ((${#policy[@]} || url_handler)); then
-    temp=$(mktemp -d "$XDG_RUNTIME_DIR/sandbox.XXXXXXXXXX")
+    temp=$(mktemp -d "$XDG_RUNTIME_DIR/sb.XXXXXXXXXX")
 
     if ((${#policy[@]})); then
         mkfifo -- "$temp/proxy"
@@ -121,11 +121,11 @@ if ((${#policy[@]} || url_handler)); then
         tail -f -- "$temp/url" | while read -rd '' url; do
             xmessage -buttons _Yes:0,_No:1 -default _Yes "Open $url?" && "$BROWSER" -- "$url" &
         done &>/dev/null &
-        args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sandbox-url")
+        args+=(--bind "$temp/url" "$XDG_RUNTIME_DIR/sb-url")
 
         exec {browser}<<-'BASH'
 			#!/bin/bash
-			printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sandbox-url
+			printf '%s\0' "$@" >$XDG_RUNTIME_DIR/sb-url
 			BASH
         exec {desktop}<<-EOF
 			[Desktop Entry]
