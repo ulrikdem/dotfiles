@@ -58,8 +58,6 @@ defaults.expandtab = true
 defaults.list = true
 defaults.listchars = "tab:→ ,trail:·,nbsp:·"
 
-vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff")
-
 defaults.fillchars = "foldopen:▾,foldclose:▸"
 defaults.foldtext = "v:lua.foldtext()"
 function _G.foldtext()
@@ -129,30 +127,6 @@ for i = 1, 10 do
 end
 
 map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
-
--- Remap do and dp to use a motion
-_G.diff_cmd, _G.diff_bufnr = "", 0
-function _G.diff_operator()
-    vim.cmd[diff_cmd]({
-        diff_bufnr ~= 0 and diff_bufnr or nil,
-        range = {fn.line("'["), fn.line("']")},
-    })
-end
--- The use of <Cmd> clears the count so that it doesn't affect the motion
-map("n", "do", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffget', vim.v.count<CR>g@")
-map("n", "dp", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffput', vim.v.count<CR>g@")
--- Map doo and dpp to the original behavior
-map("n", "doo", "do")
-map("n", "dpp", "dp")
-
--- The mappings above don't work in visual mode. As alternative, allow gv in operator-pending mode
-map("o", "gv", "<Cmd>normal! gv<CR>")
-
--- Remap to something more convenient in my keymap
-map("n", "dx", "dp", {remap = true})
-map("n", "dpx", "dp")
-map("", "[h", "[c", {remap = true})
-map("", "]h", "]c", {remap = true})
 
 -- Map <M-[> and <M-]> to enter a "mode" that prefixes every keypress with [ or ], respectively
 for _, bracket in ipairs({"[", "]"}) do
@@ -333,7 +307,7 @@ nvim_create_autocmd("LspProgress", {
     end,
 })
 
--- Git {{{1
+-- Git and diff {{{1
 
 nvim_create_autocmd("FileType", {
     group = augroup,
@@ -362,6 +336,32 @@ map("n", "<Leader>td", function()
         vim.cmd.Gdiffsplit({bang = true})
     end
 end)
+
+vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff")
+
+-- Remap do and dp to use a motion
+_G.diff_cmd, _G.diff_bufnr = "", 0
+function _G.diff_operator()
+    vim.cmd[diff_cmd]({
+        diff_bufnr ~= 0 and diff_bufnr or nil,
+        range = {fn.line("'["), fn.line("']")},
+    })
+end
+-- The use of <Cmd> clears the count so that it doesn't affect the motion
+map("n", "do", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffget', vim.v.count<CR>g@")
+map("n", "dp", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffput', vim.v.count<CR>g@")
+-- Map doo and dpp to the original behavior
+map("n", "doo", "do")
+map("n", "dpp", "dp")
+
+-- The mappings above don't work in visual mode. As alternative, allow gv in operator-pending mode
+map("o", "gv", "<Cmd>normal! gv<CR>")
+
+-- Remap to something more convenient in my keymap
+map("n", "dx", "dp", {remap = true})
+map("n", "dpx", "dp")
+map("", "[h", "[c", {remap = true})
+map("", "]h", "]c", {remap = true})
 
 -- Quickfix {{{1
 
