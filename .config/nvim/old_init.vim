@@ -29,56 +29,6 @@ if $RANGER_LEVEL
     nmap <expr> - !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
 endif
 
-" Git {{{1
-
-autocmd vimrc FileType GV setlocal nolist
-
-nnoremap <Leader>tg <Cmd>call <SID>ToggleGitStatus()<CR>
-function! s:ToggleGitStatus() abort
-    let l:buf = filter(getbufinfo(), {i, b -> get(b.variables, 'fugitive_type', '') ==# 'index'})
-    if !empty(l:buf)
-        execute 'bdelete' l:buf[0].bufnr
-        return
-    endif
-    Git
-endfunction
-
-nnoremap <Leader>td <Cmd>call <SID>ToggleDiff()<CR>
-function! s:ToggleDiff() abort
-    if &diff
-        let l:current_win = win_getid()
-        let l:wins = filter(gettabinfo(tabpagenr())[0].windows, {i, w -> getwinvar(w, '&diff')})
-        diffoff!
-        for l:win in l:wins
-            call win_gotoid(l:win)
-            if &foldmethod ==# 'manual'
-                normal! zE
-            endif
-            if l:win != l:current_win
-                close
-            end
-        endfor
-        call win_gotoid(l:current_win)
-    else
-        Gdiffsplit!
-    endif
-endfunction
-
-autocmd vimrc SourcePost fugitive.vim call s:OverrideWorkTree()
-function! s:OverrideWorkTree() abort
-    if !exists('*FugitiveWorkTree')
-        return
-    endif
-    let l:WorkTree = funcref('FugitiveWorkTree')
-    function! FugitiveWorkTree(...) abort closure
-        if exists('$GIT_WORK_TREE')
-            return $GIT_WORK_TREE
-        else
-            return call(l:WorkTree, a:000)
-        endif
-    endfunction
-endfunction
-
 " Filetypes {{{1
 
 autocmd vimrc FileType c,cpp setlocal commentstring=//%s

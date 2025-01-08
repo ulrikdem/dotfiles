@@ -333,6 +333,36 @@ nvim_create_autocmd("LspProgress", {
     end,
 })
 
+-- Git {{{1
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "GV",
+    callback = function() vim.wo[0][0].list = false end,
+})
+
+map("n", "<Leader>tg", function()
+    for _, bufnr in ipairs(nvim_list_bufs()) do
+        if vim.b[bufnr].fugitive_type == "index" then
+            nvim_buf_delete(bufnr, {})
+            return
+        end
+    end
+    vim.cmd.Git()
+end)
+
+map("n", "<Leader>td", function()
+    if vim.o.diff then
+        for _, winid in ipairs(nvim_tabpage_list_wins(nvim_get_current_tabpage())) do
+            if vim.wo[winid].diff and winid ~= nvim_get_current_win() then
+                nvim_win_close(winid, false)
+            end
+        end
+    else
+        vim.cmd.Gdiffsplit({bang = true})
+    end
+end)
+
 -- Quickfix {{{1
 
 package.loaded.quickfix = nil -- Reload when sourcing init.lua
