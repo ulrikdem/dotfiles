@@ -26,9 +26,9 @@ start_lsp({
                     if result.code == 0 then
                         read_catalog()
                         client.notify(vim.lsp.protocol.Methods.workspace_didChangeConfiguration, {settings = settings})
-                        print("schema store updated")
+                        vim.notify("schema store updated")
                     else
-                        nvim_echo({{result.stderr:gsub("\n", " "), "ErrorMsg"}}, true, {})
+                        vim.notify(result.stderr:gsub("\n$", " "), vim.log.levels.ERROR)
                     end
                 end))
         end, {})

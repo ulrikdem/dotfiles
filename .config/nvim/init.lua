@@ -172,7 +172,7 @@ nvim_create_autocmd("BufWritePre", {
         local dir = vim.fs.dirname(args.match)
         if args.match:match("^/") and not vim.uv.fs_stat(dir) then
             fn.mkdir(dir, "p")
-            print("created directory " .. dir .. "\n")
+            vim.notify("created directory " .. dir .. "\n")
         end
     end,
 })
@@ -415,9 +415,9 @@ nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command
 nvim_create_user_command("Grep", function(opts)
     vim.system({"rg", "--json", unpack(opts.fargs)}, {}, function(result)
         if result.code == 2 then
-            return vim.schedule_wrap(nvim_err_write)(result.stderr)
+            return vim.schedule_wrap(vim.notify)(result.stderr:gsub("\n$", ""), vim.log.levels.ERROR)
         elseif result.signal ~= 0 then
-            return vim.schedule_wrap(nvim_err_writeln)(("rg exited with signal %d"):format(result.signal))
+            return vim.schedule_wrap(vim.notify)(("rg exited with signal %d"):format(result.signal), vim.log.levels.ERROR)
         end
         local items = {}
         for line in vim.gsplit(result.stdout, "\n", {trimempty = true}) do
@@ -727,7 +727,7 @@ map("n", "gO", function()
         function(results)
             local items = {}
             for _, result in pairs(results) do
-                if result.error then return nvim_err_writeln(tostring(result.error)) end
+                if result.error then return vim.notify(tostring(result.error), vim.log.levels.ERROR) end
                 vim.list_extend(items, quickfix.from_lsp_symbols(result.result, bufnr))
             end
             -- The filename and line numbers are concealed when the title ends in TOC
@@ -776,7 +776,7 @@ nvim_create_user_command("CdRoot", function()
     for _, client in pairs(lsp.get_clients({bufnr = 0})) do
         root_dir = client.root_dir or root_dir
     end
-    print(root_dir)
+    vim.notify(root_dir)
     nvim_set_current_dir(root_dir)
 end, {})
 
