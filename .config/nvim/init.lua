@@ -235,6 +235,7 @@ defaults.titlelen = 0
 
 defaults.tabline = "%!v:lua.tabline()"
 
+--- @return string
 function _G.tabline()
     local tabs = nvim_list_tabpages()
     local current = nvim_get_current_tabpage()
@@ -251,6 +252,7 @@ end
 --- @param winid integer
 --- @param absolute? boolean
 --- @param title? boolean
+--- @return string
 function _G.statusline_path(winid, absolute, title)
     local bufnr = nvim_win_get_buf(winid)
     local name = nvim_buf_get_name(bufnr)
@@ -660,6 +662,7 @@ end
 
 local cmp = require("cmp")
 
+--- @return integer[]
 function _G.get_listed_bufnrs()
     return vim.tbl_map(function(info) return info.bufnr end, fn.getbufinfo({buflisted = 1}))
 end
