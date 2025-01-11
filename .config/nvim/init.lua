@@ -563,22 +563,36 @@ map("n", "<Leader>fb", function()
     })
 end)
 
-map("n", "<Leader>fg", vim.cmd.IGrep)
-nvim_create_user_command("IGrep", function(opts)
+map("n", "<Leader>fg", function()
+    local pattern = ""
+    local args = "-S"
+    local editing_args = false
+    local script = nvim_get_runtime_file("scripts/igrep_format.lua", false)[1]
     run_fzf({
         args = {"--prompt=grep: ", "--with-nth=2..", "--delimiter=\t", "--ansi", "--disabled"},
         bind = {
-            change = ("top+reload:rg --json -Se {q} %s | nvim -l %s %d"):format(
-                opts.args,
-                fn.shellescape(nvim_get_runtime_file("scripts/igrep_format.lua", false)[1]),
-                vim.o.columns),
+            change = {"top+transform", args = "{q}", function(query)
+                if editing_args then args = query else pattern = query end
+                return ("reload:rg --json -e %s %s | nvim -l %s %d")
+                    :format(fn.shellescape(pattern), args, fn.shellescape(script), vim.o.columns)
+            end},
+            ["ctrl-o"] = {"transform", args = "", function()
+                editing_args = not editing_args
+                if editing_args then
+                    return "change-prompt(args: )+change-query:" .. args
+                else
+                    return "change-prompt(grep: )+change-query:" .. pattern
+                end
+            end},
         },
         input = {},
-        on_output = jump_or_setqflist("Grep", function(line)
-           return quickfix.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
-        end),
+        on_output = function(lines)
+            return jump_or_setqflist(("rg -e %s %s"):format(fn.shellescape(pattern), args), function(line)
+                return quickfix.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
+            end)(lines)
+        end,
     })
-end, {nargs = "*", complete = "file"})
+end)
 
 nvim_create_autocmd("FileType", {
     group = augroup,
