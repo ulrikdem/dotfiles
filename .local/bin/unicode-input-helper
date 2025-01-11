@@ -4,9 +4,9 @@ fzf_args=(
     --ansi
     --tabstop 3
     --tiebreak index
-    --bind "tab:execute-silent(cut -f 2 <<<{} | head -c -1 >>'$1')+refresh-preview"
-    --bind "ctrl-c:execute-silent(printf '' >'$1')+refresh-preview"
-    --preview "cat -- '$1'"
+    --bind "tab:execute-silent(printf %s {2} >>${1@Q})+refresh-preview"
+    --bind "ctrl-c:execute-silent(printf '' >${1@Q})+refresh-preview"
+    --preview "cat -- ${1@Q}"
     --preview-window up,1,noborder
     --reverse
 )
