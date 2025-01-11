@@ -590,7 +590,7 @@ nvim_create_autocmd("FileType", {
                 title = true, items = true, winid = true, filewinid = true,
             })
             run_fzf({
-                args = {"--with-nth=2..", "--ansi", "--tiebreak=begin"},
+                args = {"--prompt=quickfix: ", "--with-nth=2..", "--ansi", "--tiebreak=begin"},
                 input = vim.iter(list.items):enumerate():map(function(i, item)
                     return i .. " " .. quickfix.to_fzf(item)
                 end):totable(),
