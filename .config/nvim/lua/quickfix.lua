@@ -82,7 +82,7 @@ function M.textfunc(args)
 
     for i = args.start_idx, args.end_idx do
         local item = list.items[i]
-        local leading_space = is_toc and 0 or #item.text:match("%s*")
+        local leading_space = (is_toc or item.bufnr == 0) and 0 or #item.text:match("%s*")
         local line = ""
 
         if item.bufnr ~= 0 then
