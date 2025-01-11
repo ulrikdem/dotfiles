@@ -606,7 +606,7 @@ nvim_create_autocmd("FileType", {
             run_fzf({
                 args = {"--prompt=quickfix: ", "--with-nth=2..", "--ansi", "--tiebreak=begin"},
                 input = vim.iter(list.items):enumerate():map(function(i, item)
-                    return i .. " " .. quickfix.to_fzf(item)
+                    return item.valid ~= 0 and i .. " " .. quickfix.to_fzf(item) or nil
                 end):totable(),
                 on_output = function(lines)
                     -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
