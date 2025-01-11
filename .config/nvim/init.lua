@@ -107,9 +107,8 @@ map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
 map("c", "/", function()
     return fn.pumvisible() ~= 0 and fn.getcmdline():sub(1, fn.getcmdpos() - 1):match("/$")
-        and "<C-y><Tab>" or "/"
+        and "<Down>" or "/"
 end, {expr = true})
-defaults.wildcharm = 9
 
 for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
     map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
