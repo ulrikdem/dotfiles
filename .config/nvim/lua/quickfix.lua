@@ -1,16 +1,17 @@
 local M = {}
 
 --- @class set_list_opts: vim.fn.setqflist.what
+--- @field action? " " | "a" | "r" | "f"
 --- @field loclist_winid? integer
 
 --- @param opts set_list_opts
 function M.set_list(opts)
     if opts.loclist_winid then
         nvim_set_current_win(opts.loclist_winid)
-        vim.fn.setloclist(0, {}, " ", opts)
+        vim.fn.setloclist(0, {}, opts.action or " ", opts)
         vim.cmd("lopen")
     else
-        vim.fn.setqflist({}, " ", opts)
+        vim.fn.setqflist({}, opts.action or " ", opts)
         vim.cmd("botright copen")
     end
 end

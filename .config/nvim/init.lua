@@ -408,10 +408,6 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
--- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
-nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
-nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
-
 nvim_create_user_command("Grep", function(opts)
     vim.system({"rg", "--json", unpack(opts.fargs)}, {}, function(result)
         if result.code == 2 then
@@ -428,6 +424,28 @@ nvim_create_user_command("Grep", function(opts)
     end)
 end, {nargs = "+", complete = "file"})
 map("n", "grg", "<Cmd>Grep -Fwe <cword><CR>")
+
+nvim_create_autocmd("QuickFixCmdPost", {
+    group = augroup,
+    -- This doesn't work for lhelpgrep, since the location list is set for a different window (the help window)
+    pattern = {"helpgrep", "vimgrep", "lvimgrep"},
+    callback = function(args)
+        local loclist_winid = vim.startswith(args.match, "l") and 0 or nil
+        local items = quickfix.get_list({loclist_winid = loclist_winid, items = true}).items
+        for _, item in ipairs(items) do
+            if item.lnum == item.end_lnum or item.end_lnum == 0 then
+                item.user_data = {
+                    highlight_ranges = {{item.col - 1, item.end_col - 1}},
+                }
+            end
+        end
+        quickfix.set_list({loclist_winid = loclist_winid, action = "r", items = items})
+    end,
+})
+
+-- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
+nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
+nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
 
 -- Fuzzy finder {{{1
 
