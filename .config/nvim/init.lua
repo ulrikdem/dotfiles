@@ -105,7 +105,7 @@ map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
 map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
 map("c", "/", function()
-    return fn.pumvisible() ~= 0 and fn.getcmdline():sub(1, fn.getcmdpos() - 1):match("/$")
+    return fn.pumvisible() ~= 0 and vim.endswith(fn.getcmdline():sub(1, fn.getcmdpos() - 1), "/")
         and "<Down>" or "/"
 end, {expr = true})
 
@@ -168,7 +168,7 @@ nvim_create_autocmd("BufWritePre", {
     group = augroup,
     callback = function(args)
         local dir = vim.fs.dirname(args.match)
-        if args.match:match("^/") and not vim.uv.fs_stat(dir) then
+        if vim.startswith(args.match, "/") and not vim.uv.fs_stat(dir) then
             fn.mkdir(dir, "p")
             vim.notify("created directory " .. dir .. "\n")
         end
@@ -699,7 +699,7 @@ end
 
 --- @param fallback fun()
 local function maybe_complete(fallback)
-    if nvim_get_current_line():sub(1, nvim_win_get_cursor(0)[2]):match("[^%s]") then
+    if nvim_get_current_line():sub(1, nvim_win_get_cursor(0)[2]):find("[^%s]") then
         cmp.complete()
     else
         fallback()
@@ -819,7 +819,7 @@ end, {})
 
 --- @param config LspConfig
 function _G.start_lsp(config)
-    if fn.executable(config.cmd[1]) ~= 0 and vim.uri_from_bufnr(0):match("^file:") then
+    if fn.executable(config.cmd[1]) ~= 0 and vim.startswith(vim.uri_from_bufnr(0), "file:") then
         config.name = config.cmd[1]
 
         if config.sandbox then
