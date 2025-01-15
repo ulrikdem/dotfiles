@@ -409,21 +409,22 @@ map("n", "<Leader>tl", function()
 end)
 
 nvim_create_user_command("Grep", function(opts)
-    vim.system({"rg", "--json", unpack(opts.fargs)}, {}, function(result)
+    vim.system({"sh", "-c", "rg --json " .. opts.args}, {}, function(result)
         if result.code == 2 then
             return vim.schedule_wrap(vim.notify)(result.stderr:gsub("\n$", ""), vim.log.levels.ERROR)
         elseif result.signal ~= 0 then
-            return vim.schedule_wrap(vim.notify)(("rg exited with signal %d"):format(result.signal), vim.log.levels.ERROR)
+            return vim.schedule_wrap(vim.notify)(("rg: exited with signal %d"):format(result.signal), vim.log.levels.ERROR)
         end
         local items = {}
         for line in vim.gsplit(result.stdout, "\n", {trimempty = true}) do
-            -- Has no effect when from_ripgrep returns nil
+            -- Unlike table.insert, this doesn't skip indices when from_ripgrep returns nil
             items[#items + 1] = quickfix.from_ripgrep(line)
         end
-        vim.schedule_wrap(quickfix.set_list)({title = "Grep " .. opts.args, items = items})
+        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. opts.args, items = items})
     end)
 end, {nargs = "+", complete = "file"})
-map("n", "grg", "<Cmd>Grep -Fwe <cword><CR>")
+map("n", "grg", function() vim.cmd.Grep({"-Fwe", fn.shellescape(fn.expand("<cword>"))}) end)
+map("n", "grG", function() vim.cmd.Grep({"-Fwe", fn.shellescape(fn.expand("<cWORD>"))}) end)
 
 nvim_create_autocmd("QuickFixCmdPost", {
     group = augroup,
