@@ -507,23 +507,16 @@ end, {nargs = "+", complete = "file"})
 map("n", "grg", function() vim.cmd.Grep({"-Fwe", fn.shellescape(fn.expand("<cword>"))}) end)
 map("n", "grG", function() vim.cmd.Grep({"-Fwe", fn.shellescape(fn.expand("<cWORD>"))}) end)
 
-nvim_create_autocmd("QuickFixCmdPost", {
-    group = augroup,
-    -- This doesn't work for lhelpgrep, since the location list is set for a different window (the help window)
-    pattern = {"helpgrep", "vimgrep", "lvimgrep"},
-    callback = function(args)
-        local loclist_winid = vim.startswith(args.match, "l") and 0 or nil
-        local items = quickfix.get_list({loclist_winid = loclist_winid, items = true}).items
-        for _, item in ipairs(items) do
-            if item.lnum == item.end_lnum or item.end_lnum == 0 then
-                item.user_data = {
-                    highlight_ranges = {{item.col - 1, item.end_col - 1}},
-                }
-            end
-        end
-        quickfix.set_list({loclist_winid = loclist_winid, action = "r", items = items})
-    end,
-})
+nvim_create_user_command("HelpGrep", function(opts)
+    vim.cmd.helpgrep(opts.args)
+    local items = fn.getqflist()
+    for _, item in ipairs(items) do
+        item.user_data = {
+            highlight_ranges = {{item.col - 1, item.end_col - 1}},
+        }
+    end
+    quickfix.set_list({action = "r", items = items})
+end, {nargs = 1})
 
 -- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
 nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
