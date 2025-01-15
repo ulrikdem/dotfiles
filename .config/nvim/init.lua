@@ -408,6 +408,53 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
+nvim_create_user_command("Make", function(opts)
+    -- Expand cmdline-special characters like %, #, <cword>, etc.
+    -- Unlike vim.fn.expand, they can be anywhere in the string
+    local function expand(str) --- @param str string
+        local result --- @type string
+        nvim_create_user_command("EXPAND", function(opts) result = opts.args end, {
+            -- Expansion only takes place for "file" and "dir"
+            complete = "file",
+            -- If it takes at most one argument, then environment variables, command substitution and globs are also
+            -- expanded, and some backslashes are removed, which we don't want, so that the shell can do all of it
+            -- This is also why :Make and :Grep are declared to take multiple arguments
+            nargs = "*",
+            -- An unsolved issue is that the contents of expansions are backslash-escaped, which is convenient for
+            -- interactive use since it handles some (but not all) shell special characters, but it's an incompatibility
+            -- here when expanding makeprg, and %:S, which should be the safe way to expand it, gives the wrong result
+        })
+        vim.cmd.EXPAND("[" .. str:gsub("\\|", "|") .. "]") -- Add brackets to preserve leading and trailing whitespace
+        nvim_del_user_command("EXPAND")
+        return result:sub(2, -2)
+    end
+
+    local makeprg, errorformat = vim.o.makeprg, vim.o.errorformat
+    if not makeprg:find("$*", 1, true) then makeprg = makeprg .. " $*" end
+    local cmd = vim.trim(vim.iter(vim.gsplit(makeprg, "$*", {plain = true})):map(expand):join(opts.args))
+    vim.notify(cmd)
+    vim.system({"sh", "-c", cmd .. " 2>&1"}, {}, vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
+        if result.signal ~= 0 then
+            vim.notify(("%s: exited with signal %d"):format(cmd, result.signal), vim.log.levels.ERROR)
+        elseif result.code ~= 0 then
+            vim.notify(("%s: exited with status %d"):format(cmd, result.code), vim.log.levels.WARN)
+        else
+            vim.notify(cmd .. ": finished")
+        end
+        local lines = vim.split(result.stdout, "\n")
+        if lines[#lines] == "" then table.remove(lines) end
+        fn.setqflist({}, " ", {title = cmd, lines = lines, efm = errorformat})
+        -- Don't open quickfix window without valid entries (because unlike other quickfix
+        -- actions the primary purpose is running the command, not seeing its results),
+        -- and preserve focus (because it may be long-running and finish at any time)
+        local winid = nvim_get_current_win()
+        vim.cmd("botright cwindow")
+        pcall(nvim_set_current_win, winid)
+    end))
+end, {nargs = "*", complete = "file"})
+map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
+map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
+
 nvim_create_user_command("Grep", function(opts)
     vim.system({"sh", "-c", "rg --json " .. opts.args}, {}, function(result)
         if result.code == 2 then

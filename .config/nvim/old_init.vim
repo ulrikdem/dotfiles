@@ -15,11 +15,6 @@ let g:mapleader = ' '
 autocmd vimrc FileType tex AddTabularPattern! tex /&\|\\\\/
 autocmd vimrc FileType tex nmap <buffer><silent> <Leader>gq vie:Tabularize tex<CR>
 
-" Command execution {{{1
-
-nnoremap <Leader>mm <Cmd>update \| make<CR>
-nnoremap <Leader>mc <Cmd>make clean<CR>
-
 " File navigation {{{1
 
 set suffixes-=.h
@@ -38,8 +33,8 @@ autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oc <Cmd>edit %:r.c<CR>
 autocmd vimrc FileType c,cpp nnoremap <buffer> <Leader>oC <Cmd>edit %:r.cpp<CR>
 
 if executable('cargo')
-    autocmd vimrc FileType rust nnoremap <buffer> <Leader>mm <Cmd>update \| make build<CR>
-    autocmd vimrc FileType rust nnoremap <buffer> <Leader>mr <Cmd>update \| make build --release<CR>
+    autocmd vimrc FileType rust nnoremap <buffer> <Leader>mm <Cmd>silent update \| Make build<CR>
+    autocmd vimrc FileType rust nnoremap <buffer> <Leader>mr <Cmd>silent update \| Make build --release<CR>
 endif
 
 autocmd vimrc FileType mail,markdown,tex setlocal spell
@@ -47,8 +42,8 @@ autocmd vimrc FileType mail,markdown,tex setlocal spell
 autocmd vimrc FileType dot setlocal commentstring=//%s
 if executable('dot')
     autocmd vimrc FileType dot let &l:makeprg = 'dot -T$* -o'.expand('%:p:r:S').'.$* '.expand('%:p:S')
-    autocmd vimrc FileType dot nnoremap <buffer> <Leader>mm <Cmd>update \| make png<CR>
-    autocmd vimrc FileType dot nnoremap <buffer> <Leader>ms <Cmd>update \| make svg<CR>
+    autocmd vimrc FileType dot nnoremap <buffer> <Leader>mm <Cmd>silent update \| Make png<CR>
+    autocmd vimrc FileType dot nnoremap <buffer> <Leader>ms <Cmd>silent update \| Make svg<CR>
 endif
 if executable('xdg-open')
     autocmd vimrc FileType dot nnoremap <buffer> <Leader>mv <Cmd>silent !xdg-open %:r:S.png &<CR>
