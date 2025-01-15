@@ -518,10 +518,6 @@ nvim_create_user_command("HelpGrep", function(opts)
     quickfix.set_list({action = "r", items = items})
 end, {nargs = 1})
 
--- Close the window before running cwindow/lwindow, because the focus depends on whether it is already open
-nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "[^l]*", command = "cclose | botright cwindow"})
-nvim_create_autocmd("QuickFixCmdPost", {group = augroup, pattern = "l*", command = "lclose | lwindow"})
-
 -- Fuzzy finder {{{1
 
 --- @class fzf_opts
