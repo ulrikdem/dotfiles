@@ -20,6 +20,7 @@ for lhs, rhs in pairs({
     ["<Leader>mv"] = "<Cmd>VimtexView<CR>",
     ["<Leader>mc"] = "<Cmd>VimtexClean<CR>",
     ["<Leader>mC"] = "<Cmd>VimtexClean!<CR>",
+    ["<C-c>"] = "<C-c><Cmd>VimtexStop<CR>",
     gO = "<Cmd>VimtexTocOpen<CR>",
     grc = "<Cmd>VimtexContextMenu<CR>",
 }) do
