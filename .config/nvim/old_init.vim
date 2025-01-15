@@ -73,8 +73,6 @@ if executable('gdb')
             return
         endif
 
-        delcommand Source
-
         let g:termdebugger = a:gdb
         execute (empty(a:args) ? 'Termdebug' : 'TermdebugCommand') a:args
         let s:gdb_buf = bufnr()
@@ -114,7 +112,7 @@ if executable('gdb')
             \ filereadable(expand('~/.config/gdb-dashboard'))
             enew
             let l:dashboard_buf = bufnr()
-            let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null # /dashboard')).pty
+            let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null')).pty
             call TermDebugSendCommand('source ~/.config/gdb-dashboard')
             call TermDebugSendCommand('dashboard -output '.l:pty)
             call extend(l:maps, [
@@ -137,10 +135,6 @@ if executable('gdb')
                     execute l:mode.'unmap' l:lhs
                 endfor
             endfor
-            if exists('g:loaded_wordmotion')
-                unlet g:loaded_wordmotion
-                runtime plugin/wordmotion.vim
-            endif
 
             execute 'bwipeout!' s:gdb_buf
             let s:gdb_buf = 0
@@ -153,7 +147,7 @@ if executable('gdb')
 
         Program
         set nomodified
-        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null # /io', #{
+        let l:pty = nvim_get_chan_info(termopen('tail -f /dev/null', #{
             \ on_stdout: function("\<SID>OnDebugStdout"),
             \ on_exit: funcref("\<SID>OnDebugExit"),
         \ })).pty
