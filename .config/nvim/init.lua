@@ -408,6 +408,36 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
+local killable_process
+do
+    --- @type table<vim.SystemObj, string>
+    local running_processes = {}
+
+    --- @param cmd string
+    --- @param on_exit fun(result: vim.SystemCompleted)
+    function killable_process(cmd, on_exit)
+        local proc
+        proc = vim.system({"sh", "-c", cmd}, {}, function(result)
+            running_processes[proc] = nil
+            on_exit(result)
+        end)
+        running_processes[proc] = cmd
+    end
+
+    map("n", "<C-c>", function()
+        for proc, _ in pairs(running_processes) do
+            proc:kill("sigterm")
+        end
+        return "<C-c>"
+    end, {expr = true})
+
+    nvim_create_user_command("Processes", function()
+        for proc, cmd in pairs(running_processes) do
+            vim.notify(proc.pid .. "\t" .. cmd)
+        end
+    end, {bar = true})
+end
+
 nvim_create_user_command("Make", function(opts)
     -- Expand cmdline-special characters like %, #, <cword>, etc.
     -- Unlike vim.fn.expand, they can be anywhere in the string
@@ -433,7 +463,7 @@ nvim_create_user_command("Make", function(opts)
     if not makeprg:find("$*", 1, true) then makeprg = makeprg .. " $*" end
     local cmd = vim.trim(vim.iter(vim.gsplit(makeprg, "$*", {plain = true})):map(expand):join(opts.args))
     vim.notify(cmd)
-    vim.system({"sh", "-c", cmd .. " 2>&1"}, {}, vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
+    killable_process(cmd .. " 2>&1", vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
         if result.signal ~= 0 then
             vim.notify(("%s: exited with signal %d"):format(cmd, result.signal), vim.log.levels.ERROR)
         elseif result.code ~= 0 then
@@ -456,7 +486,7 @@ map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
 map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
 
 nvim_create_user_command("Grep", function(opts)
-    vim.system({"sh", "-c", "rg --json " .. opts.args}, {}, function(result)
+    killable_process("rg --json " .. opts.args, function(result)
         if result.code == 2 then
             return vim.schedule_wrap(vim.notify)(result.stderr:gsub("\n$", ""), vim.log.levels.ERROR)
         elseif result.signal ~= 0 then
