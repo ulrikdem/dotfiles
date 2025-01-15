@@ -188,27 +188,29 @@ nvim_create_autocmd("TermOpen", {
 
 nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
-local sidebar_width = 80
-local function make_sidebar()
-    if vim.o.columns <= sidebar_width * 2 or vim.o.winfixwidth then return end
-    vim.cmd.wincmd("L")
-    nvim_win_set_width(0, sidebar_width)
-    vim.o.winfixwidth = true
-    vim.cmd.wincmd("=")
-end
+do
+    local sidebar_width = 80
+    local function make_sidebar()
+        if vim.o.columns <= sidebar_width * 2 or vim.o.winfixwidth then return end
+        vim.cmd.wincmd("L")
+        nvim_win_set_width(0, sidebar_width)
+        vim.o.winfixwidth = true
+        vim.cmd.wincmd("=")
+    end
 
-nvim_create_autocmd("BufWinEnter", {
-    group = augroup,
-    callback = function()
-        if vim.o.buftype == "help" then make_sidebar() end
-    end,
-})
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = {"man", "fugitive"},
-    callback = function() make_sidebar() end,
-})
-vim.env.MANWIDTH = tostring(sidebar_width + 1)
+    nvim_create_autocmd("BufWinEnter", {
+        group = augroup,
+        callback = function()
+            if vim.o.buftype == "help" then make_sidebar() end
+        end,
+    })
+    nvim_create_autocmd("FileType", {
+        group = augroup,
+        pattern = {"man", "fugitive"},
+        callback = function() make_sidebar() end,
+    })
+    vim.env.MANWIDTH = tostring(sidebar_width + 1)
+end
 
 nvim_create_autocmd("FileType", {
     group = augroup,
@@ -282,30 +284,32 @@ end
 
 nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
 
-local lsp_progress = {} --- @type table<integer, string?>
-function _G.statusline_lsp_progress()
-    local s = ""
-    for _, client in ipairs(lsp.get_clients({bufnr = 0})) do
-        if lsp_progress[client.id] then s = s .. lsp_progress[client.id] end
-    end
-    return s
-end
-
-local lsp_progress_timer = vim.uv.new_timer()
-nvim_create_autocmd("LspProgress", {
-    group = augroup,
-    callback = function(args)
-        local t = args.data.params.value
-        lsp_progress[args.data.client_id] = t.kind ~= "end"
-            and ("[%s%s] "):format(t.percentage and t.percentage .. "% " or "", t.title)
-            or nil
-        if not lsp_progress_timer:is_active() then
-            lsp_progress_timer:start(16, 0, vim.schedule_wrap(function()
-                vim.cmd.redrawstatus({bang = true})
-            end))
+do
+    local progress = {} --- @type table<integer, string?>
+    function _G.statusline_lsp_progress()
+        local s = ""
+        for _, client in ipairs(lsp.get_clients({bufnr = 0})) do
+            if progress[client.id] then s = s .. progress[client.id] end
         end
-    end,
-})
+        return s
+    end
+
+    local timer = vim.uv.new_timer()
+    nvim_create_autocmd("LspProgress", {
+        group = augroup,
+        callback = function(args)
+            local t = args.data.params.value
+            progress[args.data.client_id] = t.kind ~= "end"
+                and ("[%s%s] "):format(t.percentage and t.percentage .. "% " or "", t.title)
+                or nil
+            if not timer:is_active() then
+                timer:start(16, 0, vim.schedule_wrap(function()
+                    vim.cmd.redrawstatus({bang = true})
+                end))
+            end
+        end,
+    })
+end
 
 -- Git and diff {{{1
 
