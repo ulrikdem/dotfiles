@@ -12,5 +12,5 @@ for cmd, args in pairs({
 }) do
     nvim_buf_create_user_command(0, cmd, function(opts)
         vim.cmd["!"]({formatprg .. args, range = {opts.line1, opts.line2}})
-    end, {range = "%"})
+    end, {range = "%", bar = true})
 end

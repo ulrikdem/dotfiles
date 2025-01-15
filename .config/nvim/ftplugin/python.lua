@@ -30,7 +30,7 @@ start_lsp({
                 command = "basedpyright.organizeimports",
                 arguments = {vim.uri_from_bufnr(bufnr)},
             })
-        end, {})
+        end, {bar = true})
     end,
     on_detach = function(_, bufnr)
         nvim_buf_del_user_command(bufnr, "OrganizeImports")

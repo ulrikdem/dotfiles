@@ -552,7 +552,7 @@ nvim_create_user_command("Fzf", function(opts)
             return {filename = line, valid = true}
         end),
     })
-end, {nargs = "?", complete = "file"})
+end, {nargs = "?", complete = "dir"})
 
 map("n", "<Leader>fb", function()
     local function buffers()
@@ -811,7 +811,7 @@ nvim_create_user_command("CdRoot", function()
     end
     vim.notify(root_dir)
     nvim_set_current_dir(root_dir)
-end, {})
+end, {bar = true})
 
 --- @class LspConfig: vim.lsp.ClientConfig
 --- @field sandbox? {args?: string[], read?: string[], write?: string[]}

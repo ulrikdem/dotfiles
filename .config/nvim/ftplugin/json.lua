@@ -31,7 +31,7 @@ start_lsp({
                         vim.notify(result.stderr:gsub("\n$", " "), vim.log.levels.ERROR)
                     end
                 end))
-        end, {})
+        end, {bar = true})
     end,
     on_detach = function(_, bufnr)
         nvim_buf_del_user_command(bufnr, "UpdateSchemaStore")
