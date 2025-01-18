@@ -12,6 +12,6 @@ read -p 'Checkout FETCH_HEAD? [y/N] ' -n 1
 if [[ $REPLY = y ]]; then
     git -c advice.detachedHead=false checkout FETCH_HEAD
     if [[ -d doc ]]; then
-        nvim -es <<<'helptags doc'
+        nvim --clean -es <<<'helptags doc'
     fi
 fi
