@@ -214,6 +214,15 @@ end
 
 nvim_create_autocmd("FileType", {
     group = augroup,
+    pattern = {"c", "cpp"},
+    callback = function(args)
+        -- This will be the default in nvim 0.11
+        vim.bo[args.buf].commentstring = "// %s"
+    end,
+})
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
     pattern = {"sh", "zsh"},
     callback = function(args)
         -- The default :ShKeywordPrg and :ZshKeywordPrg are broken in nvim

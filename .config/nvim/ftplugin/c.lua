@@ -1,5 +1,9 @@
 -- This file is also sourced from the built-in cpp ftplugin
 
+for key, ext in pairs({h = "h", H = "hpp", c = "c", C = "cpp"}) do
+    vim.keymap.set("n", "<Leader>o" .. key, "<Cmd>edit %:r." .. ext .. "<CR>", {buffer = true})
+end
+
 local root_dir = find_root({"compile_commands.json", ".ccls"}, ".git")
 local completion_end_symbols = {">", '"', "/"}
 
