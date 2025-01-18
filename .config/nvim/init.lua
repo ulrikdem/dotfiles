@@ -529,6 +529,13 @@ end
 
 map("n", "grg", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cword>"))) end)
 map("n", "grG", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cWORD>"))) end)
+map("x", "grg", function()
+    nvim_feedkeys(vim.keycode("<Esc>"), "nix", false)
+    local l1, c1 = unpack(nvim_buf_get_mark(0, "<"))
+    local l2, c2 = unpack(nvim_buf_get_mark(0, ">"))
+    local text = nvim_buf_get_text(0, l1 - 1, c1, l2 - 1, c2 + 1, {})
+    ripgrep("-FUe " .. fn.shellescape(table.concat(text, "\n")))
+end)
 
 nvim_create_user_command("Grep", function(opts)
     ripgrep(opts.args)
