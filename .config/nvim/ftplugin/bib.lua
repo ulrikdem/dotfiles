@@ -1,4 +1,4 @@
-vim.cmd.runtime("ftplugin/tex.lua")
+require("vimtex_config").init_buffer()
 
 -- By default only format (including lowercasing keywords and consistently using curly braces)
 -- and apply reliable small fixes (month abbreviations and dashes in page ranges)
