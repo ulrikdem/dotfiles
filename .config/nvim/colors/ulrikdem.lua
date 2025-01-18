@@ -43,6 +43,9 @@ local highlights = {
     DiagnosticUnderlineInfo = {undercurl = true, sp = fg .. "Cyan"},
     DiagnosticUnderlineHint = {undercurl = true, sp = fg .. "Blue"},
     DiagnosticUnderlineOk = {undercurl = true, sp = fg .. "Green"},
+
+    DirvishSuffix = {link = "Comment"},
+    DirvishPathHead = {link = "NonText"},
 }
 
 for k, v in pairs(highlights) do

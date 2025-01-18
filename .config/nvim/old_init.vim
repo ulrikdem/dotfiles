@@ -2,13 +2,6 @@ augroup vimrc
     autocmd!
 augroup END
 
-set suffixes-=.h
-autocmd vimrc ColorScheme * highlight link DirvishSuffix Comment
-autocmd vimrc ColorScheme * highlight link DirvishPathHead NonText
-if $RANGER_LEVEL
-    nmap <expr> - !v:count && len(getbufinfo(#{buflisted: v:true})) * winnr('$') * tabpagenr('$') == 1 ? '<C-W>q' : '<Plug>(dirvish_up)'
-endif
-
 if executable('gdb')
     packadd termdebug
     let g:termdebug_wide = 1

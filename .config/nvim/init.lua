@@ -66,6 +66,8 @@ function _G.foldtext()
         vim.v.foldend - vim.v.foldstart + 1)
 end
 
+vim.opt.suffixes:remove(".h")
+
 -- This is usually autodetected from the COLORTERM variable,
 -- but ssh doesn't propagate it without configuration on the client and server
 if vim.env.SSH_TTY then defaults.termguicolors = true end
@@ -125,6 +127,16 @@ for i = 1, 10 do
 end
 
 map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
+
+if vim.env.RANGER_LEVEL then
+    map("n", "-", function()
+        if vim.v.count == 0 and #fn.getbufinfo({buflisted = 1}) * fn.winnr("$") * fn.tabpagenr("$") == 1 then
+            return "<C-w>q"
+        else
+            return "<Plug>(dirvish_up)"
+        end
+    end, {expr = true})
+end
 
 -- Map <M-[> and <M-]> to enter a "mode" that prefixes every keypress with [ or ], respectively
 for _, bracket in ipairs({"[", "]"}) do
@@ -272,7 +284,7 @@ function _G.statusline_path(winid, absolute, title)
     elseif buftype == "quickfix" then
         return nvim_eval_statusline("%q", {winid = winid}).str
             .. (title and vim.w[winid].quickfix_title and " " .. vim.w[winid].quickfix_title or "")
-    elseif buftype == "nofile" or name == "" then
+    elseif buftype == "nofile" and vim.bo[bufnr].filetype ~= "dirvish" or name == "" then
         return nvim_eval_statusline("%f", {winid = winid}).str
     else
         return fn.fnamemodify(fn.FugitiveReal(name), absolute and ":~" or ":~:.")
