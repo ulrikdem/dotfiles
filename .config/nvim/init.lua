@@ -506,11 +506,13 @@ nvim_create_user_command("Make", function(opts)
         pcall(nvim_set_current_win, winid)
     end))
 end, {nargs = "*", complete = "file"})
+
 map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
 map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
 
-nvim_create_user_command("Grep", function(opts)
-    killable_process("rg --json " .. opts.args, function(result)
+--- @param args string
+local function ripgrep(args)
+    killable_process("rg --json " .. args, function(result)
         if result.code == 2 then
             return vim.schedule_wrap(vim.notify)(result.stderr:gsub("\n$", ""), vim.log.levels.ERROR)
         elseif result.signal ~= 0 then
@@ -521,11 +523,16 @@ nvim_create_user_command("Grep", function(opts)
             -- Unlike table.insert, this doesn't skip indices when from_ripgrep returns nil
             items[#items + 1] = quickfix.from_ripgrep(line)
         end
-        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. opts.args, items = items})
+        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. args, items = items})
     end)
+end
+
+map("n", "grg", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cword>"))) end)
+map("n", "grG", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cWORD>"))) end)
+
+nvim_create_user_command("Grep", function(opts)
+    ripgrep(opts.args)
 end, {nargs = "+", complete = "file"})
-map("n", "grg", function() vim.cmd.Grep({"-Fwe", fn.shellescape(fn.expand("<cword>"))}) end)
-map("n", "grG", function() vim.cmd.Grep({"-Fwe", fn.shellescape(fn.expand("<cWORD>"))}) end)
 
 nvim_create_user_command("HelpGrep", function(opts)
     vim.cmd.helpgrep(opts.args)
