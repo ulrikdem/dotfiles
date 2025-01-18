@@ -1,12 +1,11 @@
-augroup vimrc
-    autocmd!
-augroup END
-
 if executable('gdb')
     packadd termdebug
     let g:termdebug_wide = 1
 
-    autocmd vimrc OptionSet signcolumn setglobal signcolumn&
+    augroup debug
+        autocmd!
+        autocmd OptionSet signcolumn setglobal signcolumn&
+    augroup END
 
     command! -nargs=* -complete=file Debug call s:Debug('gdb', <q-args>)
     if executable('rust-gdb')

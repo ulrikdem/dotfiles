@@ -8,7 +8,6 @@ local fn = vim.fn
 local lsp = vim.lsp
 local map = vim.keymap.set
 
-vim.cmd.runtime("old_init.vim")
 vim.cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
