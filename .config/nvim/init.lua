@@ -513,15 +513,16 @@ map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
 --- @param args string
 local function ripgrep(args)
     killable_process("rg --json " .. args, function(result)
-        if result.code == 2 then
-            return vim.schedule_wrap(vim.notify)(result.stderr:gsub("\n$", ""), vim.log.levels.ERROR)
-        elseif result.signal ~= 0 then
-            return vim.schedule_wrap(vim.notify)(("rg: exited with signal %d"):format(result.signal), vim.log.levels.ERROR)
+        if result.signal ~= 0 then
+            return vim.schedule_wrap(vim.notify)("rg: exited with signal " .. result.signal, vim.log.levels.ERROR)
         end
         local items = {}
         for line in vim.gsplit(result.stdout, "\n", {trimempty = true}) do
             -- Unlike table.insert, this doesn't skip indices when from_ripgrep returns nil
             items[#items + 1] = quickfix.from_ripgrep(line)
+        end
+        for line in vim.gsplit(result.stderr, "\n", {trimempty = true}) do
+            items[#items + 1] = {type = "E", text = line}
         end
         vim.schedule_wrap(quickfix.set_list)({title = "rg " .. args, items = items})
     end)
