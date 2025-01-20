@@ -629,8 +629,8 @@ local function jump_or_setqflist(title, parse, loclist_winid)
             local item = parse(lines[1])
             if not (item.bufnr or item.filename) then return end
             local bufnr = item.bufnr or fn.bufadd(item.filename)
-            vim.cmd("normal! m'")
-            nvim_win_set_buf(0, bufnr)
+            -- Unlike nvim_win_set_buf, :buffer adds an entry to the jumplist and executes the SwapExists autocmd
+            vim.cmd.buffer(bufnr)
             vim.bo.buflisted = true
             if item.lnum and item.lnum > 0 then
                 local set_cursor = item.vcol and item.vcol ~= 0 and fn.setcursorcharpos or fn.cursor
