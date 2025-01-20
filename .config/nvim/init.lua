@@ -483,9 +483,14 @@ nvim_create_user_command("Make", function(opts)
         return result:sub(2, -2)
     end
 
-    local makeprg, errorformat = vim.o.makeprg, vim.o.errorformat
-    if not makeprg:find("$*", 1, true) then makeprg = makeprg .. " $*" end
-    local cmd = vim.trim(vim.iter(vim.gsplit(makeprg, "$*", {plain = true})):map(expand):join(opts.args))
+    local cmd, errorformat
+    if opts.bang then
+        cmd, errorformat = opts.args, vim.go.errorformat
+    else
+        cmd, errorformat = vim.o.makeprg, vim.o.errorformat
+        if not cmd:find("$*", 1, true) then cmd = cmd .. " $*" end
+        cmd = vim.trim(vim.iter(vim.gsplit(cmd, "$*", {plain = true})):map(expand):join(opts.args))
+    end
     vim.notify(cmd)
     killable_process(cmd .. " 2>&1", vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
         if result.signal ~= 0 then
@@ -505,7 +510,7 @@ nvim_create_user_command("Make", function(opts)
         vim.cmd("botright cwindow")
         pcall(nvim_set_current_win, winid)
     end))
-end, {nargs = "*", complete = "file"})
+end, {nargs = "*", complete = "file", bang = true})
 
 map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
 map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
