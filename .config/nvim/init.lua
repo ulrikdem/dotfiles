@@ -432,18 +432,66 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
-local killable_process
+local quickfix_spawn
 do
     --- @type table<vim.SystemObj, string>
     local running_processes = {}
 
+    --- @class quickfix_spawn_opts
+    --- @field parse_output fun(lines: string[]): vim.quickfix.entry[]
+    --- @field parse_error? fun(lines: string[]): vim.quickfix.entry[]
+    --- @field focus? boolean
+
     --- @param cmd string
-    --- @param on_exit fun(result: vim.SystemCompleted)
-    function killable_process(cmd, on_exit)
+    --- @param opts quickfix_spawn_opts
+    function quickfix_spawn(cmd, opts)
+        vim.notify(cmd)
+        vim.cmd.cclose()
+        fn.setqflist({}, " ", {title = cmd})
+        local id = fn.getqflist({id = 0}).id
+
+        local system_opts = {}
+        for key, parse in pairs({stdout = opts.parse_output, stderr = opts.parse_error or opts.parse_output}) do
+            local partial_line = ""
+            system_opts[key] = function(err, data)
+                assert(not err, err)
+                local lines
+                if data then
+                    lines = vim.split(data, "\n")
+                    lines[1] = partial_line .. lines[1]
+                    partial_line = table.remove(lines)
+                else -- End of stream
+                    lines = {partial_line ~= "" and partial_line or nil}
+                end
+                vim.schedule(function()
+                    fn.setqflist({}, "a", {id = id, items = parse(lines), idx = "$"})
+                end)
+            end
+        end
+
         local proc
-        proc = vim.system({"sh", "-c", cmd}, {}, function(result)
+        proc = vim.system({"sh", "-c", cmd}, system_opts, function(result)
+            vim.schedule(function()
+                local first_valid = vim.iter(fn.getqflist({id = id, items = true}).items)
+                    :enumerate():find(function(_, item) return item.valid ~= 0 end)
+                fn.setqflist({}, "a", {id = id, idx = first_valid or 1})
+                if opts.focus then
+                    vim.cmd("botright copen")
+                elseif first_valid or result.code ~= 0 then
+                    local winid = nvim_get_current_win()
+                    vim.cmd("botright copen")
+                    nvim_set_current_win(winid)
+                end
+
+                if result.signal ~= 0 then
+                    vim.notify(("%s: exited with signal %d"):format(cmd, result.signal), vim.log.levels.ERROR)
+                elseif result.code ~= 0 then
+                    vim.notify(("%s: exited with status %d"):format(cmd, result.code), vim.log.levels.WARN)
+                else
+                    vim.notify(cmd .. ": finished")
+                end
+            end)
             running_processes[proc] = nil
-            on_exit(result)
         end)
         running_processes[proc] = cmd
     end
@@ -486,25 +534,11 @@ nvim_create_user_command("Make", function(opts)
     local makeprg, errorformat = vim.o.makeprg, vim.o.errorformat
     if not makeprg:find("$*", 1, true) then makeprg = makeprg .. " $*" end
     local cmd = vim.trim(vim.iter(vim.gsplit(makeprg, "$*", {plain = true})):map(expand):join(opts.args))
-    vim.notify(cmd)
-    killable_process(cmd .. " 2>&1", vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
-        if result.signal ~= 0 then
-            vim.notify(("%s: exited with signal %d"):format(cmd, result.signal), vim.log.levels.ERROR)
-        elseif result.code ~= 0 then
-            vim.notify(("%s: exited with status %d"):format(cmd, result.code), vim.log.levels.WARN)
-        else
-            vim.notify(cmd .. ": finished")
-        end
-        local lines = vim.split(result.stdout, "\n")
-        if lines[#lines] == "" then table.remove(lines) end
-        fn.setqflist({}, " ", {title = cmd, lines = lines, efm = errorformat})
-        -- Don't open quickfix window without valid entries (because unlike other quickfix
-        -- actions the primary purpose is running the command, not seeing its results),
-        -- and preserve focus (because it may be long-running and finish at any time)
-        local winid = nvim_get_current_win()
-        vim.cmd("botright cwindow")
-        pcall(nvim_set_current_win, winid)
-    end))
+    quickfix_spawn(cmd, {
+        parse_output = function(lines)
+            return fn.getqflist({lines = lines, efm = errorformat}).items
+        end,
+    })
 end, {nargs = "*", complete = "file"})
 
 map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
@@ -512,19 +546,16 @@ map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
 
 --- @param args string
 local function ripgrep(args)
-    killable_process("rg --json " .. args, function(result)
-        if result.code == 2 then
-            return vim.schedule_wrap(vim.notify)(result.stderr:gsub("\n$", ""), vim.log.levels.ERROR)
-        elseif result.signal ~= 0 then
-            return vim.schedule_wrap(vim.notify)(("rg: exited with signal %d"):format(result.signal), vim.log.levels.ERROR)
-        end
-        local items = {}
-        for line in vim.gsplit(result.stdout, "\n", {trimempty = true}) do
-            -- Unlike table.insert, this doesn't skip indices when from_ripgrep returns nil
-            items[#items + 1] = quickfix.from_ripgrep(line)
-        end
-        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. args, items = items})
-    end)
+    quickfix_spawn("rg --json " .. args, {
+        parse_output = function(lines)
+            -- vim.tbl_map would leave gaps where quickfix.from_ripgrep returns nil
+            return vim.iter(lines):map(quickfix.from_ripgrep):totable()
+        end,
+        parse_error = function(lines)
+            return vim.tbl_map(function(line) return {type = "E", text = line} end, lines)
+        end,
+        focus = true,
+    })
 end
 
 map("n", "grg", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cword>"))) end)
