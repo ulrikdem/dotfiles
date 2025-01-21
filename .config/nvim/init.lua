@@ -92,13 +92,15 @@ defaults.timeout = false
 
 -- Mappings {{{1
 
+vim.g.mapleader = " "
+
 map("n", "<C-s>", vim.cmd.write)
 
 map({"!", "t"}, "<C-BS>", "<C-w>")
 
 -- Delete default mappings that set a new undo point
-if fn.maparg("<C-w>", "i") ~= "" then vim.keymap.del("i", "<C-w>") end
-if fn.maparg("<C-u>", "i") ~= "" then vim.keymap.del("i", "<C-u>") end
+pcall(vim.keymap.del, "i", "<C-w>")
+pcall(vim.keymap.del, "i", "<C-u>")
 
 map("n", "gcu", "gcgc", {remap = true})
 
@@ -155,8 +157,6 @@ for _, bracket in ipairs({"[", "]"}) do
     map("n", intermediate, repeat_bracket, {expr = true, replace_keycodes = false, remap = true})
     map("n", intermediate .. "<Esc>", "")
 end
-
-vim.g.mapleader = " "
 
 -- Autocommands {{{1
 
@@ -729,7 +729,7 @@ nvim_create_autocmd("FileType", {
             })
             run_fzf({
                 args = {"--prompt=quickfix: ", "--with-nth=2..", "--ansi", "--tiebreak=begin"},
-                input = vim.iter(list.items):enumerate():map(function(i, item)
+                input = vim.iter(ipairs(list.items)):map(function(i, item)
                     return item.valid ~= 0 and i .. " " .. quickfix.to_fzf(item) or nil
                 end):totable(),
                 on_output = function(lines)
@@ -763,7 +763,7 @@ map("n", "<Leader>fs", function()
                         vim.list_extend(items, quickfix.from_lsp_symbols(result.result or {}, bufnr))
                     end
                 end
-                return vim.iter(items):enumerate():map(function(i, item)
+                return vim.iter(ipairs(items)):map(function(i, item)
                     return i .. " " .. quickfix.to_fzf(item)
                 end):join("\n")
             end},
@@ -775,12 +775,12 @@ map("n", "<Leader>fs", function()
     })
 end)
 
---- @param opts {prompt?: string, format_item?: fun(any): string}
+--- @param opts? {prompt?: string, format_item?: fun(any): string}
 function vim.ui.select(items, opts, on_choice)
     opts = opts or {}
     run_fzf({
         args = {("--prompt=%s "):format((opts.prompt or "select:"):lower()), "--with-nth=2..", "+m"},
-        input = vim.iter(items):enumerate():map(function(i, item)
+        input = vim.iter(ipairs(items)):map(function(i, item)
             return i .. " " .. (opts.format_item or tostring)(item)
         end):totable(),
         on_output = function(lines)
@@ -800,7 +800,7 @@ local cmp = require("cmp")
 
 --- @return integer[]
 function _G.get_listed_bufnrs()
-    return vim.tbl_map(function(info) return info.bufnr end, fn.getbufinfo({buflisted = 1}))
+    return vim.tbl_filter(function(bufnr) return vim.bo[bufnr].buflisted end, nvim_list_bufs())
 end
 
 --- @param fallback fun()
