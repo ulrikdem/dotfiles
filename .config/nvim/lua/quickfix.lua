@@ -66,10 +66,11 @@ function M.textfunc(args)
     local list = M.get_list({
         loclist_winid = args.quickfix == 0 and args.winid or nil,
         id = args.id,
-        qfbufnr = true, title = true, items = true,
+        qfbufnr = true, winid = true, title = true, items = true, context = true,
     })
     local bufnr = list.qfbufnr
-    local is_toc = vim.endswith(list.title, "TOC")
+    local tree_mode = vim.tbl_get(list, "context", "tree_mode")
+    local preserve_space = tree_mode or vim.endswith(list.title, "TOC")
 
     local lines = {} --- @type string[]
     local highlights = {}
@@ -83,33 +84,35 @@ function M.textfunc(args)
 
     for i = args.start_idx, args.end_idx do
         local item = list.items[i]
-        local leading_space = (is_toc or item.bufnr == 0) and 0 or #item.text:match("%s*")
+        local leading_space = (preserve_space or item.bufnr == 0) and 0 or #item.text:match("%s*")
         local line = ""
 
-        if item.bufnr ~= 0 then
-            local name = nvim_buf_get_name(item.bufnr)
-            line = name ~= "" and vim.fn.fnamemodify(name, ":~:.") or "[No Name]"
-            -- Dim path for all but the first (consecutive) item for the same buffer
-            if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
-                table.insert(highlights, {i - 1, 0, #line, "NonText"})
-                data.foldlevel[i] = 1
-            else
-                data.foldlevel[i] = ">1"
-                data.foldtext[i] = line
+        if not tree_mode then
+            if item.bufnr ~= 0 then
+                local name = nvim_buf_get_name(item.bufnr)
+                line = name ~= "" and vim.fn.fnamemodify(name, ":~:.") or "[No Name]"
+                -- Dim path for all but the first (consecutive) item for the same buffer
+                if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
+                    table.insert(highlights, {i - 1, 0, #line, "NonText"})
+                    data.foldlevel[i] = 1
+                else
+                    data.foldlevel[i] = ">1"
+                    data.foldtext[i] = line
+                end
             end
-        end
 
-        line = line .. "|"
-        if item.lnum ~= 0 then
-            line = line .. ("%4d"):format(item.lnum)
-        end
-        line = line .. "| "
+            line = line .. "|"
+            if item.lnum ~= 0 then
+                line = line .. ("%4d"):format(item.lnum)
+            end
+            line = line .. "| "
 
-        local type = types[item.type:upper()]
-        if type then
-            local name, group = unpack(type)
-            table.insert(highlights, {i - 1, #line, #line + #name + 1, group})
-            line = line .. name .. ": "
+            local type = types[item.type:upper()]
+            if type then
+                local name, group = unpack(type)
+                table.insert(highlights, {i - 1, #line, #line + #name + 1, group})
+                line = line .. name .. ": "
+            end
         end
 
         local highlight_ranges = vim.tbl_get(item, "user_data", "highlight_ranges")
@@ -126,10 +129,9 @@ function M.textfunc(args)
         if not highlight_ranges then text = gsub(text, "\n%s*", " ") end
         line = line .. text
 
-        local foldlevel = vim.tbl_get(item, "user_data", "foldlevel")
-        if foldlevel then
-            data.foldlevel[i] = foldlevel
-            data.foldtext[i] = text
+        if tree_mode then
+            table.insert(highlights, {i - 1, 0, #line, "Normal"})
+            data.foldlevel[i] = item.user_data.foldlevel
         end
 
         table.insert(lines, line)
@@ -143,6 +145,29 @@ function M.textfunc(args)
         for _, highlight in ipairs(highlights) do
             local line, col, end_col, group = unpack(highlight)
             nvim_buf_set_extmark(bufnr, namespace, line, col, {end_col = end_col, hl_group = group})
+        end
+
+        local wo = vim.wo[list.winid][0]
+        wo.foldmethod = "expr" -- Set unconditionally, to recompute folds
+        wo.foldexpr = "v:lua.require'quickfix'.foldexpr()"
+        if args.start_idx == 1 then
+            if tree_mode then
+                wo.foldtext = ""
+                wo.foldlevel = 0
+                wo.foldcolumn = "1"
+                wo.numberwidth = 4
+                wo.fillchars = "fold: ," .. vim.go.fillchars
+                vim.keymap.set("n", "<Left>", "zc", {buffer = bufnr})
+                vim.keymap.set("n", "<Right>", "zo", {buffer = bufnr})
+            else
+                wo.foldtext = "v:lua.require'quickfix'.foldtext()"
+                wo.foldlevel = 1
+                wo.foldcolumn = nil
+                wo.numberwidth = nil
+                wo.fillchars = nil
+                pcall(vim.keymap.del, "n", "<Left>", {buffer = bufnr})
+                pcall(vim.keymap.del, "n", "<Right>", {buffer = bufnr})
+            end
         end
     end)
 

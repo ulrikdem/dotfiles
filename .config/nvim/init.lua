@@ -56,7 +56,7 @@ defaults.expandtab = true
 defaults.list = true
 defaults.listchars = "tab:→ ,trail:·,nbsp:·"
 
-defaults.fillchars = "foldopen:▾,foldclose:▸"
+defaults.fillchars = "foldopen:▼,foldclose:▶"
 defaults.foldtext = "v:lua.foldtext()"
 function _G.foldtext()
     return ("%s %s (%d lines) "):format(
@@ -406,13 +406,8 @@ nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "qf",
     callback = function()
-        local wo = vim.wo[0][0]
-        wo.list = false
-        wo.wrap = false
-        wo.foldmethod = "expr"
-        wo.foldexpr = "v:lua.require'quickfix'.foldexpr()"
-        wo.foldtext = "v:lua.require'quickfix'.foldtext()"
-        wo.foldlevel = 99
+        vim.wo[0][0].wrap = false
+        vim.wo[0][0].list = false
 
         map("n", "<CR>", function()
             vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
@@ -874,8 +869,12 @@ map("n", "gO", function()
                 if result.error then return vim.notify(tostring(result.error), vim.log.levels.ERROR) end
                 vim.list_extend(items, quickfix.from_lsp_symbols(result.result, bufnr))
             end
-            -- The filename and line numbers are concealed when the title ends in TOC
-            quickfix.set_list({loclist_winid = winid, title = "Symbols TOC", items = items})
+            quickfix.set_list({
+                loclist_winid = winid,
+                title = "Symbols in " .. fn.fnamemodify(nvim_buf_get_name(bufnr), ":~:."),
+                items = items,
+                context = {tree_mode = true},
+            })
         end)
 end)
 
