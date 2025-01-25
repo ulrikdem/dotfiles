@@ -636,9 +636,8 @@ end
 
 --- @param title string
 --- @param parse fun(line: string): vim.quickfix.entry
---- @param loclist_winid? integer
 --- @return fun(lines: string[])
-local function jump_or_setqflist(title, parse, loclist_winid)
+local function jump_or_setqflist(title, parse)
     return function(lines)
         if #lines == 1 then
             local item = parse(lines[1])
@@ -653,11 +652,7 @@ local function jump_or_setqflist(title, parse, loclist_winid)
                 after_jump()
             end
         elseif #lines > 1 then
-            quickfix.set_list({
-                loclist_winid = loclist_winid,
-                title = title,
-                items = vim.tbl_map(parse, lines),
-            })
+            quickfix.set_list({title = title, items = vim.tbl_map(parse, lines)})
         end
     end
 end
@@ -747,12 +742,21 @@ nvim_create_autocmd("FileType", {
                     return item.valid ~= 0 and i .. " " .. quickfix.to_fzf(item) or nil
                 end):totable(),
                 on_output = function(lines)
-                    -- Focus isn't automatically returned to the quickfix window if the fzf window is focused when closed
+                    -- Focus isn't automatically returned to the quickfix window when the fzf window is closed
                     nvim_set_current_win(list.winid)
-                    if #lines == 1 then nvim_win_close(list.winid, false) end
-                    jump_or_setqflist(list.title, function(line)
-                        return list.items[tonumber(vim.gsplit(line, " ")())]
-                    end, list.filewinid)(lines)
+                    if #lines == 1 then
+                        vim.cmd(vim.gsplit(lines[1], " ")() .. (list.filewinid and "ll" or "cc"))
+                        nvim_win_close(list.winid, false)
+                        after_jump()
+                    elseif #lines > 1 then
+                        quickfix.set_list({
+                            loclist_winid = list.filewinid,
+                            title = list.title,
+                            items = vim.tbl_map(function(line)
+                                return list.items[tonumber(vim.gsplit(line, " ")())]
+                            end, lines),
+                        })
+                    end
                 end,
             })
         end, {buffer = 0})
