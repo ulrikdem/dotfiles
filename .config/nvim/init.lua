@@ -424,11 +424,11 @@ nvim_create_autocmd("FileType", {
         vim.wo[0][0].list = false
 
         map("n", "<CR>", function()
-            vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
+            vim.cmd.normal({vim.keycode("<CR>"), bang = true})
             after_jump()
         end, {buffer = 0})
         map("n", "<M-CR>", function()
-            vim.cmd.normal({vim.keycode("<CR>"), bang = true})
+            vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
             after_jump()
         end, {buffer = 0})
     end,
