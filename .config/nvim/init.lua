@@ -778,7 +778,7 @@ map("n", "<Leader>fs", function()
                     items = {}
                     for _, result in pairs(results or {}) do
                         if result.error then lsp.log.error(tostring(result.error)) end
-                        vim.list_extend(items, quickfix.from_lsp_symbols(result.result or {}, bufnr))
+                        quickfix.from_lsp_symbols(result.result or {}, items)
                     end
                 end
                 return vim.iter(ipairs(items)):map(function(i, item)
@@ -877,20 +877,29 @@ map("n", "grl", lsp.codelens.run)
 map("n", "gO", function()
     local bufnr = nvim_get_current_buf()
     local winid = nvim_get_current_win()
+    local cursor = nvim_win_get_cursor(0)
+    local line = nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], true)[1]
     lsp.buf_request_all(
         bufnr,
         lsp.protocol.Methods.textDocument_documentSymbol,
         {textDocument = lsp.util.make_text_document_params()},
         function(results)
             local items = {}
-            for _, result in pairs(results) do
-                if result.error then return vim.notify(tostring(result.error), vim.log.levels.ERROR) end
-                vim.list_extend(items, quickfix.from_lsp_symbols(result.result, bufnr))
+            local cursor_index = nil
+            for client_id, result in pairs(results) do
+                if result.error then
+                    return vim.notify(tostring(result.error), vim.log.levels.ERROR)
+                end
+                cursor_index = quickfix.from_lsp_symbols(result.result, items, bufnr, {
+                    line = cursor[1] - 1,
+                    character = lsp.util._str_utfindex_enc(line, cursor[2], lsp.get_client_by_id(client_id).offset_encoding),
+                }) or cursor_index
             end
             quickfix.set_list({
                 loclist_winid = winid,
                 title = "Symbols in " .. fn.fnamemodify(nvim_buf_get_name(bufnr), ":~:."),
                 items = items,
+                idx = cursor_index,
                 context = {tree_mode = true},
             })
         end)

@@ -157,6 +157,7 @@ function M.textfunc(args)
                 wo.foldcolumn = "1"
                 wo.numberwidth = 4
                 wo.fillchars = "fold: ," .. vim.go.fillchars
+                nvim_win_call(list.winid, function() vim.cmd("normal! zv") end)
                 vim.keymap.set("n", "<Left>", "zc", {buffer = bufnr})
                 vim.keymap.set("n", "<Right>", "zo", {buffer = bufnr})
             else
@@ -258,9 +259,12 @@ function M.from_ripgrep(json)
 end
 
 --- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
---- @param bufnr integer
-function M.from_lsp_symbols(symbols, bufnr)
-    local items = {} --- @type vim.quickfix.entry[]
+--- @param items vim.quickfix.entry[]
+--- @param bufnr? integer
+--- @param cursor? lsp.Position
+--- @return integer?
+function M.from_lsp_symbols(symbols, items, bufnr, cursor)
+    local cursor_index = nil
 
     --- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
     --- @param depth integer
@@ -283,6 +287,13 @@ function M.from_lsp_symbols(symbols, bufnr)
                     foldlevel = symbol.range and (next(symbol.children or {}) and ">" .. depth + 1 or depth),
                 },
             })
+            range = symbol.range or symbol.location.range
+            if cursor
+                and (cursor.line > range.start.line or cursor.line == range.start.line and cursor.character >= range.start.character)
+                and (cursor.line < range["end"].line or cursor.line == range["end"].line and cursor.character < range["end"].character)
+            then
+                cursor_index = #items
+            end
             if symbol.children then
                 inner(symbol.children, depth + 1, {symbol.name, unpack(container_names)})
             end
@@ -290,7 +301,7 @@ function M.from_lsp_symbols(symbols, bufnr)
     end
 
     inner(symbols, 0, {})
-    return items
+    return cursor_index
 end
 
 return M
