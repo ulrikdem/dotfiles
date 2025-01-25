@@ -7,7 +7,7 @@ local pending_requests = {} --- @type table<integer, true?>
 --- @param params table
 --- @param handler fun(result: any)
 local function cancellable_request(client, bufnr, method, params, handler)
-    local request_id
+    local _, request_id
     _, request_id = client.request(method, params, function(err, result)
         if request_id and pending_requests[request_id] then
             pending_requests[request_id] = nil

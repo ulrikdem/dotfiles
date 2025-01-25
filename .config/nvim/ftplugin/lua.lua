@@ -11,9 +11,6 @@ local settings = {
         showWord = "Disable",
         keywordSnippet = "Disable",
     },
-    diagnostics = {
-        workspaceDelay = -1,
-    },
     hint = {
         enable = true,
         setType = true,
@@ -36,6 +33,8 @@ if in_runtime then
     settings = vim.tbl_deep_extend("force", settings, {
         workspace = {
             library = runtime,
+            -- Plugins are library files (configured above), not part of the main workspace
+            ignoreDir = {"pack"},
         },
         runtime = {
             path = {"lua/?.lua", "lua/?/init.lua"},
@@ -43,7 +42,16 @@ if in_runtime then
             version = "LuaJIT",
         },
         diagnostics = {
-            disable = {"duplicate-set-field", "redefined-local"},
+            disable = {
+                "duplicate-set-field",
+                "redefined-local",
+                "unused-function",
+                "empty-block",
+                "lowercase-global",
+            },
+            neededFileStatus = {
+                ["global-element"] = "Any",
+            },
         },
     })
     -- Allow opening help with K in visual mode
