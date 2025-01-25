@@ -201,26 +201,40 @@ nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
 do
     local sidebar_width = 80
-    local function make_sidebar()
-        if vim.o.columns <= sidebar_width * 2 or vim.o.winfixwidth then return end
-        vim.cmd.wincmd("L")
-        nvim_win_set_width(0, sidebar_width)
-        vim.o.winfixwidth = true
+    vim.env.MANWIDTH = tostring(sidebar_width + 1)
+
+    --- @param size? integer
+    local function toggle_side(size)
+        if vim.o.winfixwidth then
+            vim.cmd.wincmd("J")
+            size = size or vim.o.buftype == "quickfix" and 10 or nil
+            if size then
+                nvim_win_set_height(0, size)
+                vim.o.winfixheight = true
+            end
+            vim.o.winfixwidth = false
+        else
+            vim.cmd.wincmd("L")
+            nvim_win_set_width(0, size or sidebar_width)
+            vim.o.winfixwidth = true
+            vim.o.winfixheight = false
+        end
         vim.cmd.wincmd("=")
     end
 
     nvim_create_autocmd("BufWinEnter", {
         group = augroup,
         callback = function()
-            if vim.o.buftype == "help" then make_sidebar() end
+            if (vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive")
+                    and vim.o.columns > sidebar_width * 2 and not vim.o.winfixwidth then
+                toggle_side()
+            end
         end,
     })
-    nvim_create_autocmd("FileType", {
-        group = augroup,
-        pattern = {"man", "fugitive"},
-        callback = function() make_sidebar() end,
-    })
-    vim.env.MANWIDTH = tostring(sidebar_width + 1)
+
+    map("n", "<Leader>ts", function()
+        toggle_side(vim.v.count ~= 0 and vim.v.count or nil)
+    end)
 end
 
 nvim_create_autocmd("FileType", {
