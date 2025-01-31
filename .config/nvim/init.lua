@@ -408,14 +408,6 @@ local quickfix = require("quickfix")
 
 defaults.quickfixtextfunc = "v:lua.require'quickfix'.textfunc"
 
-local function after_jump()
-    vim.cmd("normal! zv")
-    local list, i = unpack(fn.getjumplist())
-    fn.settagstack(nvim_get_current_win(), {
-        items = {{from = {list[i].bufnr, list[i].lnum, list[i].col + 1, list[i].coladd}, tagname = "quickfix"}},
-    }, "t")
-end
-
 nvim_create_autocmd("FileType", {
     group = augroup,
     pattern = "qf",
@@ -425,11 +417,11 @@ nvim_create_autocmd("FileType", {
 
         map("n", "<CR>", function()
             vim.cmd.normal({vim.keycode("<CR>"), bang = true})
-            after_jump()
+            quickfix.after_jump()
         end, {buffer = 0})
         map("n", "<M-CR>", function()
             vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
-            after_jump()
+            quickfix.after_jump()
         end, {buffer = 0})
     end,
 })
@@ -649,7 +641,7 @@ local function jump_or_setqflist(title, parse)
             if item.lnum and item.lnum > 0 then
                 local set_cursor = item.vcol and item.vcol ~= 0 and fn.setcursorcharpos or fn.cursor
                 set_cursor(item.lnum, item.col and item.col > 0 and item.col or 1)
-                after_jump()
+                quickfix.after_jump()
             end
         elseif #lines > 1 then
             quickfix.set_list({title = title, items = vim.tbl_map(parse, lines)})
@@ -747,7 +739,7 @@ nvim_create_autocmd("FileType", {
                     if #lines == 1 then
                         vim.cmd(vim.gsplit(lines[1], " ")() .. (list.filewinid and "ll" or "cc"))
                         nvim_win_close(list.winid, false)
-                        after_jump()
+                        quickfix.after_jump()
                     elseif #lines > 1 then
                         quickfix.set_list({
                             loclist_winid = list.filewinid,

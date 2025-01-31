@@ -29,6 +29,19 @@ function M.get_list(opts)
     end
 end
 
+function M.after_jump()
+    vim.cmd("normal! zv")
+    local list, i = unpack(vim.fn.getjumplist())
+    vim.fn.settagstack(nvim_get_current_win(), {
+        items = {
+            {
+                from = {list[i].bufnr, list[i].lnum, list[i].col + 1, list[i].coladd},
+                tagname = "quickfix",
+            },
+        },
+    }, "t")
+end
+
 -- This is faster than string.gsub for plain patterns, since string.find has an optimization for those
 --- @param str string
 --- @param pattern string
