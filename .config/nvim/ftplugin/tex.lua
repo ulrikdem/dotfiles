@@ -21,6 +21,6 @@ vim.keymap.set("i", "<C-b>", "\\begin{", {buffer = true})
 vim.keymap.set("i", "<C-z>", "<Plug>(vimtex-delim-close)", {buffer = true})
 
 vim.cmd.AddTabularPattern({"tex", [[/&\|\\\\/]], bang = true})
-vim.keymap.set("n", "grq", "vie:Tabularize tex<CR>", {remap = true, buffer = true, silent = true})
+vim.bo.formatexpr = "nvim_cmd(#{cmd: 'Tabularize', args: ['tex'], range: [v:lnum, v:lnum + v:count - 1]}, {})"
 
 vim.wo[0][0].spell = true
