@@ -892,7 +892,7 @@ map("n", "gO", function()
                 title = "Symbols in " .. fn.fnamemodify(nvim_buf_get_name(bufnr), ":~:."),
                 items = items,
                 idx = cursor_index,
-                context = {tree_mode = true},
+                context = {tree_foldlevel = 0},
             })
         end)
 end)

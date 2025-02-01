@@ -82,8 +82,8 @@ function M.textfunc(args)
         qfbufnr = true, winid = true, title = true, items = true, context = true,
     })
     local bufnr = list.qfbufnr
-    local tree_mode = vim.tbl_get(list, "context", "tree_mode")
-    local preserve_space = tree_mode or vim.endswith(list.title, "TOC")
+    local tree_foldlevel = vim.tbl_get(list, "context", "tree_foldlevel")
+        or vim.endswith(list.title, "TOC") and 1 or nil
 
     local lines = {} --- @type string[]
     local highlights = {}
@@ -97,10 +97,10 @@ function M.textfunc(args)
 
     for i = args.start_idx, args.end_idx do
         local item = list.items[i]
-        local leading_space = (preserve_space or item.bufnr == 0) and 0 or #item.text:match("%s*")
+        local leading_space = (tree_foldlevel or item.bufnr == 0) and 0 or #item.text:match("%s*")
         local line = ""
 
-        if not tree_mode then
+        if not tree_foldlevel then
             if item.bufnr ~= 0 then
                 local name = nvim_buf_get_name(item.bufnr)
                 line = name ~= "" and vim.fn.fnamemodify(name, ":~:.") or "[No Name]"
@@ -142,9 +142,13 @@ function M.textfunc(args)
         if not highlight_ranges then text = gsub(text, "\n%s*", " ") end
         line = line .. text
 
-        if tree_mode then
+        if tree_foldlevel then
+            local depth = math.floor(nvim_strwidth(text:match("[  ]*")) / 2)
+            local next_depth = list.items[i + 1]
+                and math.floor(nvim_strwidth(list.items[i + 1].text:match("[  ]*")) / 2) or 0
+            data.foldlevel[i] = next_depth > depth and ">" .. next_depth or depth
+            -- Override syntax and fold highlights
             table.insert(highlights, {i - 1, 0, #line, "Normal"})
-            data.foldlevel[i] = item.user_data.foldlevel
         end
 
         table.insert(lines, line)
@@ -164,9 +168,9 @@ function M.textfunc(args)
         wo.foldmethod = "expr" -- Set unconditionally, to recompute folds
         wo.foldexpr = "v:lua.require'quickfix'.foldexpr()"
         if args.start_idx == 1 then
-            if tree_mode then
+            if tree_foldlevel then
                 wo.foldtext = ""
-                wo.foldlevel = 0
+                wo.foldlevel = tree_foldlevel
                 wo.foldcolumn = "1"
                 wo.numberwidth = 4
                 wo.fillchars = "fold: ," .. vim.go.fillchars
@@ -296,8 +300,6 @@ function M.from_lsp_symbols(symbols, items, bufnr, cursor)
                 user_data = {
                     highlight_ranges = {{#text - #symbol.name, #text}},
                     container_names = symbol.containerName and {symbol.containerName} or container_names,
-                    -- Only override foldlevel for DocumentSymbols, which have a hierarchy
-                    foldlevel = symbol.range and (next(symbol.children or {}) and ">" .. depth + 1 or depth),
                 },
             })
             range = symbol.range or symbol.location.range
