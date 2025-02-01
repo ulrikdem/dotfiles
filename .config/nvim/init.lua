@@ -144,7 +144,7 @@ for _, bracket in ipairs({"[", "]"}) do
     -- The intermediate mapping is only to improve the command shown in the bottom right
     local intermediate = ("<lt>M-%s>"):format(bracket)
     map("n", ("<M-%s>"):format(bracket), intermediate, {remap = true})
-    local function repeat_bracket()
+    map("n", intermediate, function()
         local c = fn.getcharstr()
         if c == vim.keycode("<M-[>") or c == vim.keycode("<M-]>") then
             return c
@@ -153,8 +153,7 @@ for _, bracket in ipairs({"[", "]"}) do
         else
             return bracket .. c .. "zz" .. vim.keycode(intermediate)
         end
-    end
-    map("n", intermediate, repeat_bracket, {expr = true, replace_keycodes = false, remap = true})
+    end, {expr = true, replace_keycodes = false, remap = true})
     map("n", intermediate .. "<Esc>", "")
 end
 
