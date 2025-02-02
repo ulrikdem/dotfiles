@@ -865,6 +865,54 @@ map("n", "grt", lsp.buf.type_definition)
 map("n", "grq", lsp.buf.format)
 map("n", "grl", lsp.codelens.run)
 
+map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
+map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
+
+vim.diagnostic.config({
+    severity_sort = true,
+    signs = false,
+    virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
+})
+
+for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, k = {lsp.inlay_hint, "inlay hints"}}) do
+    map("n", "yo" .. k, function()
+        v[1].enable(not v[1].is_enabled())
+        nvim_echo({{v[2] .. ": " .. (v[1].is_enabled() and "enabled" or "disabled")}}, false, {})
+    end)
+end
+
+nvim_create_autocmd("InsertEnter", {
+    group = augroup,
+    callback = function()
+        if lsp.inlay_hint.is_enabled({}) then
+            lsp.inlay_hint.enable(false)
+            nvim_create_autocmd("InsertLeave", {
+                once = true,
+                callback = function() lsp.inlay_hint.enable() end,
+            })
+        end
+    end,
+})
+
+_G.old_locations_to_items = old_locations_to_items or lsp.util.locations_to_items
+function lsp.util.locations_to_items(locations, offset_encoding)
+    --- @type vim.quickfix.entry[]
+    local items = old_locations_to_items(locations, offset_encoding)
+    for _, item in ipairs(items) do
+        --- @type lsp.Range
+        local range = item.user_data.range or item.user_data.targetSelectionRange
+        item.user_data = {
+            highlight_ranges = {
+                range.start.line == range["end"].line and {
+                    lsp.util._str_byteindex_enc(item.text, range.start.character, offset_encoding),
+                    lsp.util._str_byteindex_enc(item.text, range["end"].character, offset_encoding),
+                } or nil,
+            },
+        }
+    end
+    return items
+end
+
 map("n", "gO", function()
     local bufnr = nvim_get_current_buf()
     local winid = nvim_get_current_win()
@@ -895,35 +943,6 @@ map("n", "gO", function()
             })
         end)
 end)
-
-for k, v in pairs({k = {lsp.inlay_hint, "inlay hints"}, e = {vim.diagnostic, "diagnostics"}}) do
-    map("n", "yo" .. k, function()
-        v[1].enable(not v[1].is_enabled())
-        nvim_echo({{v[2] .. ": " .. (v[1].is_enabled() and "enabled" or "disabled")}}, false, {})
-    end)
-end
-
-map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
-map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
-
-vim.diagnostic.config({
-    severity_sort = true,
-    signs = false,
-    virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
-})
-
-nvim_create_autocmd("InsertEnter", {
-    group = augroup,
-    callback = function()
-        if lsp.inlay_hint.is_enabled({}) then
-            lsp.inlay_hint.enable(false)
-            nvim_create_autocmd("InsertLeave", {
-                once = true,
-                callback = function() lsp.inlay_hint.enable() end,
-            })
-        end
-    end,
-})
 
 --- @param ... string | string[] | fun(name: string, path: string): boolean
 --- @return string?
@@ -976,25 +995,6 @@ function _G.start_lsp(config)
             end,
         })
     end
-end
-
-_G.old_locations_to_items = old_locations_to_items or lsp.util.locations_to_items
-function lsp.util.locations_to_items(locations, offset_encoding)
-    --- @type vim.quickfix.entry[]
-    local items = old_locations_to_items(locations, offset_encoding)
-    for _, item in ipairs(items) do
-        --- @type lsp.Range
-        local range = item.user_data.range or item.user_data.targetSelectionRange
-        item.user_data = {
-            highlight_ranges = {
-                range.start.line == range["end"].line and {
-                    lsp.util._str_byteindex_enc(item.text, range.start.character, offset_encoding),
-                    lsp.util._str_byteindex_enc(item.text, range["end"].character, offset_encoding),
-                } or nil,
-            },
-        }
-    end
-    return items
 end
 
 --- @param client_id integer
