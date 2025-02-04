@@ -370,7 +370,7 @@ map("n", "<Leader>td", function()
             end
         end
     else
-        vim.cmd.Gdiffsplit({bang = true})
+        vim.cmd("keepalt Gdiffsplit!")
     end
 end)
 
