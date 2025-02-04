@@ -936,13 +936,59 @@ map("n", "gO", function()
             end
             quickfix.set_list({
                 loclist_winid = winid,
-                title = "Symbols in " .. fn.fnamemodify(nvim_buf_get_name(bufnr), ":~:."),
+                title = "Symbols",
                 items = items,
                 idx = cursor_index,
                 context = {tree_foldlevel = 0},
             })
         end)
 end)
+
+for name, params in pairs({
+    IncomingCalls = {lsp.protocol.Methods.textDocument_prepareCallHierarchy, lsp.protocol.Methods.callHierarchy_incomingCalls, function(r) return r.from end},
+    OutgoingCalls = {lsp.protocol.Methods.textDocument_prepareCallHierarchy, lsp.protocol.Methods.callHierarchy_outgoingCalls, function(r) return r.to end},
+    Supertypes = {lsp.protocol.Methods.textDocument_prepareTypeHierarchy, lsp.protocol.Methods.typeHierarchy_supertypes, function(r) return r end},
+    Subtypes = {lsp.protocol.Methods.textDocument_prepareTypeHierarchy, lsp.protocol.Methods.typeHierarchy_subtypes, function(r) return r end},
+}) do
+    nvim_create_user_command(name, function()
+        local bufnr = nvim_get_current_buf()
+        vim.lsp.buf_request_all(bufnr, params[1], lsp.util.make_position_params(), function(results)
+            --- @class hierarchy_item: lsp.CallHierarchyItem
+            --- @field children? hierarchy_item[]
+            local symbols = {} --- @type hierarchy_item[]
+            local pending_requests = 0
+            for client_id, result in pairs(results) do
+                if result.error then
+                    return vim.notify(tostring(result.error), vim.log.levels.ERROR)
+                end
+                local client = assert(lsp.get_client_by_id(client_id))
+                local cache = {} --- @type table<string, hierarchy_item>
+                local function process_symbol(symbol) --- @param symbol hierarchy_item
+                    -- Assume symbols can be uniquely identified by their start positions
+                    local id = ("%s:%d:%d")
+                        :format(symbol.uri, symbol.selectionRange.start.line, symbol.selectionRange.start.character)
+                    -- Prevent duplicate work and infinite recursion
+                    if cache[id] then return cache[id] end
+                    cache[id] = symbol
+
+                    pending_requests = pending_requests + 1
+                    client.request(params[2], {item = symbol}, function(err, result)
+                        if err then vim.notify(tostring(err), vim.log.levels.WARN) end
+                        symbol.children = vim.iter(result or {}):map(params[3]):map(process_symbol):totable()
+                        pending_requests = pending_requests - 1
+                        if pending_requests == 0 then
+                            local items = {}
+                            quickfix.from_lsp_symbols(symbols, items)
+                            quickfix.set_list({title = name, items = items, context = {tree_foldlevel = 1}})
+                        end
+                    end, bufnr)
+                    return symbol
+                end
+                vim.list_extend(symbols, vim.tbl_map(process_symbol, result.result))
+            end
+        end)
+    end, {bar = true})
+end
 
 --- @param ... string | string[] | fun(name: string, path: string): boolean
 --- @return string?

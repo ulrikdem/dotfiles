@@ -147,8 +147,10 @@ function M.textfunc(args)
             local next_depth = list.items[i + 1]
                 and math.floor(nvim_strwidth(list.items[i + 1].text:match("[  ]*")) / 2) or 0
             data.foldlevel[i] = next_depth > depth and ">" .. next_depth or depth
-            -- Override syntax and fold highlights
-            table.insert(highlights, {i - 1, 0, #line, "Normal"})
+            table.insert(highlights, {i - 1, 0, #line, "Normal"}) -- Override syntax and fold highlights
+            local name = vim.fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.")
+            line = line .. " " .. name
+            table.insert(highlights, {i - 1, #line - #name, #line, "NonText"})
         end
 
         table.insert(lines, line)
@@ -275,28 +277,30 @@ function M.from_ripgrep(json)
     end
 end
 
---- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
+--- @param symbols lsp.SymbolInformation[] | lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.CallHierarchyItem[] | lsp.TypeHierarchyItem[]
 --- @param items vim.quickfix.entry[]
 --- @param bufnr? integer
 --- @param cursor? lsp.Position
 --- @return integer?
 function M.from_lsp_symbols(symbols, items, bufnr, cursor)
+    local ancestors = {}
     local cursor_index = nil
 
-    --- @param symbols lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.SymbolInformation[]
+    --- @param symbols lsp.SymbolInformation[] | lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.CallHierarchyItem[] | lsp.TypeHierarchyItem[]
     --- @param depth integer
     --- @param container_names string[]
     local function inner(symbols, depth, container_names)
         for _, symbol in ipairs(symbols) do
+            local uri = symbol.uri or symbol.location and symbol.location.uri
             local range = symbol.selectionRange or symbol.location.range
             local kind = vim.lsp.protocol.SymbolKind[symbol.kind] or "Unknown"
             local text = ("%s[%s] %s"):format(("  "):rep(depth), kind, symbol.name)
             table.insert(items, {
-                filename = symbol.location and vim.uri_to_fname(symbol.location.uri),
-                bufnr = not symbol.location and bufnr or nil,
+                filename = uri and vim.uri_to_fname(uri),
+                bufnr = not uri and bufnr or nil,
                 lnum = range.start.line + 1,
                 col = range.start.character + 1, -- This neglects to take into account offset_encoding
-                text = symbol.detail and symbol.detail ~= "" and text .. ": " .. symbol.detail or text,
+                text = symbol.detail and symbol.detail ~= "" and text .. ": " .. gsub(symbol.detail, "\n%s*", " ") or text,
                 user_data = {
                     highlight_ranges = {{#text - #symbol.name, #text}},
                     container_names = symbol.containerName and {symbol.containerName} or container_names,
@@ -309,8 +313,10 @@ function M.from_lsp_symbols(symbols, items, bufnr, cursor)
             then
                 cursor_index = #items
             end
-            if symbol.children then
+            if symbol.children and not ancestors[symbol] then
+                ancestors[symbol] = true
                 inner(symbol.children, depth + 1, {symbol.name, unpack(container_names)})
+                ancestors[symbol] = nil
             end
         end
     end
