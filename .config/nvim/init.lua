@@ -874,6 +874,14 @@ vim.diagnostic.config({
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
 
+nvim_create_user_command("Diagnostics", function()
+    quickfix.set_list({
+        title = "Diagnostics",
+        items = vim.diagnostic.toqflist(vim.diagnostic.get()),
+        action = fn.getqflist({title = true}).title == "Diagnostics" and "r" or " ",
+    })
+end, {bar = true})
+
 for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, k = {lsp.inlay_hint, "inlay hints"}}) do
     map("n", "yo" .. k, function()
         v[1].enable(not v[1].is_enabled())
