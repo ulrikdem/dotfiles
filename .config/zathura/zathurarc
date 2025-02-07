@@ -7,3 +7,5 @@ set selection-notification false
 set statusbar-home-tilde true
 set window-title-home-tilde true
 set window-title-page true
+
+map <C-l> feedkeys <Esc>
