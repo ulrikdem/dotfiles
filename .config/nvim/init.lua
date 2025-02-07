@@ -515,9 +515,8 @@ end, {nargs = "*", complete = "file", bang = true})
 map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
 map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
 
---- @param args string
-local function ripgrep(args)
-    killable_process("rg --json " .. args, function(result)
+nvim_create_user_command("Grep", function(opts)
+    killable_process("rg --json " .. opts.args, function(result)
         if result.signal ~= 0 then
             return vim.schedule_wrap(vim.notify)("rg: exited with signal " .. result.signal, vim.log.levels.ERROR)
         end
@@ -529,23 +528,24 @@ local function ripgrep(args)
         for line in vim.gsplit(result.stderr, "\n", {trimempty = true}) do
             items[#items + 1] = {type = "E", text = line}
         end
-        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. args, items = items})
+        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. opts.args, items = items})
+    end)
+end, {nargs = "+", complete = "file"})
+
+do
+    local function grep(args, pattern)
+        vim.cmd.Grep({args, fn.shellescape(pattern), magic = {file = false}})
+    end
+    map("n", "grg", function() grep("-Fwe", fn.expand("<cword>")) end)
+    map("n", "grG", function() grep("-Fwe", fn.expand("<cWORD>")) end)
+    map("x", "grg", function()
+        nvim_feedkeys(vim.keycode("<Esc>"), "nix", false)
+        local l1, c1 = unpack(nvim_buf_get_mark(0, "<"))
+        local l2, c2 = unpack(nvim_buf_get_mark(0, ">"))
+        local text = nvim_buf_get_text(0, l1 - 1, c1, l2 - 1, c2 + 1, {})
+        grep("-FUe", table.concat(text, "\n"))
     end)
 end
-
-map("n", "grg", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cword>"))) end)
-map("n", "grG", function() ripgrep("-Fwe " .. fn.shellescape(fn.expand("<cWORD>"))) end)
-map("x", "grg", function()
-    nvim_feedkeys(vim.keycode("<Esc>"), "nix", false)
-    local l1, c1 = unpack(nvim_buf_get_mark(0, "<"))
-    local l2, c2 = unpack(nvim_buf_get_mark(0, ">"))
-    local text = nvim_buf_get_text(0, l1 - 1, c1, l2 - 1, c2 + 1, {})
-    ripgrep("-FUe " .. fn.shellescape(table.concat(text, "\n")))
-end)
-
-nvim_create_user_command("Grep", function(opts)
-    ripgrep(opts.args)
-end, {nargs = "+", complete = "file"})
 
 nvim_create_user_command("HelpGrep", function(opts)
     vim.cmd.helpgrep(opts.args)
