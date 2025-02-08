@@ -109,3 +109,11 @@ start_lsp({
         })
     end,
 })
+
+--- @type repl_config
+vim.b.repl = {
+    cmd = "ghci",
+    format = function(code)
+        return code:find("\n") and ":{\n" .. code .. "\n:}\n" or code .. "\n"
+    end,
+}

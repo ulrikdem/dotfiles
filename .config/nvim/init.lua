@@ -400,6 +400,72 @@ map("n", "dpx", "dp")
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
 
+-- REPL {{{1
+
+--- @class repl_config
+--- @field cmd? string
+--- @field format? fun(code: string): string
+--- @field eval? fun(code: string)
+
+--- @type table<string, integer>
+_G.repl_channels = repl_channels or {}
+
+--- @param type? string
+function _G.repl_send(type)
+    local lines
+    if type then -- Used as normal mode operator
+        lines = fn.getregion(fn.getpos("'["), fn.getpos("']"), {
+            type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
+            exclusive = false,
+        })
+    else -- Used from visual mode
+        lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
+    end
+    local code = vim.iter(lines):map(function(s)
+        s = s:gsub("\n", "\0")
+        return s
+    end):join("\n")
+
+    local repl = vim.b.repl --- @type repl_config
+    if not repl then
+        return vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
+    elseif repl.eval then
+        return repl.eval(code)
+    end
+
+    code = repl.format and repl.format(code)
+        or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
+    if not repl_channels[repl.cmd] then
+        local winid = nvim_get_current_win()
+
+        vim.cmd.vnew()
+        local bufnr = nvim_get_current_buf()
+        repl_channels[repl.cmd] = fn.termopen(repl.cmd, {
+            on_exit = function()
+                repl_channels[repl.cmd] = nil
+                nvim_buf_delete(bufnr, {})
+            end,
+        })
+
+        nvim_set_current_win(winid)
+        nvim_feedkeys(vim.keycode("<Esc>"), "ni", false)
+
+        -- Clear screen, since the text is echoed before the first prompt
+        nvim_chan_send(repl_channels[repl.cmd], vim.keycode("<C-l>") .. code)
+    else
+        nvim_chan_send(repl_channels[repl.cmd], code)
+    end
+end
+
+map("n", "g=", function()
+    vim.o.operatorfunc = "v:lua.repl_send"
+    return "g@"
+end, {expr = true})
+
+map("n", "g==", "g=_", {remap = true})
+
+map("x", "g=", "<Esc><Cmd>lua repl_send()<CR>")
+
 -- Quickfix {{{1
 
 package.loaded.quickfix = nil -- Reload when sourcing init.lua

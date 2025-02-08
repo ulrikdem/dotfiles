@@ -29,6 +29,7 @@ if in_runtime then
         vim.fn.writefile(lines, api_lua_path)
     end
     table.insert(runtime, api_lua_path)
+
     read_paths = runtime
     settings = vim.tbl_deep_extend("force", settings, {
         workspace = {
@@ -54,10 +55,39 @@ if in_runtime then
             },
         },
     })
+
     -- Allow opening help with K in visual mode
     vim.bo.keywordprg = ":help"
+
+    --- @type repl_config
+    vim.b.repl = {
+        eval = function(code)
+            local func, err
+            -- Attempt to parse as an expression, falling back to a chunk
+            -- As far as I know the only ambiguous case is function calls, where we want to print the return values
+            for _, code in ipairs({"return " .. code, code}) do
+                func, err = loadstring(code)
+                if func then
+                    (function(ok, ...)
+                        if ok then
+                            local results = {}
+                            for i = 1, select("#", ...) do
+                                table.insert(results, vim.inspect(select(i, ...), nil))
+                            end
+                            vim.notify(table.concat(results, "\n"))
+                        else
+                            err = select(1, ...)
+                        end
+                    end)(pcall(func))
+                    break
+                end
+            end
+            if err then vim.notify(err, vim.log.levels.ERROR) end
+        end,
+    }
 else
     read_paths = {find_root({".luarc.json", ".luarc.jsonc"}, ".git")}
+    vim.b.repl = {cmd = "lua"} --- @type repl_config
 end
 
 start_lsp({

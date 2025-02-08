@@ -25,3 +25,6 @@ start_lsp({
         implicitProjectConfiguration = {checkJs = true},
     },
 })
+
+--- @type repl_config
+vim.b.repl = {cmd = "node"}
