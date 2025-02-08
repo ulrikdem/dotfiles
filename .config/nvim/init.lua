@@ -539,12 +539,10 @@ do
     map("n", "grg", function() grep("-Fwe", fn.expand("<cword>")) end)
     map("n", "grG", function() grep("-Fwe", fn.expand("<cWORD>")) end)
     map("x", "grg", function()
-        nvim_feedkeys(vim.keycode("<Esc>"), "nix", false)
-        local l1, c1 = unpack(nvim_buf_get_mark(0, "<"))
-        local l2, c2 = unpack(nvim_buf_get_mark(0, ">"))
-        local text = nvim_buf_get_text(0, l1 - 1, c1, l2 - 1, c2 + 1, {})
-        grep("-FUe", table.concat(text, "\n"))
-    end)
+        local lines = fn.getregion(fn.getpos("v"), fn.getpos("."), {type = fn.mode()})
+        grep("-FUe", vim.iter(lines):map(function(s) s = s:gsub("\n", "\0"); return s end):join("\n"))
+        return "<Esc>"
+    end, {expr = true})
 end
 
 nvim_create_user_command("HelpGrep", function(opts)
