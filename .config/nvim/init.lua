@@ -404,22 +404,23 @@ map("", "]h", "]c", {remap = true})
 
 --- @class repl_config
 --- @field cmd? string
+--- @field load_file? fun(path: string): string
 --- @field format? fun(code: string): string
---- @field eval? fun(code: string)
+--- @field eval? fun(code?: string)
 
 --- @type table<string, integer>
 _G.repl_channels = repl_channels or {}
 
---- @param type? string
+--- @param type string
 function _G.repl_send(type)
-    local lines
-    if type then -- Used as normal mode operator
+    local lines = {}
+    if type == "visual" then
+        lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
+    elseif type ~= "buffer" then -- Used as normal mode operator
         lines = fn.getregion(fn.getpos("'["), fn.getpos("']"), {
             type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
             exclusive = false,
         })
-    else -- Used from visual mode
-        lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
     end
     local code = vim.iter(lines):map(function(s)
         s = s:gsub("\n", "\0")
@@ -430,11 +431,9 @@ function _G.repl_send(type)
     if not repl then
         return vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
     elseif repl.eval then
-        return repl.eval(code)
+        return repl.eval(type ~= "buffer" and code or nil)
     end
 
-    code = repl.format and repl.format(code)
-        or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
     if not repl_channels[repl.cmd] then
         local winid = nvim_get_current_win()
 
@@ -446,15 +445,21 @@ function _G.repl_send(type)
                 nvim_buf_delete(bufnr, {})
             end,
         })
+        -- Clear screen at first prompt, since the text is echoed before the REPL is ready
+        nvim_chan_send(repl_channels[repl.cmd], vim.keycode("<C-l>"))
 
         nvim_set_current_win(winid)
         nvim_feedkeys(vim.keycode("<Esc>"), "ni", false)
-
-        -- Clear screen, since the text is echoed before the first prompt
-        nvim_chan_send(repl_channels[repl.cmd], vim.keycode("<C-l>") .. code)
-    else
-        nvim_chan_send(repl_channels[repl.cmd], code)
     end
+
+    if type == "buffer" then
+        vim.cmd("silent update")
+        code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
+            or table.concat(nvim_buf_get_lines(0, 0, -1, true), "\n")
+    end
+    code = repl.format and repl.format(code)
+        or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
+    nvim_chan_send(repl_channels[repl.cmd], code)
 end
 
 map("n", "g=", function()
@@ -464,7 +469,11 @@ end, {expr = true})
 
 map("n", "g==", "g=_", {remap = true})
 
-map("x", "g=", "<Esc><Cmd>lua repl_send()<CR>")
+map("x", "g=", "<Esc><Cmd>lua repl_send('visual')<CR>")
+
+map("n", "g=s", function()
+    repl_send("buffer")
+end)
 
 -- Quickfix {{{1
 

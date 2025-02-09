@@ -63,11 +63,19 @@ if in_runtime then
     --- @type repl_config
     vim.b.repl = {
         eval = function(code)
+            local load, args
+            if code then
+                -- Attempt to parse as an expression, falling back to a chunk
+                -- As far as I know the only ambiguous case is function calls, where we want to print the return values
+                load, args = loadstring, {"return " .. code, code}
+            else
+                -- Reset environment when loading a buffer
+                _G.lua_repl_env = setmetatable({}, {__index = _G})
+                load, args = loadfile, {nvim_buf_get_name(0)}
+            end
             local func, err
-            -- Attempt to parse as an expression, falling back to a chunk
-            -- As far as I know the only ambiguous case is function calls, where we want to print the return values
-            for _, code in ipairs({"return " .. code, code}) do
-                func, err = loadstring(code)
+            for _, arg in ipairs(args) do
+                func, err = load(arg)
                 if func then
                     debug.sethook(function(event)
                         -- Add top-level locals to lua_repl_env. Doesn't work when func has a tail call

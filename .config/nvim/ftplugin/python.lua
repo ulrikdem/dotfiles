@@ -40,6 +40,9 @@ start_lsp({
 --- @type repl_config
 vim.b.repl = {
     cmd = "ipython",
+    load_file = function(path)
+        return "%run -n -- " .. vim.fn.shellescape(path)
+    end,
     format = function(code)
         -- Use bracketed paste, ending with <M-CR> to execute without waiting for more lines
         return "\x1b[200~" .. code .. "\x1b[201~\x1b\r"

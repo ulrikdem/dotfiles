@@ -27,4 +27,12 @@ start_lsp({
 })
 
 --- @type repl_config
-vim.b.repl = {cmd = "node"}
+vim.b.repl = {
+    cmd = "node",
+    load_file = function(path)
+        return ".load " .. path
+    end,
+    format = function(code)
+        return code:find("\n") and ".editor\n" .. code .. "\4" or code .. "\n"
+    end,
+}

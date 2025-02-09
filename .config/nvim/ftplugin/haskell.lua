@@ -113,6 +113,9 @@ start_lsp({
 --- @type repl_config
 vim.b.repl = {
     cmd = "ghci",
+    load_file = function(path)
+        return (':load "%s"'):format(vim.fn.escape(path, '"\\'))
+    end,
     format = function(code)
         return code:find("\n") and ":{\n" .. code .. "\n:}\n" or code .. "\n"
     end,
