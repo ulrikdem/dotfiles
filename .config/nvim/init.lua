@@ -411,6 +411,9 @@ map("", "]h", "]c", {remap = true})
 --- @type table<string, integer>
 _G.repl_channels = repl_channels or {}
 
+--- @type [integer, integer]
+local repl_cursor
+
 --- @param type string
 function _G.repl_send(type)
     local lines = {}
@@ -421,6 +424,7 @@ function _G.repl_send(type)
             type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
             exclusive = false,
         })
+        nvim_win_set_cursor(0, repl_cursor)
     end
     local code = vim.iter(lines):map(function(s)
         s = s:gsub("\n", "\0")
@@ -463,6 +467,7 @@ function _G.repl_send(type)
 end
 
 map("n", "g=", function()
+    repl_cursor = nvim_win_get_cursor(0)
     vim.o.operatorfunc = "v:lua.repl_send"
     return "g@"
 end, {expr = true})
