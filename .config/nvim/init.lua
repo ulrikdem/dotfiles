@@ -444,6 +444,11 @@ function _G.repl_send(type)
         vim.cmd.vnew()
         local bufnr = nvim_get_current_buf()
         repl_channels[repl.cmd] = fn.termopen(repl.cmd, {
+            on_stdout = function()
+                for _, winid in ipairs(fn.win_findbuf(bufnr)) do
+                    nvim_win_set_cursor(winid, {fn.line("$", winid), 0})
+                end
+            end,
             on_exit = function()
                 repl_channels[repl.cmd] = nil
                 nvim_buf_delete(bufnr, {})
