@@ -112,7 +112,7 @@ if in_runtime then
     end, {nargs = 1, complete = "lua"})
 else
     read_paths = {find_root({".luarc.json", ".luarc.jsonc"}, ".git")}
-    vim.b.repl = {cmd = "lua"} --- @type repl_config
+    vim.b.repl = {cmd = {"lua"}, cwd = read_paths[1]} --- @type repl_config
 end
 
 start_lsp({

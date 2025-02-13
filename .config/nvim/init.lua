@@ -403,7 +403,8 @@ map("", "]h", "]c", {remap = true})
 -- REPL {{{1
 
 --- @class repl_config
---- @field cmd? string
+--- @field cmd? string[]
+--- @field cwd? string
 --- @field load_file? fun(path: string): string
 --- @field format? fun(code: string): string
 --- @field eval? fun(code?: string)
@@ -438,24 +439,26 @@ function _G.repl_send(type)
         return repl.eval(type ~= "buffer" and code or nil)
     end
 
-    if not repl_channels[repl.cmd] then
+    local key = table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
+    if not repl_channels[key] then
         local winid = nvim_get_current_win()
 
         vim.cmd.vnew()
         local bufnr = nvim_get_current_buf()
-        repl_channels[repl.cmd] = fn.termopen(repl.cmd, {
+        repl_channels[key] = fn.termopen(repl.cmd, {
+            cwd = repl.cwd,
             on_stdout = function()
                 for _, winid in ipairs(fn.win_findbuf(bufnr)) do
                     nvim_win_set_cursor(winid, {fn.line("$", winid), 0})
                 end
             end,
             on_exit = function()
-                repl_channels[repl.cmd] = nil
+                repl_channels[key] = nil
                 nvim_buf_delete(bufnr, {})
             end,
         })
         -- Clear screen at first prompt, since the text is echoed before the REPL is ready
-        nvim_chan_send(repl_channels[repl.cmd], vim.keycode("<C-l>"))
+        nvim_chan_send(repl_channels[key], vim.keycode("<C-l>"))
 
         nvim_set_current_win(winid)
         nvim_feedkeys(vim.keycode("<Esc>"), "ni", false)
@@ -468,7 +471,7 @@ function _G.repl_send(type)
     end
     code = repl.format and repl.format(code)
         or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
-    nvim_chan_send(repl_channels[repl.cmd], code)
+    nvim_chan_send(repl_channels[key], code)
 end
 
 map("n", "g=", function()

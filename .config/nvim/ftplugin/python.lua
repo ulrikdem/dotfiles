@@ -39,9 +39,10 @@ start_lsp({
 
 --- @type repl_config
 vim.b.repl = {
-    cmd = "ipython",
+    cmd = venv and {"venv", venv, "ipython"} or {"ipython"},
+    cwd = root_dir,
     load_file = function(path)
-        return "%run -n -- " .. vim.fn.shellescape(path)
+        return "%run -n " .. vim.fn.shellescape(path)
     end,
     format = function(code)
         -- Use bracketed paste, ending with <M-CR> to execute without waiting for more lines

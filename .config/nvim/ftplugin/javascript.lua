@@ -28,7 +28,8 @@ start_lsp({
 
 --- @type repl_config
 vim.b.repl = {
-    cmd = "node",
+    cmd = {"node"},
+    cwd = root_dir,
     load_file = function(path)
         return ".load " .. path
     end,
