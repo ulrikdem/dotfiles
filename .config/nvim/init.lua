@@ -504,7 +504,7 @@ nvim_create_autocmd("FileType", {
             quickfix.after_jump()
         end, {buffer = 0})
         map("n", "<M-CR>", function()
-            vim.cmd(fn.getwininfo(nvim_get_current_win())[1].loclist == 0 and ".cc | cclose" or ".ll | lclose")
+            vim.cmd(fn.win_gettype() == "loclist" and ".ll | lclose" or ".cc | cclose")
             quickfix.after_jump()
         end, {buffer = 0})
     end,
@@ -807,7 +807,7 @@ nvim_create_autocmd("FileType", {
     callback = function()
         map("n", "s", function()
             local list = quickfix.get_list({
-                loclist_winid = fn.getwininfo(nvim_get_current_win())[1].loclist ~= 0 and 0 or nil,
+                loclist_winid = fn.win_gettype() == "loclist" and 0 or nil,
                 title = true, items = true, winid = true, filewinid = true,
             })
             run_fzf({
