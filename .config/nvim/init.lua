@@ -409,108 +409,110 @@ map("", "]h", "]c", {remap = true})
 --- @field format? fun(code: string): string
 --- @field eval? fun(arg: {code: string} | {file: string})
 
---- @type table<string, integer>
-_G.repl_bufnrs = repl_bufnrs or {}
+do
+    --- @type table<string, integer>
+    _G.repl_bufnrs = repl_bufnrs or {}
 
---- @param toggle? boolean
-local function open_repl(toggle)
-    local repl = vim.b.repl --- @type repl_config
-    if not (repl and repl.cmd) then
-        vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
-        return
-    end
-    local key = table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
-    local bufnr = repl_bufnrs[key]
+    --- @param toggle? boolean
+    local function open_repl(toggle)
+        local repl = vim.b.repl --- @type repl_config
+        if not (repl and repl.cmd) then
+            vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
+            return
+        end
+        local key = table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
+        local bufnr = repl_bufnrs[key]
 
-    if not bufnr then
-        vim.cmd("keepalt vnew")
-        bufnr = nvim_get_current_buf()
-        repl_bufnrs[key] = bufnr
-        fn.termopen(repl.cmd, {
-            cwd = repl.cwd,
-            on_stdout = function()
-                for _, winid in ipairs(fn.win_findbuf(bufnr)) do
-                    nvim_win_set_cursor(winid, {fn.line("$", winid), 0})
-                end
-            end,
-            on_exit = function()
-                repl_bufnrs[key] = nil
-                nvim_buf_delete(bufnr, {})
-            end,
-        })
-        vim.b.repl = repl -- Allow using toggle mapping (and others) from REPL buffer
-        -- Clear screen at first prompt, since the text is echoed before the REPL is ready
-        nvim_chan_send(vim.o.channel, vim.keycode("<C-l>"))
+        if not bufnr then
+            vim.cmd("keepalt vnew")
+            bufnr = nvim_get_current_buf()
+            repl_bufnrs[key] = bufnr
+            fn.termopen(repl.cmd, {
+                cwd = repl.cwd,
+                on_stdout = function()
+                    for _, winid in ipairs(fn.win_findbuf(bufnr)) do
+                        nvim_win_set_cursor(winid, {fn.line("$", winid), 0})
+                    end
+                end,
+                on_exit = function()
+                    repl_bufnrs[key] = nil
+                    nvim_buf_delete(bufnr, {})
+                end,
+            })
+            vim.b.repl = repl -- Allow using toggle mapping (and others) from REPL buffer
+            -- Clear screen at first prompt, since the text is echoed before the REPL is ready
+            nvim_chan_send(vim.o.channel, vim.keycode("<C-l>"))
+            return bufnr
+        end
+
+        for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
+            if nvim_win_get_buf(winid) == bufnr then
+                if toggle then nvim_win_hide(winid) end
+                return bufnr
+            end
+        end
+
+        vim.cmd("keepalt vsplit #" .. bufnr)
         return bufnr
     end
 
-    for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
-        if nvim_win_get_buf(winid) == bufnr then
-            if toggle then nvim_win_hide(winid) end
-            return bufnr
+    map("n", "<Leader>tr", function() open_repl(true) end)
+
+    --- @type [integer, integer]
+    local saved_cursor
+
+    --- @param type "buffer" | "visual" | "char" | "line" | "block"
+    function _G.repl_send(type)
+        local lines = {}
+        if type == "visual" then
+            lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
+        elseif type ~= "buffer" then -- Used as normal mode operator
+            lines = fn.getregion(fn.getpos("'["), fn.getpos("']"), {
+                type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
+                exclusive = false,
+            })
+            nvim_win_set_cursor(0, saved_cursor)
         end
+        local code = vim.iter(lines):map(function(s)
+            s = s:gsub("\n", "\0")
+            return s
+        end):join("\n")
+
+        local repl = vim.b.repl --- @type repl_config
+        if repl and repl.eval then
+            return repl.eval(type == "buffer" and {file = nvim_buf_get_name(0)} or {code = code})
+        end
+
+        local winid = nvim_get_current_win()
+        local bufnr = open_repl()
+        if not bufnr then return end
+        nvim_set_current_win(winid)
+        nvim_feedkeys(vim.keycode("<Esc>"), "ni", false)
+
+        if type == "buffer" then
+            code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
+                or table.concat(nvim_buf_get_lines(0, 0, -1, true), "\n")
+        end
+        code = repl.format and repl.format(code)
+            or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
+        nvim_chan_send(vim.bo[bufnr].channel, code)
     end
 
-    vim.cmd("keepalt vsplit #" .. bufnr)
-    return bufnr
+    map("n", "g=", function()
+        saved_cursor = nvim_win_get_cursor(0)
+        vim.o.operatorfunc = "v:lua.repl_send"
+        return "g@"
+    end, {expr = true})
+
+    map("n", "g==", "g=_", {remap = true})
+
+    map("x", "g=", "<Esc><Cmd>lua repl_send('visual')<CR>")
+
+    map("n", "g=s", function()
+        vim.cmd("silent update")
+        repl_send("buffer")
+    end)
 end
-
-map("n", "<Leader>tr", function() open_repl(true) end)
-
---- @type [integer, integer]
-local repl_cursor
-
---- @param type "buffer" | "visual" | "char" | "line" | "block"
-function _G.repl_send(type)
-    local lines = {}
-    if type == "visual" then
-        lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
-    elseif type ~= "buffer" then -- Used as normal mode operator
-        lines = fn.getregion(fn.getpos("'["), fn.getpos("']"), {
-            type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
-            exclusive = false,
-        })
-        nvim_win_set_cursor(0, repl_cursor)
-    end
-    local code = vim.iter(lines):map(function(s)
-        s = s:gsub("\n", "\0")
-        return s
-    end):join("\n")
-
-    local repl = vim.b.repl --- @type repl_config
-    if repl and repl.eval then
-        return repl.eval(type == "buffer" and {file = nvim_buf_get_name(0)} or {code = code})
-    end
-
-    local winid = nvim_get_current_win()
-    local bufnr = open_repl()
-    if not bufnr then return end
-    nvim_set_current_win(winid)
-    nvim_feedkeys(vim.keycode("<Esc>"), "ni", false)
-
-    if type == "buffer" then
-        code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
-            or table.concat(nvim_buf_get_lines(0, 0, -1, true), "\n")
-    end
-    code = repl.format and repl.format(code)
-        or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
-    nvim_chan_send(vim.bo[bufnr].channel, code)
-end
-
-map("n", "g=", function()
-    repl_cursor = nvim_win_get_cursor(0)
-    vim.o.operatorfunc = "v:lua.repl_send"
-    return "g@"
-end, {expr = true})
-
-map("n", "g==", "g=_", {remap = true})
-
-map("x", "g=", "<Esc><Cmd>lua repl_send('visual')<CR>")
-
-map("n", "g=s", function()
-    vim.cmd("silent update")
-    repl_send("buffer")
-end)
 
 -- Combines the functions of :lua {chunk}, :[lua]= {expr} and :luafile/source {file}, preserving variables across uses
 nvim_create_user_command("Lua", function(opts)
