@@ -59,57 +59,12 @@ if in_runtime then
     -- Allow opening help with K in visual mode
     vim.bo.keywordprg = ":help"
 
-    _G.lua_repl_env = lua_repl_env or setmetatable({}, {__index = _G})
     --- @type repl_config
     vim.b.repl = {
-        eval = function(code)
-            local load, args
-            if code then
-                -- Attempt to parse as an expression, falling back to a chunk
-                -- As far as I know the only ambiguous case is function calls, where we want to print the return values
-                load, args = loadstring, {"return " .. code, code}
-            else
-                -- Reset environment when loading a buffer
-                _G.lua_repl_env = setmetatable({}, {__index = _G})
-                load, args = loadfile, {nvim_buf_get_name(0)}
-            end
-            local func, err
-            for _, arg in ipairs(args) do
-                func, err = load(arg)
-                if func then
-                    debug.sethook(function(event)
-                        -- Add top-level locals to lua_repl_env. Doesn't work when func has a tail call
-                        if event == "return" and debug.getinfo(2, "f").func == func then
-                            local i, name, value = 1, debug.getlocal(2, 1)
-                            while name do
-                                if not vim.startswith(name, "(") then lua_repl_env[name] = value end
-                                i = i + 1
-                                name, value = debug.getlocal(2, i)
-                            end
-                        end
-                    end, "r");
-                    (function(ok, ...)
-                        if ok then
-                            local results = {}
-                            for i = 1, select("#", ...) do
-                                table.insert(results, vim.inspect(select(i, ...), nil))
-                            end
-                            vim.notify(table.concat(results, "\n"))
-                        else
-                            err = select(1, ...)
-                        end
-                    end)(pcall(setfenv(func, lua_repl_env)))
-                    debug.sethook()
-                    break
-                end
-            end
-            if err then vim.notify(err, vim.log.levels.ERROR) end
+        eval = function(arg)
+            vim.cmd.Lua({arg.code or arg.file, bang = not arg.code})
         end,
     }
-    -- This is different from :lua and := in that it can access REPL locals
-    nvim_buf_create_user_command(0, "Lua", function(opts)
-        vim.b.repl.eval(opts.args)
-    end, {nargs = 1, complete = "lua"})
 else
     read_paths = {find_root({".luarc.json", ".luarc.jsonc"}, ".git")}
     vim.b.repl = {cmd = {"lua"}, cwd = read_paths[1]} --- @type repl_config

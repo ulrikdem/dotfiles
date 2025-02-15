@@ -407,7 +407,7 @@ map("", "]h", "]c", {remap = true})
 --- @field cwd? string
 --- @field load_file? fun(path: string): string
 --- @field format? fun(code: string): string
---- @field eval? fun(code?: string)
+--- @field eval? fun(arg: {code: string} | {file: string})
 
 --- @type table<string, integer>
 _G.repl_channels = repl_channels or {}
@@ -415,7 +415,7 @@ _G.repl_channels = repl_channels or {}
 --- @type [integer, integer]
 local repl_cursor
 
---- @param type string
+--- @param type "buffer" | "visual" | "char" | "line" | "block"
 function _G.repl_send(type)
     local lines = {}
     if type == "visual" then
@@ -436,7 +436,7 @@ function _G.repl_send(type)
     if not repl then
         return vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
     elseif repl.eval then
-        return repl.eval(type ~= "buffer" and code or nil)
+        return repl.eval(type == "buffer" and {file = nvim_buf_get_name(0)} or {code = code})
     end
 
     local key = table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
@@ -465,7 +465,6 @@ function _G.repl_send(type)
     end
 
     if type == "buffer" then
-        vim.cmd("silent update")
         code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
             or table.concat(nvim_buf_get_lines(0, 0, -1, true), "\n")
     end
@@ -485,8 +484,56 @@ map("n", "g==", "g=_", {remap = true})
 map("x", "g=", "<Esc><Cmd>lua repl_send('visual')<CR>")
 
 map("n", "g=s", function()
+    vim.cmd("silent update")
     repl_send("buffer")
 end)
+
+-- Combines the functions of :lua {chunk}, :[lua]= {expr} and :luafile/source {file}, preserving variables across uses
+nvim_create_user_command("Lua", function(opts)
+    local load, args
+    if opts.bang then -- Reset environment, and load file if given
+        _G.lua_env = nil
+        if opts.args == "" then return end
+        load, args = loadfile, {opts.args}
+    else
+        -- Attempt to parse as an expression, falling back to a chunk
+        -- As far as I know the only ambiguous case is a function call, where we want to print the return values
+        load, args = loadstring, {"return " .. opts.args, opts.args}
+    end
+    _G.lua_env = lua_env or setmetatable({}, {__index = _G})
+
+    local func, err
+    for _, arg in ipairs(args) do
+        func, err = load(arg)
+        if func then
+            debug.sethook(function(event)
+                -- Add top-level locals to environment. Doesn't work when the chunk has a tail call
+                if event == "return" and debug.getinfo(2, "f").func == func then
+                    local i, name, value = 1, debug.getlocal(2, 1)
+                    while name do
+                        if not vim.startswith(name, "(") then lua_env[name] = value end
+                        i = i + 1
+                        name, value = debug.getlocal(2, i)
+                    end
+                end
+            end, "r");
+            (function(ok, ...)
+                if ok then
+                    local results = {}
+                    for i = 1, select("#", ...) do
+                        table.insert(results, vim.inspect(select(i, ...), nil))
+                    end
+                    vim.notify(table.concat(results, "\n"))
+                else
+                    err = select(1, ...)
+                end
+            end)(pcall(setfenv(func, lua_env)))
+            debug.sethook()
+            break
+        end
+    end
+    if err then vim.notify(err, vim.log.levels.ERROR) end
+end, {nargs = "?", complete = "lua", bang = true})
 
 -- Quickfix {{{1
 
