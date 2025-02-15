@@ -353,9 +353,9 @@ nvim_create_autocmd("FileType", {
 })
 
 map("n", "<Leader>tg", function()
-    for _, bufnr in ipairs(nvim_list_bufs()) do
-        if vim.b[bufnr].fugitive_type == "index" then
-            nvim_buf_delete(bufnr, {})
+    for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
+        if vim.b[nvim_win_get_buf(winid)].fugitive_type == "index" then
+            nvim_win_hide(winid)
             return
         end
     end
@@ -364,9 +364,9 @@ end)
 
 map("n", "<Leader>td", function()
     if vim.o.diff then
-        for _, winid in ipairs(nvim_tabpage_list_wins(nvim_get_current_tabpage())) do
+        for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
             if vim.wo[winid].diff and winid ~= nvim_get_current_win() then
-                nvim_win_close(winid, false)
+                nvim_win_hide(winid)
             end
         end
     else
@@ -870,7 +870,7 @@ nvim_create_autocmd("FileType", {
                     nvim_set_current_win(list.winid)
                     if #lines == 1 then
                         vim.cmd(vim.gsplit(lines[1], " ")() .. (list.filewinid and "ll" or "cc"))
-                        nvim_win_close(list.winid, false)
+                        nvim_win_hide(list.winid)
                         quickfix.after_jump()
                     elseif #lines > 1 then
                         quickfix.set_list({
