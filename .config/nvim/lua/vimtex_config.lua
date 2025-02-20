@@ -11,6 +11,20 @@ g.vimtex_fold_enabled = true
 g.vimtex_indent_enabled = false
 g.vimtex_indent_bib_enabled = false
 g.vimtex_syntax_conceal = {cites = false, fancy = false, spacing = false, math_bounds = false, math_delimiters = false, math_fracs = false, math_super_sub = false, styles = false}
+g.vimtex_imaps_enabled = false
+
+local insert_maps = {} --- @type table<string, string>
+local ucs_data = "/usr/share/texmf-dist/tex/latex/ucs/data"
+for file in vim.fs.dir(ucs_data) do
+    for line in io.lines(ucs_data .. "/" .. file) do
+        local codepoint, rhs = line:match([[\uc@dclc{(%d+)}%b{}{\ensuremath(.*)}]])
+        if codepoint then
+            insert_maps[vim.fn.nr2char(tonumber(codepoint))] = rhs:match("^{(.*)}$") or rhs
+        end
+    end
+end
+insert_maps["√"] = "\\sqrt"
+insert_maps["…"] = "\\dots"
 
 function M.init_buffer()
     vim.wo[0][0].foldlevel = 99
@@ -25,6 +39,14 @@ function M.init_buffer()
         grc = "<Cmd>VimtexContextMenu<CR>",
     }) do
         vim.keymap.set("n", lhs, rhs, {buffer = true})
+    end
+
+    for lhs, rhs in pairs(insert_maps) do
+        vim.keymap.set("i", lhs, function()
+            local packages = vim.b.vimtex.packages
+            -- Insert symbol directly if a package allows Unicode in math mode
+            return (packages.ucs or packages["unicode-math"] or packages["unicode-math-input"]) and lhs or rhs
+        end, {expr = true, buffer = true})
     end
 end
 
