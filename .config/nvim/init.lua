@@ -498,17 +498,17 @@ do
         nvim_chan_send(vim.bo[bufnr].channel, code)
     end
 
-    map("n", "g=", function()
+    map("n", "<Leader>e", function()
         saved_cursor = nvim_win_get_cursor(0)
         vim.o.operatorfunc = "v:lua.repl_send"
         return "g@"
     end, {expr = true})
 
-    map("n", "g==", "g=_", {remap = true})
+    map("n", "<Leader>ee", "<Leader>e_", {remap = true})
 
-    map("x", "g=", "<Esc><Cmd>lua repl_send('visual')<CR>")
+    map("x", "<Leader>e", "<Esc><Cmd>lua repl_send('visual')<CR>")
 
-    map("n", "g=s", function()
+    map("n", "<Leader>es", function()
         vim.cmd("silent update")
         repl_send("buffer")
     end)
