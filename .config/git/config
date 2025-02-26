@@ -12,6 +12,7 @@
 
 [diff]
     algorithm = histogram
+    colorMoved = blocks
     tool = nvimdiff
 
 [fetch]
