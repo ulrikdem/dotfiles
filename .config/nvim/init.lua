@@ -250,6 +250,38 @@ nvim_create_autocmd("FileType", {
     end
 })
 
+do
+    local last_winid, last_time = 0, tonumber("-inf")
+
+    defaults.mousemoveevent = true
+    map("n", "<MouseMove>", function()
+        local winid, time = fn.getmousepos().winid, vim.uv.hrtime()
+        -- Change focus when the mouse moves to a different (non-floating) window. The time interval
+        -- check is a heuristic to determine whether the events are from the same mouse movement, to
+        -- prevent triggering when the (nvim or external) window layout or current tab changes.
+        if winid ~= last_winid and nvim_win_get_config(winid).relative == "" and time - last_time <= 1e9 then
+            nvim_set_current_win(winid)
+        end
+        last_winid, last_time = winid, time
+    end)
+
+    local namespace = nvim_create_namespace("")
+    nvim_set_hl(namespace, "StatusLine", {link = "StatusLineNC"})
+
+    nvim_create_autocmd("FocusLost", {
+        group = augroup,
+        callback = function() nvim_set_hl_ns(namespace) end,
+    })
+    nvim_create_autocmd("FocusGained", {
+        group = augroup,
+        callback = function()
+            nvim_set_hl_ns(0)
+            -- The mouse may have just moved from outside the nvim window
+            last_winid, last_time = 0, vim.uv.hrtime()
+        end,
+    })
+end
+
 -- Statusline {{{1
 
 defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0, v:false, v:true)}%( %m%)"
