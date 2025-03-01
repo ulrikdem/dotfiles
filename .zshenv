@@ -3,7 +3,7 @@ path=(~/.local/bin $path)
 
 [[ -z $BROWSER ]] && type firefox >/dev/null && export BROWSER=firefox
 
-[[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim MANPAGER="nvim +Man! +'set laststatus=1'" ABDUCO_CMD='nvim +terminal'
+[[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim MANPAGER="nvim +Man! +'set laststatus=1'" ABDUCO_CMD='nvim +terminal +startinsert'
 
 type less >/dev/null && export PAGER=less
 

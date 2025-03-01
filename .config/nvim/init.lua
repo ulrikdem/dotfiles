@@ -112,19 +112,16 @@ map("c", "/", function()
         and "<Down>" or "/"
 end, {expr = true})
 
+map("t", "<C-Esc>", "<C-\\><C-n>")
+
 for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
     map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
-    -- Terminal mappings are separate, because counts don't work with <C-\><C-n>
-    map("t", ("<M-%s>"):format(dir), ("<C-\\><C-n><C-w><%s>"):format(dir))
 end
 
 map("n", "<C-Tab>", "gt")
 map("n", "<C-S-Tab>", "gT")
-map("t", "<C-Tab>", "<C-\\><C-n>gt")
-map("t", "<C-S-Tab>", "<C-\\><C-n>gT")
-
 for i = 1, 10 do
-    map({"n", "t"}, ("<M-%d>"):format(i % 10), ("<C-\\><C-n>%dgt"):format(i))
+    map("n", ("<M-%d>"):format(i % 10), ("%dgt"):format(i))
 end
 
 map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
@@ -190,9 +187,8 @@ nvim_create_autocmd("TermOpen", {
     callback = function()
         vim.wo[0][0].number = false
         vim.wo[0][0].relativenumber = false
+        -- The MatchParen highlight isn't updated in terminal mode, so disable it
         vim.bo.matchpairs = ""
-        vim.cmd.startinsert()
-        nvim_create_autocmd("BufEnter", {buffer = 0, command = "startinsert"})
     end,
 })
 
@@ -496,7 +492,6 @@ do
         local bufnr = open_repl()
         if not bufnr then return end
         nvim_set_current_win(winid)
-        nvim_feedkeys(vim.keycode("<Esc>"), "ni", false)
 
         if type == "buffer" then
             code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
@@ -790,6 +785,7 @@ local function run_fzf(opts)
             opts.on_output(lines)
         end,
     })
+    vim.cmd.startinsert()
 end
 
 --- @param title string
