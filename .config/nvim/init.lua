@@ -422,9 +422,13 @@ do
         end
         local key = table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
         local bufnr = repl_bufnrs[key]
+        local mods = {
+            vertical = vim.o.columns > 160,
+            keepalt = true,
+        }
 
         if not bufnr then
-            vim.cmd("keepalt vnew")
+            vim.cmd.new({mods = mods})
             bufnr = nvim_get_current_buf()
             repl_bufnrs[key] = bufnr
             fn.termopen(repl.cmd, {
@@ -452,7 +456,7 @@ do
             end
         end
 
-        vim.cmd("keepalt vsplit #" .. bufnr)
+        vim.cmd.split({"#" .. bufnr, mods = mods})
         return bufnr
     end
 
