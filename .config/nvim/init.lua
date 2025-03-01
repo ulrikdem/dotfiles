@@ -458,11 +458,16 @@ do
 
     map("n", "<Leader>tr", function() open_repl(true) end)
 
+    --- @param s string
+    function _G.bracketed_paste(s)
+        return "\27[200~" .. s .. "\27[201~"
+    end
+
     --- @type [integer, integer]
     local saved_cursor
 
     --- @param type "buffer" | "visual" | "char" | "line" | "block"
-    function _G.repl_send(type)
+    function _G.repl_eval(type)
         local lines = {}
         if type == "visual" then
             lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
@@ -493,24 +498,23 @@ do
             code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
                 or table.concat(nvim_buf_get_lines(0, 0, -1, true), "\n")
         end
-        code = repl.format and repl.format(code)
-            or "\x1b[200~" .. code .. "\x1b[201~\n" -- Bracketed paste
+        code = repl.format and repl.format(code) or bracketed_paste(code) .. "\n"
         nvim_chan_send(vim.bo[bufnr].channel, code)
     end
 
     map("n", "<Leader>e", function()
         saved_cursor = nvim_win_get_cursor(0)
-        vim.o.operatorfunc = "v:lua.repl_send"
+        vim.o.operatorfunc = "v:lua.repl_eval"
         return "g@"
     end, {expr = true})
 
     map("n", "<Leader>ee", "<Leader>e_", {remap = true})
 
-    map("x", "<Leader>e", "<Esc><Cmd>lua repl_send('visual')<CR>")
+    map("x", "<Leader>e", "<Esc><Cmd>lua repl_eval('visual')<CR>")
 
     map("n", "<Leader>es", function()
         vim.cmd("silent update")
-        repl_send("buffer")
+        repl_eval("buffer")
     end)
 end
 
