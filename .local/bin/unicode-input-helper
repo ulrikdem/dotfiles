@@ -28,42 +28,46 @@ def output(code, char, name, seqs=''):
     print(f'\x1b[90m{code}\x1b[0m\t{char}\t{name} \x1b[90m{seqs}\x1b[0m ')
 
 keysyms = {}
-altgr = {}
-with open(sys.argv[1]) as file:
-    pattern = r'\bkey\s*<.*?>\s*\{\s*\[(.*?)\]\s*\}|\bsymbols\s*\[.*?\]\s*=\s*\[(.*?)\]'
-    for match in re.finditer(pattern, file.read()):
-        keys = [key.strip() for key in (match[1] or match[2]).split(',')]
-        for i, key in enumerate(keys):
-            if re.fullmatch(r'U[0-9A-F]{4,6}', key):
-                keysyms[key] = chr(int(key[1:], 16))
-            elif not key.startswith('KP_'):
-                keysyms[key] = f'<{key}>'
-            if 2 <= i < 4 and key != keys[i - 2] and keys[i - 2] in keysyms:
-                altgr[key] = keys[i - 2]
-
 with open('/usr/include/X11/keysymdef.h') as file:
     pattern = r'^#define XK_(\w+)\s+0x[0-9a-f]+\s*/\*[ (]U\+([0-9A-F]{4,6}) .*[ )]\*/\s*$'
     for match in re.finditer(pattern, file.read(), re.MULTILINE):
         key, code = match.groups()
-        if key in keysyms or f'U{code}' in keysyms:
-            char = chr(int(code, 16))
-            keysyms[key] = char
-            keysyms[f'U{code}'] = char
-        if key in altgr:
-            altgr[f'U{code}'] = altgr[key]
-keysyms['space'] = '␣'
+        keysyms[key] = int(code, 16)
+keysyms['space'] = 'space'
+keysyms['Multi_key'] = 'compose'
+
+def normalize(key):
+    return int(key[1:], 16) if re.fullmatch(r'U[0-9A-F]{4,6}', key) else keysyms.get(key, key)
+
+keymap = {}
+altgr = {}
+with open(sys.argv[1]) as file:
+    pattern = r'\bkey\s*<.*?>\s*\{\s*\[(.*?)\]\s*\}|\bsymbols\s*\[.*?\]\s*=\s*\[(.*?)\]'
+    for match in re.finditer(pattern, file.read()):
+        keys = [normalize(key.strip()) for key in (match[1] or match[2]).split(',')]
+        for i, key in enumerate(keys):
+            if isinstance(key, str) and key.startswith('KP_'):
+                continue
+            if i < 2:
+                keymap[key] = chr(key) if isinstance(key, int) else f'<{key}>'
+            elif i < 4:
+                base = keys[i - 2]
+                altgr[key] = f'<altgr-{chr(base) if isinstance(base, int) else base}>'
 
 compose = {}
-for path in ['/usr/share/X11/locale/en_US.UTF-8/Compose', Path.home() / '.XCompose']:
+shadowed = set()
+for path in [Path.home() / '.XCompose', '/usr/share/X11/locale/en_US.UTF-8/Compose']:
     try:
         with open(path) as file:
-            pattern = r'^\s*<Multi_key>((?:\s*<\w+>)+)\s*:\s*"([^\\]|\\.)"'
+            pattern = r'^((?:\s*<\w+>)+)\s*:\s*"([^\\]|\\.)"'
             for match in re.finditer(pattern, file.read(), re.MULTILINE):
                 seq, char = match.groups()
-                seq = [key.strip('<>') for key in seq.split()]
-                if all(key in keysyms for key in seq):
-                    seq = ''.join(keysyms[key] for key in seq)
-                    compose.setdefault(char[-1], []).append(seq)
+                seq = [normalize(key.strip('<>')) for key in seq.split()]
+                if all(key in keymap or key in altgr for key in seq):
+                    if len(seq) == 1:
+                        shadowed.add(seq[0])
+                    seq = ''.join(keymap.get(key) or altgr.get(key) for key in seq)
+                    compose.setdefault(ord(char[-1]), []).append(seq)
     except FileNotFoundError:
         pass
 
@@ -72,11 +76,11 @@ with open('/usr/share/unicode/UnicodeData.txt') as file:
         code, name = line.split(';')[:2]
         if name.startswith('<'):
             continue
-        char = chr(int(code, 16))
-        seqs = compose.get(char, [])
-        if f'U{code}' in altgr:
-            seqs.insert(0, 'altgr+' + keysyms[altgr[f'U{code}']])
-        output(code, char, name.lower(), ' '.join(seqs))
+        key = int(code, 16)
+        seqs = compose.get(key, [])
+        if key in altgr and key not in shadowed:
+            seqs.insert(0, altgr[key])
+        output(code, chr(key), name.lower(), ' '.join(seqs))
 
 nerd = []
 with open(sys.argv[2]) as file:
