@@ -10,7 +10,7 @@ local completion_end_symbols = {">", '"', "/"}
 start_lsp({
     cmd = {"ccls"},
     -- Does not accept nil root_dir. Use filetype to enable separate servers with different clang args
-    root_dir = root_dir or ("/" .. vim.bo.filetype),
+    root_dir = root_dir or ("/" .. vim.o.filetype),
     sandbox = {
         read = {root_dir},
         write = {root_dir and root_dir .. "/.ccls-cache"},
@@ -25,7 +25,7 @@ start_lsp({
         index = {onChange = true},
         clang = {
             extraArgs = {
-                vim.bo.filetype == "c" and "-std=c17" or "-std=c++20",
+                vim.o.filetype == "c" and "-std=c17" or "-std=c++20",
                 "-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion",
             },
         },
@@ -36,7 +36,7 @@ start_lsp({
         for _, s in ipairs(completion_end_symbols) do
             vim.keymap.set("i", s, function()
                 local col = nvim_win_get_cursor(0)[2]
-                if cmp.visible() and nvim_get_current_line():sub(col, col) == s then
+                if cmp.get_active_entry() and nvim_get_current_line():sub(col, col) == s then
                     return "<C-y>"
                 else
                     return s

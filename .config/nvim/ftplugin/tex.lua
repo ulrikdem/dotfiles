@@ -10,7 +10,7 @@ cmp.setup.buffer({
 
 vim.keymap.set("i", "}", function()
     local col = nvim_win_get_cursor(0)[2]
-    if cmp.visible() and nvim_get_current_line():sub(col, col) == "}" then
+    if cmp.get_active_entry() and nvim_get_current_line():sub(col, col) == "}" then
         return "<C-y>"
     else
         return "}"
