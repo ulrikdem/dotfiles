@@ -112,7 +112,8 @@ map("c", "/", function()
         and "<Down>" or "/"
 end, {expr = true})
 
-map("t", "<C-Esc>", "<C-\\><C-n>")
+map("t", "<Esc>", "<C-\\><C-n>")
+map("t", "<C-Esc>", "<Esc>")
 
 for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
     map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
@@ -786,6 +787,7 @@ local function run_fzf(opts)
         end,
     })
     vim.cmd.startinsert()
+    map("t", "<Esc>", "<Esc>", {buffer = true})
 end
 
 --- @param title string
