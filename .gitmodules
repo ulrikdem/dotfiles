@@ -31,9 +31,6 @@
 [submodule ".config/nvim/pack/plugins/start/vim-repeat"]
 	path = .config/nvim/pack/plugins/start/vim-repeat
 	url = https://github.com/tpope/vim-repeat
-[submodule ".config/nvim/pack/plugins/start/vim-sleuth"]
-	path = .config/nvim/pack/plugins/start/vim-sleuth
-	url = https://github.com/tpope/vim-sleuth
 [submodule ".config/nvim/pack/plugins/start/vim-speeddating"]
 	path = .config/nvim/pack/plugins/start/vim-speeddating
 	url = https://github.com/tpope/vim-speeddating

@@ -159,6 +159,29 @@ end
 
 local augroup = nvim_create_augroup("init.lua", {})
 
+nvim_create_autocmd("BufReadPost", {
+    group = augroup,
+    callback = function()
+        local tabs = false
+        local min_spaces
+        for _, line in ipairs(nvim_buf_get_lines(0, 0, -1, true)) do
+            tabs = tabs or vim.startswith(line, "\t")
+            local spaces = #line:match("^ *")
+            if spaces > 0 then
+                min_spaces = min_spaces and math.min(min_spaces, spaces) or spaces
+            end
+        end
+        if tabs then
+            vim.bo.expandtab = false
+            vim.bo.shiftwidth = min_spaces or 0
+            if min_spaces then vim.bo.tabstop = 8 end
+        elseif min_spaces then
+            vim.bo.expandtab = true
+            vim.bo.shiftwidth = min_spaces
+        end
+    end,
+})
+
 nvim_create_autocmd("FileType", {
     group = augroup,
     callback = function() pcall(vim.treesitter.start) end
