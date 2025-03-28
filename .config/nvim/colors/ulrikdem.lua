@@ -8,8 +8,6 @@ if vim.o.background == "light" then bg, fg = fg, bg end
 --- @type table<string, vim.api.keyset.highlight>
 local highlights = {
     StatusLine = {bg = fg .. "Gray4", fg = bg .. "Gray2"},
-    StatusLineNC = {bg = bg .. "Gray4", fg = fg .. "Gray2"},
-
     TabLineSel = {link = "StatusLine"},
     TabLineFill = {bg = bg .. "Gray4", fg = fg .. "Gray4"},
 

@@ -209,8 +209,6 @@ nvim_create_autocmd("BufWritePre", {
 nvim_create_autocmd("TermOpen", {
     group = augroup,
     callback = function()
-        vim.wo[0][0].number = false
-        vim.wo[0][0].relativenumber = false
         -- The MatchParen highlight isn't updated in terminal mode, so disable it
         vim.bo.matchpairs = ""
     end,
@@ -256,24 +254,6 @@ do
     end)
 end
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = {"c", "cpp"},
-    callback = function(args)
-        -- This will be the default in nvim 0.11
-        vim.bo[args.buf].commentstring = "// %s"
-    end,
-})
-
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = {"sh", "zsh"},
-    callback = function(args)
-        -- The default :ShKeywordPrg and :ZshKeywordPrg are broken in nvim
-        vim.bo[args.buf].keywordprg = ":Man"
-    end
-})
-
 -- Statusline {{{1
 
 defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0, v:false, v:true)}%( %m%)"
@@ -293,7 +273,7 @@ function _G.tabline()
     local tabs = nvim_list_tabpages()
     local current = nvim_get_current_tabpage()
     local max_width = math.max(math.floor(vim.o.columns / #tabs) - 3, 1)
-    local s = "%T" -- For some reason the first item has no effect, so add a useless one
+    local s = ""
     for i, tab in ipairs(tabs) do
         s = s .. (tab == current and "%#TabLineSel#" or "%#TabLine#") .. "%" .. i .. "T "
             .. "%." .. max_width .. "(%{v:lua.statusline_path(" .. nvim_tabpage_get_win(tab) .. ")}%)"
@@ -394,7 +374,7 @@ map("n", "<Leader>td", function()
     end
 end)
 
-vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,linematch:60,hiddenoff")
+vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,hiddenoff")
 
 -- Remap do and dp to use a motion
 _G.diff_cmd, _G.diff_bufnr = "", 0
@@ -1057,10 +1037,6 @@ cmp.setup({
 
 -- LSP {{{1
 
-map("n", "grn", lsp.buf.rename)
-map({"n", "x"}, "gra", lsp.buf.code_action)
-map("n", "grr", lsp.buf.references)
-map("n", "gri", lsp.buf.implementation)
 map("n", "grd", lsp.buf.declaration)
 map("n", "grt", lsp.buf.type_definition)
 map("n", "grq", lsp.buf.format)
@@ -1093,7 +1069,7 @@ end
 nvim_create_autocmd("InsertEnter", {
     group = augroup,
     callback = function()
-        if lsp.inlay_hint.is_enabled({}) then
+        if lsp.inlay_hint.is_enabled() then
             lsp.inlay_hint.enable(false)
             nvim_create_autocmd("InsertLeave", {
                 once = true,
@@ -1241,7 +1217,6 @@ function _G.start_lsp(config)
             config.capabilities or {})
 
         lsp.start(config, {
-            bufnr = 0,
             reuse_client = function(client, config)
                 -- The default considers nil root_dirs to be distinct, resulting in a new client for each buffer
                 return client.name == config.name and client.root_dir == config.root_dir

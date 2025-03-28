@@ -6,40 +6,14 @@ vim.cmd = {}
 --- @type table<string, string?>
 vim.env = {}
 
---- @class vim.api.keyset.create_autocmd
---- @diagnostic disable: duplicate-doc-field
---- @field group? string | integer
---- @field pattern? string | string[]
---- @field callback? fun(args: autocmd_args): boolean? | string
---- @diagnostic enable: duplicate-doc-field
-
---- @class autocmd_args
---- @field event string
---- @field match string
---- @field file string
---- @field buf integer
+--- @class quickfixtextfunc_args
+--- @field quickfix 0 | 1
+--- @field winid integer
 --- @field id integer
---- @field group? integer
---- @field data any
+--- @field start_idx integer
+--- @field end_idx integer
 
---- @param name string
---- @param command string | fun(opts: user_command_opts)
---- @param opts vim.api.keyset.user_command
-function vim.api.nvim_create_user_command(name, command, opts) end
-
---- @class user_command_opts
---- @field name string
---- @field bang boolean
---- @field args string
---- @field fargs string[]
---- @field line1 integer
---- @field line2 integer
---- @field range integer
---- @field count integer
---- @field reg string
---- @field mods string
---- @field smods vim.api.keyset.parse_cmd.mods
-
+-- defaults uses string for action and integer for return
 --- @param list vim.quickfix.entry[]
 --- @param action? " " | "a" | "r" | "f"
 --- @param what? vim.fn.setqflist.what
@@ -52,40 +26,6 @@ function vim.fn.setqflist(list, action, what) end
 --- @param what? vim.fn.setqflist.what
 --- @return 0 | -1
 function vim.fn.setloclist(nr, list, action, what) end
-
---- @class vim.quickfix.entry
---- @field bufnr? integer
---- @field filename? string
---- @field module? string
---- @field lnum? integer
---- @field end_lnum? integer
---- @field col? integer
---- @field end_col? integer
---- @field vcol? 0 | 1 | boolean
---- @field pattern? string
---- @field type? string
---- @field nr? integer
---- @field text? string
---- @field valid? 0 | 1 | boolean
---- @field user_data? any
-
---- @class vim.fn.setqflist.what
---- @field id? integer
---- @field nr? integer | "$"
---- @field idx? integer | "$"
---- @field items? vim.quickfix.entry[]
---- @field lines? string[]
---- @field efm? string
---- @field quickfixtextfunc? string | fun(args: quickfixtextfunc_args): string[]
---- @field title? string
---- @field context? any
-
---- @class quickfixtextfunc_args
---- @field quickfix 0 | 1
---- @field winid integer
---- @field id integer
---- @field start_idx integer
---- @field end_idx integer
 
 --- @overload fun(): vim.fn.getqflist.ret.item[]
 --- @overload fun(what: vim.fn.getqflist.what): vim.fn.getqflist.ret
