@@ -8,7 +8,7 @@ local pending_requests = {} --- @type table<integer, true?>
 --- @param handler fun(result: any)
 local function cancellable_request(client, bufnr, method, params, handler)
     local _, request_id
-    _, request_id = client.request(method, params, function(err, result)
+    _, request_id = client:request(method, params, function(err, result)
         if request_id and pending_requests[request_id] then
             pending_requests[request_id] = nil
             if err then
@@ -24,7 +24,7 @@ end
 --- @param client vim.lsp.Client
 --- @param bufnr integer
 local function refresh_codelens(client, bufnr)
-    for request_id, _ in pairs(pending_requests) do client.cancel_request(request_id) end
+    for request_id, _ in pairs(pending_requests) do client:cancel_request(request_id) end
     pending_requests = {}
 
     cancellable_request(client, bufnr, lsp.protocol.Methods.textDocument_codeLens, {

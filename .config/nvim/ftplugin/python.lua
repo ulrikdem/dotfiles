@@ -26,7 +26,7 @@ start_lsp({
 
     on_attach = function(client, bufnr)
         nvim_buf_create_user_command(bufnr, "OrganizeImports", function()
-            client.request(vim.lsp.protocol.Methods.workspace_executeCommand, {
+            client:request(vim.lsp.protocol.Methods.workspace_executeCommand, {
                 command = "basedpyright.organizeimports",
                 arguments = {vim.uri_from_bufnr(bufnr)},
             })

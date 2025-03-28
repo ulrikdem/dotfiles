@@ -25,7 +25,7 @@ start_lsp({
                 vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
                     if result.code == 0 then
                         read_catalog()
-                        client.notify(vim.lsp.protocol.Methods.workspace_didChangeConfiguration, {settings = settings})
+                        client:notify(vim.lsp.protocol.Methods.workspace_didChangeConfiguration, {settings = settings})
                         vim.notify("schema store updated")
                     else
                         vim.notify(result.stderr:gsub("\n$", " "), vim.log.levels.ERROR)

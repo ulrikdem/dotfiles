@@ -457,8 +457,9 @@ do
             vim.cmd.new({mods = mods})
             bufnr = nvim_get_current_buf()
             repl_bufnrs[key] = bufnr
-            fn.termopen(repl.cmd, {
+            fn.jobstart(repl.cmd, {
                 cwd = repl.cwd,
+                term = true,
                 on_stdout = function()
                     for _, winid in ipairs(fn.win_findbuf(bufnr)) do
                         nvim_win_set_cursor(winid, {fn.line("$", winid), 0})
@@ -809,8 +810,9 @@ local function run_fzf(opts)
         fn.writefile(opts.input, input)
     end
 
-    fn.termopen(cmd, {
+    fn.jobstart(cmd, {
         cwd = opts.cwd,
+        term = true,
         on_exit = function()
             nvim_buf_delete(bufnr, {})
             local lines = fn.readfile(output)
@@ -1106,14 +1108,9 @@ function lsp.util.locations_to_items(locations, offset_encoding)
     --- @type vim.quickfix.entry[]
     local items = old_locations_to_items(locations, offset_encoding)
     for _, item in ipairs(items) do
-        --- @type lsp.Range
-        local range = item.user_data.range or item.user_data.targetSelectionRange
         item.user_data = {
             highlight_ranges = {
-                range.start.line == range["end"].line and {
-                    lsp.util._str_byteindex_enc(item.text, range.start.character, offset_encoding),
-                    lsp.util._str_byteindex_enc(item.text, range["end"].character, offset_encoding),
-                } or nil,
+                item.lnum == item.end_lnum and {item.col - 1, item.end_col - 1} or nil,
             },
         }
     end
@@ -1133,12 +1130,12 @@ map("n", "gO", function()
             local items = {}
             local cursor_index = nil
             for client_id, result in pairs(results) do
-                if result.error then
-                    return vim.notify(tostring(result.error), vim.log.levels.ERROR)
+                if result.err then
+                    return vim.notify(tostring(result.err), vim.log.levels.ERROR)
                 end
                 cursor_index = quickfix.from_lsp_symbols(result.result, items, bufnr, {
                     line = cursor[1] - 1,
-                    character = lsp.util._str_utfindex_enc(line, cursor[2], lsp.get_client_by_id(client_id).offset_encoding),
+                    character = vim.str_utfindex(line, lsp.get_client_by_id(client_id).offset_encoding, cursor[2]),
                 }) or cursor_index
             end
             quickfix.set_list({
@@ -1159,14 +1156,17 @@ for name, params in pairs({
 }) do
     nvim_create_user_command(name, function()
         local bufnr = nvim_get_current_buf()
-        vim.lsp.buf_request_all(bufnr, params[1], lsp.util.make_position_params(), function(results)
+        local winid = nvim_get_current_win()
+        vim.lsp.buf_request_all(bufnr, params[1], function(client)
+            return lsp.util.make_position_params(winid, client.offset_encoding)
+        end, function(results)
             --- @class hierarchy_item: lsp.CallHierarchyItem
             --- @field children? hierarchy_item[]
             local symbols = {} --- @type hierarchy_item[]
             local pending_requests = 0
             for client_id, result in pairs(results) do
-                if result.error then
-                    return vim.notify(tostring(result.error), vim.log.levels.ERROR)
+                if result.err then
+                    return vim.notify(tostring(result.err), vim.log.levels.ERROR)
                 end
                 local client = assert(lsp.get_client_by_id(client_id))
                 local cache = {} --- @type table<string, hierarchy_item>
@@ -1179,7 +1179,7 @@ for name, params in pairs({
                     cache[id] = symbol
 
                     pending_requests = pending_requests + 1
-                    client.request(params[2], {item = symbol}, function(err, result)
+                    client:request(params[2], {item = symbol}, function(err, result)
                         if err then vim.notify(tostring(err), vim.log.levels.WARN) end
                         symbol.children = vim.iter(result or {}):map(params[3]):map(process_symbol):totable()
                         pending_requests = pending_requests - 1
@@ -1265,30 +1265,7 @@ nvim_create_autocmd("LspAttach", {
         local augroup = lsp_augroup(client.id)
         nvim_clear_autocmds({buffer = bufnr, group = augroup})
 
-        local signature_triggers = vim.tbl_get(client.server_capabilities, "signatureHelpProvider", "triggerCharacters")
-        if signature_triggers then
-            local pattern = "[" .. vim.pesc(table.concat(signature_triggers)) .. "][%s]*$"
-            nvim_create_autocmd("TextChangedI", {
-                buffer = bufnr,
-                group = augroup,
-                callback = function()
-                    local lnum, col = unpack(nvim_win_get_cursor(0))
-                    local line = nvim_get_current_line():sub(1, col)
-                    while lnum > 1 and line:match("^%s*$") do
-                        lnum = lnum - 1
-                        line = nvim_buf_get_lines(bufnr, lnum - 1, lnum, true)[1]
-                    end
-                    if line:match(pattern) then
-                        client.request(
-                            lsp.protocol.Methods.textDocument_signatureHelp,
-                            lsp.util.make_position_params(0, client.offset_encoding),
-                            lsp.with(lsp.handlers.signature_help, {silent = true, focusable = false}))
-                    end
-                end,
-            })
-        end
-
-        if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
+        if client:supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
             local timer = vim.uv.new_timer()
             nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
                 buffer = bufnr,
@@ -1299,7 +1276,7 @@ nvim_create_autocmd("LspAttach", {
                     elseif fn.mode() == "n" then
                         timer:start(100, 0, vim.schedule_wrap(function()
                             if nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
-                            client.request(
+                            client:request(
                                 lsp.protocol.Methods.textDocument_documentHighlight,
                                 lsp.util.make_position_params(0, client.offset_encoding),
                                 function(err, refs)
@@ -1321,7 +1298,7 @@ nvim_create_autocmd("LspAttach", {
             group = augroup,
             callback = function(args)
                 if args.data.client_id ~= client.id then return end
-                if client.supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
+                if client:supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
                     lsp.util.buf_clear_references(bufnr)
                 end
                 local config = client.config --[[ @as LspConfig ]]
