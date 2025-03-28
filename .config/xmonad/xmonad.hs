@@ -208,10 +208,10 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-S-<Left>", sendMessage $ Apply (windows . W.modify' . moveUp) L)
     , ("M-S-<Right>", sendMessage $ Apply (windows . W.modify' . moveDown) R)
 
-    , ("M--", modifyColumns (-))
-    , ("M-=", modifyColumns (+))
-    , ("M-C--", sendMessage $ ModifyLimit pred)
-    , ("M-C-=", sendMessage $ ModifyLimit succ)
+    , ("M-C--", modifyColumns (-))
+    , ("M-C-=", modifyColumns (+))
+    , ("M--", sendMessage $ ModifyLimit pred)
+    , ("M-=", sendMessage $ ModifyLimit succ)
     , ("M-\\", flip whenJust (sendMessage . ModifyLimit . const . length) . W.stack =<< getWorkspace)
     , ("M-f", withFocused $ \w -> windows (W.sink w) >> sendMessage (ToggleFullscreen w))
     , ("M-<Backspace>", setLayout $ Layout layout)
@@ -353,7 +353,7 @@ layout textHeight =
     resetEmpty $
     focusTracking $
     ModifiedLayout (Fullscreen Nothing) $
-    ModifiedLayout (Limit 3 (0, 0) tabbed) $
+    ModifiedLayout (Limit 2 (0, 0) tabbed) $
     avoidStruts $
     smartSpacingWithEdge (fi gapWidth) $
     configurableNavigation noNavigateBorders $
