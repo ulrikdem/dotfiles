@@ -46,6 +46,6 @@ vim.b.repl = {
     end,
     format = function(code)
         -- <M-CR> executes without waiting for more lines
-        return bracketed_paste(code) .. "\27\r"
+        return vim.keycode("<Esc>ggcG") .. bracketed_paste(code) .. vim.keycode("<Esc><CR>")
     end,
 }

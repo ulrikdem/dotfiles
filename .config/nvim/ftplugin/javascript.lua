@@ -34,6 +34,6 @@ vim.b.repl = {
         return ".load " .. path
     end,
     format = function(code)
-        return code:find("\n") and ".editor\n" .. code .. "\4" or code .. "\n"
+        return vim.keycode("<C-e><C-u>") .. (code:find("\n") and ".editor\n" .. code .. vim.keycode("<C-d>") or code .. "\n")
     end,
 }

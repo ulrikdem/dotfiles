@@ -123,7 +123,7 @@ local repl = {
         return (':load "%s"'):format(vim.fn.escape(path, '"\\'))
     end,
     format = function(code)
-        return code:find("\n") and ":{\n" .. code .. "\n:}\n" or code .. "\n"
+        return vim.keycode("<C-e><C-u>") .. (code:find("\n") and ":{\n" .. code .. "\n:}" or code) .. "\n"
     end,
 }
 if root_dir then

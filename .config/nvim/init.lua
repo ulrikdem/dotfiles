@@ -410,14 +410,20 @@ do
     --- @type table<string, integer>
     _G.repl_bufnrs = repl_bufnrs or {}
 
+    --- @return string?
+    local function get_key()
+        local repl = vim.b.repl --- @type repl_config
+        return repl and repl.cmd and table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
+    end
+
     --- @param toggle? boolean
     local function open_repl(toggle)
         local repl = vim.b.repl --- @type repl_config
-        if not (repl and repl.cmd) then
+        local key = get_key()
+        if not key then
             vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
             return
         end
-        local key = table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
         local bufnr = repl_bufnrs[key]
         local mods = {
             vertical = vim.o.columns > 160,
@@ -498,7 +504,7 @@ do
             code = repl.load_file and repl.load_file(nvim_buf_get_name(0))
                 or table.concat(nvim_buf_get_lines(0, 0, -1, true), "\n")
         end
-        code = repl.format and repl.format(code) or bracketed_paste(code) .. "\n"
+        code = repl.format and repl.format(code) or vim.keycode("<C-e><C-u>") .. bracketed_paste(code) .. "\n"
         nvim_chan_send(vim.bo[bufnr].channel, code)
     end
 
@@ -515,6 +521,11 @@ do
     map("n", "<Leader>es", function()
         vim.cmd("silent update")
         repl_eval("buffer")
+    end)
+
+    map("n", "<Leader>ec", function()
+        local bufnr = repl_bufnrs[get_key()]
+        if bufnr then nvim_chan_send(vim.bo[bufnr].channel, vim.keycode("<C-c>")) end
     end)
 end
 
