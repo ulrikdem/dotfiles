@@ -419,20 +419,17 @@ do
     --- @type table<string, integer>
     _G.repl_bufnrs = repl_bufnrs or {}
 
-    --- @return string?
+    local default_cmd = {"zsh"}
+
     local function get_key()
-        local repl = vim.b.repl --- @type repl_config
-        return repl and repl.cmd and table.concat(repl.cmd, "\0") .. "\0" .. (repl.cwd or "")
+        local repl = vim.b.repl or {} --- @type repl_config
+        return table.concat(repl.cmd or default_cmd, "\0") .. "\0" .. (repl.cwd or "")
     end
 
     --- @param toggle? boolean
     local function open_repl(toggle)
-        local repl = vim.b.repl --- @type repl_config
+        local repl = vim.b.repl --- @type repl_config?
         local key = get_key()
-        if not key then
-            vim.notify("no REPL configured for buffer", vim.log.levels.ERROR)
-            return
-        end
         local bufnr = repl_bufnrs[key]
 
         if not bufnr then
@@ -440,8 +437,8 @@ do
             make_sidebar()
             bufnr = nvim_get_current_buf()
             repl_bufnrs[key] = bufnr
-            fn.jobstart(repl.cmd, {
-                cwd = repl.cwd,
+            fn.jobstart(repl and repl.cmd or default_cmd, {
+                cwd = repl and repl.cwd,
                 term = true,
                 on_stdout = function()
                     for _, winid in ipairs(fn.win_findbuf(bufnr)) do
@@ -471,7 +468,7 @@ do
         return bufnr
     end
 
-    map("n", "<Leader>tr", function() open_repl(true) end)
+    map("n", "<Leader>tt", function() open_repl(true) end)
 
     --- @param s string
     function _G.bracketed_paste(s)
@@ -498,14 +495,13 @@ do
             return s
         end):join("\n")
 
-        local repl = vim.b.repl --- @type repl_config
-        if repl and repl.eval then
+        local repl = vim.b.repl or {} --- @type repl_config
+        if repl.eval then
             return repl.eval(type == "buffer" and {file = nvim_buf_get_name(0)} or {code = code})
         end
 
         local winid = nvim_get_current_win()
         local bufnr = open_repl()
-        if not bufnr then return end
         nvim_set_current_win(winid)
 
         if type == "buffer" then
