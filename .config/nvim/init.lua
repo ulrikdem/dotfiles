@@ -65,6 +65,8 @@ function _G.foldtext()
         vim.v.foldend - vim.v.foldstart + 1)
 end
 
+defaults.nrformats = "hex,bin,blank"
+
 vim.opt.suffixes:remove(".h")
 
 -- This is usually autodetected from the COLORTERM variable,
