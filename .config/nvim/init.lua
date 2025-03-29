@@ -385,26 +385,30 @@ end)
 vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,hiddenoff")
 
 -- Remap do and dp to use a motion
-_G.diff_cmd, _G.diff_bufnr = "", 0
-function _G.diff_operator()
-    vim.cmd[diff_cmd]({
-        diff_bufnr ~= 0 and diff_bufnr or nil,
-        range = {fn.line("'["), fn.line("']")},
-    })
+_G.diff_bufnr = 0
+for key, cmd in pairs({o = "diffget", p = "diffput"}) do
+    _G[cmd .. "_operator"] = function()
+        vim.cmd[cmd]({
+            diff_bufnr ~= 0 and diff_bufnr or nil,
+            range = {fn.line("'["), fn.line("']")},
+        })
+    end
+    -- The use of <Cmd> clears the count so that it doesn't affect the motion
+    map("n", "d" .. key, ("<Cmd>set operatorfunc=v:lua.%s_operator | lua diff_bufnr = vim.v.count<CR>g@"):format(cmd))
+    map("n", "d" .. key .. key, function()
+        local lnum = nvim_win_get_cursor(0)[1]
+        vim.cmd[cmd]({range = {lnum, lnum + vim.v.count1 - 1}})
+    end)
+    -- Make the original behavior available under a different mapping
+    map("n", "d" .. key .. "c", "d" .. key)
 end
--- The use of <Cmd> clears the count so that it doesn't affect the motion
-map("n", "do", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffget', vim.v.count<CR>g@")
-map("n", "dp", "<Cmd>set operatorfunc=v:lua.diff_operator | lua diff_cmd, diff_bufnr = 'diffput', vim.v.count<CR>g@")
--- Map doo and dpp to the original behavior
-map("n", "doo", "do")
-map("n", "dpp", "dp")
 
--- The mappings above don't work in visual mode. As alternative, allow gv in operator-pending mode
+-- The mappings above don't work in visual mode. As an alternative, allow gv in operator-pending mode
 map("o", "gv", "<Cmd>normal! gv<CR>")
 
 -- Remap to something more convenient in my keymap
 map("n", "dx", "dp", {remap = true})
-map("n", "dpx", "dp")
+map("n", "dxx", "dpp", {remap = true})
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
 
