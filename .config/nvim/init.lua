@@ -458,7 +458,10 @@ do
 
         for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
             if nvim_win_get_buf(winid) == bufnr then
-                if toggle then nvim_win_hide(winid) end
+                if toggle then
+                    nvim_win_hide(winid)
+                    return
+                end
                 return bufnr
             end
         end
@@ -468,7 +471,9 @@ do
         return bufnr
     end
 
-    map("n", "<Leader>tt", function() open_repl(true) end)
+    map("n", "<Leader>tt", function()
+        if open_repl(true) then vim.cmd.startinsert() end
+    end)
 
     --- @param s string
     function _G.bracketed_paste(s)
