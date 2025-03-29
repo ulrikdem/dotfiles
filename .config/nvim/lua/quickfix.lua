@@ -83,7 +83,7 @@ function M.textfunc(args)
     })
     local bufnr = list.qfbufnr
     local tree_foldlevel = vim.tbl_get(list, "context", "tree_foldlevel")
-        or vim.endswith(list.title, "TOC") and 1 or nil
+        or list.title == "Table of contents" and 1 or nil
 
     local lines = {} --- @type string[]
     local highlights = {}
