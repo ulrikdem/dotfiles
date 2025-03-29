@@ -216,6 +216,7 @@ nvim_create_autocmd("TermOpen", {
 
 nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
+local make_sidebar --- @type fun()
 do
     local sidebar_width = 80
     vim.env.MANWIDTH = tostring(sidebar_width + 1)
@@ -239,12 +240,17 @@ do
         vim.cmd.wincmd("=")
     end
 
+    function make_sidebar()
+        if vim.o.columns > sidebar_width * 2 and not vim.o.winfixwidth then
+            toggle_side()
+        end
+    end
+
     nvim_create_autocmd("BufWinEnter", {
         group = augroup,
         callback = function()
-            if (vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive")
-                    and vim.o.columns > sidebar_width * 2 and not vim.o.winfixwidth then
-                toggle_side()
+            if vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive" then
+                make_sidebar()
             end
         end,
     })
@@ -428,13 +434,10 @@ do
             return
         end
         local bufnr = repl_bufnrs[key]
-        local mods = {
-            vertical = vim.o.columns > 160,
-            keepalt = true,
-        }
 
         if not bufnr then
-            vim.cmd.new({mods = mods})
+            vim.cmd("keepalt new")
+            make_sidebar()
             bufnr = nvim_get_current_buf()
             repl_bufnrs[key] = bufnr
             fn.jobstart(repl.cmd, {
@@ -463,7 +466,8 @@ do
             end
         end
 
-        vim.cmd.split({"#" .. bufnr, mods = mods})
+        vim.cmd("keepalt split #" .. bufnr)
+        make_sidebar()
         return bufnr
     end
 
