@@ -161,28 +161,35 @@ end
 
 local augroup = nvim_create_augroup("init.lua", {})
 
-nvim_create_autocmd("BufReadPost", {
-    group = augroup,
-    callback = function()
-        local tabs = false
-        local min_spaces
-        for _, line in ipairs(nvim_buf_get_lines(0, 0, -1, true)) do
-            tabs = tabs or vim.startswith(line, "\t")
+nvim_create_autocmd("BufReadPost", {group = augroup, command = "DetectIndent"})
+nvim_create_user_command("DetectIndent", function()
+    local expandtab_votes = 1
+    local tabstop_votes = vim.defaulttable(function() return 0 end)
+    local prev_spaces
+    for _, line in ipairs(nvim_buf_get_lines(0, 0, -1, true)) do
+        if vim.startswith(line, "\t") then
+            expandtab_votes = expandtab_votes - 1
+            prev_spaces = nil
+        else
             local spaces = #line:match("^ *")
-            if spaces > 0 then
-                min_spaces = min_spaces and math.min(min_spaces, spaces) or spaces
+            if spaces > 0 then expandtab_votes = expandtab_votes + 1 end
+            if prev_spaces then
+                local diff = math.abs(spaces - prev_spaces)
+                tabstop_votes[diff] = tabstop_votes[diff] + 1
             end
+            prev_spaces = spaces
         end
-        if tabs then
-            vim.bo.expandtab = false
-            vim.bo.shiftwidth = min_spaces or 0
-            if min_spaces then vim.bo.tabstop = 8 end
-        elseif min_spaces then
-            vim.bo.expandtab = true
-            vim.bo.shiftwidth = min_spaces
+    end
+    vim.bo.expandtab = expandtab_votes > 0
+    for k, v in pairs(tabstop_votes) do
+        if k > 0 and v > tabstop_votes[vim.o.tabstop] then
+            vim.bo.tabstop = k
         end
-    end,
-})
+    end
+    -- These are the defaults, but may be different when the command is run manually
+    vim.bo.softtabstop = 0
+    vim.bo.shiftwidth = 0
+end, {bar = true})
 
 nvim_create_autocmd("FileType", {
     group = augroup,
