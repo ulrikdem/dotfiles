@@ -1,7 +1,6 @@
 local M = {}
 
 local g = vim.g
-g.vimtex_complete_close_braces = true
 g.vimtex_view_method = "zathura"
 g.vimtex_view_use_temp_files = true
 g.vimtex_doc_handlers = {"vimtex#doc#handlers#texdoc"}
