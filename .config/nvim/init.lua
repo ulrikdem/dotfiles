@@ -163,32 +163,36 @@ local augroup = nvim_create_augroup("init.lua", {})
 
 nvim_create_autocmd("BufReadPost", {group = augroup, command = "DetectIndent"})
 nvim_create_user_command("DetectIndent", function()
-    local expandtab_votes = 1
-    local tabstop_votes = vim.defaulttable(function() return 0 end)
-    local prev_spaces
+    local shiftwidth_votes = vim.defaulttable(function() return 0 end)
+    local expandtab_votes = vim.o.expandtab and 1 or 0
+    local mixed, prev_indent
     for _, line in ipairs(nvim_buf_get_lines(0, 0, -1, true)) do
-        if vim.startswith(line, "\t") then
+        local indent = line:match("^[ \t]*")
+        if indent:find("\t") then
             expandtab_votes = expandtab_votes - 1
-            prev_spaces = nil
+            mixed = mixed or indent:find(" ")
+            prev_indent = nil
         else
-            local spaces = #line:match("^ *")
-            if spaces > 0 then expandtab_votes = expandtab_votes + 1 end
-            if prev_spaces then
-                local diff = math.abs(spaces - prev_spaces)
-                tabstop_votes[diff] = tabstop_votes[diff] + 1
+            if #indent > 0 then expandtab_votes = expandtab_votes + 1 end
+            if prev_indent and #indent ~= prev_indent then
+                local diff = math.abs(#indent - prev_indent)
+                shiftwidth_votes[diff] = shiftwidth_votes[diff] + 1
             end
-            prev_spaces = spaces
+            prev_indent = #indent
         end
     end
-    vim.bo.expandtab = expandtab_votes > 0
-    for k, v in pairs(tabstop_votes) do
-        if k > 0 and v > tabstop_votes[vim.o.tabstop] then
-            vim.bo.tabstop = k
-        end
+    local shiftwidth = fn.shiftwidth()
+    for k, v in pairs(shiftwidth_votes) do
+        if v > shiftwidth_votes[shiftwidth] then shiftwidth = k end
     end
-    -- These are the defaults, but may be different when the command is run manually
+    vim.bo.shiftwidth = shiftwidth
+    vim.bo.tabstop = shiftwidth
     vim.bo.softtabstop = 0
-    vim.bo.shiftwidth = 0
+    vim.bo.expandtab = expandtab_votes > 0
+    if mixed then -- If any lines contain mixed indentation, default to traditional values
+        vim.bo.tabstop = 8
+        vim.bo.expandtab = false
+    end
 end, {bar = true})
 
 nvim_create_autocmd("FileType", {
