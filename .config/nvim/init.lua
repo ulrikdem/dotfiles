@@ -37,6 +37,8 @@ defaults.dictionary = "/usr/share/dict/words"
 
 vim.opt.shortmess:append("Ic")
 
+defaults.guicursor = "i-ci-ve:ver25,r-cr:hor20"
+
 defaults.cursorline = true
 defaults.cursorlineopt = "number"
 
