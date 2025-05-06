@@ -13,16 +13,15 @@ vim.env = {}
 --- @field start_idx integer
 --- @field end_idx integer
 
--- defaults uses string for action and integer for return
 --- @param list vim.quickfix.entry[]
---- @param action? " " | "a" | "r" | "f"
+--- @param action? " " | "a" | "r" | "u" | "f"
 --- @param what? vim.fn.setqflist.what
 --- @return 0 | -1
 function vim.fn.setqflist(list, action, what) end
 
 --- @param nr integer
 --- @param list vim.quickfix.entry[]
---- @param action? " " | "a" | "r" | "f"
+--- @param action? " " | "a" | "r" | "u" | "f"
 --- @param what? vim.fn.setqflist.what
 --- @return 0 | -1
 function vim.fn.setloclist(nr, list, action, what) end

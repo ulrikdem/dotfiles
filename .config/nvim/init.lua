@@ -760,6 +760,19 @@ nvim_create_user_command("HelpGrep", function(opts)
     quickfix.set_list({action = "r", items = items})
 end, {nargs = 1})
 
+nvim_create_user_command("Diagnostics", function()
+    quickfix.set_list({title = "Diagnostics", items = vim.diagnostic.toqflist(vim.diagnostic.get())})
+    _G.diagnostic_qf_id = fn.getqflist({id = 0}).id
+end, {bar = true})
+nvim_create_autocmd("DiagnosticChanged", {
+    group = augroup,
+    callback = function()
+        if diagnostic_qf_id and fn.getqflist({id = diagnostic_qf_id}).id ~= 0 then
+            fn.setqflist({}, "u", {id = diagnostic_qf_id, items = vim.diagnostic.toqflist(vim.diagnostic.get())})
+        end
+    end,
+})
+
 -- Fuzzy finder {{{1
 
 --- @class fzf_opts
@@ -1074,14 +1087,6 @@ vim.diagnostic.config({
     signs = false,
     virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
 })
-
-nvim_create_user_command("Diagnostics", function()
-    quickfix.set_list({
-        title = "Diagnostics",
-        items = vim.diagnostic.toqflist(vim.diagnostic.get()),
-        action = fn.getqflist({title = true}).title == "Diagnostics" and "r" or " ",
-    })
-end, {bar = true})
 
 for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, k = {lsp.inlay_hint, "inlay hints"}}) do
     map("n", "yo" .. k, function()

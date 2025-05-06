@@ -1,7 +1,7 @@
 local M = {}
 
 --- @class set_list_opts: vim.fn.setqflist.what
---- @field action? " " | "a" | "r" | "f"
+--- @field action? " " | "a" | "r" | "u" | "f"
 --- @field loclist_winid? integer
 
 --- @param opts set_list_opts
