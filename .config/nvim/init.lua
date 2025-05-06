@@ -1102,9 +1102,9 @@ nvim_create_autocmd("InsertEnter", {
 })
 
 _G.old_locations_to_items = old_locations_to_items or lsp.util.locations_to_items
-function lsp.util.locations_to_items(locations, offset_encoding)
+function lsp.util.locations_to_items(locations, position_encoding)
     --- @type vim.quickfix.entry[]
-    local items = old_locations_to_items(locations, offset_encoding)
+    local items = old_locations_to_items(locations, position_encoding)
     for _, item in ipairs(items) do
         item.user_data = {
             highlight_ranges = {
@@ -1234,16 +1234,10 @@ function _G.start_lsp(config)
         end
 
         config.capabilities = vim.tbl_deep_extend("force",
-            lsp.protocol.make_client_capabilities(),
             require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}),
             config.capabilities or {})
 
-        lsp.start(config, {
-            reuse_client = function(client, config)
-                -- The default considers nil root_dirs to be distinct, resulting in a new client for each buffer
-                return client.name == config.name and client.root_dir == config.root_dir
-            end,
-        })
+        lsp.start(config)
     end
 end
 
