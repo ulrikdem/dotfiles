@@ -158,7 +158,10 @@ function M.textfunc(args)
 
     vim.schedule(function()
         -- Cancel if the list has been replaced since this was scheduled
-        -- This can happen when updating the list from a DiagnosticChanged autocmd
+        -- quickfixtextfunc is not called for an empty list, so that case is handled first
+        if nvim_buf_line_count(bufnr) == 1 and nvim_buf_get_lines(bufnr, 0, 1, true)[1] == "" then
+            quickfix_data[bufnr] = nil
+        end
         if quickfix_data[bufnr] ~= data then return end
 
         for _, highlight in ipairs(highlights) do

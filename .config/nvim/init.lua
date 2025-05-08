@@ -461,7 +461,7 @@ do
                 term = true,
                 on_stdout = function()
                     for _, winid in ipairs(fn.win_findbuf(bufnr)) do
-                        nvim_win_set_cursor(winid, {fn.line("$", winid), 0})
+                        nvim_win_set_cursor(winid, {nvim_buf_line_count(bufnr), 0})
                     end
                 end,
                 on_exit = function()
