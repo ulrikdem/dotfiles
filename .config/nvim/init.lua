@@ -184,8 +184,8 @@ nvim_create_user_command("DetectIndent", function()
         end
     end
     local shiftwidth = fn.shiftwidth()
-    for k, v in pairs(shiftwidth_votes) do
-        if v > shiftwidth_votes[shiftwidth] then shiftwidth = k end
+    for _, n in ipairs({2, 4, 8}) do
+        if shiftwidth_votes[n] > shiftwidth_votes[shiftwidth] then shiftwidth = n end
     end
     vim.bo.shiftwidth = shiftwidth
     vim.bo.tabstop = shiftwidth
