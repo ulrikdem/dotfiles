@@ -31,15 +31,17 @@ Config
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Battery
-            [ "-t", " <fn=1><leftbar></fn> <acstatus> <fc=gray17>│</fc>"
-            , "-L", "20"
-            , "-l", "red3"
+            [ "-t", " <acstatus> <fc=gray17>│</fc>"
             , "-W", "0"
             , "-f", "󰂎󰁺󰁻󰁼󰁽󰁾󰁿󰂀󰂁󰂂󰁹"
             , "--"
-            , "-i", "<fc=gray33></fc>"
-            , "-O", "<fc=gray33></fc>"
-            , "-o", "<timeleft>"
+            , "-i", "<fn=1><leftbar></fn> <fc=gray33></fc>"
+            , "-O", "<fn=1><leftbar></fn> <fc=gray33></fc>"
+            , "-o", " <timeleft>"
+            , "--mediums", "<fn=1><leftbar></fn>"
+            , "--lows", "<fn=1><fc=red3><leftbar></fc></fn>"
+            , "-L", "20"
+            , "-H", "999"
             ] 10
         , Run CommandReader "work bar" "work"
         , Run Date " %Y-%m-%d %H:%M:%S " "date" 10
