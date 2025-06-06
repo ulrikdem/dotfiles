@@ -1,2 +1,3 @@
 Sxiv.background: black
 Sxiv.foreground: gray50
+Sxiv.font: monospace-9
