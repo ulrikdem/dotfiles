@@ -1,4 +1,4 @@
-TARGETS := ../bin/nvidia-modules ../bin/vpn
+TARGETS := ../bin/vpn
 
 all: $(TARGETS)
 
