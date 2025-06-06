@@ -1,5 +1,5 @@
 Config
-    { template = "}%xmonad%{ %dynnetwork%%wi%%alsa:default:Master%%memory%%cpu%%cpufreq%%battery%%work%%date%"
+    { template = "}%xmonad%{ %dynnetwork%%wi%%alsa:default:Master%%memory%%cpu%%cpufreq%%gpu%%battery%%work%%date%"
     , fgColor = "gray50"
     , commands =
         [ Run DynNetwork
@@ -30,6 +30,10 @@ Config
             [ "-t", " <max> <fc=gray33>GHz</fc> <fc=gray17>│</fc>"
             , "-d", "1"
             ] 10
+        , Run ComX "bash"
+            [ "-c"
+            , "[[ $(</sys/bus/pci/drivers/nvidia/*/power/runtime_status) = active ]] && echo ' <fn=1>󰊴</fn> <fc=gray17>│</fc>'"
+            ] "" "gpu" 10
         , Run Battery
             [ "-t", " <acstatus> <fc=gray17>│</fc>"
             , "-W", "0"
