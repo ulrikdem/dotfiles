@@ -23,8 +23,10 @@ export FZF_DEFAULT_OPTS='
 
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
 
-export WINEDLLOVERRIDES=winemenubuilder.exe=
+export __GLX_VENDOR_LIBRARY_NAME=mesa __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json VK_LOADER_DRIVERS_DISABLE=nvidia_icd.json
+
 export DXVK_HUD=fps
+export WINEDLLOVERRIDES=winemenubuilder.exe=
 
 if [[ -f ~/.zshenv.local ]]; then
     source ~/.zshenv.local

@@ -1,0 +1,2 @@
+#!/bin/bash
+__NV_PRIME_RENDER_OFFLOAD_PROVIDER=NVIDIA-G0 __GLX_VENDOR_LIBRARY_NAME=nvidia __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/10_nvidia.json VK_LOADER_DRIVERS_SELECT=nvidia_icd.json exec "$@"
