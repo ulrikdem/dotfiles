@@ -305,6 +305,7 @@ alias la='ls -lha'
 (($+commands[ipython])) && alias ipy=ipython
 (($+commands[nvim])) && alias vi=nvim
 (($+commands[nvim] && $+NVIM)) && alias vi='nvim --server "$NVIM" --remote'
+(($+commands[pacman])) && alias pm=pacman spm='sudo pacman'
 (($+commands[ranger])) && alias r=ranger
 (($+commands[xdg-open])) && alias open=xdg-open
 
