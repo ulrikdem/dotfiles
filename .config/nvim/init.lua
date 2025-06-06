@@ -466,7 +466,7 @@ do
                 end,
                 on_exit = function()
                     repl_bufnrs[key] = nil
-                    nvim_buf_delete(bufnr, {})
+                    pcall(nvim_buf_delete, bufnr, {})
                 end,
             })
             vim.b.repl = repl -- Allow using toggle mapping (and others) from REPL buffer
