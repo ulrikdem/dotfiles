@@ -2,15 +2,26 @@ Config
     { template = "}%xmonad%{ %dynnetwork%%wi%%alsa:default:Master%%memory%%cpu%%cpufreq%%battery%%work%%date%"
     , fgColor = "gray50"
     , commands =
-        [ Run Wireless ""
+        [ Run DynNetwork
+            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray33>KB/s</fc> <fc=gray17>│</fc>"
+            , "-L", "0"
+            , "-l", "gray33"
+            ] 10
+        , Run Wireless ""
             [ "-t", " <fn=1><qualitybar></fn> <fc=gray17>│</fc>"
             , "-W", "0"
             , "-f", "󰤯󰤟󰤢󰤥󰤨"
             ] 10
-        , Run DynNetwork
-            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray33>KB/s</fc> <fc=gray17>│</fc>"
-            , "-L", "0"
-            , "-l", "gray33"
+        , Run Alsa "default" "Master"
+            [ "-t", " <fn=1><status></fn> <fc=gray17>│</fc>"
+            , "--"
+            , "-O", "<fc=gray50>󰕾</fc>"
+            , "-o", "<fc=gray50>󰖁</fc>"
+            ]
+        , Run Memory
+            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
+            , "-H", "80"
+            , "-h", "red3,gray17"
             ] 10
         , Run Cpu
             [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
@@ -19,17 +30,6 @@ Config
             [ "-t", " <max> <fc=gray33>GHz</fc> <fc=gray17>│</fc>"
             , "-d", "1"
             ] 10
-        , Run Memory
-            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
-            , "-H", "80"
-            , "-h", "red3,gray17"
-            ] 10
-        , Run Alsa "default" "Master"
-            [ "-t", " <fn=1><status></fn> <fc=gray17>│</fc>"
-            , "--"
-            , "-O", "<fc=gray50>󰕾</fc>"
-            , "-o", "<fc=gray50>󰖁</fc>"
-            ]
         , Run Battery
             [ "-t", " <acstatus> <fc=gray17>│</fc>"
             , "-W", "0"
