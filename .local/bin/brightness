@@ -4,8 +4,8 @@
 [[ -e $BACKLIGHT/brightness && -e $BACKLIGHT/max_brightness ]] || exit 1
 
 ((max = $(<"$BACKLIGHT/max_brightness")))
-((percent = ($(<"$BACKLIGHT/brightness") * 100 / max $1)))
+((percent = $(<"$BACKLIGHT/brightness") * 100 / max $1))
 ((percent = percent < 0 ? 0 : percent > 100 ? 100 : percent))
-echo $(((max - 1) * percent / 100 + 1)) >"$BACKLIGHT/brightness"
+echo $((max - (100 - percent) * max / 100)) >"$BACKLIGHT/brightness"
 
 dunstify -t 1000 -i /usr/share/icons/Adwaita/symbolic/status/display-brightness-symbolic.svg -h string:x-dunst-stack-tag:light -h int:value:$percent $percent
