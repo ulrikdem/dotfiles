@@ -262,8 +262,8 @@ function _sb {
             fi;;
         dbus)
             local name names=(
-                $(qdbus org.freedesktop.DBus /org/freedesktop/DBus ListNames | grep '^[^:]')
-                $(qdbus org.freedesktop.DBus /org/freedesktop/DBus ListActivatableNames)
+                $(qdbus6 org.freedesktop.DBus /org/freedesktop/DBus ListNames | grep '^[^:]')
+                $(qdbus6 org.freedesktop.DBus /org/freedesktop/DBus ListActivatableNames)
             ) 2>/dev/null
             local completions=($names)
             for name in $names; do
