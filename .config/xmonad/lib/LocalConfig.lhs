@@ -8,11 +8,11 @@ import XMonad.Hooks.ManageHelpers
 overrideConfig = id
 
 leaderMap =
-    [ ("c", "nm-rofi", False)
+    [ ("b", "btop", True)
+    , ("c", "nm-rofi", False)
     , ("S-c", "nm-connection-editor", False)
     , ("f", "firefox", False)
     , ("S-f", "firefox --private-window", False)
-    , ("h", "htop", True)
     , ("i", "ipython", True)
     , ("m", "xdotool click --clearmodifiers 3; sleep 0.1; xdotool key --clearmodifiers l; sleep 0.1; mpv --force-window -- \"$(xsel)\"", False)
     , ("n", "newsboat", True)
@@ -23,7 +23,7 @@ leaderMap =
 
 iconQuery = composeOne
     [ className =? "Alacritty" -?> composeOne
-        [ title =? "htop" -?> return "\xf0128" -- 󰄨
+        [ title =? "btop" -?> return "\xf0128" -- 󰄨
         , title =? "ipython" <||> title =? "ipy" -?> return "\xf0320" -- 󰌠
         , title =? "newsboat" -?> return "\xf046b" -- 󰑫
         , title =? "pulsemixer" -?> return "\xf057e" -- 󰕾
