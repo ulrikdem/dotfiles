@@ -1,0 +1,21 @@
+#!/bin/bash
+
+exec /usr/bin/btop -c <(cat <<EOF
+    shown_boxes = "proc"
+    presets = "proc:0:default"
+    rounded_corners = False
+
+    proc_gradient = False
+    proc_filter_kernel = True
+    proc_tree = True
+    proc_sorting = "pid"
+    proc_per_core = True
+
+    cpu_invert_lower = False
+    gpu_mirror_graph = False
+    $([[ $(</sys/bus/pci/drivers/nvidia/*/power/runtime_status) != active ]] 2>/dev/null && echo 'shown_gpus = "amd intel"')
+
+    mem_graphs = False
+    use_fstab = False
+EOF
+) "$@"
