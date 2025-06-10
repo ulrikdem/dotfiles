@@ -13,9 +13,10 @@ synctex() {
 
 prefix=()
 if [[ ! -v SANDBOX ]] && ! synctex "$@"; then
-    prefix=(sb -xuw /run/cups/cups.sock)
+    prefix=(sb -xu)
     for arg; do
         [[ -e $arg && $(realpath -s -- "$arg") != /usr/* ]] && prefix+=(-r ":$arg")
     done
+    prefix+=(-- --bind-try /run/cups/cups.sock /run/cups/cups.sock)
 fi
 exec "${prefix[@]}" /usr/bin/zathura "$@"
