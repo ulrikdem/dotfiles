@@ -93,7 +93,7 @@ theme = def
     , fontName = "xft:monospace-" ++ show fontSize
     }
 
-fontSize = 9
+fontSize = 10
 
 getTextHeight = do
     display <- openDisplay ""
@@ -112,8 +112,9 @@ statusBar textHeight screen@(S i) = return $ statusBarGeneric cmd $ barLogHook s
         ++ " -f 'Monospace " ++ show fontSize ++ "' -N 'Symbols Nerd Font " ++ show (fontSize + 2) ++ "' -N 'Monospace " ++ show (fontSize - 1) ++ "'"
         ++ " -D \"$(xrdb -get Xft.dpi)\""
 
-barHeight textHeight = h + h `mod` 2 - 1 where
+barHeight textHeight = h + h `mod` 2 - parity where
     h = textHeight * 3 `div` 2
+    parity = 0
 
 barLogHook screen@(S sid) prop = do
     workspaceIndex <- getWorkspaceIndex

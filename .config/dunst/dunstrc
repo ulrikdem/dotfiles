@@ -1,7 +1,7 @@
 [global]
 follow = keyboard
-font = monospace 9
-offset = 18x41
+font = monospace 10
+offset = 18x46
 frame_width = 1
 separator_height = 1
 show_indicators = false
