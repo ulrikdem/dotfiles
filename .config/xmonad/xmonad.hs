@@ -234,8 +234,8 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("<XF86AudioMute>", spawn "volume toggle")
     , ("<XF86AudioLowerVolume>", spawn "volume 2%-")
     , ("<XF86AudioRaiseVolume>", spawn "volume 2%+")
-    , ("<XF86MonBrightnessDown>", spawn "brightness -10")
-    , ("<XF86MonBrightnessUp>", spawn "brightness +10")
+    , ("<XF86MonBrightnessDown>", spawn "brightness -4")
+    , ("<XF86MonBrightnessUp>", spawn "brightness +4")
 
     , ("M-r", commandPrompt textHeight Shell (completionToCommand Shell) spawn =<< io getCommands)
     , ("M-S-r", commandPrompt textHeight Terminal (completionToCommand Shell) (spawnIn terminal []) =<< io getCommands)
