@@ -27,7 +27,7 @@ Config
             [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
             ] 10
         , Run CpuFreq
-            [ "-t", " <max> <fc=gray33>GHz</fc> <fc=gray17>│</fc>"
+            [ "-t", " <max><fc=gray33>GHz</fc> <fc=gray17>│</fc>"
             , "-d", "1"
             ] 10
         , Run ComX "bash"
@@ -41,7 +41,7 @@ Config
             , "--"
             , "-i", "<fn=1><leftbar></fn> <fc=gray33></fc>"
             , "-O", "<fn=1><leftbar></fn> <fc=gray33></fc>"
-            , "-o", " <watts> <fc=gray33>W</fc> <timeleft>"
+            , "-o", " <watts><fc=gray33>W</fc> <timeleft>"
             , "--mediums", "<fn=1><leftbar></fn>"
             , "--lows", "<fn=1><fc=red3><leftbar></fc></fn>"
             , "-L", "20"
