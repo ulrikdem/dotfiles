@@ -307,7 +307,7 @@ alias la='ls -lha'
 (($+commands[nvim] && $+NVIM)) && alias vi='nvim --server "$NVIM" --remote'
 (($+commands[pacman])) && alias pm=pacman spm='sudo pacman'
 (($+commands[ranger])) && alias r=ranger
-(($+commands[xdg-open])) && alias open=xdg-open
+(($+commands[xdg-open])) && alias o=xdg-open
 
 if [[ -d ~/.dotfiles.git ]]; then
     function conf {
