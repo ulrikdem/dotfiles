@@ -60,7 +60,7 @@ zmodload zsh/zutil
 
 # Prompt and Title {{{1
 
-PROMPT='%F{blue}%B%n%b%8F@%F{blue}%B%m%f %~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}'${SANDBOX+ %8F[%F{blue}sb%8F]%f}'%(?.. %F{red}%?%f)
+PROMPT='%B'${SSH_TTY+%F{blue}%m%8F:}'%F{blue}%~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}'${SANDBOX+ %8F[%F{blue}sb%8F]%f}'%(?.. %F{red}%?%f)
 %F{blue}»%f '
 PROMPT2='%F{blue}»%f '
 
@@ -74,7 +74,7 @@ zstyle ':vcs_info:*' check-for-changes true
 
 function precmd {
     vcs_info
-    print -Pn '\e]2;%n@%m %~\a'
+    print -Pn "\e]2;${SSH_TTY+%m:}%~\a"
 }
 function preexec {
     printf '\e]2;%s\a' "$1"
