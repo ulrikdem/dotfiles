@@ -60,14 +60,16 @@ zmodload zsh/zutil
 
 # Prompt and Title {{{1
 
-PROMPT='%B'${SSH_TTY+%F{blue}%m%8F:}'%F{blue}%~%b$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%F{blue\}venv%8F]%f}'${SANDBOX+ %8F[%F{blue}sb%8F]%f}'%(?.. %F{red}%?%f)
-%F{blue}»%f '
-PROMPT2='%F{blue}»%f '
+[[ $TERM = linux ]] && fancy_prompt= || fancy_prompt=1
+PROMPT=${fancy_prompt:+%K{#404040} }${SSH_TTY+%B%m%b%8F:%f}%B%~%b${fancy_prompt:+ %k%F{#404040}%f}'$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%fvenv%8F]%f}'${SANDBOX+ %8F[%fsb%8F]%f}'%(?.. %F{red}%?%f)
+%8F»%f '
+PROMPT2='%8F»%f '
+unset fancy_prompt
 
 autoload -U vcs_info
-zstyle ':vcs_info:*' formats ' %8F[%F{blue}%b%c%u%8F]%f'
-zstyle ':vcs_info:*' actionformats ' %8F[%F{blue}%b%8F:%F{magenta}%a%c%u%8F]%f'
-zstyle ':vcs_info:*' branchformat '%b%8F:%F{blue}%r'
+zstyle ':vcs_info:*' formats ' %8F[%f%b%c%u%8F]%f'
+zstyle ':vcs_info:*' actionformats ' %8F[%f%b%8F:%f%a%c%u%8F]%f'
+zstyle ':vcs_info:*' branchformat '%b%8F:%f%r'
 zstyle ':vcs_info:*' stagedstr '%8F:%F{green}S'
 zstyle ':vcs_info:*' unstagedstr '%8F:%F{red}U'
 zstyle ':vcs_info:*' check-for-changes true
