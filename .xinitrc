@@ -1,8 +1,9 @@
 #!/bin/bash
 
-export GDK_SCALE=$(cat ~/.config/dpi-scale || echo 1)
+dpi=$(cat ~/.config/dpi || echo 96)
+export GDK_SCALE=$((dpi / 96))
 export GDK_DPI_SCALE=$(bc <<<"scale=2; 1/$GDK_SCALE")
-xrdb -merge <<<"Xft.dpi: $((96*GDK_SCALE))"
+xrdb -merge <<<"Xft.dpi: $dpi"
 xrdb -merge ~/.config/Xresources
 
 dbus-update-activation-environment --systemd DISPLAY XAUTHORITY
