@@ -259,10 +259,16 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , w <- workspaces $ conf textHeight
     ] ++
 
-    [ (mod ++ [key], f i)
-    | (mod, f) <- [("M-", viewScreen def), ("M-S-", sendToScreen def),
-        ("M-C-", getScreen def >=> flip whenJust (screenWorkspace >=> flip whenJust (windows . W.greedyView)))]
-    , (key, i) <- zip "h,." [0..]
+    [ (mod ++ [key], action)
+    | (key, i) <- zip "h,." [0..]
+    , (mod, action) <-
+        [ ("M-", viewScreen def i)
+        , ("M-S-", sendToScreen def i)
+        , ("M-C-", do
+            screen <- getScreen def i
+            whenJust screen $ screenWorkspace >=> flip whenJust (windows . W.greedyView)
+            viewScreen def i)
+        ]
     ] ++
 
     [ ("M-<Space> " ++ mod ++ mod' ++ key, f command)
