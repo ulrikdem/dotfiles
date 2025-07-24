@@ -1,0 +1,10 @@
+#!/bin/bash
+set -e
+
+sqlite3 ~/.local/share/newsboat/cache.db \
+    "update rss_feed set rssurl = '${2//\'/\'\'}' where rssurl = '${1//\'/\'\'}'" \
+    "update rss_item set feedurl = '${2//\'/\'\'}' where feedurl = '${1//\'/\'\'}'"
+
+temp=$(mktemp)
+rg -xFe "$1" -r "${2//$/\$$}" --passthru ~/.config/newsboat/urls >"$temp"
+mv -- "$temp" "$(realpath ~/.config/newsboat/urls)"
