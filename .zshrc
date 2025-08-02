@@ -129,6 +129,24 @@ bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
 
 bindkeymaps '\e^_' copy-earlier-word main
 
+# function accept-and-exit { BUFFER+=' &>/dev/null & exit'; zle accept-line } # adds '& exit' to history
+function accept-and-exit { # might not execute immediately on syntax error, but then preexec is still overridden
+    function preexec { eval $3 &>/dev/null & exit }
+    zle accept-line
+}
+# function accept-and-exit { # doesn't give feedback on syntax error
+#     [[ $BUFFER =~ '^[^ ]' ]] && print -rS $BUFFER
+#     eval $BUFFER &>/dev/null & exit
+# }
+# function accept-and-exit { # shows implementation details on syntax error
+#     [[ $BUFFER =~ '^[^ ]' ]] && print -rS $BUFFER
+#     BUFFER=" $BUFFER &>/dev/null & exit"
+#     zle accept-line
+# }
+# adding &>/dev/null allows using open with terminal program, although that I don't see why you would use this keybinding for it
+# why not </dev/null? that might break pipelines, but doesn't seem to using rofi, and you can eval in a subshell and redirect that
+bindkeymaps '\e\r' accept-and-exit main vicmd
+
 bindkeymaps '\eo' accept-and-infer-next-history main
 
 function accept-history { print -rS "$BUFFER"; zle send-break }
@@ -320,8 +338,8 @@ if [[ -d ~/.dotfiles.git ]]; then
     compdef 'conf _precommand' conf
 fi
 
-(($+commands[gcc])) && alias gcc='gcc -std=c17 -Wall -Wextra -Wconversion'
-(($+commands[g++])) && alias g++='g++ -std=c++20 -Wall -Wextra -Wconversion'
+(($+commands[gcc])) && alias gcc='gcc -Wall -Wextra -Wconversion'
+(($+commands[g++])) && alias g++='g++ -std=c++23 -Wall -Wextra -Wconversion'
 
 (($+commands[nsenter])) && alias sbenter='sudo nsenter -aew -S follow -G follow -t'
 

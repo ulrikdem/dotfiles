@@ -605,6 +605,14 @@ nvim_create_user_command("Lua", function(opts)
     if err then vim.notify(err, vim.log.levels.ERROR) end
 end, {nargs = "?", complete = "lua", bang = true})
 
+nvim_create_autocmd("TermRequest", {
+    callback = function()
+        if vim.startswith(vim.v.termrequest, "\27_G") then
+            io.stdout:write(vim.v.termrequest .. "\27\\")
+        end
+    end
+})
+
 -- Quickfix {{{1
 
 package.loaded.quickfix = nil -- Reload when sourcing init.lua
@@ -1086,7 +1094,14 @@ map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>"
 vim.diagnostic.config({
     severity_sort = true,
     signs = false,
-    virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
+    virtual_text = {
+        -- current_line = true,
+        virt_text_pos = "eol_right_align",
+        format = function(d) return d.message:match("[^\n]*") end,
+    },
+    -- virtual_lines = true,
+    -- virtual_lines = {current_line = true},
+    jump = {float = true},
 })
 
 for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, k = {lsp.inlay_hint, "inlay hints"}}) do

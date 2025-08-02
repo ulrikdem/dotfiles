@@ -169,6 +169,7 @@ function M.textfunc(args)
             nvim_buf_set_extmark(bufnr, namespace, line, col, {end_col = end_col, hl_group = group})
         end
 
+        if not nvim_win_is_valid(list.winid) then return end
         local wo = vim.wo[list.winid][0]
         wo.foldmethod = "expr" -- Set unconditionally, to recompute folds
         wo.foldexpr = "v:lua.require'quickfix'.foldexpr()"

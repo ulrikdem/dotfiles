@@ -1,3 +1,6 @@
+# set database null # crashes on reload since 0.5.11 (1f2ab90, which fixes c6e539b), but actually broken in 6d5fa4c (see also fa91029)
+# set double-click-follow false # breaks all links since 0.5.9 (986f8ae)
+# expanding/contracting in table of contents must use l/h: https://github.com/pwmt/zathura/issues/709 (also broken in 0.5.9, 87a21fa)
 set font "monospace 10"
 set guioptions ""
 set recolor-keephue true

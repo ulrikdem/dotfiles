@@ -13,6 +13,7 @@ local highlights = {
 
     CursorLineNr = {fg = fg .. "Gray4"},
     Folded = {fg = fg .. "Gray4"},
+    Conceal = {fg = fg .. "Gray4"},
 
     QuickFixLine = {bg = bg .. "Gray3"},
     ColorColumn = {bg = bg .. "Gray3"},
@@ -44,6 +45,36 @@ local highlights = {
 
     DirvishSuffix = {link = "Comment"},
     DirvishPathHead = {link = "NonText"},
+
+    -- :h group-name
+    -- :h treesitter-highlight-groups
+    -- Statement = {fg = fg .. "Gray4", bold = true},
+    -- Error = {link = "ErrorMsg"},
+    Constant = {fg = fg .. "Green"},
+    Identifier = {},
+    -- Function = {},
+    -- ["@constructor"] = {}, -- default Special
+    ["@constructor.lua"] = {},
+    Type = {bold = true},
+    Operator = {bold = true},
+    Delimiter = {fg = fg .. "Gray4"},
+    PreProc = {bold = true},
+    -- String = {link = "Statement"},
+    -- ["@variable"] = {link = "Identifier"}, -- default unstyled
+    -- Tag = {},
+    ["@string.regexp"] = {link = "String"},
+
+    -- ["@markup.link.vimdoc"] = {fg = fg .. "Blue"}, -- default Underlined
+    -- ["@label"] = {}, -- default Statement
+    hsDelimiter = {link = "Delimiter"},
+
+    manUnderline = {link = "manItalic"},
+    -- manOptionDesc = {}, -- default Constant
+    -- manReference = {fg = fg .. "Blue"}, -- default PreProc
+    -- manSectionHeading = {}, -- default Statement
+    -- manSubHeading = {link = "manSectionHeading"}, -- default Function
+
+    javaConceptKind = {link = "Keyword"},
 }
 
 for k, v in pairs(highlights) do

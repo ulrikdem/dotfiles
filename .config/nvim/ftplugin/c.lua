@@ -25,8 +25,8 @@ start_lsp({
         index = {onChange = true},
         clang = {
             extraArgs = {
-                vim.o.filetype == "c" and "-std=c17" or "-std=c++20",
                 "-Wall", "-Wextra", "-Wconversion", "-Wno-sign-conversion",
+                vim.o.filetype == "cpp" and "-std=c++23" or nil,
             },
         },
     }),
