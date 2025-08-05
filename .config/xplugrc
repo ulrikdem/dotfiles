@@ -1,14 +1,16 @@
 #!/bin/bash
 
-if ((!$#)) || [[ $1:$3 = keyboard:connected ]]; then
+if [[ $1:$3 = keyboard:connected ]] || ((!$#)); then
+    # A keyboard is connected or this is the initial run without arguments
     setxkbmap us symbolic compose:menu
 fi
 
-if ((!$#)) || [[ $1:$3 = display:connected ]]; then
+if [[ $1:$3 = display:connected ]] && xrandr --current | grep -q "^$2 connected (" || ((!$#)); then
+    # A display is connected but not yet enabled (indicated by the lack of geometry before the parenthesis) or this is the initial run
     if [[ -f $0.displays ]]; then
         connected=$2
         display() {
-            [[ -z $connected ]] && xrandr | grep -q "^$1 connected" || [[ $connected = $1 ]] && xrandr --output "$@"
+            [[ -z $connected ]] && xrandr --current | grep -q "^$1 connected" || [[ $connected = $1 ]] && xrandr --output "$@"
         }
         source "$0.displays"
         true
