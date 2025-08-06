@@ -1,6 +1,6 @@
 color title color8 default
-color listfocus black blue
-color listfocus_unread black blue bold
+color listfocus default default reverse
+color listfocus_unread default default reverse bold
 show-keymap-hint no
 scrolloff 4
 articlelist-format "%4i %f %D  %?T?[%T] &?%t"
