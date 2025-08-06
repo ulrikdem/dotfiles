@@ -605,6 +605,23 @@ nvim_create_user_command("Lua", function(opts)
     if err then vim.notify(err, vim.log.levels.ERROR) end
 end, {nargs = "?", complete = "lua", bang = true})
 
+-- Pass through kitty graphics protocol requests from terminal buffers to the host terminal
+nvim_create_autocmd("TermRequest", {
+    callback = function()
+        if vim.startswith(vim.v.termrequest, "\27_G") then
+            local data = vim.v.termrequest .. "\a"
+            while data ~= "" do
+                local n = vim.uv.fs_write(1, data)
+                if n then
+                    data = data:sub(n + 1)
+                else -- Assume error is EAGAIN and retry
+                    vim.uv.sleep(1)
+                end
+            end
+        end
+    end
+})
+
 -- Quickfix {{{1
 
 package.loaded.quickfix = nil -- Reload when sourcing init.lua
