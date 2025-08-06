@@ -72,7 +72,7 @@ conf textHeight = overrideConfig
         , borderWidth = 2
         , normalBorderColor = inactiveColor theme
         , focusedBorderColor = activeColor theme
-        , terminal = "alacritty"
+        , terminal = "kitty"
         , modMask = mod4Mask
         , keys = flip mkKeymap $ keymap textHeight
         , mouseBindings = mouse
@@ -221,7 +221,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-t", withFocused $ windows . W.sink)
 
     , ("M-s", allNamedScratchpadAction
-        [ NS "" (terminal ++ " --class Alacritty,xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
+        [ NS "" (terminal ++ " --name xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
     , ("M-S-s", toggleTag "scratchpad")
 
@@ -274,7 +274,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     [ ("M-<Space> " ++ mod ++ mod' ++ key, f command)
     | mod <- ["", "M-"]
     , (key, command, term) <- leaderMap
-    , (mod', f) <- if term then [("", spawnIn terminal []), ("S-", spawnIn terminal ["--class=Alacritty,xmonad-scratchpad"])]
+    , (mod', f) <- if term then [("", spawnIn terminal []), ("S-", spawnIn terminal ["--name=xmonad-scratchpad"])]
                            else [("", spawn)]
     ]
 

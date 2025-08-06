@@ -1,10 +1,10 @@
 #!/bin/bash
 
-if ! command -v alacritty >/dev/null; then
+if ! command -v kitty >/dev/null; then
     exec /usr/bin/xterm "$@"
 fi
 
 while (($#)) && [[ $1 != -e ]]; do
     shift
 done
-exec alacritty "$@"
+exec kitty "$@"

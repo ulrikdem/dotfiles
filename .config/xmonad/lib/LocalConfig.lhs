@@ -16,13 +16,13 @@ leaderMap =
     , ("i", "ipython", True)
     , ("m", "xdotool click --clearmodifiers 3; sleep 0.1; xdotool key --clearmodifiers l; sleep 0.1; mpv --force-window -- \"$(xsel)\"", False)
     , ("n", "newsboat", True)
-    , ("p", "alacritty -o window.dimensions.columns=120 -o window.dimensions.lines=15 --class Alacritty,xmonad-float -T pulsemixer -e pulsemixer", False)
+    , ("p", "kitty --name xmonad-float -o initial_window_width=120c -o initial_window_height=15c pulsemixer", False)
     , ("t", "thunderbird", False)
     , ("v", "nvim", True)
     ]
 
 iconQuery = composeOne
-    [ className =? "Alacritty" -?> composeOne
+    [ className =? "kitty" -?> composeOne
         [ title =? "btop" -?> return "\xf0128" -- 󰄨
         , title =? "ipython" <||> title =? "ipy" -?> return "\xf0320" -- 󰌠
         , title =? "newsboat" -?> return "\xf046b" -- 󰑫

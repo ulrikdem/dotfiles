@@ -295,7 +295,7 @@ compdef _kitty kitten
 
 # Aliases and Functions {{{1
 
-[[ $TERM = alacritty ]] && alias ls='ls --color=auto --hyperlink=auto' || alias ls='ls --color=auto'
+alias ls='ls --color=auto --hyperlink=auto'
 alias ll='ls -lh'
 alias la='ls -lha'
 
