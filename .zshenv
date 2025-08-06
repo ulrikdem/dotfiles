@@ -6,6 +6,7 @@ path=(~/.local/bin $path)
 [[ -x /usr/bin/nvim ]] && export EDITOR=/usr/bin/nvim MANPAGER="nvim +Man! +'set laststatus=1'" ABDUCO_CMD='nvim +terminal +startinsert'
 
 type less >/dev/null && export PAGER=less
+export LESSUTFCHARDEF=E0A0:p,E0B0:p # Show the Powerline symbols in my prompt when opening kitty's scrollback in the pager
 
 type fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L --strip-cwd-prefix'
 export FZF_DEFAULT_OPTS='

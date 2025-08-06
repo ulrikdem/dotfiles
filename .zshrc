@@ -61,9 +61,9 @@ zmodload zsh/zutil
 # Prompt and Title {{{1
 
 [[ $TERM = linux ]] && fancy_prompt= || fancy_prompt=1
-PROMPT=${fancy_prompt:+%K{#404040} }${SSH_TTY+%B%m%b%8F:%f}%B%~%b${fancy_prompt:+ %k%F{#404040}%f}'$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%fvenv%8F]%f}'${SANDBOX+ %8F[%fsb%8F]%f}'%(?.. %F{red}%?%f)
+PROMPT=$'%{\e]133;A\a%}'${fancy_prompt:+%K{#404040} }${SSH_TTY+%B%m%b%8F:%f}%B%~%b${fancy_prompt:+ %k%F{#404040}%f}'$vcs_info_msg_0_${VIRTUAL_ENV+ %8F[%fvenv%8F]%f}'${SANDBOX+ %8F[%fsb%8F]%f}'%(?.. %F{red}%?%f)
 %8F»%f '
-PROMPT2='%8F»%f '
+PROMPT2=$'%{\e]133;A;k=s\a%}%8F»%f '
 unset fancy_prompt
 
 autoload -U vcs_info
@@ -79,7 +79,7 @@ function precmd {
     print -Pn "\e]2;${SSH_TTY+%m:}%~\a"
 }
 function preexec {
-    printf '\e]2;%s\a' "$1"
+    printf '\e]133;C\a\e]2;%s\a' "$1"
 }
 
 VIRTUAL_ENV_DISABLE_PROMPT=1
@@ -291,6 +291,7 @@ compdef "_arguments ':directory:_files -/' '*::: :{_normal -p venv}'" venv
 compdef _precommand nv
 compdef _precommand vpn
 compdef "_arguments ':subcommand:(toggle target undo edit bar)'" work
+compdef _kitty kitten
 
 # Aliases and Functions {{{1
 
