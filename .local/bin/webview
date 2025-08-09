@@ -7,10 +7,11 @@ from PyQt6.QtWebEngineWidgets import QWebEngineView
 from PyQt6.QtWidgets import QApplication
 from sys import argv
 
-app = QApplication(["webview", "--webEngineArgs", "--force-dark-mode"])
+app = QApplication(["webview", "--webEngineArgs", "--blink-settings=preferredColorScheme=0"])
 view = QWebEngineView()
 view.titleChanged.connect(view.setWindowTitle)
 view.page().newWindowRequested.connect(lambda r: QDesktopServices.openUrl(r.requestedUrl()))
+view.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, True)
 view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
 view.load(QUrl(argv[1]))
 view.show()
