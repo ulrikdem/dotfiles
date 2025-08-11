@@ -17,4 +17,8 @@ except ModuleNotFoundError:
     pass
 
 sys.path.append(str(Path(__file__).parent / "extensions"))
-c.InteractiveShellApp.extensions.append("kitty_ipython_ext")
+try:
+    import PIL
+    c.InteractiveShellApp.extensions.append("kitty_ipython_ext")
+except ModuleNotFoundError:
+    pass

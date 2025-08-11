@@ -1,13 +1,17 @@
 from base64 import b64decode, b64encode
+from io import BytesIO
 from math import ceil
 from random import randrange
 from shutil import get_terminal_size
-from struct import unpack
+from zlib import compress
+
 from IPython.lib.latextools import latex_to_png
+from PIL import Image
 
 def load_ipython_extension(ipython):
-    ipython.display_formatter.active_types = ["text/plain", "image/png", "text/latex"]
+    ipython.display_formatter.active_types = ["text/plain", "image/png", "image/jpeg", "text/latex"]
     ipython.mime_renderers["image/png"] = display_img
+    ipython.mime_renderers["image/jpeg"] = display_img
     ipython.mime_renderers["text/latex"] = lambda data, _: display_img(latex_to_png(data, color="White", backend="dvipng"))
 
 img_id = randrange(2**24)
@@ -17,18 +21,20 @@ def display_img(data, _metadata=None):
 
     if isinstance(data, str):
         data = b64decode(data)
-    assert data.startswith(b"\x89PNG\r\n\x1A\n\0\0\0\rIHDR")
+    img = Image.open(BytesIO(data)).convert("RGBA")
 
-    img_width, img_height = unpack(">ii", data[16:24])
-    term_width, _ = get_terminal_size()
     cell_width, cell_height = 8, 18 # JetBrains Mono NL at size 10
-    cols = min(ceil(img_width / cell_width), term_width)
-    rows = ceil(cols * cell_width / img_width * img_height / cell_height)
+    cols, _ = get_terminal_size()
+    if img.width / cell_width > cols:
+        rows = ceil(cols * cell_width / img.width * img.height / cell_height)
+    else:
+        cols, rows = ceil(img.width / cell_width), ceil(img.height / cell_height)
+        img = img.crop((0, 0, cols * cell_width, rows * cell_height))
 
-    data = b64encode(data).decode()
+    data = b64encode(compress(img.tobytes())).decode()
     chunk_len = 4096
     for i in range(0, len(data), chunk_len):
-        args = "" if i else f"a=T,i={img_id},f=100,U=1,c={cols},r={rows},q=2,"
+        args = "" if i else f"a=T,i={img_id},f=32,o=z,s={img.width},v={img.height},U=1,c={cols},r={rows},q=2,"
         print(f"\x1B_G{args}m={int(i + chunk_len < len(data))};{data[i:i + chunk_len]}\a", end="")
 
     print(f"\n\x1B[38;2;{img_id >> 16};{img_id >> 8 & 0xFF};{img_id & 0xFF}m", end="")
