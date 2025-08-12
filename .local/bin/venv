@@ -1,25 +1,18 @@
 #!/bin/bash
 
+[[ $1 = -c ]] && shift && create=1 || create=0
 arg=${1:-.}
 shift
 
-if [[ -f $arg/pyvenv.cfg ]]; then
-    venv=$arg
-elif [[ -d $arg/.venv ]]; then
-    venv=$arg/.venv
-else
-    echo "error: $arg contains neither pyvenv.cfg nor .venv" >&2
+[[ -f $arg/pyvenv.cfg || ! -d $arg ]] && venv=$arg || venv=$arg/.venv
+venv=$(realpath -m -- "$venv")
+
+if ((create)); then
+    python -m venv -- "$venv" || exit
+elif [[ ! -f $venv/pyvenv.cfg ]]; then
+    echo "error: neither $arg nor $arg/.venv is a virtual environment" >&2
     exit 1
 fi
 
-export VIRTUAL_ENV=$(realpath -- "$venv")
-
-[[ $1 = jupyter-lab ]] && set sb -xur ~/.jupyter/lab/user-settings "$@"
-
-if [[ $1 = sb ]]; then
-    shift
-    exec sb -w ":$arg" -w ":$VIRTUAL_ENV" -e PATH="$VIRTUAL_ENV/bin:$PATH" "$@"
-else
-    (($#)) || set zsh
-    PATH=$VIRTUAL_ENV/bin:$PATH exec "$@"
-fi
+[[ $1 = jupyter-lab ]] && set -- -xur ~/.jupyter/lab/user-settings "$@"
+exec sb -w ":$arg" -w ":$venv" -e VIRTUAL_ENV="$venv" -e PATH="$venv/bin:$PATH" "$@"
