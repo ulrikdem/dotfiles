@@ -127,6 +127,13 @@ bindkeymaps "$terminfo[kcbt]" reverse-menu-complete main
 
 bindkeymaps '\e^_' copy-earlier-word main
 
+function accept-and-exit {
+    [[ $BUFFER =~ '^[^ ]' ]] && print -rS $BUFFER
+    BUFFER=" $BUFFER &>/dev/null & exit"
+    zle accept-line
+}
+bindkeymaps '\e\r' accept-and-exit main vicmd
+
 bindkeymaps '\eo' accept-and-infer-next-history main
 
 function accept-history { print -rS "$BUFFER"; zle send-break }
