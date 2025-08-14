@@ -1,4 +1,5 @@
 #!/bin/bash
+trap '' HUP
 if command -v handlr >/dev/null; then
     exec handlr open -- "$@"
 fi
