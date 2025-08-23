@@ -60,15 +60,15 @@ zmodload zsh/zutil
 
 # Prompt and Title {{{1
 
-[[ $TERM = linux ]] && fancy_prompt= || fancy_prompt=1
-PROMPT=$'%{\e]133;A\a%}'${fancy_prompt:+%K{#404040} }${SSH_TTY+%B%m%b%8F:%f}%B%~%b${fancy_prompt:+ %k%F{#404040}%f}'$vcs_info_msg_0_'${SANDBOX+ %8F[%fsb%8F]%f}'%(?.. %F{red}%?%f)
+[[ $TERM = linux ]] && rgb_prompt= || rgb_prompt=1
+PROMPT=$'%{\e]133;A\a%}'${rgb_prompt:+%K{#404040} }${SSH_TTY+%B%m%b%8F:%f}%B%~%b${rgb_prompt:+ %k}'$vcs_info_msg_0_'${SANDBOX+ %8F[%fsb%8F]%f}'%(?.. %F{red}%?%f)
 %8F»%f '
 PROMPT2=$'%{\e]133;A;k=s\a%}%8F»%f '
-unset fancy_prompt
+unset rgb_prompt
 
 autoload -U vcs_info
-zstyle ':vcs_info:*' formats ' %8F[%f%b%c%u%8F]%f'
-zstyle ':vcs_info:*' actionformats ' %8F[%f%b%8F:%f%a%c%u%8F]%f'
+zstyle ':vcs_info:*' formats ' %8F%f%b%c%u%f'
+zstyle ':vcs_info:*' actionformats ' %8F%f%b%8F:%f%a%c%u%f'
 zstyle ':vcs_info:*' branchformat '%b%8F:%f%r'
 zstyle ':vcs_info:*' stagedstr '%8F:%F{green}S'
 zstyle ':vcs_info:*' unstagedstr '%8F:%F{red}U'
