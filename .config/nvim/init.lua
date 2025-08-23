@@ -72,10 +72,6 @@ defaults.nrformats = "hex,bin,blank"
 
 vim.opt.suffixes:remove(".h")
 
--- This is usually autodetected from the COLORTERM variable,
--- but ssh doesn't propagate it without configuration on the client and server
-if vim.env.SSH_TTY then defaults.termguicolors = true end
-
 defaults.clipboard = "unnamed"
 if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) then
     local osc52 = require("vim.ui.clipboard.osc52")
