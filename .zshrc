@@ -307,7 +307,6 @@ alias la='ls -lha'
 (($+commands[diff])) && alias diff='diff --color'
 (($+commands[grep])) && alias grep='grep --color'
 (($+commands[rg])) && alias rg='rg --hyperlink-format kitty'
-(($+commands[ssh])) && alias ssh='TERM=xterm-256color ssh'
 
 (($+commands[bsdtar])) && alias tar=bsdtar
 (($+commands[git])) && alias g=git
