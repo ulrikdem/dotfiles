@@ -7,4 +7,5 @@ fi
 while (($#)) && [[ $1 != -e ]]; do
     shift
 done
-exec kitty "$@"
+shift
+exec kitty -- "$@"
