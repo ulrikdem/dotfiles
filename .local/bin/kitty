@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Explicitly specify default name to prevent reusing name of first window in instance
+exec /usr/bin/kitty --single-instance --name kitty "$@"
