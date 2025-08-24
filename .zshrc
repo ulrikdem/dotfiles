@@ -312,6 +312,7 @@ alias la='ls -lha'
 (($+commands[bsdtar])) && alias tar=bsdtar
 (($+commands[git])) && alias g=git
 (($+commands[ipython])) && alias ipy=ipython
+(($+commands[kitten])) && alias k=kitten
 (($+commands[nvim])) && alias vi=nvim
 (($+commands[nvim] && $+NVIM)) && alias vi='nvim --server "$NVIM" --remote'
 (($+commands[pacman])) && alias pm=pacman spm='sudo pacman'
