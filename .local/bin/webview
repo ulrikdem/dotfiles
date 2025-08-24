@@ -11,6 +11,7 @@ app = QApplication(["webview", "--webEngineArgs", "--blink-settings=preferredCol
 view = QWebEngineView()
 view.titleChanged.connect(view.setWindowTitle)
 view.page().newWindowRequested.connect(lambda r: QDesktopServices.openUrl(r.requestedUrl()))
+view.settings().setAttribute(QWebEngineSettings.WebAttribute.AutoLoadIconsForPage, False)
 view.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, True)
 view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
 view.load(QUrl(argv[1]))
