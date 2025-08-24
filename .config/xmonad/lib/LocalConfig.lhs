@@ -14,7 +14,7 @@ leaderMap =
     , ("f", "firefox", False)
     , ("S-f", "firefox --private-window", False)
     , ("i", "ipython", True)
-    , ("m", "xdotool click --clearmodifiers 3; sleep 0.1; xdotool key --clearmodifiers l; sleep 0.1; mpv --force-window -- \"$(xsel)\"", False)
+    , ("m", "xdotool click --clearmodifiers 3; sleep 0.1; xdotool key --clearmodifiers l; sleep 0.1; mpv --force-window -- \"$(xsel -ob)\"", False)
     , ("n", "newsboat", True)
     , ("p", "kitty --name xmonad-float -o initial_window_width=120c -o initial_window_height=15c pulsemixer", False)
     , ("t", "thunderbird", False)
