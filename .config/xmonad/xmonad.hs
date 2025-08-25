@@ -223,7 +223,7 @@ keymap textHeight = let XConfig{terminal = terminal, layoutHook = layout, logHoo
     , ("M-s", allNamedScratchpadAction
         [ NS "" (terminal ++ " --name xmonad-scratchpad") (liftX . hasTag "scratchpad" =<< ask) idHook
         ] "")
-    , ("M-S-s", toggleTag "scratchpad")
+    , ("M-S-s", toggleTag "scratchpad" >> logHook)
 
     , ("M-<Return>", spawn terminal)
     , ("M-i", spawn "unicode-input")
