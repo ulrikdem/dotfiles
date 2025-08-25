@@ -1,6 +1,6 @@
 #!/bin/bash
 temp=$(mktemp -t unicode.XXXXXXXX)
-kitty --name xmonad-custom-float --wait-for-single-instance-window-close unicode-input-helper "$temp"
+kitty --name xmonad-custom-float -T unicode unicode-input-helper "$temp"
 xsel -ib <"$temp"
 xdotool key shift+Insert
 rm -- "$temp"

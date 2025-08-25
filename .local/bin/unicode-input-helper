@@ -1,7 +1,5 @@
 #!/bin/bash
 
-printf '\e]2;unicode\a'
-
 fzf_args=(
     --ansi
     --tabstop 3
