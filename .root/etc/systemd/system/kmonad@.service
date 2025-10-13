@@ -4,6 +4,7 @@ Description=KMonad %f
 [Service]
 DynamicUser=true
 SupplementaryGroups=input
+ExecStartPre=!/usr/bin/modprobe uinput
 ExecStartPre=!/usr/bin/setfacl -m u:${USER}:rw /dev/uinput
 ExecStopPost=!/usr/bin/setfacl -x u:${USER} /dev/uinput
 ExecStart=/usr/bin/kmonad -i 'device-file "%f"' -o 'uinput-sink "KMonad %f"' %E/kmonad.kbd
