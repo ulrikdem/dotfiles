@@ -1,4 +1,5 @@
 .ccls-cache/
 .lsp_root
+.nvim.lua
 .venv
 compile_commands.json

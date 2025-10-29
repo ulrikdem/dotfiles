@@ -2,7 +2,7 @@ local buf_path = nvim_buf_get_name(0)
 local runtime = vim.tbl_map(vim.uv.fs_realpath, nvim_get_runtime_file("", true))
 local in_runtime = vim.iter(runtime):any(function(path)
     return vim.startswith(buf_path, path .. "/")
-end)
+end) or vim.fs.basename(buf_path) == ".nvim.lua"
 
 -- https://luals.github.io/wiki/settings/
 local settings = {

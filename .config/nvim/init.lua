@@ -71,6 +71,8 @@ defaults.nrformats = "hex,bin,blank"
 
 vim.opt.suffixes:remove(".h")
 
+defaults.exrc = true
+
 defaults.clipboard = "unnamed"
 if not (vim.env.DISPLAY or vim.env.WAYLAND_DISPLAY) then
     local osc52 = require("vim.ui.clipboard.osc52")
