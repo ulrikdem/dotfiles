@@ -33,17 +33,18 @@ done < <(git --git-dir ~/.dotfiles.git ls-files -z)
 
 add-mount() {
     local dest srces src
-    if [[ $OPTARG = :* ]]; then
-        dest=${OPTARG:1}
+    if [[ $2 = :* ]]; then
+        dest=${2:1}
         srces=("$dest")
     else
-        readarray -td: srces < <(printf %s: "${OPTARG##*=}")
-        [[ $OPTARG = *=* ]] && dest=${OPTARG%=*} || dest=${srces[0]}
+        readarray -td: srces < <(printf %s: "${2##*=}")
+        [[ $2 = *=* ]] && dest=${2%=*} || dest=${srces[0]}
     fi
-    dest=$(realpath -s -- "$dest") || exit 1
+    dest=$(realpath -s --relative-base ~/sb-share -- "$dest") || exit 1
+    [[ $dest = /* ]] || dest=/tmp/sb-share/$dest
     if ((${#srces[@]} == 1)); then
         src=${srces[0]}
-        if [[ $opt = r ]]; then
+        if [[ $1 = r ]]; then
             args+=(--ro-bind "$src" "$dest")
         elif [[ -z $src ]]; then
             args+=(--tmpfs "$dest")
@@ -57,7 +58,7 @@ add-mount() {
             args+=(--overlay-src "$src")
         done
         src=${srces[-1]}
-        if [[ $opt = r ]]; then
+        if [[ $1 = r ]]; then
             args+=(--overlay-src "$src" --ro-overlay "$dest")
         elif [[ -z $src ]]; then
             args+=(--tmp-overlay "$dest")
@@ -85,9 +86,9 @@ while getopts ns:xuRWr:w:e:b:B: opt; do
                 args+=(--dev-bind-try "$path" "$path")
             done;;
         u) url_handler=1;;
-        R) bind_args=ro-bind;;
-        W) bind_args=bind;;
-        [rw]) add-mount;;
+        R) bind_args=r;;
+        W) bind_args=w;;
+        [rw]) add-mount "$opt" "$OPTARG";;
         e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
@@ -99,7 +100,7 @@ shift $((OPTIND - 1))
 
 if [[ -n $bind_args ]]; then
     for arg; do
-        [[ -e $arg ]] && args+=(--$bind_args "$arg" "$(realpath -s -- "$arg")")
+        [[ -e $arg ]] && add-mount "$bind_args" :"$arg"
     done
 fi
 
