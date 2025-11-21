@@ -37,8 +37,8 @@ iconQuery = composeOne
     , className ^? "libreoffice" <||> className =? "Soffice" -?> return "\xf0214" -- 󰈔
     , className =? "mpv" -?> return "\xe69f" -- 
     , className =? "Nm-connection-editor" -?> return "\xf06f3" -- 󰛳
+    , className =? "org.mozilla.Thunderbird" -?> return "\xf01ee" -- 󰇮
     , className =? "Sxiv" -?> return "\xf02e9" -- 󰋩
-    , className =? "thunderbird" -?> return "\xf01ee" -- 󰇮
     , className =? "webview" <&&> title $? "JupyterLab" -?> return "\xf0320" -- 󰌠
     , className $? ".exe" -?> return "\xedae" -- 
     , return $ Just "\xf05af" -- 󰖯
