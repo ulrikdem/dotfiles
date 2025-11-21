@@ -10,7 +10,7 @@ export LESSUTFCHARDEF=E0A0:p # Show the branch symbol in the prompt when opening
 
 type fd >/dev/null && export FZF_DEFAULT_COMMAND='fd -L --strip-cwd-prefix'
 export FZF_DEFAULT_OPTS='
-    --color 16,border:white,info:gray
+    --color 16,current-bg:-1,gutter:black,info:gray
     --info inline-right
     --no-separator
     --no-multi-line
