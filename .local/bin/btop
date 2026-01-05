@@ -11,6 +11,7 @@ exec /usr/bin/btop -c <(cat <<EOF
     proc_sorting = "pid"
     proc_per_core = True
 
+    freq_mode = "range"
     cpu_invert_lower = False
     gpu_mirror_graph = False
     $([[ $(</sys/bus/pci/drivers/nvidia/*/power/runtime_status) != active ]] 2>/dev/null && echo 'shown_gpus = "amd intel"')
