@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [[ ${@: -1} = https://?(www.)youtu@(be.com|.be)/* ]]; then
+    IFS=$'\n' read -rd '' title video audio < <(yt-dlp -egS height:1080 -- "${@: -1}")
+    exec /usr/bin/mpv --force-media-title="$title" --audio-file=<(yt-dlp --http-chunk-size 10M -o - -- "$audio") "${@:1:$#-1}" <(yt-dlp --http-chunk-size 10M -o - -- "$video")
+fi
+
+exec /usr/bin/mpv "$@"
