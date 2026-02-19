@@ -292,7 +292,7 @@ function _sb {
 }
 
 compdef _sb sb
-compdef "_arguments : -c ':directory:_files -/' '*:: :_sb'" venv
+compdef "_arguments -s : -c -p+:version: ':directory:_files -/' '*:: :_sb'" venv
 compdef _precommand nv
 compdef _precommand vpn
 compdef "_arguments ':subcommand:(toggle target undo edit bar)'" work

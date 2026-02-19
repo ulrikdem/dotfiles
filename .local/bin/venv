@@ -1,13 +1,24 @@
 #!/bin/bash
 
-[[ $1 = -c ]] && shift && create=1 || create=0
+create=0 python_version=
+while getopts cp: opt; do
+    case $opt in
+        c) create=1;;
+        p) create=1 python_version=$OPTARG;;
+        ?) echo 'venv [-c | -p version] [path [sb-arg]... [command [arg]...]]' >&2; exit 1;;
+    esac
+done
+shift $((OPTIND - 1))
+
 arg=${1:-.}
 shift
 
 [[ -f $arg/pyvenv.cfg || ! -d $arg ]] && venv=$arg || venv=$arg/.venv
 venv=$(realpath -m -- "$venv")
 
-if ((create)); then
+if [[ -n $python_version ]]; then
+    UV_PYTHON_INSTALL_DIR=$venv uv venv -qnp "$python_version" --allow-existing --seed -- "$venv" || exit
+elif ((create)); then
     python -m venv -- "$venv" || exit
 elif [[ ! -f $venv/pyvenv.cfg ]]; then
     echo "error: neither $arg nor $arg/.venv is a virtual environment" >&2
