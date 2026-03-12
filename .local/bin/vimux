@@ -1,0 +1,8 @@
+#!/bin/bash
+
+socket=$XDG_RUNTIME_DIR/vimux${1:+.}${1//\//-}
+if [[ ! -e $socket ]]; then
+    nvim --headless --listen "$socket" +'set termguicolors' +terminal &
+    while [[ ! -e $socket ]]; do :; done
+fi
+exec nvim --server "$socket" --remote-ui
