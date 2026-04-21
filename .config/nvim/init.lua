@@ -344,7 +344,7 @@ do
         return s
     end
 
-    local timer = vim.uv.new_timer()
+    local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
     nvim_create_autocmd("LspProgress", {
         group = augroup,
         callback = function(args)
@@ -631,11 +631,11 @@ nvim_create_autocmd("FileType", {
         map("n", "<CR>", function()
             vim.cmd.normal({vim.keycode("<CR>"), bang = true})
             quickfix.after_jump()
-        end, {buffer = 0})
+        end, {buf = 0})
         map("n", "<M-CR>", function()
             vim.cmd(fn.win_gettype() == "loclist" and ".ll | lclose" or ".cc | cclose")
             quickfix.after_jump()
-        end, {buffer = 0})
+        end, {buf = 0})
     end,
 })
 
@@ -748,7 +748,7 @@ end, {nargs = "+", complete = "file"})
 
 do
     local function grep(args, pattern)
-        vim.cmd.Grep({args, fn.shellescape(pattern), magic = {file = false}})
+        vim.cmd.Grep({args, fn.shellescape(pattern), magic = {file = false, bar = false}})
     end
     map("n", "grg", function() grep("-Fwe", fn.expand("<cword>")) end)
     map("n", "grG", function() grep("-Fwe", fn.expand("<cWORD>")) end)
@@ -850,7 +850,7 @@ local function run_fzf(opts)
         end,
     })
     vim.cmd.startinsert()
-    map("t", "<Esc>", "<Esc>", {buffer = true})
+    map("t", "<Esc>", "<Esc>", {buf = 0})
 end
 
 --- @param title string
@@ -978,7 +978,7 @@ nvim_create_autocmd("FileType", {
                     end
                 end,
             })
-        end, {buffer = 0})
+        end, {buf = 0})
     end,
 })
 
@@ -993,7 +993,7 @@ map("n", "<Leader>fs", function()
                 query = vim.gsplit(query, " ")() or ""
                 if query ~= last_query then
                     last_query = query
-                    local results = lsp.buf_request_sync(bufnr, lsp.protocol.Methods.workspace_symbol, {query = query})
+                    local results = lsp.buf_request_sync(bufnr, "workspace/symbol", {query = query})
                     items = {}
                     for _, result in pairs(results or {}) do
                         if result.error then lsp.log.error(tostring(result.error)) end
@@ -1137,7 +1137,7 @@ map("n", "gO", function()
     local line = nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], true)[1]
     lsp.buf_request_all(
         bufnr,
-        lsp.protocol.Methods.textDocument_documentSymbol,
+        "textDocument/documentSymbol",
         {textDocument = lsp.util.make_text_document_params()},
         function(results)
             local items = {}
@@ -1162,10 +1162,10 @@ map("n", "gO", function()
 end)
 
 for name, params in pairs({
-    IncomingCalls = {lsp.protocol.Methods.textDocument_prepareCallHierarchy, lsp.protocol.Methods.callHierarchy_incomingCalls, function(r) return r.from end},
-    OutgoingCalls = {lsp.protocol.Methods.textDocument_prepareCallHierarchy, lsp.protocol.Methods.callHierarchy_outgoingCalls, function(r) return r.to end},
-    Supertypes = {lsp.protocol.Methods.textDocument_prepareTypeHierarchy, lsp.protocol.Methods.typeHierarchy_supertypes, function(r) return r end},
-    Subtypes = {lsp.protocol.Methods.textDocument_prepareTypeHierarchy, lsp.protocol.Methods.typeHierarchy_subtypes, function(r) return r end},
+    IncomingCalls = {"textDocument/prepareCallHierarchy", lsp.protocol.Methods.callHierarchy_incomingCalls, function(r) return r.from end},
+    OutgoingCalls = {"textDocument/prepareCallHierarchy", lsp.protocol.Methods.callHierarchy_outgoingCalls, function(r) return r.to end},
+    Supertypes = {"textDocument/prepareTypeHierarchy", lsp.protocol.Methods.typeHierarchy_supertypes, function(r) return r end},
+    Subtypes = {"textDocument/prepareTypeHierarchy", lsp.protocol.Methods.typeHierarchy_subtypes, function(r) return r end},
 }) do
     nvim_create_user_command(name, function()
         local bufnr = nvim_get_current_buf()
@@ -1271,8 +1271,8 @@ nvim_create_autocmd("LspAttach", {
         local augroup = lsp_augroup(client.id)
         nvim_clear_autocmds({buffer = bufnr, group = augroup})
 
-        if client:supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
-            local timer = vim.uv.new_timer()
+        if client:supports_method("textDocument/documentHighlight") then
+            local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
             nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
                 buffer = bufnr,
                 group = augroup,
@@ -1283,7 +1283,7 @@ nvim_create_autocmd("LspAttach", {
                         timer:start(100, 0, vim.schedule_wrap(function()
                             if nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
                             client:request(
-                                lsp.protocol.Methods.textDocument_documentHighlight,
+                                "textDocument/documentHighlight",
                                 lsp.util.make_position_params(0, client.offset_encoding),
                                 function(err, refs)
                                     lsp.util.buf_clear_references(bufnr)
@@ -1304,7 +1304,7 @@ nvim_create_autocmd("LspAttach", {
             group = augroup,
             callback = function(args)
                 if args.data.client_id ~= client.id then return end
-                if client:supports_method(lsp.protocol.Methods.textDocument_documentHighlight) then
+                if client:supports_method("textDocument/documentHighlight") then
                     lsp.util.buf_clear_references(bufnr)
                 end
                 local config = client.config --[[ @as LspConfig ]]

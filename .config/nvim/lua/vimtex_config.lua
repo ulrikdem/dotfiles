@@ -18,7 +18,7 @@ for file in vim.fs.dir(ucs_data) do
     for line in io.lines(ucs_data .. "/" .. file) do
         local codepoint, rhs = line:match([[\uc@dclc{(%d+)}%b{}{\ensuremath(.*)}]])
         if codepoint then
-            insert_maps[vim.fn.nr2char(tonumber(codepoint))] = rhs:match("^{(.*)}$") or rhs
+            insert_maps[vim.fn.nr2char(tonumber(codepoint) or 0)] = rhs:match("^{(.*)}$") or rhs
         end
     end
 end
@@ -37,7 +37,7 @@ function M.init_buffer()
         gO = "<Cmd>VimtexTocOpen<CR>",
         grc = "<Cmd>VimtexContextMenu<CR>",
     }) do
-        vim.keymap.set("n", lhs, rhs, {buffer = true})
+        vim.keymap.set("n", lhs, rhs, {buf = 0})
     end
 
     for lhs, rhs in pairs(insert_maps) do
@@ -45,7 +45,7 @@ function M.init_buffer()
             local packages = vim.b.vimtex.packages
             -- Insert symbol directly if a package allows Unicode in math mode
             return (packages.ucs or packages["unicode-math"] or packages["unicode-math-input"]) and lhs or rhs
-        end, {expr = true, buffer = true})
+        end, {expr = true, buf = 0})
     end
 end
 

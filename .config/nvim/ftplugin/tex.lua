@@ -8,9 +8,9 @@ cmp.setup.buffer({
     },
 })
 
-vim.keymap.set("i", "<C-b>", "\\begin{", {buffer = true})
-vim.keymap.set("i", "<C-z>", "<Plug>(vimtex-delim-close)", {buffer = true})
-vim.keymap.set("i", "<C-/>", "\\frac", {buffer = true})
+vim.keymap.set("i", "<C-b>", "\\begin{", {buf = 0})
+vim.keymap.set("i", "<C-z>", "<Plug>(vimtex-delim-close)", {buf = 0})
+vim.keymap.set("i", "<C-/>", "\\frac", {buf = 0})
 
 vim.cmd.AddTabularPattern({"tex", [[/&\|\\\\/]], bang = true})
 vim.bo.formatexpr = "nvim_cmd(#{cmd: 'Tabularize', args: ['tex'], range: [v:lnum, v:lnum + v:count - 1]}, {})"

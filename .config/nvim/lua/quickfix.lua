@@ -181,16 +181,16 @@ function M.textfunc(args)
                 wo.numberwidth = 4
                 wo.fillchars = "fold: ," .. vim.go.fillchars
                 nvim_win_call(list.winid, function() vim.cmd("normal! zv") end)
-                vim.keymap.set("n", "<Left>", "zc", {buffer = bufnr})
-                vim.keymap.set("n", "<Right>", "zo", {buffer = bufnr})
+                vim.keymap.set("n", "<Left>", "zc", {buf = bufnr})
+                vim.keymap.set("n", "<Right>", "zo", {buf = bufnr})
             else
                 wo.foldtext = "v:lua.require'quickfix'.foldtext()"
                 wo.foldlevel = 1
                 wo.foldcolumn = nil
                 wo.numberwidth = nil
                 wo.fillchars = nil
-                pcall(vim.keymap.del, "n", "<Left>", {buffer = bufnr})
-                pcall(vim.keymap.del, "n", "<Right>", {buffer = bufnr})
+                pcall(vim.keymap.del, "n", "<Left>", {buf = bufnr})
+                pcall(vim.keymap.del, "n", "<Right>", {buf = bufnr})
             end
         end
     end)
