@@ -23,6 +23,7 @@ export FZF_DEFAULT_OPTS='
     --jump-labels neiohtsrad'
 
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
+export ADW_DISABLE_PORTAL=1
 
 : ${__GLX_VENDOR_LIBRARY_NAME:=mesa} ${__EGL_VENDOR_LIBRARY_FILENAMES:=/usr/share/glvnd/egl_vendor.d/50_mesa.json} ${VK_LOADER_DRIVERS_DISABLE:=nvidia_icd.json}
 export __GLX_VENDOR_LIBRARY_NAME __EGL_VENDOR_LIBRARY_FILENAMES VK_LOADER_DRIVERS_DISABLE
