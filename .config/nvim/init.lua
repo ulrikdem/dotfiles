@@ -334,8 +334,6 @@ function _G.statusline_diagnostics()
     return count > 0 and count .. "⚠ " or ""
 end
 
-nvim_create_autocmd("DiagnosticChanged", {command = "redrawstatus!", group = augroup})
-
 do
     local progress = {} --- @type table<integer, string?>
     function _G.statusline_lsp_progress()
@@ -413,9 +411,6 @@ for key, cmd in pairs({o = "diffget", p = "diffput"}) do
     -- Make the original behavior available under a different mapping
     map("n", "d" .. key .. "c", "d" .. key)
 end
-
--- The mappings above don't work in visual mode. As an alternative, allow gv in operator-pending mode
-map("o", "gv", "<Cmd>normal! gv<CR>")
 
 -- Remap to something more convenient in my keymap
 map("n", "dx", "dp", {remap = true})
@@ -1090,9 +1085,7 @@ cmp.setup({
 -- LSP {{{1
 
 map("n", "grd", lsp.buf.declaration)
-map("n", "grt", lsp.buf.type_definition)
 map("n", "grq", lsp.buf.format)
-map("n", "grl", lsp.codelens.run)
 
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
