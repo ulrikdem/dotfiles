@@ -39,7 +39,7 @@ start_lsp({
 
 --- @type repl_config
 vim.b.repl = {
-    cmd = venv and {"venv", venv, "ipython"} or {"ipython"},
+    cmd = venv and not vim.env.VIRTUAL_ENV and {"venv", root_dir, "ipython"} or {"ipython"},
     cwd = root_dir,
     load_file = function(path)
         return "%run -n " .. vim.fn.shellescape(path)
