@@ -2,15 +2,24 @@
 
 from PyQt6.QtCore import QUrl
 from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtWebEngineCore import QWebEngineSettings
+from PyQt6.QtWebEngineCore import QWebEngineDownloadRequest, QWebEngineSettings
 from PyQt6.QtWebEngineWidgets import QWebEngineView
-from PyQt6.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication, QFileDialog
 from sys import argv
+import os.path
+
+def download_requested(download: QWebEngineDownloadRequest):
+    path, _ = QFileDialog.getSaveFileName(view, directory=download.suggestedFileName())
+    if path:
+        download.setDownloadDirectory(os.path.dirname(path))
+        download.setDownloadFileName(os.path.basename(path))
+        download.accept()
 
 app = QApplication(["webview", "--webEngineArgs", "--blink-settings=preferredColorScheme=0"])
 view = QWebEngineView()
 view.titleChanged.connect(view.setWindowTitle)
 view.page().newWindowRequested.connect(lambda r: QDesktopServices.openUrl(r.requestedUrl()))
+view.page().profile().downloadRequested.connect(download_requested)
 view.settings().setAttribute(QWebEngineSettings.WebAttribute.AutoLoadIconsForPage, False)
 view.settings().setAttribute(QWebEngineSettings.WebAttribute.JavascriptCanAccessClipboard, True)
 view.settings().setAttribute(QWebEngineSettings.WebAttribute.LocalContentCanAccessRemoteUrls, True)
