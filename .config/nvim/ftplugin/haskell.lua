@@ -1,66 +1,3 @@
-local lsp = vim.lsp
-local pending_requests = {} --- @type table<integer, true?>
-
---- @param client vim.lsp.Client
---- @param bufnr integer
---- @param method string
---- @param params table
---- @param handler fun(result: any)
-local function cancellable_request(client, bufnr, method, params, handler)
-    local _, request_id
-    _, request_id = client:request(method, params, function(err, result)
-        if request_id and pending_requests[request_id] then
-            pending_requests[request_id] = nil
-            if err then
-                lsp.log.error(client.name, tostring(err))
-            else
-                handler(result)
-            end
-        end
-    end, bufnr)
-    if request_id then pending_requests[request_id] = true end
-end
-
---- @param client vim.lsp.Client
---- @param bufnr integer
-local function refresh_codelens(client, bufnr)
-    for request_id, _ in pairs(pending_requests) do client:cancel_request(request_id) end
-    pending_requests = {}
-
-    cancellable_request(client, bufnr, lsp.protocol.Methods.textDocument_codeLens, {
-        textDocument = lsp.util.make_text_document_params(bufnr),
-    }, function(lenses) --- @param lenses lsp.CodeLens[]
-        local count = #lenses
-        if count == 0 then
-            lsp.codelens.clear(client.id, bufnr)
-            return
-        end
-
-        --- @param lens lsp.CodeLens
-        local function resolved(lens)
-            if lens.command then
-                lens.command.title = (" " .. lens.command.title):gsub("^ import%s[^(]*", "")
-            end
-            count = count - 1
-            if count == 0 then
-                lsp.codelens.save(lenses, bufnr, client.id)
-                lsp.codelens.display(lenses, bufnr, client.id)
-            end
-        end
-
-        for i, lens in ipairs(lenses) do
-            if lens.command then
-                resolved(lens)
-            else
-                cancellable_request(client, bufnr, lsp.protocol.Methods.codeLens_resolve, lens, function(lens)
-                    lenses[i] = lens
-                    resolved(lenses[i])
-                end)
-            end
-        end
-    end)
-end
-
 local function is_package(name)
     -- No need to check for package.yaml, since stack projects require stack.yaml
     return vim.endswith(name, ".cabal")
@@ -101,17 +38,19 @@ start_lsp({
     settings = {},
 
     on_attach = function(client, bufnr)
-        refresh_codelens(client, bufnr)
-        local timer = vim.uv.new_timer()
-        nvim_create_autocmd({"TextChanged", "InsertLeave"}, {
-            buffer = bufnr,
-            group = lsp_augroup(client.id),
-            callback = function()
-                timer:start(100, 0, vim.schedule_wrap(function()
-                    refresh_codelens(client, bufnr)
-                end))
-            end,
-        })
+        function client:request(method, params, handler)
+            if method == "codeLens/resolve" then
+                local old_handler = handler
+                function handler(err, result, ctx) --- @param result? lsp.CodeLens
+                    if result and result.command then
+                        result.command.title = result.command.title:gsub("\n", " "):gsub("  +", " ")
+                    end
+                    old_handler(err, result, ctx)
+                end
+            end
+            return vim.lsp.client.request(self, method, params, handler)
+        end
+        vim.lsp.codelens.enable(true, {bufnr = bufnr})
     end,
 })
 
