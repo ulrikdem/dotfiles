@@ -363,12 +363,6 @@ end
 
 -- Git and diff {{{1
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "GV",
-    callback = function() vim.wo[0][0].list = false end,
-})
-
 map("n", "<Leader>tg", function()
     for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
         if vim.b[nvim_win_get_buf(winid)].fugitive_type == "index" then
