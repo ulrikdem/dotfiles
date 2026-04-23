@@ -1104,7 +1104,7 @@ cmp.setup({
         ["<C-y>"] = cmp.mapping.confirm({select = true}),
     }),
     preselect = cmp.PreselectMode.None,
-    formatting = { --- @diagnostic disable-line: missing-fields
+    formatting = {
         expandable_indicator = false,
         format = function(entry, item)
             if entry.source.name == "buffer" or entry.source.name == "omni" then
