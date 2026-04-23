@@ -4,7 +4,7 @@ shopt -s nullglob
 export GIT_DIR=~/.dotfiles.git GIT_WORK_TREE=~
 dir=.config/nvim/pack/plugins
 
-git submodule update --init --depth 1
+git submodule update --init
 
 for module in "$GIT_DIR/modules/$dir"/*/*; do
     path=${module#$GIT_DIR/modules/}

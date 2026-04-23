@@ -21,7 +21,7 @@ shift $((OPTIND - 1))
 
 mkdir -p ~/$dir
 cd ~/$dir
-git submodule add --depth 1 -- "$1"
+git submodule add -- "$1"
 
 name=$(basename -- "$1")
 doc=${name%.git}/doc
