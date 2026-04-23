@@ -84,10 +84,12 @@ function M.textfunc(args)
     local bufnr = list.qfbufnr
     local tree_foldlevel = vim.tbl_get(list, "context", "tree_foldlevel")
         or list.title == "Table of contents" and 1 or nil
+    local is_git_log = vim.startswith(list.title, "git log")
 
     local lines = {} --- @type string[]
     local highlights = {}
     local namespace = nvim_create_namespace("quickfix")
+    local module_length = 0
 
     if args.start_idx == 1 then
         nvim_buf_clear_namespace(bufnr, namespace, 0, -1)
@@ -101,7 +103,10 @@ function M.textfunc(args)
         local line = ""
 
         if not tree_foldlevel then
-            if item.bufnr ~= 0 then
+            if item.module ~= "" then
+                line = item.module
+                module_length = #line
+            elseif item.bufnr ~= 0 then
                 local name = nvim_buf_get_name(item.bufnr)
                 line = name ~= "" and vim.fn.fnamemodify(name, ":~:.") or "[No Name]"
                 -- Dim path for all but the first (consecutive) item for the same buffer
@@ -112,6 +117,8 @@ function M.textfunc(args)
                     data.foldlevel[i] = ">1"
                     data.foldtext[i] = line
                 end
+            elseif is_git_log then
+                line = vim.fn["repeat"](" ", module_length)
             end
 
             line = line .. "|"

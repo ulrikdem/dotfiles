@@ -418,6 +418,49 @@ map("n", "dxx", "dpp", {remap = true})
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
 
+vim.g.fugitive_summary_format = "%as %s (%an)%d"
+
+nvim_create_user_command("Glog", function(opts)
+    local git_dir = fn.FugitiveGitDir()
+    local path = fn.FugitivePath(nvim_buf_get_name(0), "/", git_dir)
+    if git_dir == ""
+        -- :Gclog ignores the range when the buffer doesn't belong to a repo, so error out instead
+        or (opts.range > 0 or opts.bang) and (path == "" or vim.startswith(path, "/.git/"))
+    then
+        vim.notify("not a git repository", vim.log.levels.ERROR)
+        return
+    end
+
+    if opts.range > 0 then
+        vim.cmd.Gclog({opts.fargs[1], range = {opts.line1, opts.line2}, bang = true})
+        fn.setqflist({}, "a", {
+            title = fn.getqflist({title = true}).title:gsub("^:Gclog", "git log"),
+        })
+    elseif opts.bang then
+        vim.cmd.Gclog({opts.fargs[1], range = {0}, bang = true})
+        fn.setqflist({}, "a", {
+            title = fn.getqflist({title = true}).title:gsub("^:0,%d+Gclog", "git log"):gsub(" ?$", " ." .. path),
+        })
+    else
+        local format = vim.g.fugitive_summary_format .. "\r%h\rfugitive://" .. git_dir:gsub("%%", "%%%%") .. "//%H"
+        local limit = 1000
+        local args = opts.fargs[1] or ""
+        local output = nvim_cmd({
+            cmd = "Git",
+            args = {("-P log --graph --pretty=format:%s -n %d %s"):format(fn.shellescape(format), limit, args)},
+        }, {output = true})
+        fn.setqflist({}, " ", {
+            title = ("git log " .. args):gsub(" $", ""),
+            lines = vim.split(output, "\n"),
+            efm = "%m\r%o\r%f",
+        })
+        if vim.iter(fn.getqflist()):fold(0, function(acc, item) return acc + item.valid end) == limit then
+            fn.setqflist({{type = "W", text = ("truncated after %d commits"):format(limit)}}, "a")
+        end
+    end
+    vim.cmd("botright copen")
+end, {nargs = "?", complete = fn["fugitive#LogComplete"], bang = true, range = true})
+
 -- REPL {{{1
 
 --- @class repl_config
