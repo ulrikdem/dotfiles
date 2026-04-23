@@ -324,7 +324,7 @@ end
 
 function _G.statusline_git()
     local s = fn.FugitiveStatusline()
-    local match = s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git:(.-)%(.*%)%]$")
+    local match = s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git(:.-)%(.*%)%]$")
     return match and match .. "  " or ""
 end
 
