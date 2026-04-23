@@ -47,6 +47,7 @@ defaults.numberwidth = 3
 
 defaults.scrolloff = 4
 defaults.sidescrolloff = 8
+defaults.smoothscroll = true
 
 defaults.linebreak = true
 defaults.breakindent = true
