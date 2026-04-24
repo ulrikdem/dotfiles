@@ -186,7 +186,7 @@ function M.textfunc(args)
                 wo.foldlevel = tree_foldlevel
                 wo.foldcolumn = "1"
                 wo.numberwidth = 4
-                wo.fillchars = "fold: ," .. vim.go.fillchars
+                wo.fillchars = "fold: ,foldsep: ,foldinner: ," .. vim.go.fillchars
                 nvim_win_call(list.winid, function() vim.cmd("normal! zv") end)
                 vim.keymap.set("n", "<Left>", "zc", {buf = bufnr})
                 vim.keymap.set("n", "<Right>", "zo", {buf = bufnr})
