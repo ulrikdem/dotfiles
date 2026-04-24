@@ -639,15 +639,7 @@ end, {nargs = "?", complete = "lua", bang = true})
 nvim_create_autocmd("TermRequest", {
     callback = function()
         if vim.startswith(vim.v.termrequest, "\27_G") then
-            local data = vim.v.termrequest .. "\a"
-            while data ~= "" do
-                local n = vim.uv.fs_write(1, data)
-                if n then
-                    data = data:sub(n + 1)
-                else -- Assume error is EAGAIN and retry
-                    vim.uv.sleep(1)
-                end
-            end
+            nvim_ui_send(vim.v.termrequest .. "\a")
         end
     end
 })
