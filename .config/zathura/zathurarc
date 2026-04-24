@@ -1,3 +1,4 @@
+set database null
 set font "monospace 10"
 set guioptions ""
 set recolor-keephue true
