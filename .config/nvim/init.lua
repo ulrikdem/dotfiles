@@ -274,6 +274,17 @@ do
     end)
 end
 
+vim.cmd.packadd({"nvim.undotree", bang = true})
+map("n", "<Leader>tu", vim.cmd.Undotree)
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "nvim-undotree",
+    callback = function()
+        vim.wo[0][0].cursorlineopt = "both"
+        vim.o.winfixwidth = true
+    end,
+})
+
 -- Statusline {{{1
 
 defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0, v:false, v:true)}%( %m%)"
@@ -412,6 +423,17 @@ map("n", "dx", "dp", {remap = true})
 map("n", "dxx", "dpp", {remap = true})
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
+
+vim.cmd.packadd({"nvim.difftool", bang = true})
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "qf",
+    callback = function()
+        if vim.w.quickfix_title == "DiffTool" then
+            vim.wo[0][0].winhighlight = "DiffAdd:Added,DiffDelete:Removed,DiffText:Changed,DiffChange:Changed,qfFileName:Normal"
+        end
+    end,
+})
 
 vim.g.fugitive_summary_format = "%as %s (%an)%d"
 
