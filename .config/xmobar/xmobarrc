@@ -19,12 +19,12 @@ Config
             , "-o", "<fc=gray50>󰖁</fc>"
             ]
         , Run Memory
-            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
+            [ "-t", " <fn=1></fn> <fn=2><fc=gray50,gray17><usedvbar></fc></fn> <fc=gray17>│</fc>"
             , "-H", "80"
             , "-h", "red3,gray17"
             ] 10
         , Run Cpu
-            [ "-t", " <fn=0></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
+            [ "-t", " <fn=1></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
             ] 10
         , Run CpuFreq
             [ "-t", " <max><fc=gray33>GHz</fc> <fc=gray17>│</fc>"
