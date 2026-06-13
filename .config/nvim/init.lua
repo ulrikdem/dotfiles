@@ -205,7 +205,7 @@ vim.treesitter.language.register("bash", "sh")
 nvim_create_autocmd("TextYankPost", {
     group = augroup,
     callback = function()
-        vim.highlight.on_yank({higroup = "Visual", on_visual = false})
+        vim.hl.on_yank({higroup = "Visual", on_visual = false})
     end,
 })
 
@@ -1337,12 +1337,12 @@ nvim_create_autocmd("LspAttach", {
         if not client then return end
 
         local augroup = lsp_augroup(client.id)
-        nvim_clear_autocmds({buffer = bufnr, group = augroup})
+        nvim_clear_autocmds({buf = bufnr, group = augroup})
 
         if client:supports_method("textDocument/documentHighlight") then
             local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
             nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
-                buffer = bufnr,
+                buf = bufnr,
                 group = augroup,
                 callback = function(args)
                     if args.event == "BufLeave" or fn.mode():match("[^nc]") then
@@ -1368,7 +1368,7 @@ nvim_create_autocmd("LspAttach", {
         end
 
         nvim_create_autocmd("LspDetach", {
-            buffer = bufnr,
+            buf = bufnr,
             group = augroup,
             callback = function(args)
                 if args.data.client_id ~= client.id then return end
@@ -1377,7 +1377,7 @@ nvim_create_autocmd("LspAttach", {
                 end
                 local config = client.config --[[ @as LspConfig ]]
                 if config.on_detach then config.on_detach(client, bufnr) end
-                nvim_clear_autocmds({buffer = bufnr, group = augroup})
+                nvim_clear_autocmds({buf = bufnr, group = augroup})
             end,
         })
     end,
