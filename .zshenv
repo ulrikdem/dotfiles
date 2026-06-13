@@ -22,6 +22,9 @@ export FZF_DEFAULT_OPTS='
     --bind ctrl-s:jump,jump:deselect-all+accept
     --jump-labels neiohtsrad'
 
+export CMAKE_EXPORT_COMPILE_COMMANDS=ON
+type ninja >/dev/null && export CMAKE_GENERATOR=Ninja
+
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
 export ADW_DISABLE_PORTAL=1
 

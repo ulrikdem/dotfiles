@@ -20,7 +20,9 @@ start_lsp({
     -- https://github.com/MaskRay/ccls/wiki/Customization#initialization-options
     init_options = vim.tbl_deep_extend("force", {
         completion = {detailedLabel = false},
-    }, root_dir and {} or {
+    }, root_dir and {
+        compilationDatabaseDirectory = vim.uv.fs_stat(root_dir .. "/build/compile_commands.json") and "build",
+    } or {
         cache = {directory = ""},
         index = {onChange = true},
         clang = {
