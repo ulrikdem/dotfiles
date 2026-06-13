@@ -107,6 +107,13 @@ pcall(vim.keymap.del, "i", "<C-u>")
 
 map("n", "gcu", "gcgc", {remap = true})
 
+map({"x", "o"}, "al", function()
+    vim.cmd("normal! " .. (fn.mode() == "V" and "" or "V") .. "gg0oG0")
+end)
+map({"x", "o"}, "il", function()
+    vim.cmd("normal! " .. (fn.mode() == "v" and "" or "v") .. "^og_")
+end)
+
 map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
 map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
@@ -1137,7 +1144,6 @@ cmp.setup({
 -- LSP {{{1
 
 map("n", "grd", lsp.buf.declaration)
-map("n", "grq", lsp.buf.format)
 
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
@@ -1367,6 +1373,10 @@ nvim_create_autocmd("LspAttach", {
             })
         end
 
+        if client:supports_method("textDocument/formatting") then
+            map("n", "gqal", lsp.buf.format, {buf = bufnr})
+        end
+
         nvim_create_autocmd("LspDetach", {
             buf = bufnr,
             group = augroup,
@@ -1374,6 +1384,9 @@ nvim_create_autocmd("LspAttach", {
                 if args.data.client_id ~= client.id then return end
                 if client:supports_method("textDocument/documentHighlight") then
                     lsp.util.buf_clear_references(bufnr)
+                end
+                if client:supports_method("textDocument/formatting") then
+                    vim.keymap.del("n", "gqal", {buf = bufnr})
                 end
                 local config = client.config --[[ @as LspConfig ]]
                 if config.on_detach then config.on_detach(client, bufnr) end
