@@ -1,3 +1,5 @@
+vim.bo.formatprg = "jq"
+
 -- https://github.com/microsoft/vscode/tree/main/extensions/json-language-features/server#configuration
 local settings = {
     json = {
