@@ -1142,14 +1142,30 @@ map("n", "grq", lsp.buf.format)
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
 
-vim.diagnostic.config({
-    severity_sort = true,
-    signs = false,
-    virtual_text = {format = function(d) return d.message:match("[^\n]*") end},
-})
+do
+    local virtual_text = {
+        current_line = true,
+        format = function(d) return d.message:match("[^\n]*") end,
+    }
 
-for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, k = {lsp.inlay_hint, "inlay hints"}}) do
-    map("n", "yo" .. k, function()
+    vim.diagnostic.config({
+        severity_sort = true,
+        signs = false,
+        virtual_text = virtual_text,
+    })
+
+    map("n", "<Leader>tv", function()
+        local virtual_lines = not vim.diagnostic.config().virtual_lines
+        vim.diagnostic.config({
+            virtual_lines = virtual_lines,
+            virtual_text = not virtual_lines and virtual_text,
+        })
+        nvim_echo({{"diagnostic virtual lines: " .. (virtual_lines and "enabled" or "disabled")}}, false, {})
+    end)
+end
+
+for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, i = {lsp.inlay_hint, "inlay hints"}}) do
+    map("n", "<Leader>t" .. k, function()
         v[1].enable(not v[1].is_enabled())
         nvim_echo({{v[2] .. ": " .. (v[1].is_enabled() and "enabled" or "disabled")}}, false, {})
     end)
