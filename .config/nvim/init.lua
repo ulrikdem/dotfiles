@@ -397,7 +397,7 @@ map("n", "<Leader>td", function()
     end
 end)
 
-vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,hiddenoff")
+vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,inline:word,hiddenoff")
 
 -- Remap do and dp to use a motion
 _G.diff_bufnr = 0
