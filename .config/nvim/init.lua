@@ -165,6 +165,25 @@ for _, bracket in ipairs({"[", "]"}) do
     map("n", intermediate .. "<Esc>", "")
 end
 
+-- Mappings to move the current line backward or forward to its place within a paragraph of sorted lines
+for sign, bracket in pairs({[-1] = "[", [1] = "]"}) do
+    map("n", bracket .. "E", function()
+        local current_line = nvim_get_current_line()
+        local lnum = nvim_win_get_cursor(0)[1]
+        local i = 0
+        while true do
+            lnum = lnum + sign
+            local line = nvim_buf_get_lines(0, lnum - 1, lnum, false)[1]
+            if not line or line == "" or vim.stricmp(current_line, line) ~= sign then
+                return i > 0 and ("%d%se"):format(i, bracket) or ""
+            end
+            i = i + 1
+        end
+    end, {expr = true, remap = true})
+end
+
+map("i", "<M-d>", function() return os.date("%F") end, {expr = true})
+
 -- Autocommands {{{1
 
 local augroup = nvim_create_augroup("init.lua", {})
