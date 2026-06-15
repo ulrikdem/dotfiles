@@ -1174,6 +1174,14 @@ nvim_create_autocmd("InsertEnter", {
     end,
 })
 
+_G.old_open_floating_preview = _G.old_open_floating_preview or lsp.util.open_floating_preview
+function lsp.util.open_floating_preview(context, syntax, opts)
+    opts = vim.tbl_extend("keep", opts, {border = {"", "", "", " "}}) -- Add empty columns left and right, like popup menu
+    local bufnr, winid = old_open_floating_preview(context, syntax, opts)
+    vim.wo[winid][0].concealcursor = "n" -- Prevent markdown code fence from showing when focusing window
+    return bufnr, winid
+end
+
 _G.old_locations_to_items = old_locations_to_items or lsp.util.locations_to_items
 function lsp.util.locations_to_items(locations, position_encoding)
     --- @type vim.quickfix.entry[]
