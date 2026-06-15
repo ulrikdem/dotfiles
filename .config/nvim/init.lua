@@ -32,7 +32,7 @@ defaults.smartcase = true
 defaults.wildignorecase = true
 defaults.wildmode = "longest:full,full"
 
-defaults.completeopt = "menuone,noselect,popup"
+defaults.completeopt = "fuzzy,menuone,noselect,popup"
 defaults.dictionary = "/usr/share/dict/words"
 
 vim.opt.shortmess:append("Ic")
@@ -117,6 +117,22 @@ end)
 map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
 map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
+for k, v in pairs({["<Tab>"] = "<C-n>", ["<S-Tab>"] = "<C-p>"}) do
+    map("i", k, function()
+        if fn.pumvisible() ~= 0 then
+            return fn.reg_recording() == "" and v or ""
+        elseif nvim_get_current_line():sub(1, nvim_win_get_cursor(0)[2]):find("[^%s]") then
+            return vim.o.omnifunc ~= "" and "<C-x><C-o>" or v
+        else
+            return k
+        end
+    end, {expr = true})
+end
+
+map("i", "/", function()
+    return fn.complete_info({"mode"}).mode == "files" and vim.endswith(nvim_get_current_line():sub(1, nvim_win_get_cursor(0)[2]), "/")
+        and "<C-x><C-f>" or "/"
+end, {expr = true})
 map("c", "/", function()
     return fn.pumvisible() ~= 0 and vim.endswith(fn.getcmdline():sub(1, fn.getcmdpos() - 1), "/")
         and "<Down>" or "/"
@@ -1109,57 +1125,6 @@ function vim.ui.select(items, opts, on_choice)
     })
 end
 
--- Completion {{{1
-
-local cmp = require("cmp")
-
---- @return integer[]
-function _G.get_listed_bufnrs()
-    return vim.tbl_filter(function(bufnr) return vim.bo[bufnr].buflisted end, nvim_list_bufs())
-end
-
---- @param fallback fun()
-local function maybe_complete(fallback)
-    if nvim_get_current_line():sub(1, nvim_win_get_cursor(0)[2]):find("[^%s]") then
-        cmp.complete()
-    else
-        fallback()
-    end
-end
-
-cmp.setup({
-    sources = {
-        {name = "nvim_lsp"},
-        {name = "path"},
-        {name = "buffer", group_index = 1, option = {get_bufnrs = get_listed_bufnrs}},
-    },
-    mapping = cmp.mapping.preset.insert({
-        ["<Tab>"] = cmp.mapping(function(fallback)
-            if not cmp.select_next_item() then maybe_complete(fallback) end
-        end),
-        ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if not cmp.select_prev_item() then maybe_complete(fallback) end
-        end),
-        ["<PageDown>"] = cmp.mapping.scroll_docs(4),
-        ["<PageUp>"] = cmp.mapping.scroll_docs(-4),
-        ["<C-y>"] = cmp.mapping.confirm({select = true}),
-    }),
-    preselect = cmp.PreselectMode.None,
-    formatting = {
-        expandable_indicator = false,
-        format = function(entry, item)
-            if entry.source.name == "buffer" or entry.source.name == "omni" then
-                item.kind = item.menu -- Remove uninformative "Text" kind
-            end
-            item.menu = nil
-            return item
-        end,
-    },
-    window = {
-        documentation = {winhighlight = "Normal:NormalFloat,Error:NormalFloat"},
-    },
-})
-
 -- LSP {{{1
 
 map("n", "grd", lsp.buf.declaration)
@@ -1341,9 +1306,11 @@ function _G.start_lsp(config)
             for _, dir in pairs(config.sandbox.write or {}) do fn.mkdir(dir, "p") end
         end
 
-        config.capabilities = vim.tbl_deep_extend("force",
-            require("cmp_nvim_lsp").default_capabilities({snippetSupport = false}),
-            config.capabilities or {})
+        config.capabilities = vim.tbl_deep_extend("force", {
+            textDocument = {
+                completion = {completionItem = {snippetSupport = false}},
+            },
+        }, config.capabilities or {})
 
         lsp.start(config)
     end
@@ -1412,5 +1379,15 @@ nvim_create_autocmd("LspAttach", {
                 nvim_clear_autocmds({buf = bufnr, group = augroup})
             end,
         })
+    end,
+})
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    callback = function()
+        if next(lsp.get_clients({bufnr = 0, method = "textDocument/completion"})) then
+            -- This is set on attach, but when a buffer is opened while the server is running, the ftplugin can override it
+            vim.bo.omnifunc = "v:lua.vim.lsp.omnifunc"
+        end
     end,
 })

@@ -27,10 +27,9 @@ local highlights = {
     diffAdded = {link = "Added"},
     diffRemoved = {link = "Removed"},
 
+    PmenuKind = {link = "Comment"},
+    PmenuExtra = {link = "Comment"},
     NormalFloat = {link = "Pmenu"},
-
-    CmpItemAbbrMatch = {fg = fg .. "Green"},
-    CmpItemAbbrMatchFuzzy = {link = "CmpItemAbbrMatch"},
 
     SnippetTabstop = {bg = bg .. "Gray3"},
 

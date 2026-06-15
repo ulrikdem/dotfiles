@@ -34,11 +34,10 @@ start_lsp({
     }),
 
     on_attach = function(_, bufnr)
-        local cmp = require("cmp")
         for _, s in ipairs(completion_end_symbols) do
             vim.keymap.set("i", s, function()
                 local col = nvim_win_get_cursor(0)[2]
-                if cmp.get_active_entry() and nvim_get_current_line():sub(col, col) == s then
+                if vim.fn.pumvisible() ~= 0 and nvim_get_current_line():sub(col, col) == s then
                     return "<C-y>"
                 else
                     return s
