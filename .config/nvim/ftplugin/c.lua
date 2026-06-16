@@ -5,7 +5,6 @@ for key, ext in pairs({h = "h", H = "hpp", c = "c", C = "cpp"}) do
 end
 
 local root_dir = find_root({"compile_commands.json", ".ccls"}, ".git")
-local completion_end_symbols = {">", '"', "/"}
 
 start_lsp({
     cmd = {"ccls"},
@@ -33,21 +32,12 @@ start_lsp({
         },
     }),
 
-    on_attach = function(_, bufnr)
-        for _, s in ipairs(completion_end_symbols) do
-            vim.keymap.set("i", s, function()
-                local col = nvim_win_get_cursor(0)[2]
-                if vim.fn.pumvisible() ~= 0 and nvim_get_current_line():sub(col, col) == s then
-                    return "<C-y>"
-                else
-                    return s
-                end
-            end, {expr = true, remap = true, buf = bufnr})
-        end
-    end,
-    on_detach = function(_, bufnr)
-        for _, s in ipairs(completion_end_symbols) do
-            vim.keymap.del("i", s, {buf = bufnr})
-        end
+    convert_completion = function(item)
+        return {
+            word = item.textEdit.newText:gsub('[>"/]$', ""):gsub(" $", ""),
+            abbr = item.label:gsub('[>"]$', ""),
+            menu = "",
+            info = ("```%s\n%s\n```\n%s"):format(vim.o.filetype, item.detail, item.documentation or ""),
+        }
     end,
 })

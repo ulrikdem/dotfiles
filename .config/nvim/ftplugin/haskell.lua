@@ -52,6 +52,13 @@ start_lsp({
         end
         vim.lsp.codelens.enable(true, {bufnr = bufnr})
     end,
+
+    convert_completion = function()
+        return {
+            menu = "",
+            info = "", -- Force a request to resolve signatures for symbols from other modules
+        }
+    end,
 })
 
 --- @type repl_config

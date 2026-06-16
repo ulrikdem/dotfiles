@@ -1294,6 +1294,7 @@ end, {bar = true})
 
 --- @class LspConfig: vim.lsp.ClientConfig
 --- @field sandbox? {args?: string[], read?: string[], write?: string[]}
+--- @field convert_completion? fun(item: lsp.CompletionItem): table
 --- @field on_detach? fun(client: vim.lsp.Client, bufnr: integer)
 
 --- @param config LspConfig
@@ -1335,9 +1336,31 @@ nvim_create_autocmd("LspAttach", {
         local bufnr = args.buf
         local client = lsp.get_client_by_id(args.data.client_id)
         if not client then return end
+        local config = client.config --[[ @as LspConfig ]]
 
         local augroup = lsp_augroup(client.id)
         nvim_clear_autocmds({buf = bufnr, group = augroup})
+
+        if client:supports_method("textDocument/completion") then
+            local supports_resolve = client:supports_method("completionItem/resolve")
+            lsp.completion.enable(true, client.id, bufnr, {
+                convert = config.convert_completion or function(item) --- @param item lsp.CompletionItem
+                    local doc = type(item.documentation) == "table" and item.documentation.value or item.documentation --[[ @as string? ]]
+                    return {
+                        info = supports_resolve and not doc
+                            and "" -- An empty string ensures a request is sent to resolve documentation
+                            or item.detail and not (doc or ""):find(item.detail, 1, true) -- Match behavior of resolve handler
+                                and ("```%s\n%s\n```\n%s"):format(vim.bo[bufnr].filetype, item.detail, doc or "")
+                                or doc or "",
+                        -- Omit potentially long details from menu. This means item.labelDetails isn't shown, but
+                        -- item.labelDetails.detail seems rare, and item.labelDetails.description, when present,
+                        -- usually contains (type signature or auto-import) information redundant with item.detail
+                        abbr = item.label,
+                        menu = "",
+                    }
+                end,
+            })
+        end
 
         if client:supports_method("textDocument/documentHighlight") then
             local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
@@ -1382,7 +1405,6 @@ nvim_create_autocmd("LspAttach", {
                 if client:supports_method("textDocument/formatting") then
                     vim.keymap.del("n", "gqal", {buf = bufnr})
                 end
-                local config = client.config --[[ @as LspConfig ]]
                 if config.on_detach then config.on_detach(client, bufnr) end
                 nvim_clear_autocmds({buf = bufnr, group = augroup})
             end,

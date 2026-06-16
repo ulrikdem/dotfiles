@@ -11,4 +11,16 @@ start_lsp({
         args = {"-n"},
         write = {root_dir, vim.fs.normalize("~/.cargo")},
     },
+
+    convert_completion = function(item)
+        local use_decl = vim.tbl_get(item, "labelDetails", "detail")
+        local doc = vim.tbl_get(item, "documentation", "value") or ""
+        return {
+            abbr = item.label,
+            menu = "",
+            info = (use_decl or item.detail)
+                and ("```rust\n%s\n```\n%s"):format(vim.iter({use_decl, item.detail}):join("\n"), doc)
+                or doc,
+        }
+    end,
 })
