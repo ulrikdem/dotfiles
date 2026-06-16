@@ -1292,12 +1292,31 @@ nvim_create_user_command("CdRoot", function()
     nvim_set_current_dir(root_dir)
 end, {bar = true})
 
---- @class LspConfig: vim.lsp.ClientConfig
+--- @param item lsp.CompletionItem
+--- @return string?
+local function format_completion_docs(item)
+    local docs = type(item.documentation) == "table"
+        and item.documentation.value or item.documentation --[[ @as string? ]]
+    for _, keys in ipairs({{"labelDetails", "description"}, {"detail"}, {"labelDetails", "detail"}}) do
+        local detail = vim.tbl_get(item, unpack(keys))
+        -- These fields usually contain type signatures or auto-imports, which may be included in
+        -- item.documentation or other detail fields. Attempt to avoid redundancy by omitting
+        -- details that are found in the first code block of documentation so far
+        if detail and not (docs and docs:find("^```[^`]*" .. vim.pesc(detail))) then
+            -- Wrap in a code block to avoid interpreting symbols as markdown syntax
+            -- Use the filetype of the buffer, since signatures likely resemble valid syntax
+            docs = vim.iter({("```%s\n%s\n```"):format(vim.o.filetype, detail), docs}):join("\n\n")
+        end
+    end
+    return docs
+end
+
+--- @class vim.lsp.ClientConfig
 --- @field sandbox? {args?: string[], read?: string[], write?: string[]}
---- @field convert_completion? fun(item: lsp.CompletionItem): table
+--- @field response_modifiers? table<vim.lsp.protocol.Method.ClientToServer.Request, fun(result: table)>
 --- @field on_detach? fun(client: vim.lsp.Client, bufnr: integer)
 
---- @param config LspConfig
+--- @param config vim.lsp.ClientConfig
 function _G.start_lsp(config)
     if fn.executable(config.cmd[1]) ~= 0 and vim.startswith(vim.uri_from_bufnr(0), "file:") then
         config.name = config.cmd[1]
@@ -1321,8 +1340,38 @@ function _G.start_lsp(config)
             },
         }, config.capabilities or {})
 
+        --- @param result lsp.CompletionItem
+        modify_lsp_response(config, "completionItem/resolve", function(result)
+            local docs = format_completion_docs(result)
+            result.documentation = docs and {value = docs, kind = "markdown"}
+            result.detail = nil -- Prevent attempt to prepend detail to documentation
+        end)
+
         lsp.start(config)
     end
+end
+
+--- @param config vim.lsp.ClientConfig
+--- @param method vim.lsp.protocol.Method.ClientToServer.Request
+--- @param modifier fun(result: table)
+function _G.modify_lsp_response(config, method, modifier)
+    -- Using this function, instead of setting table fields directly,
+    -- allows lua-language-server to complete and check the method argument
+    config.response_modifiers = config.response_modifiers or {}
+    config.response_modifiers[method] = modifier
+end
+
+_G.old_client_request = old_client_request or vim.lsp.client.request
+function vim.lsp.client.request(self, method, params, handler, bufnr)
+    local modifier = vim.tbl_get(self.config, "response_modifiers", method)
+    if modifier and handler then
+        local old_handler = handler
+        function handler(err, result, context) --- @type lsp.Handler
+            if result then modifier(result) end
+            old_handler(err, result, context)
+        end
+    end
+    return old_client_request(self, method, params, handler, bufnr)
 end
 
 --- @param client_id integer
@@ -1336,7 +1385,6 @@ nvim_create_autocmd("LspAttach", {
         local bufnr = args.buf
         local client = lsp.get_client_by_id(args.data.client_id)
         if not client then return end
-        local config = client.config --[[ @as LspConfig ]]
 
         local augroup = lsp_augroup(client.id)
         nvim_clear_autocmds({buf = bufnr, group = augroup})
@@ -1344,19 +1392,13 @@ nvim_create_autocmd("LspAttach", {
         if client:supports_method("textDocument/completion") then
             local supports_resolve = client:supports_method("completionItem/resolve")
             lsp.completion.enable(true, client.id, bufnr, {
-                convert = config.convert_completion or function(item) --- @param item lsp.CompletionItem
-                    local doc = type(item.documentation) == "table" and item.documentation.value or item.documentation --[[ @as string? ]]
+                convert = function(item)
                     return {
-                        info = supports_resolve and not doc
-                            and "" -- An empty string ensures a request is sent to resolve documentation
-                            or item.detail and not (doc or ""):find(item.detail, 1, true) -- Match behavior of resolve handler
-                                and ("```%s\n%s\n```\n%s"):format(vim.bo[bufnr].filetype, item.detail, doc or "")
-                                or doc or "",
-                        -- Omit potentially long details from menu. This means item.labelDetails isn't shown, but
-                        -- item.labelDetails.detail seems rare, and item.labelDetails.description, when present,
-                        -- usually contains (type signature or auto-import) information redundant with item.detail
                         abbr = item.label,
                         menu = "",
+                        -- Setting info to "" ensures a request is sent to resolve documentation
+                        -- Some servers (haskell) add more details to already-populated fields on resolve
+                        info = not supports_resolve and format_completion_docs(item) or "",
                     }
                 end,
             })
@@ -1405,7 +1447,7 @@ nvim_create_autocmd("LspAttach", {
                 if client:supports_method("textDocument/formatting") then
                     vim.keymap.del("n", "gqal", {buf = bufnr})
                 end
-                if config.on_detach then config.on_detach(client, bufnr) end
+                if client.config.on_detach then client.config.on_detach(client, bufnr) end
                 nvim_clear_autocmds({buf = bufnr, group = augroup})
             end,
         })

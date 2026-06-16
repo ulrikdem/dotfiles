@@ -37,27 +37,16 @@ start_lsp({
     -- https://haskell-language-server.readthedocs.io/en/stable/configuration.html
     settings = {},
 
-    on_attach = function(client, bufnr)
-        function client:request(method, params, handler)
-            if method == "codeLens/resolve" then
-                local old_handler = handler
-                function handler(err, result, ctx) --- @param result? lsp.CodeLens
-                    if result and result.command then
-                        result.command.title = result.command.title:gsub("\n", " "):gsub("  +", " ")
-                    end
-                    old_handler(err, result, ctx)
-                end
+    on_init = function(client)
+        --- @param result lsp.CodeLens
+        modify_lsp_response(client.config, "codeLens/resolve", function(result)
+            if result.command then
+                result.command.title = result.command.title:gsub("\n", " "):gsub("  +", " ")
             end
-            return vim.lsp.client.request(self, method, params, handler)
-        end
-        vim.lsp.codelens.enable(true, {bufnr = bufnr})
+        end)
     end,
-
-    convert_completion = function()
-        return {
-            menu = "",
-            info = "", -- Force a request to resolve signatures for symbols from other modules
-        }
+    on_attach = function(_, bufnr)
+        vim.lsp.codelens.enable(true, {bufnr = bufnr})
     end,
 })
 

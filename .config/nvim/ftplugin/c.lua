@@ -32,12 +32,13 @@ start_lsp({
         },
     }),
 
-    convert_completion = function(item)
-        return {
-            word = item.textEdit.newText:gsub('[>"/]$', ""):gsub(" $", ""),
-            abbr = item.label:gsub('[>"]$', ""),
-            menu = "",
-            info = ("```%s\n%s\n```\n%s"):format(vim.o.filetype, item.detail, item.documentation or ""),
-        }
+    on_init = function(client)
+        --- @param result lsp.CompletionList
+        modify_lsp_response(client.config, "textDocument/completion", function(result)
+            for _, item in ipairs(result.items) do
+                item.textEdit.newText = item.textEdit.newText:gsub('[>"/]$', ""):gsub(" $", "")
+                item.label = item.label:gsub('[>"]$', "")
+            end
+        end)
     end,
 })
