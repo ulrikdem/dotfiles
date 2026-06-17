@@ -18,6 +18,7 @@ args=(
     --dir /var/tmp
     --dir /run
     --symlink /run /var/run
+    --dir "$XDG_RUNTIME_DIR"
     --bind /tmp/sb-share /tmp/sb-share
     --symlink /tmp/sb-share ~/sb-share
     --dir "$PWD"
