@@ -1279,8 +1279,7 @@ end
 --- @param ... string | string[] | fun(name: string, path: string): boolean
 --- @return string?
 function _G.find_root(...)
-    return vim.fs.root(0, ".lsp_root")
-        or vim.iter({...}):fold(nil, function(root, marker) return root or vim.fs.root(0, marker) end)
+    return vim.fs.root(0, {".lsp_root", ...})
 end
 
 nvim_create_user_command("CdRoot", function()

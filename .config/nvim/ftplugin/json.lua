@@ -1,4 +1,4 @@
-vim.bo.formatprg = "jq"
+vim.bo.formatprg = "jq --indent 4"
 
 -- https://github.com/microsoft/vscode/tree/main/extensions/json-language-features/server#configuration
 local settings = {
@@ -23,14 +23,14 @@ start_lsp({
     on_attach = function(client, bufnr)
         nvim_buf_create_user_command(bufnr, "UpdateSchemaStore", function()
             vim.fn.mkdir(vim.fs.dirname(catalog_path), "p")
-            vim.system({"wget", "-nv", "-O", catalog_path, "https://www.schemastore.org/api/json/catalog.json"}, {},
-                vim.schedule_wrap(function(result) --- @param result vim.SystemCompleted
-                    if result.code == 0 then
+            vim.net.request("https://www.schemastore.org/api/json/catalog.json", {outpath = catalog_path, retry = 0},
+                vim.schedule_wrap(function(err)
+                    if err then
+                        vim.notify(err:gsub("\n$", " "), vim.log.levels.ERROR)
+                    else
                         read_catalog()
                         client:notify("workspace/didChangeConfiguration", {settings = settings})
                         vim.notify("schema store updated")
-                    else
-                        vim.notify(result.stderr:gsub("\n$", " "), vim.log.levels.ERROR)
                     end
                 end))
         end, {bar = true})

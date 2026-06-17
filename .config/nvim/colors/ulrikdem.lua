@@ -13,7 +13,7 @@ local highlights = {
     TabLineFill = {bg = bg .. "Gray4", fg = fg .. "Gray4"},
 
     CursorLineNr = {fg = fg .. "Gray4"},
-    Folded = {fg = fg .. "Gray4"},
+    Folded = {bg = "", update = true},
 
     QuickFixLine = {bg = bg .. "Gray3"},
     ColorColumn = {bg = bg .. "Gray3"},
@@ -36,11 +36,11 @@ local highlights = {
     LspReferenceText = {bg = bg .. "Gray3"},
     LspReferenceWrite = {bg = bg .. "Gray4"},
 
-    DiagnosticUnderlineError = {undercurl = true, sp = fg .. "Red"},
-    DiagnosticUnderlineWarn = {undercurl = true, sp = fg .. "Yellow"},
-    DiagnosticUnderlineInfo = {undercurl = true, sp = fg .. "Cyan"},
-    DiagnosticUnderlineHint = {undercurl = true, sp = fg .. "Blue"},
-    DiagnosticUnderlineOk = {undercurl = true, sp = fg .. "Green"},
+    DiagnosticUnderlineError = {undercurl = true, update = true},
+    DiagnosticUnderlineWarn = {undercurl = true, update = true},
+    DiagnosticUnderlineInfo = {undercurl = true, update = true},
+    DiagnosticUnderlineHint = {undercurl = true, update = true},
+    DiagnosticUnderlineOk = {undercurl = true, update = true},
 
     DirvishSuffix = {link = "Comment"},
     DirvishPathHead = {link = "NonText"},
