@@ -280,49 +280,53 @@ nvim_create_autocmd("TermOpen", {
 
 nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
 
-local make_sidebar --- @type fun()
-do
-    local sidebar_width = 80
-    vim.env.MANWIDTH = tostring(sidebar_width + 1)
+local sidebar_width = 80
+vim.env.MANWIDTH = tostring(sidebar_width + 1)
 
-    --- @param size? integer
-    local function toggle_side(size)
-        if vim.o.winfixwidth then
-            vim.cmd.wincmd("J")
-            size = size or vim.o.buftype == "quickfix" and 10 or nil
-            if size then
-                nvim_win_set_height(0, size)
-                vim.o.winfixheight = true
-            end
-            vim.o.winfixwidth = false
-        else
-            vim.cmd.wincmd("L")
-            nvim_win_set_width(0, size or sidebar_width)
-            vim.o.winfixwidth = true
-            vim.o.winfixheight = false
-        end
-        vim.cmd.wincmd("=")
+--- @param vertical boolean|"auto"|"toggle"
+--- @param opts {bufnr?: integer, size?: integer}
+local function make_sidebar(vertical, opts)
+    if vertical == "auto" then
+        vertical = vim.o.columns > sidebar_width * 2
+    elseif vertical == "toggle" then
+        vertical = not vim.o.winfixwidth
     end
-
-    function make_sidebar()
-        if vim.o.columns > sidebar_width * 2 and not vim.o.winfixwidth then
-            toggle_side()
-        end
+    --- @cast vertical boolean
+    local config = {vertical = vertical, win = -1} --- @type vim.api.keyset.win_config
+    if vertical then
+        config.width = opts.size or sidebar_width
+    else
+        config.height = opts.size or vim.o.buftype == "quickfix" and 10 or nil
     end
-
-    nvim_create_autocmd("BufWinEnter", {
-        group = augroup,
-        callback = function()
-            if vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive" then
-                make_sidebar()
-            end
-        end,
-    })
-
-    map("n", "<Leader>ts", function()
-        toggle_side(vim.v.count ~= 0 and vim.v.count or nil)
-    end)
+    if opts.bufnr then
+        nvim_open_win(opts.bufnr, true, config)
+    else
+        nvim_win_set_config(0, config)
+    end
+    vim.o.winfixwidth = config.width ~= nil
+    vim.o.winfixheight = config.height ~= nil
+    vim.cmd.wincmd("=")
 end
+
+nvim_create_autocmd("BufWinEnter", {
+    group = augroup,
+    callback = function()
+        if vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive" then
+            make_sidebar("auto", {})
+        end
+    end,
+})
+
+map("n", "<Leader>ts", function()
+    if nvim_win_get_config(0).relative == "" then
+        make_sidebar("toggle", {size = vim.v.count ~= 0 and vim.v.count or nil})
+    else
+        -- Create a new window instead of converting the floating window, since the LSP code may still focus or close it
+        local winid = nvim_get_current_win()
+        make_sidebar("auto", {bufnr = 0, size = vim.v.count ~= 0 and vim.v.count or nil})
+        nvim_win_close(winid, false)
+    end
+end)
 
 vim.cmd.packadd({"nvim.undotree", bang = true})
 map("n", "<Leader>tu", vim.cmd.Undotree)
@@ -555,9 +559,8 @@ do
         local bufnr = repl_bufnrs[key]
 
         if not bufnr then
-            vim.cmd("keepalt new")
-            make_sidebar()
-            bufnr = nvim_get_current_buf()
+            bufnr = nvim_create_buf(true, false)
+            make_sidebar("auto", {bufnr = bufnr})
             repl_bufnrs[key] = bufnr
             fn.jobstart(repl and repl.cmd or default_cmd, {
                 cwd = repl and repl.cwd,
@@ -588,8 +591,7 @@ do
             end
         end
 
-        vim.cmd("keepalt split #" .. bufnr)
-        make_sidebar()
+        make_sidebar("auto", {bufnr = bufnr})
         return bufnr
     end
 
