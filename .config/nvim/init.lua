@@ -262,6 +262,14 @@ nvim_create_autocmd("BufWritePre", {
     end,
 })
 
+nvim_create_autocmd("BufWritePost", {
+    group = augroup,
+    pattern = {".nvim.lua", ".nvimrc", ".exrc"},
+    callback = function(args)
+        vim.secure.trust({action = "allow", bufnr = args.buf})
+    end,
+})
+
 nvim_create_autocmd("TermOpen", {
     group = augroup,
     callback = function()
