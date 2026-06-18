@@ -186,16 +186,15 @@ for sign, bracket in pairs({[-1] = "[", [1] = "]"}) do
     map("n", bracket .. "E", function()
         local current_line = nvim_get_current_line()
         local lnum = nvim_win_get_cursor(0)[1]
-        local i = 0
         while true do
             lnum = lnum + sign
             local line = nvim_buf_get_lines(0, lnum - 1, lnum, false)[1]
             if not line or line == "" or vim.stricmp(current_line, line) ~= sign then
-                return i > 0 and ("%d%se"):format(i, bracket) or ""
+                vim.cmd.move({lnum - (sign + 1) / 2, range = {nvim_win_get_cursor(0)[1]}})
+                return
             end
-            i = i + 1
         end
-    end, {expr = true, remap = true})
+    end)
 end
 
 map("i", "<M-d>", function() return os.date("%F") end, {expr = true})
@@ -770,8 +769,7 @@ do
         for proc, _ in pairs(running_processes) do
             proc:kill("sigterm")
         end
-        return "<C-c>"
-    end, {expr = true})
+    end)
 
     nvim_create_user_command("Processes", function()
         for proc, cmd in pairs(running_processes) do
