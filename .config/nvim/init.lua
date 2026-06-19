@@ -8,6 +8,8 @@ local fn = vim.fn
 local lsp = vim.lsp
 local map = vim.keymap.set
 
+local augroup = nvim_create_augroup("init.lua", {})
+
 vim.cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
@@ -199,9 +201,94 @@ end
 
 map("i", "<M-d>", function() return os.date("%F") end, {expr = true})
 
--- Autocommands {{{1
+-- Plugins {{{1
 
-local augroup = nvim_create_augroup("init.lua", {})
+vim.pack.add({
+    "https://github.com/tpope/vim-eunuch",
+    "https://github.com/tpope/vim-fugitive",
+    "https://github.com/tpope/vim-repeat",
+    "https://github.com/tpope/vim-speeddating",
+    "https://github.com/tpope/vim-surround",
+    "https://github.com/tpope/vim-unimpaired",
+
+    "https://github.com/justinmk/vim-dirvish",
+    "https://github.com/lervag/vimtex",
+    "https://github.com/godlygeek/tabular",
+})
+
+nvim_create_user_command("PackSync", function()
+    vim.pack.update(nil, {target = "lockfile", force = true})
+    vim.pack.del(vim.iter(vim.pack.get())
+        :filter(function(x) return not x.active end)
+        :map(function(x) return x.spec.name end)
+        :totable())
+end, {bar = true})
+
+nvim_create_user_command("PackUpdate", function(opts)
+    vim.pack.update(next(opts.fargs) and opts.fargs, {force = opts.bang})
+end, {nargs = "*", bang = true, bar = true})
+
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "nvim-pack",
+    callback = function(args)
+        -- Review the pending updates for the plugin at the cursor
+        map("n", "r", function()
+            local section_start = vim.fn.search("^#", "bcnW")
+            local section_end = vim.fn.search("^#", "nW")
+
+            --- @param key string
+            --- @param pattern string
+            --- @return string?
+            local function match(key, pattern)
+                return vim.tbl_get(vim.fn.matchbufline(
+                    nvim_get_current_buf(),
+                    ([[\v\C^%s: +\zs%s]]):format(key, pattern),
+                    section_start + 1,
+                    section_end ~= 0 and section_end - 1 or "$"
+                ), 1, "text")
+            end
+
+            local path = match("Path", ".+")
+            local rev_before = match("Revision before", "\\x{40}")
+            local rev_after = match("Revision after", "\\x{40}")
+            if not (path and rev_before and rev_after) then
+                vim.notify("no plugin with pending updates at cursor", vim.log.levels.ERROR)
+                return
+            end
+
+            nvim_open_tabpage(0, true, {})
+            vim.fn.chdir(path, "tabpage")
+            vim.cmd.Glog(("--left-right %s...%s"):format(rev_before, rev_after))
+            vim.cmd.wincmd("p")
+            vim.cmd.clast()
+        end, {buf = args.buf})
+    end,
+})
+
+vim.cmd.packadd({"nvim.difftool", bang = true})
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "qf",
+    callback = function()
+        if vim.w.quickfix_title == "DiffTool" then
+            vim.wo[0][0].winhighlight = "DiffAdd:Added,DiffDelete:Removed,DiffText:Changed,DiffChange:Changed,qfFileName:Normal"
+        end
+    end,
+})
+
+vim.cmd.packadd({"nvim.undotree", bang = true})
+map("n", "<Leader>tu", vim.cmd.Undotree)
+nvim_create_autocmd("FileType", {
+    group = augroup,
+    pattern = "nvim-undotree",
+    callback = function()
+        vim.wo[0][0].cursorlineopt = "both"
+        vim.o.winfixwidth = true
+    end,
+})
+
+-- Autocommands {{{1
 
 nvim_create_autocmd("BufReadPost", {group = augroup, command = "DetectIndent"})
 nvim_create_user_command("DetectIndent", function()
@@ -326,17 +413,6 @@ map("n", "<Leader>ts", function()
         nvim_win_close(winid, false)
     end
 end)
-
-vim.cmd.packadd({"nvim.undotree", bang = true})
-map("n", "<Leader>tu", vim.cmd.Undotree)
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "nvim-undotree",
-    callback = function()
-        vim.wo[0][0].cursorlineopt = "both"
-        vim.o.winfixwidth = true
-    end,
-})
 
 -- Statusline {{{1
 
@@ -476,17 +552,6 @@ map("n", "dx", "dp", {remap = true})
 map("n", "dxx", "dpp", {remap = true})
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
-
-vim.cmd.packadd({"nvim.difftool", bang = true})
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "qf",
-    callback = function()
-        if vim.w.quickfix_title == "DiffTool" then
-            vim.wo[0][0].winhighlight = "DiffAdd:Added,DiffDelete:Removed,DiffText:Changed,DiffChange:Changed,qfFileName:Normal"
-        end
-    end,
-})
 
 vim.g.fugitive_summary_format = "%as %s (%an)%d"
 
