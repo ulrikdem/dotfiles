@@ -611,23 +611,30 @@ do
 
     local default_cmd = {"zsh"}
 
-    local function get_key()
-        local repl = vim.b.repl or {} --- @type repl_config
-        return table.concat(repl.cmd or default_cmd, "\0") .. "\0" .. (repl.cwd or "")
+    --- @param repl repl_config
+    --- @return integer? bufnr
+    --- @return string key
+    local function get_repl_bufnr(repl)
+        local key = table.concat(repl.cmd or default_cmd, "\0") .. "\0" .. (repl.cwd or "")
+        if not (vim.b.repl_bufnr and nvim_buf_is_valid(vim.b.repl_bufnr)) then
+            vim.b.repl_bufnr = repl_bufnrs[key]
+        end
+        return vim.b.repl_bufnr, key
     end
 
+    --- @param repl repl_config
     --- @param toggle? boolean
-    local function open_repl(toggle)
-        local repl = vim.b.repl --- @type repl_config?
-        local key = get_key()
-        local bufnr = repl_bufnrs[key]
+    local function open_repl(repl, toggle)
+        local bufnr, key = get_repl_bufnr(repl)
 
         if not bufnr then
             bufnr = nvim_create_buf(true, false)
+            vim.b.repl_bufnr = bufnr
             make_sidebar("auto", {bufnr = bufnr})
+            vim.b.repl_bufnr = bufnr -- Allow using toggle mapping (and others) from REPL buffer
             repl_bufnrs[key] = bufnr
-            fn.jobstart(repl and repl.cmd or default_cmd, {
-                cwd = repl and repl.cwd,
+            fn.jobstart(repl.cmd or default_cmd, {
+                cwd = repl.cwd,
                 term = true,
                 on_stdout = function()
                     for _, winid in ipairs(fn.win_findbuf(bufnr)) do
@@ -639,7 +646,6 @@ do
                     pcall(nvim_buf_delete, bufnr, {})
                 end,
             })
-            vim.b.repl = repl -- Allow using toggle mapping (and others) from REPL buffer
             -- Clear screen at first prompt, since the text is echoed before the REPL is ready
             nvim_chan_send(vim.o.channel, vim.keycode("<C-l>"))
             return bufnr
@@ -660,7 +666,10 @@ do
     end
 
     map("n", "<Leader>tt", function()
-        if open_repl(true) then vim.cmd.startinsert() end
+        if open_repl(vim.b.repl or {}, true) then vim.cmd.startinsert() end
+    end)
+    map("n", "<Leader>tT", function()
+        if open_repl({}, true) then vim.cmd.startinsert() end -- Use default shell
     end)
 
     --- @param s string
@@ -694,7 +703,7 @@ do
         end
 
         local winid = nvim_get_current_win()
-        local bufnr = open_repl()
+        local bufnr = open_repl(repl)
         nvim_set_current_win(winid)
 
         if type == "buffer" then
@@ -721,7 +730,7 @@ do
     end)
 
     map("n", "<Leader>ec", function()
-        local bufnr = repl_bufnrs[get_key()]
+        local bufnr = get_repl_bufnr(vim.b.repl or {})
         if bufnr then nvim_chan_send(vim.bo[bufnr].channel, vim.keycode("<C-c>")) end
     end)
 end
