@@ -10,6 +10,15 @@ local map = vim.keymap.set
 
 local augroup = nvim_create_augroup("init.lua", {})
 
+--- @param event vim.api.keyset.events | vim.api.keyset.events[]
+--- @param opts vim.api.keyset.create_autocmd
+--- @param callback? fun(args: vim.api.keyset.create_autocmd.callback_args): boolean? | string
+local function on(event, opts, callback)
+    opts.group = opts.group or augroup
+    opts.callback = callback
+    return nvim_create_autocmd(event, opts)
+end
+
 vim.cmd.colorscheme("ulrikdem")
 
 -- Options {{{1
@@ -228,69 +237,57 @@ nvim_create_user_command("PackUpdate", function(opts)
     vim.pack.update(next(opts.fargs) and opts.fargs, {force = opts.bang})
 end, {nargs = "*", bang = true, bar = true})
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "nvim-pack",
-    callback = function(args)
-        -- Review the pending updates for the plugin at the cursor
-        map("n", "r", function()
-            local section_start = vim.fn.search("^#", "bcnW")
-            local section_end = vim.fn.search("^#", "nW")
+on("FileType", {pattern = "nvim-pack"}, function(args)
+    -- Review the pending updates for the plugin at the cursor
+    map("n", "r", function()
+        local section_start = vim.fn.search("^#", "bcnW")
+        local section_end = vim.fn.search("^#", "nW")
 
-            --- @param key string
-            --- @param pattern string
-            --- @return string?
-            local function match(key, pattern)
-                return vim.tbl_get(vim.fn.matchbufline(
-                    nvim_get_current_buf(),
-                    ([[\v\C^%s: +\zs%s]]):format(key, pattern),
-                    section_start + 1,
-                    section_end ~= 0 and section_end - 1 or "$"
-                ), 1, "text")
-            end
+        --- @param key string
+        --- @param pattern string
+        --- @return string?
+        local function match(key, pattern)
+            return vim.tbl_get(vim.fn.matchbufline(
+                nvim_get_current_buf(),
+                ([[\v\C^%s: +\zs%s]]):format(key, pattern),
+                section_start + 1,
+                section_end ~= 0 and section_end - 1 or "$"
+            ), 1, "text")
+        end
 
-            local path = match("Path", ".+")
-            local rev_before = match("Revision before", "\\x{40}")
-            local rev_after = match("Revision after", "\\x{40}")
-            if not (path and rev_before and rev_after) then
-                vim.notify("no plugin with pending updates at cursor", vim.log.levels.ERROR)
-                return
-            end
+        local path = match("Path", ".+")
+        local rev_before = match("Revision before", "\\x{40}")
+        local rev_after = match("Revision after", "\\x{40}")
+        if not (path and rev_before and rev_after) then
+            vim.notify("no plugin with pending updates at cursor", vim.log.levels.ERROR)
+            return
+        end
 
-            nvim_open_tabpage(0, true, {})
-            vim.fn.chdir(path, "tabpage")
-            vim.cmd.Glog(("--left-right %s...%s"):format(rev_before, rev_after))
-            vim.cmd.wincmd("p")
-            vim.cmd.clast()
-        end, {buf = args.buf})
-    end,
-})
+        nvim_open_tabpage(0, true, {})
+        vim.fn.chdir(path, "tabpage")
+        vim.cmd.Glog(("--left-right %s...%s"):format(rev_before, rev_after))
+        vim.cmd.wincmd("p")
+        vim.cmd.clast()
+    end, {buf = args.buf})
+end)
 
 vim.cmd.packadd({"nvim.difftool", bang = true})
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "qf",
-    callback = function()
-        if vim.w.quickfix_title == "DiffTool" then
-            vim.wo[0][0].winhighlight = "DiffAdd:Added,DiffDelete:Removed,DiffText:Changed,DiffChange:Changed,qfFileName:Normal"
-        end
-    end,
-})
+on("FileType", {pattern = "qf"}, function()
+    if vim.w.quickfix_title == "DiffTool" then
+        vim.wo[0][0].winhighlight = "DiffAdd:Added,DiffDelete:Removed,DiffText:Changed,DiffChange:Changed,qfFileName:Normal"
+    end
+end)
 
 vim.cmd.packadd({"nvim.undotree", bang = true})
 map("n", "<Leader>tu", vim.cmd.Undotree)
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "nvim-undotree",
-    callback = function()
-        vim.wo[0][0].cursorlineopt = "both"
-        vim.o.winfixwidth = true
-    end,
-})
+on("FileType", {pattern = "nvim-undotree"}, function()
+    vim.wo[0][0].cursorlineopt = "both"
+    vim.o.winfixwidth = true
+end)
 
 -- Autocommands {{{1
 
-nvim_create_autocmd("BufReadPost", {group = augroup, command = "DetectIndent"})
+on("BufReadPost", {command = "DetectIndent"})
 nvim_create_user_command("DetectIndent", function()
     local shiftwidth_votes = vim.defaulttable(function() return 0 end)
     local expandtab_votes = vim.o.expandtab and 1 or 0
@@ -324,47 +321,31 @@ nvim_create_user_command("DetectIndent", function()
     end
 end, {bar = true})
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    callback = function() pcall(vim.treesitter.start) end
-})
+on("FileType", {}, function() pcall(vim.treesitter.start) end)
 vim.treesitter.language.register("bash", "sh")
 
-nvim_create_autocmd("TextYankPost", {
-    group = augroup,
-    callback = function()
-        vim.hl.on_yank({higroup = "Visual", on_visual = false})
-    end,
-})
+on("TextYankPost", {}, function()
+    vim.hl.on_yank({higroup = "Visual", on_visual = false})
+end)
 
-nvim_create_autocmd("BufWritePre", {
-    group = augroup,
-    callback = function(args)
-        local dir = vim.fs.dirname(args.match)
-        if vim.startswith(args.match, "/") and not vim.uv.fs_stat(dir) then
-            fn.mkdir(dir, "p")
-            vim.notify("created directory " .. dir .. "\n")
-        end
-    end,
-})
+on("BufWritePre", {}, function(args)
+    local dir = vim.fs.dirname(args.match)
+    if vim.startswith(args.match, "/") and not vim.uv.fs_stat(dir) then
+        fn.mkdir(dir, "p")
+        vim.notify("created directory " .. dir .. "\n")
+    end
+end)
 
-nvim_create_autocmd("BufWritePost", {
-    group = augroup,
-    pattern = {".nvim.lua", ".nvimrc", ".exrc"},
-    callback = function(args)
-        vim.secure.trust({action = "allow", bufnr = args.buf})
-    end,
-})
+on("BufWritePost", {pattern = {".nvim.lua", ".nvimrc", ".exrc"}}, function(args)
+    vim.secure.trust({action = "allow", bufnr = args.buf})
+end)
 
-nvim_create_autocmd("TermOpen", {
-    group = augroup,
-    callback = function()
-        -- The MatchParen highlight isn't updated in terminal mode, so disable it
-        vim.bo.matchpairs = ""
-    end,
-})
+on("TermOpen", {}, function()
+    -- The MatchParen highlight isn't updated in terminal mode, so disable it
+    vim.bo.matchpairs = ""
+end)
 
-nvim_create_autocmd("VimResized", {group = augroup, command = "wincmd ="})
+on("VimResized", {command = "wincmd ="})
 
 local sidebar_width = 80
 vim.env.MANWIDTH = tostring(sidebar_width + 1)
@@ -394,14 +375,11 @@ local function make_sidebar(vertical, opts)
     vim.cmd.wincmd("=")
 end
 
-nvim_create_autocmd("BufWinEnter", {
-    group = augroup,
-    callback = function()
-        if vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive" then
-            make_sidebar("auto", {})
-        end
-    end,
-})
+on("BufWinEnter", {}, function()
+    if vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive" then
+        make_sidebar("auto", {})
+    end
+end)
 
 map("n", "<Leader>ts", function()
     if nvim_win_get_config(0).relative == "" then
@@ -486,20 +464,17 @@ do
     end
 
     local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
-    nvim_create_autocmd("LspProgress", {
-        group = augroup,
-        callback = function(args)
-            local t = args.data.params.value
-            progress[args.data.client_id] = t.kind ~= "end"
-                and ("[%s%s] "):format(t.percentage and t.percentage .. "% " or "", t.title)
-                or nil
-            if not timer:is_active() then
-                timer:start(16, 0, vim.schedule_wrap(function()
-                    vim.cmd.redrawstatus({bang = true})
-                end))
-            end
-        end,
-    })
+    on("LspProgress", {}, function(args)
+        local t = args.data.params.value
+        progress[args.data.client_id] = t.kind ~= "end"
+            and ("[%s%s] "):format(t.percentage and t.percentage .. "% " or "", t.title)
+            or nil
+        if not timer:is_active() then
+            timer:start(16, 0, vim.schedule_wrap(function()
+                vim.cmd.redrawstatus({bang = true})
+            end))
+        end
+    end)
 end
 
 -- Git and diff {{{1
@@ -783,13 +758,11 @@ nvim_create_user_command("Lua", function(opts)
 end, {nargs = "?", complete = "lua", bang = true})
 
 -- Pass through kitty graphics protocol requests from terminal buffers to the host terminal
-nvim_create_autocmd("TermRequest", {
-    callback = function()
-        if vim.startswith(vim.v.termrequest, "\27_G") then
-            nvim_ui_send(vim.v.termrequest .. "\a")
-        end
+on("TermRequest", {}, function()
+    if vim.startswith(vim.v.termrequest, "\27_G") then
+        nvim_ui_send(vim.v.termrequest .. "\a")
     end
-})
+end)
 
 -- Quickfix {{{1
 
@@ -798,23 +771,19 @@ local quickfix = require("quickfix")
 
 defaults.quickfixtextfunc = "v:lua.require'quickfix'.textfunc"
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "qf",
-    callback = function()
-        vim.wo[0][0].wrap = false
-        vim.wo[0][0].list = false
+on("FileType", {pattern = "qf"}, function()
+    vim.wo[0][0].wrap = false
+    vim.wo[0][0].list = false
 
-        map("n", "<CR>", function()
-            vim.cmd.normal({vim.keycode("<CR>"), bang = true})
-            quickfix.after_jump()
-        end, {buf = 0})
-        map("n", "<M-CR>", function()
-            vim.cmd(fn.win_gettype() == "loclist" and ".ll | lclose" or ".cc | cclose")
-            quickfix.after_jump()
-        end, {buf = 0})
-    end,
-})
+    map("n", "<CR>", function()
+        vim.cmd.normal({vim.keycode("<CR>"), bang = true})
+        quickfix.after_jump()
+    end, {buf = 0})
+    map("n", "<M-CR>", function()
+        vim.cmd(fn.win_gettype() == "loclist" and ".ll | lclose" or ".cc | cclose")
+        quickfix.after_jump()
+    end, {buf = 0})
+end)
 
 map("n", "<Leader>tq", function()
     vim.cmd(fn.getqflist({winid = true}).winid ~= 0 and "cclose" or "botright copen")
@@ -950,14 +919,11 @@ nvim_create_user_command("Diagnostics", function()
     quickfix.set_list({title = "Diagnostics", items = vim.diagnostic.toqflist(vim.diagnostic.get())})
     _G.diagnostic_qf_id = fn.getqflist({id = 0}).id
 end, {bar = true})
-nvim_create_autocmd("DiagnosticChanged", {
-    group = augroup,
-    callback = function()
-        if diagnostic_qf_id and fn.getqflist({id = diagnostic_qf_id}).id ~= 0 then
-            fn.setqflist({}, "u", {id = diagnostic_qf_id, items = vim.diagnostic.toqflist(vim.diagnostic.get())})
-        end
-    end,
-})
+on("DiagnosticChanged", {}, function()
+    if diagnostic_qf_id and fn.getqflist({id = diagnostic_qf_id}).id ~= 0 then
+        fn.setqflist({}, "u", {id = diagnostic_qf_id, items = vim.diagnostic.toqflist(vim.diagnostic.get())})
+    end
+end)
 
 -- Fuzzy finder {{{1
 
@@ -1122,41 +1088,37 @@ map("n", "<Leader>fg", function()
     })
 end)
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    pattern = "qf",
-    callback = function()
-        map("n", "s", function()
-            local list = quickfix.get_list({
-                loclist_winid = fn.win_gettype() == "loclist" and 0 or nil,
-                title = true, items = true, winid = true, filewinid = true,
-            })
-            run_fzf({
-                args = {"--prompt=quickfix: ", "--with-nth=2..", "--ansi", "--tiebreak=begin"},
-                input = vim.iter(ipairs(list.items)):map(function(i, item)
-                    return item.valid ~= 0 and i .. " " .. quickfix.to_fzf(item) or nil
-                end):totable(),
-                on_output = function(lines)
-                    -- Focus isn't automatically returned to the quickfix window when the fzf window is closed
-                    nvim_set_current_win(list.winid)
-                    if #lines == 1 then
-                        vim.cmd(vim.gsplit(lines[1], " ")() .. (list.filewinid and "ll" or "cc"))
-                        nvim_win_hide(list.winid)
-                        quickfix.after_jump()
-                    elseif #lines > 1 then
-                        quickfix.set_list({
-                            loclist_winid = list.filewinid,
-                            title = list.title,
-                            items = vim.tbl_map(function(line)
-                                return list.items[tonumber(vim.gsplit(line, " ")())]
-                            end, lines),
-                        })
-                    end
-                end,
-            })
-        end, {buf = 0})
-    end,
-})
+on("FileType", {pattern = "qf"}, function()
+    map("n", "s", function()
+        local list = quickfix.get_list({
+            loclist_winid = fn.win_gettype() == "loclist" and 0 or nil,
+            title = true, items = true, winid = true, filewinid = true,
+        })
+        run_fzf({
+            args = {"--prompt=quickfix: ", "--with-nth=2..", "--ansi", "--tiebreak=begin"},
+            input = vim.iter(ipairs(list.items)):map(function(i, item)
+                return item.valid ~= 0 and i .. " " .. quickfix.to_fzf(item) or nil
+            end):totable(),
+            on_output = function(lines)
+                -- Focus isn't automatically returned to the quickfix window when the fzf window is closed
+                nvim_set_current_win(list.winid)
+                if #lines == 1 then
+                    vim.cmd(vim.gsplit(lines[1], " ")() .. (list.filewinid and "ll" or "cc"))
+                    nvim_win_hide(list.winid)
+                    quickfix.after_jump()
+                elseif #lines > 1 then
+                    quickfix.set_list({
+                        loclist_winid = list.filewinid,
+                        title = list.title,
+                        items = vim.tbl_map(function(line)
+                            return list.items[tonumber(vim.gsplit(line, " ")())]
+                        end, lines),
+                    })
+                end
+            end,
+        })
+    end, {buf = 0})
+end)
 
 map("n", "<Leader>fs", function()
     local bufnr = nvim_get_current_buf()
@@ -1243,18 +1205,14 @@ for k, v in pairs({e = {vim.diagnostic, "diagnostics"}, i = {lsp.inlay_hint, "in
     end)
 end
 
-nvim_create_autocmd("InsertEnter", {
-    group = augroup,
-    callback = function()
-        if lsp.inlay_hint.is_enabled() then
-            lsp.inlay_hint.enable(false)
-            nvim_create_autocmd("InsertLeave", {
-                once = true,
-                callback = function() lsp.inlay_hint.enable() end,
-            })
-        end
-    end,
-})
+on("InsertEnter", {}, function()
+    if lsp.inlay_hint.is_enabled() then
+        lsp.inlay_hint.enable(false)
+        on("InsertLeave", {once = true}, function()
+            lsp.inlay_hint.enable()
+        end)
+    end
+end)
 
 _G.old_open_floating_preview = _G.old_open_floating_preview or lsp.util.open_floating_preview
 function lsp.util.open_floating_preview(context, syntax, opts)
@@ -1460,87 +1418,73 @@ function _G.lsp_augroup(client_id)
     return nvim_create_augroup("lsp_client_" .. client_id, {clear = false})
 end
 
-nvim_create_autocmd("LspAttach", {
-    group = augroup,
-    callback = function(args)
-        local bufnr = args.buf
-        local client = lsp.get_client_by_id(args.data.client_id)
-        if not client then return end
+on("LspAttach", {}, function(args)
+    local bufnr = args.buf
+    local client = lsp.get_client_by_id(args.data.client_id)
+    if not client then return end
 
-        local augroup = lsp_augroup(client.id)
-        nvim_clear_autocmds({buf = bufnr, group = augroup})
+    local augroup = lsp_augroup(client.id)
+    nvim_clear_autocmds({buf = bufnr, group = augroup})
 
-        if client:supports_method("textDocument/completion") then
-            local supports_resolve = client:supports_method("completionItem/resolve")
-            lsp.completion.enable(true, client.id, bufnr, {
-                convert = function(item)
-                    return {
-                        abbr = item.label,
-                        menu = "",
-                        -- Setting info to "" ensures a request is sent to resolve documentation
-                        -- Some servers (haskell) add more details to already-populated fields on resolve
-                        info = not supports_resolve and format_completion_docs(item) or "",
-                    }
-                end,
-            })
-        end
-
-        if client:supports_method("textDocument/documentHighlight") then
-            local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
-            nvim_create_autocmd({"CursorMoved", "ModeChanged", "BufLeave"}, {
-                buf = bufnr,
-                group = augroup,
-                callback = function(args)
-                    if args.event == "BufLeave" or fn.mode():match("[^nc]") then
-                        lsp.util.buf_clear_references(bufnr)
-                    elseif fn.mode() == "n" then
-                        timer:start(100, 0, vim.schedule_wrap(function()
-                            if nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
-                            client:request(
-                                "textDocument/documentHighlight",
-                                lsp.util.make_position_params(0, client.offset_encoding),
-                                function(err, refs)
-                                    lsp.util.buf_clear_references(bufnr)
-                                    if refs and nvim_get_current_buf() == bufnr and fn.mode() == "n" then
-                                        lsp.util.buf_highlight_references(bufnr, refs, client.offset_encoding)
-                                    elseif err then
-                                        lsp.log.error(client.name, tostring(err))
-                                    end
-                                end)
-                        end))
-                    end
-                end,
-            })
-        end
-
-        if client:supports_method("textDocument/formatting") then
-            map("n", "gqal", lsp.buf.format, {buf = bufnr})
-        end
-
-        nvim_create_autocmd("LspDetach", {
-            buf = bufnr,
-            group = augroup,
-            callback = function(args)
-                if args.data.client_id ~= client.id then return end
-                if client:supports_method("textDocument/documentHighlight") then
-                    lsp.util.buf_clear_references(bufnr)
-                end
-                if client:supports_method("textDocument/formatting") then
-                    vim.keymap.del("n", "gqal", {buf = bufnr})
-                end
-                if client.config.on_detach then client.config.on_detach(client, bufnr) end
-                nvim_clear_autocmds({buf = bufnr, group = augroup})
+    if client:supports_method("textDocument/completion") then
+        local supports_resolve = client:supports_method("completionItem/resolve")
+        lsp.completion.enable(true, client.id, bufnr, {
+            convert = function(item)
+                return {
+                    abbr = item.label,
+                    menu = "",
+                    -- Setting info to "" ensures a request is sent to resolve documentation
+                    -- Some servers (haskell) add more details to already-populated fields on resolve
+                    info = not supports_resolve and format_completion_docs(item) or "",
+                }
             end,
         })
-    end,
-})
+    end
 
-nvim_create_autocmd("FileType", {
-    group = augroup,
-    callback = function()
-        if next(lsp.get_clients({bufnr = 0, method = "textDocument/completion"})) then
-            -- This is set on attach, but when a buffer is opened while the server is running, the ftplugin can override it
-            vim.bo.omnifunc = "v:lua.vim.lsp.omnifunc"
+    if client:supports_method("textDocument/documentHighlight") then
+        local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
+        on({"CursorMoved", "ModeChanged", "BufLeave"}, {buf = bufnr, group = augroup}, function(args)
+            if args.event == "BufLeave" or fn.mode():match("[^nc]") then
+                lsp.util.buf_clear_references(bufnr)
+            elseif fn.mode() == "n" then
+                timer:start(100, 0, vim.schedule_wrap(function()
+                    if nvim_get_current_buf() ~= bufnr or fn.mode() ~= "n" then return end
+                    client:request(
+                        "textDocument/documentHighlight",
+                        lsp.util.make_position_params(0, client.offset_encoding),
+                        function(err, refs)
+                            lsp.util.buf_clear_references(bufnr)
+                            if refs and nvim_get_current_buf() == bufnr and fn.mode() == "n" then
+                                lsp.util.buf_highlight_references(bufnr, refs, client.offset_encoding)
+                            elseif err then
+                                lsp.log.error(client.name, tostring(err))
+                            end
+                        end)
+                end))
+            end
+        end)
+    end
+
+    if client:supports_method("textDocument/formatting") then
+        map("n", "gqal", lsp.buf.format, {buf = bufnr})
+    end
+
+    on("LspDetach", {buf = bufnr, group = augroup}, function(args)
+        if args.data.client_id ~= client.id then return end
+        if client:supports_method("textDocument/documentHighlight") then
+            lsp.util.buf_clear_references(bufnr)
         end
-    end,
-})
+        if client:supports_method("textDocument/formatting") then
+            vim.keymap.del("n", "gqal", {buf = bufnr})
+        end
+        if client.config.on_detach then client.config.on_detach(client, bufnr) end
+        nvim_clear_autocmds({buf = bufnr, group = augroup})
+    end)
+end)
+
+on("FileType", {}, function()
+    if next(lsp.get_clients({bufnr = 0, method = "textDocument/completion"})) then
+        -- This is set on attach, but when a buffer is opened while the server is running, the ftplugin can override it
+        vim.bo.omnifunc = "v:lua.vim.lsp.omnifunc"
+    end
+end)
