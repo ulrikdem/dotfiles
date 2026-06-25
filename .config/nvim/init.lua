@@ -195,6 +195,7 @@ end
 -- Mappings to move the current line backward or forward to its place within a paragraph of sorted lines
 for sign, bracket in pairs({[-1] = "[", [1] = "]"}) do
     map("n", bracket .. "E", function()
+        fn["repeat#set"](bracket .. "E")
         local current_line = nvim_get_current_line()
         local lnum = nvim_win_get_cursor(0)[1]
         while true do
@@ -514,9 +515,10 @@ for key, cmd in pairs({o = "diffget", p = "diffput"}) do
     -- The use of <Cmd> clears the count so that it doesn't affect the motion
     map("n", "d" .. key, ("<Cmd>set operatorfunc=v:lua.%s_operator | lua diff_bufnr = vim.v.count<CR>g@"):format(cmd))
     map("n", "d" .. key .. key, function()
-        local lnum = nvim_win_get_cursor(0)[1]
-        vim.cmd[cmd]({range = {lnum, lnum + vim.v.count1 - 1}})
-    end)
+        vim.o.operatorfunc = ("v:lua.%s_operator"):format(cmd)
+        _G.diff_bufnr = 0
+        return "g@_" -- Use g@ so that, like the previous form but unlike the next, it can be repeated with .
+    end, {expr = true})
     -- Make the original behavior available under a different mapping
     map("n", "d" .. key .. "c", "d" .. key)
 end
@@ -650,7 +652,7 @@ do
         return "\27[200~" .. s .. "\27[201~"
     end
 
-    --- @type [integer, integer]
+    --- @type [integer, integer]?
     local saved_cursor
 
     --- @param type "buffer" | "char" | "line" | "block"
@@ -661,7 +663,10 @@ do
                 type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
                 exclusive = false,
             })
-            nvim_win_set_cursor(0, saved_cursor)
+            if saved_cursor then
+                nvim_win_set_cursor(0, saved_cursor)
+                saved_cursor = nil -- Don't move cursor again when repeated with .
+            end
         end
         local code = vim.iter(lines):map(function(s)
             s = s:gsub("\n", "\0")
