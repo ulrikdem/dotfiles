@@ -812,7 +812,8 @@ do
         for proc, _ in pairs(running_processes) do
             proc:kill("sigterm")
         end
-    end)
+        return "<C-c>"
+    end, {expr = true})
 
     nvim_create_user_command("Processes", function()
         for proc, cmd in pairs(running_processes) do
