@@ -74,7 +74,7 @@ defaults.fillchars = "foldopen:▼,foldclose:▶"
 defaults.foldtext = "v:lua.foldtext()"
 function _G.foldtext()
     return ("%s %s (%d lines) "):format(
-        fn["repeat"]("·", vim.v.foldlevel * 2),
+        ("·"):rep(vim.v.foldlevel * 2),
         vim.trim(fn.foldtext():gsub("^.-:", "")),
         vim.v.foldend - vim.v.foldstart + 1)
 end
@@ -322,7 +322,6 @@ nvim_create_user_command("DetectIndent", function()
 end, {bar = true})
 
 on("FileType", {}, function() pcall(vim.treesitter.start) end)
-vim.treesitter.language.register("bash", "sh")
 
 on("TextYankPost", {}, function()
     vim.hl.on_yank({higroup = "Visual", on_visual = false})
@@ -554,13 +553,12 @@ nvim_create_user_command("Glog", function(opts)
     else
         local format = vim.g.fugitive_summary_format .. "\r%h\rfugitive://" .. git_dir:gsub("%%", "%%%%") .. "//%H"
         local limit = 1000
-        local args = opts.fargs[1] or ""
         local output = nvim_cmd({
             cmd = "Git",
-            args = {("-P log --graph --pretty=format:%s -n %d %s"):format(fn.shellescape(format), limit, args)},
+            args = {("-P log --graph --pretty=format:%s -n %d %s"):format(fn.shellescape(format), limit, opts.args)},
         }, {output = true})
         fn.setqflist({}, " ", {
-            title = ("git log " .. args):gsub(" $", ""),
+            title = table.concat({"git log", opts.fargs[1]}, " "),
             lines = vim.split(output, "\n"),
             efm = "%m\r%o\r%f",
         })
@@ -655,12 +653,10 @@ do
     --- @type [integer, integer]
     local saved_cursor
 
-    --- @param type "buffer" | "visual" | "char" | "line" | "block"
+    --- @param type "buffer" | "char" | "line" | "block"
     function _G.repl_eval(type)
         local lines = {}
-        if type == "visual" then
-            lines = fn.getregion(fn.getpos("'<"), fn.getpos("'>"), {type = fn.visualmode()})
-        elseif type ~= "buffer" then -- Used as normal mode operator
+        if type ~= "buffer" then -- Used as operator
             lines = fn.getregion(fn.getpos("'["), fn.getpos("']"), {
                 type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
                 exclusive = false,
@@ -689,15 +685,13 @@ do
         nvim_chan_send(vim.bo[bufnr].channel, code)
     end
 
-    map("n", "<Leader>e", function()
+    map({"n", "x"}, "<Leader>e", function()
         saved_cursor = nvim_win_get_cursor(0)
         vim.o.operatorfunc = "v:lua.repl_eval"
         return "g@"
     end, {expr = true})
 
     map("n", "<Leader>ee", "<Leader>e_", {remap = true})
-
-    map("x", "<Leader>e", "<Esc><Cmd>lua repl_eval('visual')<CR>")
 
     map("n", "<Leader>es", function()
         vim.cmd("silent update")
