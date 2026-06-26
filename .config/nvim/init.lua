@@ -164,16 +164,6 @@ end
 
 map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
 
-if vim.env.RANGER_LEVEL then
-    map("n", "-", function()
-        if vim.v.count == 0 and #fn.getbufinfo({buflisted = 1}) * fn.winnr("$") * fn.tabpagenr("$") == 1 then
-            return "<C-w>q"
-        else
-            return "<Plug>(dirvish_up)"
-        end
-    end, {expr = true})
-end
-
 -- Map <M-[> and <M-]> to enter a "mode" that prefixes every keypress with [ or ], respectively
 for _, bracket in ipairs({"[", "]"}) do
     -- The intermediate mapping is only to improve the command shown in the bottom right
@@ -270,6 +260,11 @@ on("FileType", {pattern = "nvim-pack"}, function(args)
         vim.cmd.wincmd("p")
         vim.cmd.clast()
     end, {buf = args.buf})
+end)
+
+on("FileType", {pattern = "dirvish"}, function()
+    -- Remap "open" action for easy one-handed use on my navigation layer
+    map("n", "<Insert>", "<CR>", {remap = true, buf = 0})
 end)
 
 vim.cmd.packadd({"nvim.difftool", bang = true})
@@ -389,6 +384,21 @@ map("n", "<Leader>ts", function()
         local winid = nvim_get_current_win()
         make_sidebar("auto", {bufnr = 0, size = vim.v.count ~= 0 and vim.v.count or nil})
         nvim_win_close(winid, false)
+    end
+end)
+
+map("n", "<Leader>-", function()
+    make_sidebar("auto", {bufnr = 0})
+    vim.w.dirvish_autopreview = true
+    vim.cmd.Dirvish()
+end)
+on("CursorMoved", {nested = true}, function()
+    if vim.w.dirvish_autopreview then
+        if vim.o.filetype == "dirvish" then
+            fn["dirvish#open"]("p", true)
+        else
+            nvim_win_hide(0)
+        end
     end
 end)
 
