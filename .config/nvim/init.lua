@@ -125,6 +125,13 @@ map({"x", "o"}, "il", function()
     vim.cmd("normal! " .. (fn.mode() == "v" and "" or "v") .. "^og_")
 end)
 
+map("x", "<M-Up>", "an", {remap = true})
+map("x", "<M-Down>", "in", {remap = true})
+map("x", "<M-Left>", "[n", {remap = true})
+map("x", "<M-Right>", "]n", {remap = true})
+map("x", "<M-S-Left>", "[N", {remap = true})
+map("x", "<M-S-Right>", "]N", {remap = true})
+
 map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
 map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
