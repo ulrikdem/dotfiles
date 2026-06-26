@@ -346,7 +346,7 @@ local sidebar_width = 80
 vim.env.MANWIDTH = tostring(sidebar_width + 1)
 
 --- @param vertical boolean|"auto"|"toggle"
---- @param opts {bufnr?: integer, size?: integer}
+--- @param opts {open_bufnr?: integer, size?: integer}
 local function make_sidebar(vertical, opts)
     if vertical == "auto" then
         vertical = vim.o.columns > sidebar_width * 2
@@ -354,14 +354,17 @@ local function make_sidebar(vertical, opts)
         vertical = not vim.o.winfixwidth
     end
     --- @cast vertical boolean
-    local config = {vertical = vertical, win = -1} --- @type vim.api.keyset.win_config
+    local config = { --- @type vim.api.keyset.win_config
+        vertical = vertical,
+        win = opts.open_bufnr and 0 or fn.win_getid(fn.winnr("#")),
+    }
     if vertical then
         config.width = opts.size or sidebar_width
     else
         config.height = opts.size or vim.o.buftype == "quickfix" and 10 or nil
     end
-    if opts.bufnr then
-        nvim_open_win(opts.bufnr, true, config)
+    if opts.open_bufnr then
+        nvim_open_win(opts.open_bufnr, true, config)
     else
         nvim_win_set_config(0, config)
     end
@@ -381,14 +384,16 @@ map("n", "<Leader>ts", function()
         make_sidebar("toggle", {size = vim.v.count ~= 0 and vim.v.count or nil})
     else
         -- Create a new window instead of converting the floating window, since the LSP code may still focus or close it
+        local bufnr = nvim_get_current_buf()
         local winid = nvim_get_current_win()
-        make_sidebar("auto", {bufnr = 0, size = vim.v.count ~= 0 and vim.v.count or nil})
+        vim.cmd.wincmd("p") -- Split from previous window
+        make_sidebar("auto", {open_bufnr = bufnr, size = vim.v.count ~= 0 and vim.v.count or nil})
         nvim_win_close(winid, false)
     end
 end)
 
 map("n", "<Leader>-", function()
-    make_sidebar("auto", {bufnr = 0})
+    make_sidebar("auto", {open_bufnr = 0})
     vim.w.dirvish_autopreview = true
     vim.cmd.Dirvish()
 end)
@@ -615,7 +620,7 @@ do
         if not bufnr then
             bufnr = nvim_create_buf(true, false)
             vim.b.repl_bufnr = bufnr
-            make_sidebar("auto", {bufnr = bufnr})
+            make_sidebar("auto", {open_bufnr = bufnr})
             vim.b.repl_bufnr = bufnr -- Allow using toggle mapping (and others) from REPL buffer
             repl_bufnrs[key] = bufnr
             fn.jobstart(repl.cmd or default_cmd, {
@@ -646,7 +651,7 @@ do
             end
         end
 
-        make_sidebar("auto", {bufnr = bufnr})
+        make_sidebar("auto", {open_bufnr = bufnr})
         return bufnr
     end
 
