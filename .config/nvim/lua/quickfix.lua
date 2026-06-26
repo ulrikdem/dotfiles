@@ -185,7 +185,7 @@ function M.textfunc(args)
                 wo.foldtext = ""
                 wo.foldlevel = tree_foldlevel
                 wo.foldcolumn = "1"
-                wo.numberwidth = 4
+                wo.statuscolumn = "%(%l %)%C "
                 wo.fillchars = "fold: ,foldsep: ,foldinner: ," .. vim.go.fillchars
                 nvim_win_call(list.winid, function() vim.cmd("normal! zv") end)
                 vim.keymap.set("n", "<Left>", "zc", {buf = bufnr})
@@ -194,7 +194,7 @@ function M.textfunc(args)
                 wo.foldtext = "v:lua.require'quickfix'.foldtext()"
                 wo.foldlevel = 1
                 wo.foldcolumn = nil
-                wo.numberwidth = nil
+                wo.statuscolumn = nil
                 wo.fillchars = nil
                 pcall(vim.keymap.del, "n", "<Left>", {buf = bufnr})
                 pcall(vim.keymap.del, "n", "<Right>", {buf = bufnr})
