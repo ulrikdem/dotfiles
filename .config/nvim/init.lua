@@ -558,32 +558,6 @@ map("n", "dxx", "dpp", {remap = true})
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
 
-map("n", "dm", function()
-    local mark = fn.getcharstr()
-    if vim.o.diff and not vim.list_contains(vim.opt_local.diffanchors:get(), "'" .. mark) then
-        local cursor = nvim_win_get_cursor(0)
-        nvim_buf_set_mark(0, mark, cursor[1], cursor[2], {})
-        vim.opt_local.diffanchors:append("'" .. mark)
-    else
-        nvim_buf_del_mark(0, mark)
-        vim.opt_local.diffanchors:remove("'" .. mark)
-    end
-end)
-map("n", "dm<Esc>", "")
-
-defaults.statuscolumn = "%!v:lua.statuscolumn()"
-function _G.statuscolumn()
-    if vim.v.virtnum == 0 and vim.wo[vim.g.statusline_winid].diff then
-        local bufnr = nvim_win_get_buf(vim.g.statusline_winid)
-        for anchor in vim.gsplit(vim.bo[bufnr].diffanchors, ",") do
-            if anchor:find("^'.$") and nvim_buf_get_mark(bufnr, anchor:sub(2))[1] == vim.v.lnum then
-                return "%#Search#" .. anchor:sub(2) .. "%s%(%l %)"
-            end
-        end
-    end
-    return "%C%s%(%l %)"
-end
-
 vim.g.fugitive_summary_format = "%as %s (%an)%d"
 
 nvim_create_user_command("Glog", function(opts)
@@ -625,6 +599,42 @@ nvim_create_user_command("Glog", function(opts)
     end
     vim.cmd("botright copen")
 end, {nargs = "?", complete = fn["fugitive#LogComplete"], bang = true, range = true})
+
+nvim_create_user_command("DiffAnchor", function(opts)
+    if opts.bang then vim.go.diffanchors = "" end
+    if opts.args ~= "" then
+        local escaped = fn.substitute(opts.args, [[\v(^|[^\\])(\\\\)*\zs/]], [[\\/]], "g")
+        -- Only one line is used, and the $ ensures it is the first match in the buffer, assuming wrapscan is on
+        vim.opt_global.diffanchors:append(("$/%s/"):format(escaped))
+        vim.cmd("normal! gg") -- Add to jump list and search from first line
+        fn.search(opts.args, "c")
+    end
+    vim.notify(vim.go.diffanchors)
+    vim.bo.diffanchors = ""
+end, {nargs = "?", bang = true, preview = function(opts, ns)
+    if opts.args == "" then return 0 end
+    local ignorecase = vim.o.ignorecase and (not vim.o.smartcase or fn.match(opts.args, "[[:upper:]]") == -1)
+    local regex = vim.regex((ignorecase and "\\c" or "") .. opts.args)
+    for _, winid in ipairs(nvim_tabpage_list_wins(0)) do
+        if vim.wo[winid].diff then
+            nvim_win_call(winid, function()
+                for row = 0, nvim_buf_line_count(0) - 1 do
+                    local start_col, end_col = regex:match_line(0, row)
+                    if start_col and end_col then
+                        nvim_win_set_cursor(0, {row + 1, start_col})
+                        -- Add virtual text instead of just a highlight, because the diff highlights have higher priority
+                        nvim_buf_set_extmark(0, ns, row, start_col, {
+                            virt_text = {{nvim_buf_get_text(0, row, start_col, row, end_col, {})[1], "IncSearch"}},
+                            virt_text_pos = "overlay",
+                        })
+                        break
+                    end
+                end
+            end)
+        end
+    end
+    return 1
+end})
 
 -- REPL {{{1
 
