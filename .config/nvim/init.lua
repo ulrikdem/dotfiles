@@ -523,7 +523,14 @@ map("n", "<Leader>td", function()
     end
 end)
 
-vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,inline:word,hiddenoff")
+vim.opt.diffopt:append("vertical,foldcolumn:1,algorithm:histogram,anchor,inline:word,hiddenoff")
+
+map("n", "[oW", ":set diffopt+=iwhiteall<CR>")
+map("n", "]oW", ":set diffopt-=iwhiteall<CR>")
+map("n", "yoW", function()
+    return (":set diffopt%s=iwhiteall<CR>")
+        :format(vim.list_contains(vim.opt.diffopt:get(), "iwhiteall") and "-" or "+")
+end, {expr = true})
 
 -- Remap do and dp to use a motion
 _G.diff_bufnr = 0
@@ -550,6 +557,32 @@ map("n", "dx", "dp", {remap = true})
 map("n", "dxx", "dpp", {remap = true})
 map("", "[h", "[c", {remap = true})
 map("", "]h", "]c", {remap = true})
+
+map("n", "dm", function()
+    local mark = fn.getcharstr()
+    if vim.o.diff and not vim.list_contains(vim.opt_local.diffanchors:get(), "'" .. mark) then
+        local cursor = nvim_win_get_cursor(0)
+        nvim_buf_set_mark(0, mark, cursor[1], cursor[2], {})
+        vim.opt_local.diffanchors:append("'" .. mark)
+    else
+        nvim_buf_del_mark(0, mark)
+        vim.opt_local.diffanchors:remove("'" .. mark)
+    end
+end)
+map("n", "dm<Esc>", "")
+
+defaults.statuscolumn = "%!v:lua.statuscolumn()"
+function _G.statuscolumn()
+    if vim.v.virtnum == 0 and vim.wo[vim.g.statusline_winid].diff then
+        local bufnr = nvim_win_get_buf(vim.g.statusline_winid)
+        for anchor in vim.gsplit(vim.bo[bufnr].diffanchors, ",") do
+            if anchor:find("^'.$") and nvim_buf_get_mark(bufnr, anchor:sub(2))[1] == vim.v.lnum then
+                return "%#Search#" .. anchor:sub(2) .. "%s%(%l %)"
+            end
+        end
+    end
+    return "%C%s%(%l %)"
+end
 
 vim.g.fugitive_summary_format = "%as %s (%an)%d"
 
