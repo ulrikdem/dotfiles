@@ -159,18 +159,6 @@ end, {expr = true})
 map("t", "<Esc>", "<C-\\><C-n>")
 map("t", "<C-Esc>", "<Esc>")
 
-for _, dir in ipairs({"Left", "Down", "Up", "Right"}) do
-    map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
-end
-
-map("n", "<C-Tab>", "gt")
-map("n", "<C-S-Tab>", "gT")
-for i = 1, 10 do
-    map("n", ("<M-%d>"):format(i % 10), ("%dgt"):format(i))
-end
-
-map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
-
 -- Map <M-[> and <M-]> to enter a "mode" that prefixes every keypress with [ or ], respectively
 for _, bracket in ipairs({"[", "]"}) do
     -- The intermediate mapping is only to improve the command shown in the bottom right
@@ -207,6 +195,100 @@ for sign, bracket in pairs({[-1] = "[", [1] = "]"}) do
 end
 
 map("i", "<M-d>", function() return os.date("%F") end, {expr = true})
+
+-- Window management {{{1
+
+for _, dir in ipairs({"Left", "Right", "Up", "Down"}) do
+    map("n", ("<M-%s>"):format(dir), ("<C-w><%s>"):format(dir))
+end
+
+map("n", "<C-Tab>", "gt")
+map("n", "<C-S-Tab>", "gT")
+for i = 1, 10 do
+    map("n", ("<M-%d>"):format(i % 10), ("%dgt"):format(i))
+end
+
+map("n", "ZT", "<Cmd>silent only | quit<CR>") -- Close tab
+
+on("VimResized", {command = "wincmd ="})
+
+-- Since windows are equalized automatically, set winfixwidth or winfixheight on manual resizes
+for _, key in ipairs({"|", "<", ">"}) do
+    map("n", "<C-w>" .. key, function()
+        vim.o.winfixwidth = true
+        return "<C-w>" .. key
+    end, {expr = true})
+end
+for _, key in ipairs({"_", "-", "+"}) do
+    map("n", "<C-w>" .. key, function()
+        vim.o.winfixheight = true
+        return "<C-w>" .. key
+    end, {expr = true})
+end
+map("n", "<C-w>=", function()
+    vim.o.winfixwidth = false
+    vim.o.winfixheight = false
+    return "<C-w>="
+end, {expr = true})
+
+local sidebar_width = 80
+if not vim.env.MAN_PN then -- Skip when nvim is invoked as MANPAGER
+    vim.env.MANWIDTH = tostring(sidebar_width + 1)
+end
+
+-- Either opens a new window showing the given bufnr, or modifies the current window
+-- The window is placed to the given side of the given winid, or the far edge if negative
+--- @param opts {bufnr?: integer, split?: "left"|"right"|"above"|"below", winid?: integer}
+local function make_split(opts)
+    local config = { --- @type vim.api.keyset.win_config
+        split = opts.split
+            or vim.o.columns > sidebar_width * 2 and (vim.o.splitright and "right" or "left")
+            or vim.o.splitbelow and "below" or "above",
+        win = opts.winid,
+    }
+    if config.split == "left" or config.split == "right" then
+        config.width = opts.bufnr
+            and sidebar_width
+            or (vim.o.winfixwidth and fn.winwidth(0) or vim.w.default_width)
+    else
+        config.height = not opts.bufnr
+            and (vim.o.winfixheight and fn.winheight(0) or vim.w.default_height)
+            or nil
+    end
+    if opts.bufnr then
+        nvim_open_win(opts.bufnr, true, config)
+        vim.w.default_width = sidebar_width -- Except for the dirvish autopreview window, vim.b would be better
+    else
+        nvim_win_set_config(0, config)
+    end
+    vim.o.winfixwidth = config.width ~= nil
+    vim.o.winfixheight = config.height ~= nil
+    vim.cmd.wincmd("=")
+end
+
+on("BufWinEnter", {}, function()
+    if (vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive")
+            and fn.winnr("$") > 1 then
+        vim.w.default_width = sidebar_width
+        make_split({winid = fn.win_getid(fn.winnr("#"))})
+    end
+end)
+
+for dir, split in pairs({Left = "left", Right = "right", Up = "above", Down = "below"}) do
+    map("n", ("<M-S-%s>"):format(dir), function()
+        -- Attach to the window given by the count, defaulting to the previous window, or attach to far edge on invalid count
+        local winid = fn.win_getid(vim.v.count ~= 0 and vim.v.count or fn.winnr("#"))
+        if winid == 0 or winid == nvim_get_current_win() then winid = -1 end
+        if nvim_win_get_config(0).relative == "" then
+            make_split({split = split, winid = winid})
+        else
+            -- Create a new window instead of converting the floating window, since the LSP code may still focus or close it
+            local float_winid = nvim_get_current_win()
+            make_split({bufnr = 0, split = split, winid = winid})
+            nvim_win_close(float_winid, false)
+        end
+    end)
+end
 
 -- Plugins {{{1
 
@@ -274,6 +356,21 @@ on("FileType", {pattern = "dirvish"}, function()
     map("n", "<Insert>", "<CR>", {remap = true, buf = 0})
 end)
 
+map("n", "<Leader>-", function()
+    make_split({bufnr = 0})
+    vim.w.dirvish_autopreview = true
+    vim.cmd.Dirvish()
+end)
+on("CursorMoved", {nested = true}, function()
+    if vim.w.dirvish_autopreview then
+        if vim.o.filetype == "dirvish" then
+            fn["dirvish#open"]("p", true)
+        else
+            nvim_win_hide(0)
+        end
+    end
+end)
+
 vim.cmd.packadd({"nvim.difftool", bang = true})
 on("FileType", {pattern = "qf"}, function()
     if vim.w.quickfix_title == "DiffTool" then
@@ -325,6 +422,16 @@ nvim_create_user_command("DetectIndent", function()
 end, {bar = true})
 
 on("FileType", {}, function() pcall(vim.treesitter.start) end)
+on("FileType", {pattern = "query"}, function()
+    if vim.o.buftype == "nofile" then -- :InspectTree or :EditQuery window
+        vim.o.winfixwidth = true
+    end
+end)
+
+on("TermOpen", {}, function()
+    -- The MatchParen highlight isn't updated in terminal mode, so disable it
+    vim.bo.matchpairs = ""
+end)
 
 on("TextYankPost", {}, function()
     vim.hl.on_yank({higroup = "Visual", on_visual = false})
@@ -340,78 +447,6 @@ end)
 
 on("BufWritePost", {pattern = {".nvim.lua", ".nvimrc", ".exrc"}}, function(args)
     vim.secure.trust({action = "allow", bufnr = args.buf})
-end)
-
-on("TermOpen", {}, function()
-    -- The MatchParen highlight isn't updated in terminal mode, so disable it
-    vim.bo.matchpairs = ""
-end)
-
-on("VimResized", {command = "wincmd ="})
-
-local sidebar_width = 80
-vim.env.MANWIDTH = tostring(sidebar_width + 1)
-
---- @param vertical boolean|"auto"|"toggle"
---- @param opts {open_bufnr?: integer, size?: integer}
-local function make_sidebar(vertical, opts)
-    if vertical == "auto" then
-        vertical = vim.o.columns > sidebar_width * 2
-    elseif vertical == "toggle" then
-        vertical = not vim.o.winfixwidth
-    end
-    --- @cast vertical boolean
-    local config = { --- @type vim.api.keyset.win_config
-        vertical = vertical,
-        win = opts.open_bufnr and 0 or fn.win_getid(fn.winnr("#")),
-    }
-    if vertical then
-        config.width = opts.size or sidebar_width
-    else
-        config.height = opts.size or vim.o.buftype == "quickfix" and 10 or nil
-    end
-    if opts.open_bufnr then
-        nvim_open_win(opts.open_bufnr, true, config)
-    else
-        nvim_win_set_config(0, config)
-    end
-    vim.o.winfixwidth = config.width ~= nil
-    vim.o.winfixheight = config.height ~= nil
-    vim.cmd.wincmd("=")
-end
-
-on("BufWinEnter", {}, function()
-    if vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive" then
-        make_sidebar("auto", {})
-    end
-end)
-
-map("n", "<Leader>ts", function()
-    if nvim_win_get_config(0).relative == "" then
-        make_sidebar("toggle", {size = vim.v.count ~= 0 and vim.v.count or nil})
-    else
-        -- Create a new window instead of converting the floating window, since the LSP code may still focus or close it
-        local bufnr = nvim_get_current_buf()
-        local winid = nvim_get_current_win()
-        vim.cmd.wincmd("p") -- Split from previous window
-        make_sidebar("auto", {open_bufnr = bufnr, size = vim.v.count ~= 0 and vim.v.count or nil})
-        nvim_win_close(winid, false)
-    end
-end)
-
-map("n", "<Leader>-", function()
-    make_sidebar("auto", {open_bufnr = 0})
-    vim.w.dirvish_autopreview = true
-    vim.cmd.Dirvish()
-end)
-on("CursorMoved", {nested = true}, function()
-    if vim.w.dirvish_autopreview then
-        if vim.o.filetype == "dirvish" then
-            fn["dirvish#open"]("p", true)
-        else
-            nvim_win_hide(0)
-        end
-    end
 end)
 
 -- Statusline {{{1
@@ -670,7 +705,7 @@ do
         if not bufnr then
             bufnr = nvim_create_buf(true, false)
             vim.b.repl_bufnr = bufnr
-            make_sidebar("auto", {open_bufnr = bufnr})
+            make_split({bufnr = bufnr})
             vim.b.repl_bufnr = bufnr -- Allow using toggle mapping (and others) from REPL buffer
             repl_bufnrs[key] = bufnr
             fn.jobstart(repl.cmd or default_cmd, {
@@ -701,7 +736,7 @@ do
             end
         end
 
-        make_sidebar("auto", {open_bufnr = bufnr})
+        make_split({bufnr = bufnr})
         return bufnr
     end
 
@@ -838,6 +873,8 @@ defaults.quickfixtextfunc = "v:lua.require'quickfix'.textfunc"
 on("FileType", {pattern = "qf"}, function()
     vim.wo[0][0].wrap = false
     vim.wo[0][0].list = false
+    vim.w.default_width = sidebar_width
+    vim.w.default_height = 10
 
     map("n", "<CR>", function()
         vim.cmd.normal({vim.keycode("<CR>"), bang = true})
