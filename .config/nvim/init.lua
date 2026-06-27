@@ -159,22 +159,44 @@ end, {expr = true})
 map("t", "<Esc>", "<C-\\><C-n>")
 map("t", "<C-Esc>", "<Esc>")
 
--- Map <M-[> and <M-]> to enter a "mode" that prefixes every keypress with [ or ], respectively
-for _, bracket in ipairs({"[", "]"}) do
-    -- The intermediate mapping is only to improve the command shown in the bottom right
-    local intermediate = ("<lt>M-%s>"):format(bracket)
-    map("n", ("<M-%s>"):format(bracket), intermediate, {remap = true})
-    map("n", intermediate, function()
-        local c = fn.getcharstr()
-        if c == vim.keycode("<M-[>") or c == vim.keycode("<M-]>") then
-            return c
-        elseif c:match("^%d$") then
-            return c .. vim.keycode(intermediate)
-        else
-            return bracket .. c .. "zz" .. vim.keycode(intermediate)
+local bracket_pairs = {["("] = ")", [")"] = "(", ["["] = "]", ["]"] = "[", ["{"] = "}", ["}"] = "{"}
+
+-- Map <M-;> to repeat the last command starting with [ or ], and <M-,> to reverse it
+-- Control and shift modifiers can be adjusted during repetition
+do
+    local last_seq = {} --- @type string[]
+    local function set_last(typed) --- @param typed string
+        last_seq = {}
+        for _, key in ipairs(fn.matchstrlist({fn.keytrans(typed)}, [[[^<]\|<.\{-}>]])) do
+            table.insert(last_seq, key.text:gsub("<(.*)>", "%1"):gsub("[CS]%-", ""):lower())
         end
-    end, {expr = true, replace_keycodes = false, remap = true})
-    map("n", intermediate .. "<Esc>", "")
+    end
+    local partial --- @type string?
+    vim.on_key(function(key, typed)
+        if partial then
+            set_last(partial .. key)
+            partial = nil
+        elseif typed:match("^[%[%]]") and fn.mode():find("[nvV]") then
+            if #typed > 1 then -- Mapping
+                set_last(typed)
+            else -- Built-in command or undefined sequence
+                partial = typed
+            end
+        end
+    end, nvim_create_namespace("bracket_repeat"))
+    for key, reverse in pairs({[";"] = false, [","] = true}) do
+        for _, mod in ipairs({"", "S-", "C-", "C-S-"}) do
+            map({"n", "x"}, ("<M-%s%s>"):format(mod, key), function()
+                local result = ""
+                for i, key in ipairs(last_seq) do
+                    if reverse then key = bracket_pairs[key] or key end
+                    if i > 1 then key = mod .. key end
+                    result = result .. (#key == 1 and key or ("<%s>"):format(key))
+                end
+                return result
+            end, {expr = true, remap = true})
+        end
+    end
 end
 
 -- Mappings to move the current line backward or forward to its place within a paragraph of sorted lines

@@ -6,6 +6,12 @@ vim.cmd = {}
 --- @type table<string, string?>
 vim.env = {}
 
+--- @param list string[]
+--- @param pat string
+--- @param dict? {submatches?: boolean}
+--- @return {idx: integer, byteidx: integer, text: string, submatches?: string[]}[]
+function vim.fn.matchstrlist(list, pat, dict) end
+
 --- @class quickfixtextfunc_args
 --- @field quickfix 0 | 1
 --- @field winid integer
