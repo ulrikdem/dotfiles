@@ -290,7 +290,7 @@ end
 
 on("BufWinEnter", {}, function()
     if (vim.o.buftype == "help" or vim.o.filetype == "man" or vim.o.filetype == "fugitive")
-            and fn.winnr("$") > 1 then
+            and fn.winnr("$") > 1 and not vim.w.default_width then
         vim.w.default_width = sidebar_width
         make_split({winid = fn.win_getid(fn.winnr("#"))})
     end
