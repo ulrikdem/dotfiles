@@ -108,7 +108,9 @@ function M.textfunc(args)
                 module_length = #line
             elseif item.bufnr ~= 0 then
                 local name = nvim_buf_get_name(item.bufnr)
-                line = name ~= "" and vim.fn.fnamemodify(name, ":~:.") or "[No Name]"
+                line = name == "" and "[No Name]"
+                    or item.type == "\1" and vim.fs.basename(name) -- Help file
+                    or vim.fn.fnamemodify(name, ":~:.")
                 -- Dim path for all but the first (consecutive) item for the same buffer
                 if item.bufnr == vim.tbl_get(list.items, i - 1, "bufnr") then
                     table.insert(highlights, {i - 1, 0, #line, "NonText"})

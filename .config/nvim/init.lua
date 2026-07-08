@@ -342,17 +342,17 @@ nvim_create_user_command("PackUpdate", function(opts)
     vim.pack.update(next(opts.fargs) and opts.fargs, {force = opts.bang})
 end, {nargs = "*", bang = true, bar = true})
 
-on("FileType", {pattern = "nvim-pack"}, function(args)
+on("FileType", {pattern = "nvim-pack"}, function()
     -- Review the pending updates for the plugin at the cursor
     map("n", "r", function()
-        local section_start = vim.fn.search("^#", "bcnW")
-        local section_end = vim.fn.search("^#", "nW")
+        local section_start = fn.search("^#", "bcnW")
+        local section_end = fn.search("^#", "nW")
 
         --- @param key string
         --- @param pattern string
         --- @return string?
         local function match(key, pattern)
-            return vim.tbl_get(vim.fn.matchbufline(
+            return vim.tbl_get(fn.matchbufline(
                 nvim_get_current_buf(),
                 ([[\v\C^%s: +\zs%s]]):format(key, pattern),
                 section_start + 1,
@@ -369,11 +369,10 @@ on("FileType", {pattern = "nvim-pack"}, function(args)
         end
 
         nvim_open_tabpage(0, true, {})
-        vim.fn.chdir(path, "tabpage")
+        fn.chdir(path, "tabpage")
         vim.cmd.Glog(("--left-right %s...%s"):format(rev_before, rev_after))
-        vim.cmd.wincmd("p")
-        vim.cmd.clast()
-    end, {buf = args.buf})
+        vim.cmd.llast()
+    end, {buf = 0})
 end)
 
 on("FileType", {pattern = "dirvish"}, function()
@@ -691,14 +690,14 @@ nvim_create_user_command("Glog", function(opts)
     end
 
     if opts.range > 0 then
-        vim.cmd.Gclog({opts.fargs[1], range = {opts.line1, opts.line2}, bang = true})
-        fn.setqflist({}, "a", {
-            title = fn.getqflist({title = true}).title:gsub("^:Gclog", "git log"),
+        vim.cmd.Gllog({opts.fargs[1], range = {opts.line1, opts.line2}, bang = true})
+        fn.setloclist(0, {}, "a", {
+            title = fn.getloclist(0, {title = true}).title:gsub("^:Gllog", "git log"),
         })
     elseif opts.bang then
-        vim.cmd.Gclog({opts.fargs[1], range = {0}, bang = true})
-        fn.setqflist({}, "a", {
-            title = fn.getqflist({title = true}).title:gsub("^:0,%d+Gclog", "git log"):gsub(" ?$", " ." .. path),
+        vim.cmd.Gllog({opts.fargs[1], range = {0}, bang = true})
+        fn.setloclist(0, {}, "a", {
+            title = fn.getloclist(0, {title = true}).title:gsub("^:0,%d+Gllog", "git log"):gsub(" ?$", " ." .. path),
         })
     else
         local format = vim.g.fugitive_summary_format .. "\r%h\rfugitive://" .. git_dir:gsub("%%", "%%%%") .. "//%H"
@@ -707,16 +706,16 @@ nvim_create_user_command("Glog", function(opts)
             cmd = "Git",
             args = {("-P log --graph --pretty=format:%s -n %d %s"):format(fn.shellescape(format), limit, opts.args)},
         }, {output = true})
-        fn.setqflist({}, " ", {
+        fn.setloclist(0, {}, " ", {
             title = table.concat({"git log", opts.fargs[1]}, " "),
             lines = vim.split(output, "\n"),
             efm = "%m\r%o\r%f",
         })
-        if vim.iter(fn.getqflist()):fold(0, function(acc, item) return acc + item.valid end) == limit then
-            fn.setqflist({{type = "W", text = ("truncated after %d commits"):format(limit)}}, "a")
+        if vim.iter(fn.getloclist(0)):fold(0, function(acc, item) return acc + item.valid end) == limit then
+            fn.setloclist(0, {{type = "W", text = ("truncated after %d commits"):format(limit)}}, "a")
         end
     end
-    vim.cmd("botright copen")
+    vim.cmd.lopen()
 end, {nargs = "?", complete = fn["fugitive#LogComplete"], bang = true, range = true})
 
 nvim_create_user_command("DiffAnchor", function(opts)
@@ -1061,6 +1060,7 @@ map("n", "<Leader>mm", "<Cmd>silent update | Make<CR>")
 map("n", "<Leader>mc", "<Cmd>silent update | Make clean<CR>")
 
 nvim_create_user_command("Grep", function(opts)
+    local loclist_winid = not opts.bang and nvim_get_current_win() or nil
     killable_process("rg --json " .. opts.args, function(result)
         if result.signal ~= 0 then
             return vim.schedule_wrap(vim.notify)("rg: exited with signal " .. result.signal, vim.log.levels.ERROR)
@@ -1073,9 +1073,13 @@ nvim_create_user_command("Grep", function(opts)
         for line in vim.gsplit(result.stderr, "\n", {trimempty = true}) do
             items[#items + 1] = {type = "E", text = line}
         end
-        vim.schedule_wrap(quickfix.set_list)({title = "rg " .. opts.args, items = items})
+        vim.schedule_wrap(quickfix.set_list)({
+            loclist_winid = loclist_winid,
+            title = "rg " .. opts.args,
+            items = items,
+        })
     end)
-end, {nargs = "+", complete = "file"})
+end, {nargs = "+", complete = "file", bang = true})
 
 do
     local function grep(args, pattern)
@@ -1091,14 +1095,14 @@ do
 end
 
 nvim_create_user_command("HelpGrep", function(opts)
-    vim.cmd.helpgrep(opts.args)
-    local items = fn.getqflist()
+    vim.cmd.lhelpgrep(opts.args)
+    local items = fn.getloclist(0)
     for _, item in ipairs(items) do
         item.user_data = {
             highlight_ranges = {{item.col - 1, item.end_col - 1}},
         }
     end
-    quickfix.set_list({action = "r", items = items})
+    quickfix.set_list({loclist_winid = 0, action = "r", items = items})
 end, {nargs = 1})
 
 nvim_create_user_command("Diagnostics", function()
@@ -1184,7 +1188,7 @@ end
 --- @param title string
 --- @param parse fun(line: string): vim.quickfix.entry
 --- @return fun(lines: string[])
-local function jump_or_setqflist(title, parse)
+local function jump_or_setloclist(title, parse)
     return function(lines)
         if #lines == 1 then
             local item = parse(lines[1])
@@ -1199,7 +1203,7 @@ local function jump_or_setqflist(title, parse)
                 quickfix.after_jump()
             end
         elseif #lines > 1 then
-            quickfix.set_list({title = title, items = vim.tbl_map(parse, lines)})
+            quickfix.set_list({loclist_winid = 0, title = title, items = vim.tbl_map(parse, lines)})
         end
     end
 end
@@ -1210,7 +1214,7 @@ nvim_create_user_command("Fzf", function(opts)
     run_fzf({
         args = {("--prompt=%s/"):format(fn.fnamemodify(cwd, ":p:~"):gsub("/$", ""))},
         cwd = cwd,
-        on_output = jump_or_setqflist("Files", function(line)
+        on_output = jump_or_setloclist("Files", function(line)
             return {filename = line, valid = true}
         end),
     })
@@ -1237,7 +1241,7 @@ map("n", "<Leader>fb", function()
                 return table.concat(buffers(), "\n")
             end},
         },
-        on_output = jump_or_setqflist("Buffers", function(line)
+        on_output = jump_or_setloclist("Buffers", function(line)
             return {bufnr = tonumber(vim.gsplit(line, " ")()), valid = true}
         end),
     })
@@ -1267,7 +1271,7 @@ map("n", "<Leader>fg", function()
         },
         input = {},
         on_output = function(lines)
-            return jump_or_setqflist(("rg -e %s %s"):format(fn.shellescape(pattern), args), function(line)
+            jump_or_setloclist(("rg -e %s %s"):format(fn.shellescape(pattern), args), function(line)
                 return quickfix.from_ripgrep(vim.gsplit(line, "\t")() or "") or {}
             end)(lines)
         end,
@@ -1330,7 +1334,7 @@ map("n", "<Leader>fs", function()
             end},
         },
         input = {},
-        on_output = jump_or_setqflist("Symbols", function(line)
+        on_output = jump_or_setloclist("Symbols", function(line)
             return items[tonumber(vim.gsplit(line, " ")())]
         end),
     })
@@ -1357,7 +1361,10 @@ end
 
 -- LSP {{{1
 
-map("n", "grd", lsp.buf.declaration)
+map("n", "grd", function() lsp.buf.declaration({loclist = true}) end)
+map("n", "gri", function() lsp.buf.implementation({loclist = true}) end)
+map("n", "grr", function() lsp.buf.references(nil, {loclist = true}) end)
+map("n", "grt", function() lsp.buf.type_definition({loclist = true}) end)
 
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
@@ -1491,7 +1498,12 @@ for name, params in pairs({
                         if pending_requests == 0 then
                             local items = {}
                             quickfix.from_lsp_symbols(symbols, items)
-                            quickfix.set_list({title = name, items = items, context = {tree_foldlevel = 1}})
+                            quickfix.set_list({
+                                loclist_winid = winid,
+                                title = name,
+                                items = items,
+                                context = {tree_foldlevel = 1},
+                            })
                         end
                     end, bufnr)
                     return symbol
