@@ -324,7 +324,6 @@ vim.pack.add({
 
     "https://github.com/justinmk/vim-dirvish",
     "https://github.com/lervag/vimtex",
-    "https://github.com/godlygeek/tabular",
 })
 
 nvim_create_user_command("PackSync", function()
@@ -406,6 +405,65 @@ on("FileType", {pattern = "nvim-undotree"}, function()
     vim.wo[0][0].cursorlineopt = "both"
     vim.o.winfixwidth = true
 end)
+
+-- Commands {{{1
+
+do
+    --- @param opts vim.api.keyset.create_user_command.command_args
+    local function align(opts)
+        if opts.args == "" then return 0 end
+        local lines = nvim_buf_get_lines(0, opts.line1 - 1, opts.line2, true)
+
+        local indent = lines[1]:match("%s*")
+        for _, line in ipairs(lines) do
+            for i = 1, #indent do
+                if line:sub(i, i) ~= indent:sub(i, i) then
+                    indent = indent:sub(1, i - 1)
+                    break
+                end
+            end
+        end
+
+        local all_parts = vim.defaulttable()
+        local widths = vim.defaulttable(function() return 0 end)
+        local function append(i, part)
+            table.insert(all_parts[i], part)
+            local n = #all_parts[i]
+            widths[n] = math.max(widths[n], nvim_strwidth(part))
+        end
+        for i, line in ipairs(lines) do
+            local offset = #indent
+            local separator, start, end_ = unpack(fn.matchstrpos(line, opts.args, offset, 1))
+            while start ~= -1 do
+                append(i, vim.trim(line:sub(offset + 1, start)))
+                append(i, separator)
+                offset = end_
+                separator, start, end_ = unpack(fn.matchstrpos(line, opts.args, offset, 1))
+                if end_ == offset then
+                    separator, start, end_ = unpack(fn.matchstrpos(line, opts.args, offset + 1, 1))
+                end
+            end
+            append(i, vim.trim(line:sub(offset + 1)))
+        end
+
+        for i, parts in ipairs(all_parts) do
+            local line = indent
+            for j, part in ipairs(parts) do
+                if widths[j] > 0 then
+                    line = line .. part .. (" "):rep(widths[j] - nvim_strwidth(part)) .. (opts.bang and "" or " ")
+                end
+            end
+            lines[i] = line:gsub(" +$", "")
+        end
+
+        nvim_buf_set_lines(0, opts.line1 - 1, opts.line2, true, lines)
+        nvim_buf_set_mark(0, "[", opts.line1, 0, {})
+        nvim_buf_set_mark(0, "]", opts.line2, 0, {})
+        return 1
+    end
+
+    nvim_create_user_command("Align", align, {nargs = 1, range = true, bang = true, preview = align})
+end
 
 -- Autocommands {{{1
 
