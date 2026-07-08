@@ -514,7 +514,7 @@ on("TermOpen", {}, function()
 end)
 
 on("TextYankPost", {}, function()
-    vim.hl.on_yank({higroup = "Visual", on_visual = false})
+    vim.hl.on_yank({higroup = "Visual"})
 end)
 
 on("BufWritePre", {}, function(args)
