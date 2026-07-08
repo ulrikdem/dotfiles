@@ -298,8 +298,12 @@ end)
 
 for dir, split in pairs({Left = "left", Right = "right", Up = "above", Down = "below"}) do
     map("n", ("<M-S-%s>"):format(dir), function()
-        -- Attach to the window given by the count, defaulting to the previous window, or attach to far edge on invalid count
-        local winid = fn.win_getid(vim.v.count ~= 0 and vim.v.count or fn.winnr("#"))
+        local filewinid = fn.getloclist(0, {filewinid = true}).filewinid
+        -- Attach to the window given by the count, defaulting to the previous window (or file
+        -- window when in a location list), or attach to the far edge on invalid count
+        local winid = vim.v.count ~= 0 and fn.win_getid(vim.v.count)
+            or filewinid ~= 0 and filewinid
+            or fn.win_getid(fn.winnr("#"))
         if winid == 0 or winid == nvim_get_current_win() then winid = -1 end
         if nvim_win_get_config(0).relative == "" then
             make_split({split = split, winid = winid})
