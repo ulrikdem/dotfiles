@@ -1268,6 +1268,30 @@ map("n", "<Leader>fb", function()
     })
 end)
 
+map("n", "<Leader>f.", function()
+    local path = nvim_buf_get_name(0)
+    run_fzf({
+        args = {
+            "--prompt=file: ",
+            "--exact",
+            "--no-ignore-case",
+            ("--query=%s."):format(fn.fnamemodify(path, ":t:r")),
+            "--print-query",
+            "--expect=alt-enter",
+        },
+        on_output = function(lines)
+            if #lines == 2 or lines[2] == "alt-enter" then
+                lines = {vim.fs.joinpath(vim.fs.dirname(path), lines[1])}
+            else
+                lines = vim.iter(lines):skip(2):totable()
+            end
+            jump_or_setloclist("Files", function(line)
+                return {filename = line, valid = true}
+            end)(lines)
+        end,
+    })
+end)
+
 map("n", "<Leader>fg", function()
     local pattern = ""
     local args = "-S"
