@@ -976,6 +976,27 @@ map("n", "<Leader>tl", function()
     vim.cmd(fn.getloclist(0, {winid = true}).winid ~= 0 and "lclose" or "lopen")
 end)
 
+on({"WinClosed", "QuitPre"}, {}, function(args)
+    local winid
+    if args.event == "WinClosed" then
+        winid = tonumber(args.match) --[[ @as integer ]]
+    else
+        -- WinClosed handles most cases, but when it causes the last window to be closed, quitting is aborted
+        -- Here we use QuitPre to handle that case first
+        local winids = fn.win_findbuf(args.buf)
+        if #winids ~= 1 then return end
+        winid = winids[1]
+    end
+    nvim_win_call(winid, function()
+        vim.cmd.lclose()
+        if vim.iter(nvim_tabpage_list_wins(0)):all(function(w)
+            return w == winid or fn.win_gettype(w) == "quickfix"
+        end) then
+            vim.cmd.cclose()
+        end
+    end)
+end)
+
 local killable_process
 do
     --- @type table<vim.SystemObj, string>
