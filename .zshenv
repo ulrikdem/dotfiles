@@ -4,6 +4,7 @@ path=(~/.local/bin $path)
 [[ -z $BROWSER ]] && type firefox >/dev/null && export BROWSER=firefox
 
 type nvim >/dev/null && export EDITOR=nvim MANPAGER="nvim +Man! +'set laststatus=1'"
+export MANWIDTH=100
 
 type less >/dev/null && export PAGER=less
 export LESSUTFCHARDEF=E0A0:p # Show the branch symbol in the prompt when opening kitty's scrollback in the pager
