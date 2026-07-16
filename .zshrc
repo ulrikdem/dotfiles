@@ -245,7 +245,7 @@ function git-files-wrapper {
 function _sb {
     local curcontext=$curcontext state state_descr line
     local -A opt_args
-    _arguments -s -S -C : -{n,x,u,R,W} '*-'{r,w}'+: :->mount' '*-e: :->var' '*-'{b,B}'+: :->dbus' \
+    _arguments -s -S -C : -{n,x,u,R,W} '*-'{r,w}'+: :->mount' '*-e: :->var' '*-'{p,P}'+: :->port' '*-'{b,B}'+: :->dbus' \
         '*-s+:namespace:(cgroup ipc net pid user uts)' '*:: :_normal -p sb' && return
     case $state in
         mount)
@@ -266,6 +266,12 @@ function _sb {
                 _parameters -g '*export*' $arg
             else
                 _default
+            fi;;
+        port)
+            if ! compset -P '*='; then
+                _alternative ':port:_numbers -l 0 -m 65535 port' '_net_interfaces -qS :'
+            else
+                _alternative ':port:_numbers -l 0 -m 65535 port' '_hosts -qS :' '_bind_addresses -K -qS :'
             fi;;
         dbus)
             local name names=(

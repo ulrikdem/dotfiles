@@ -74,7 +74,10 @@ add-mount() {
 bind_args=
 policy=()
 url_handler=0
-while getopts ns:xuRWr:w:e:b:B: opt; do
+port_opts=()
+listen_addrs=()
+connect_addrs=()
+while getopts ns:xuRWr:w:e:b:B:p:P: opt; do
     case $opt in
         n) unset default_args[--unshare-net];;
         s) unset default_args["--unshare-$OPTARG"];;
@@ -94,8 +97,15 @@ while getopts ns:xuRWr:w:e:b:B: opt; do
         e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sb [-nxuRW] [-rw [dest-path=]src-path[:overlay]...]... [-rw +-path]... [-bB busname]...' \
-            '[-e var[=value]]... [-s namespace]... [--] [command [arg]...]' >&2; exit 1;;
+        [pP])
+            if ! [[ $OPTARG =~ ^((([^\'\\]+):)?([0-9]+)=(([^\'\\]+):)?)?([0-9]+)$ ]]; then
+                echo "invalid port forward specification: $OPTARG" >&2 && exit 1
+            fi
+            port_opts+=("$opt")
+            listen_addrs+=("tcp-listen:${BASH_REMATCH[4]:-${BASH_REMATCH[7]}},so-bindtodevice='${BASH_REMATCH[3]:-lo}',fork")
+            connect_addrs+=("tcp:'${BASH_REMATCH[6]:-localhost}':${BASH_REMATCH[7]}");;
+        ?) echo 'sb [-nxuRW] [-rw [dest-path=]src-path[:overlay]...]... [-rw +-path]... [-pP [[bind-dev:]listen-port=[host:]]port]...' \
+            '[-bB busname]... [-e var[=value]]... [-s namespace]... [--] [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
@@ -106,7 +116,8 @@ if [[ -n $bind_args ]]; then
     done
 fi
 
-if ((${#policy[@]} || url_handler)); then
+extra_cmds=
+if ((${#policy[@]} || url_handler || ${#port_opts[@]})); then
     temp=$(mktemp -d "$XDG_RUNTIME_DIR/sb.XXXXXXXXXX")
 
     if ((${#policy[@]})); then
@@ -151,9 +162,26 @@ if ((${#policy[@]} || url_handler)); then
         )
     fi
 
+    if ((${#port_opts[@]})); then
+        mkdir -- "$temp/sockets"
+        args+=(--bind "$temp/sockets" "$temp/sockets")
+        for ((i = 0; i < ${#port_opts[@]}; ++i)); do
+            listen_cmd=(socat -d0 -0 "${listen_addrs[$i]}" "unix-connect:'$temp/sockets/$i'")
+            connect_cmd=(socat -d0 "unix-listen:'$temp/sockets/$i',fork" "${connect_addrs[$i]}")
+            case ${port_opts[$i]} in
+                p)
+                    "${connect_cmd[@]}" &
+                    extra_cmds="${listen_cmd[*]@Q} & $extra_cmds";;
+                P)
+                    "${listen_cmd[@]}" &
+                    extra_cmds="${connect_cmd[*]@Q} & $extra_cmds";;
+            esac
+        done
+    fi
+
     exec {fd}> >(
         read
-        kill $(jobs -p)
+        kill $(jobs -p) 2>/dev/null
         rm -r -- "$temp"
     )
     args+=(--sync-fd $fd)
@@ -165,4 +193,5 @@ if ((!url_handler)) && [[ -e ~/.config/mimeapps.list ]]; then
 fi
 
 (($#)) || set zsh
+[[ -n $extra_cmds ]] && set bash -c "$extra_cmds${*@Q}; kill \$(jobs -p) 2>/dev/null"
 exec bwrap ${!default_args[@]} "${args[@]}" -- "$@"
