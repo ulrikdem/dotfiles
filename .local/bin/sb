@@ -33,10 +33,11 @@ while read -rd '' path; do
 done < <(git --git-dir ~/.dotfiles.git ls-files -z)
 
 add-mount() {
-    local dest srces src
-    if [[ $2 = :* ]]; then
+    local dest srces src try
+    if [[ $2 = [+-]* ]]; then
         dest=${2:1}
         srces=("$dest")
+        [[ $2 = -* ]] && try=-try
     else
         readarray -td: srces < <(printf %s: "${2##*=}")
         [[ $2 = *=* ]] && dest=${2%=*} || dest=${srces[0]}
@@ -46,13 +47,13 @@ add-mount() {
     if ((${#srces[@]} == 1)); then
         src=${srces[0]}
         if [[ $1 = r ]]; then
-            args+=(--ro-bind "$src" "$dest")
+            args+=(--ro-bind$try "$src" "$dest")
         elif [[ -z $src ]]; then
             args+=(--tmpfs "$dest")
         elif [[ $(realpath -s -- "$src") = /dev/* ]]; then
-            args+=(--dev-bind "$src" "$dest")
+            args+=(--dev-bind$try "$src" "$dest")
         else
-            args+=(--bind "$src" "$dest")
+            args+=(--bind$try "$src" "$dest")
         fi
     else
         for src in "${srces[@]::${#srces[@]}-1}"; do
@@ -93,15 +94,15 @@ while getopts ns:xuRWr:w:e:b:B: opt; do
         e) [[ $OPTARG = *=* ]] && args+=(--setenv "${OPTARG%%=*}" "${OPTARG#*=}") || args+=(--unsetenv "$OPTARG");;
         b) policy+=(--talk="$OPTARG");;
         B) policy+=(--own="$OPTARG");;
-        ?) echo 'sb [-nxuRW] [-rw [dest-path=]src-path[:overlay]...]... [-rw :path]... [-bB busname]...' \
-            '[-e var[=value]]... [-s namespace]... [-- [bwrap-arg]...] [command [arg]...]' >&2; exit 1;;
+        ?) echo 'sb [-nxuRW] [-rw [dest-path=]src-path[:overlay]...]... [-rw +-path]... [-bB busname]...' \
+            '[-e var[=value]]... [-s namespace]... [--] [command [arg]...]' >&2; exit 1;;
     esac
 done
 shift $((OPTIND - 1))
 
 if [[ -n $bind_args ]]; then
     for arg; do
-        [[ -e $arg ]] && add-mount "$bind_args" :"$arg"
+        [[ -e $arg ]] && add-mount "$bind_args" +"$arg"
     done
 fi
 
@@ -164,6 +165,4 @@ if ((!url_handler)) && [[ -e ~/.config/mimeapps.list ]]; then
 fi
 
 (($#)) || set zsh
-exec bwrap ${!default_args[@]} "${args[@]}" "$@"
-
-# vim: tabstop=4
+exec bwrap ${!default_args[@]} "${args[@]}" -- "$@"

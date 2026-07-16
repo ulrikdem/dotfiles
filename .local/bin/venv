@@ -26,4 +26,4 @@ elif [[ ! -f $venv/pyvenv.cfg ]]; then
 fi
 
 [[ $1 = jupyter-lab ]] && set -- -xur ~/.jupyter/lab/user-settings "$@"
-exec sb -w ":$arg" -w ":$venv" -e VIRTUAL_ENV="$venv" -e PATH="$venv/bin:$PATH" "$@"
+exec sb -w +"$arg" -w +"$venv" -e VIRTUAL_ENV="$venv" -e PATH="$venv/bin:$PATH" "$@"

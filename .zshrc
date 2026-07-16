@@ -245,11 +245,11 @@ function git-files-wrapper {
 function _sb {
     local curcontext=$curcontext state state_descr line
     local -A opt_args
-    _arguments -s -C : -{n,x,u,R,W} '*-'{r,w}'+: :->mount' '*-e: :->var' '*-'{b,B}'+: :->dbus' \
-        '*-s+:namespace:(cgroup ipc net pid user uts)' '*::: :->command' && return
+    _arguments -s -S -C : -{n,x,u,R,W} '*-'{r,w}'+: :->mount' '*-e: :->var' '*-'{b,B}'+: :->dbus' \
+        '*-s+:namespace:(cgroup ipc net pid user uts)' '*:: :_normal -p sb' && return
     case $state in
         mount)
-            if compset -P : || compset -S 1 '=*'; then
+            if compset -P '[+-]' || compset -S 1 '=*'; then
                 _files
             else
                 compset -P '*='
@@ -280,12 +280,6 @@ function _sb {
                 done
             done
             _describe 'dbus name' completions;;
-        command)
-            if [[ $words[1] = -- ]]; then
-                _bwrap
-            else
-                _normal -p sb
-            fi;;
         *)
             return 1;;
     esac
