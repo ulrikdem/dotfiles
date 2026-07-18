@@ -1126,65 +1126,6 @@ nvim_create_user_command("HelpGrep", function(opts)
     quickfix.set_list({loclist_winid = 0, action = "r", items = items})
 end, {nargs = 1})
 
-nvim_create_user_command("Tree", function(opts)
-    local path = vim.fs.abspath(vim.fs.normalize(opts.args))
-    local root = {path = path, children = {}}
-    local queue = {root}
-    local queue_index = 1
-    local count = 0
-    while queue[queue_index] do
-        local current = queue[queue_index]
-        queue_index = queue_index + 1
-        for name, type in vim.fs.dir(current.path) do
-            if count >= 1000 then
-                current.incomplete = true
-                break
-            end
-            count = count + 1
-            table.insert(current.children, {
-                path = vim.fs.joinpath(current.path, name),
-                name = name,
-                type = type,
-                children = {},
-            })
-            if type == "directory" and not vim.startswith(name, ".") then
-                table.insert(queue, current.children[#current.children])
-            end
-        end
-    end
-    local suffixes = {directory = "/", link = "@", fifo = "|", socket = "=", char = "$", block = "#"}
-    local items = {}
-    local index = nil
-    local function walk(dir, indent)
-        for _, child in ipairs(dir.children) do
-            local suffix = suffixes[child.type] or ""
-            table.insert(items, {
-                filename = child.path,
-                text = indent .. child.name .. suffix,
-                valid = true,
-                user_data = {
-                    highlight_ranges = {{#indent + #child.name, #indent + #child.name + #suffix}},
-                },
-            })
-            if vim.fs.relpath(child.path, nvim_buf_get_name(0)) then
-                index = #items
-            end
-            walk(child, indent .. "  ")
-        end
-        if dir.incomplete then
-            table.insert(items, {text = indent .. "truncated"})
-        end
-    end
-    walk(root, "")
-    quickfix.set_list({
-        loclist_winid = 0,
-        title = fn.fnamemodify(path, ":~"),
-        items = items,
-        idx = index,
-        context = {tree_foldlevel = 0},
-    })
-end, {nargs = "?", complete = "dir"})
-
 nvim_create_user_command("Diagnostics", function()
     quickfix.set_list({title = "Diagnostics", items = vim.diagnostic.toqflist(vim.diagnostic.get())})
     _G.diagnostic_qf_id = fn.getqflist({id = 0}).id
@@ -1612,7 +1553,7 @@ for name, params in pairs({
                                 loclist_winid = winid,
                                 title = name,
                                 items = items,
-                                context = {tree_foldlevel = 1, show_filename = true},
+                                context = {tree_foldlevel = 1},
                             })
                         end
                     end, bufnr)
