@@ -1411,6 +1411,12 @@ map("n", "gri", function() lsp.buf.implementation({loclist = true}) end)
 map("n", "grr", function() lsp.buf.references(nil, {loclist = true}) end)
 map("n", "grt", function() lsp.buf.type_definition({loclist = true}) end)
 
+map("n", "gqal", function()
+    return next(lsp.get_clients({bufnr = 0, method = "textDocument/formatting"}))
+        and "<Cmd>lua vim.lsp.buf.format()<CR>"
+        or "gqal"
+end, {expr = true, remap = true})
+
 map("n", "<M-LeftMouse>", "<LeftMouse><Cmd>lua vim.lsp.buf.hover()<CR>")
 map("n", "<M-RightMouse>", "<LeftMouse><Cmd>lua vim.diagnostic.open_float()<CR>")
 
@@ -1708,17 +1714,10 @@ on("LspAttach", {}, function(args)
         end)
     end
 
-    if client:supports_method("textDocument/formatting") then
-        map("n", "gqal", lsp.buf.format, {buf = bufnr})
-    end
-
     on("LspDetach", {buf = bufnr, group = augroup}, function(args)
         if args.data.client_id ~= client.id then return end
         if client:supports_method("textDocument/documentHighlight") then
             lsp.util.buf_clear_references(bufnr)
-        end
-        if client:supports_method("textDocument/formatting") then
-            vim.keymap.del("n", "gqal", {buf = bufnr})
         end
         if client.config.on_detach then client.config.on_detach(client, bufnr) end
         nvim_clear_autocmds({buf = bufnr, group = augroup})
