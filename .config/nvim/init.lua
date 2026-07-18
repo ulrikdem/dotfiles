@@ -835,8 +835,8 @@ do
         return "\27[200~" .. s .. "\27[201~"
     end
 
-    --- @type [integer, integer]?
-    local saved_cursor
+    --- @type vim.fn.winsaveview.ret?
+    local saved_view
 
     --- @param type "buffer" | "char" | "line" | "block"
     function _G.repl_eval(type)
@@ -846,9 +846,9 @@ do
                 type = ({char = "v", line = "V", block = vim.keycode("<C-V>")})[type],
                 exclusive = false,
             })
-            if saved_cursor then
-                nvim_win_set_cursor(0, saved_cursor)
-                saved_cursor = nil -- Don't move cursor again when repeated with .
+            if saved_view then
+                fn.winrestview(saved_view)
+                saved_view = nil -- Don't move cursor again when repeated with .
             end
         end
         local code = vim.iter(lines):map(function(s)
@@ -874,7 +874,7 @@ do
     end
 
     map({"n", "x"}, "<Leader>e", function()
-        saved_cursor = nvim_win_get_cursor(0)
+        saved_view = fn.winsaveview()
         vim.o.operatorfunc = "v:lua.repl_eval"
         return "g@"
     end, {expr = true})
