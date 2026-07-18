@@ -156,10 +156,17 @@ function M.textfunc(args)
             local next_depth = list.items[i + 1]
                 and math.floor(nvim_strwidth(list.items[i + 1].text:match("[  ]*")) / 2) or 0
             data.foldlevel[i] = next_depth > depth and ">" .. next_depth or depth
-            table.insert(highlights, {i - 1, 0, #line, "Normal"}) -- Override syntax and fold highlights
-            local name = vim.fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.")
-            line = line .. " " .. name
-            table.insert(highlights, {i - 1, #line - #name, #line, "NonText"})
+            table.insert(highlights, { -- Override syntax and fold highlights
+                i - 1,
+                0,
+                #line,
+                item.valid ~= 0 and "Normal" or "Comment",
+            })
+            if vim.tbl_get(list, "context", "show_filename") then
+                local name = vim.fn.fnamemodify(nvim_buf_get_name(item.bufnr), ":~:.")
+                line = line .. " " .. name
+                table.insert(highlights, {i - 1, #line - #name, #line, "Comment"})
+            end
         end
 
         table.insert(lines, line)
