@@ -166,8 +166,8 @@ if ((${#policy[@]} || url_handler || ${#port_opts[@]})); then
         mkdir -- "$temp/sockets"
         args+=(--bind "$temp/sockets" "$temp/sockets")
         for ((i = 0; i < ${#port_opts[@]}; ++i)); do
-            listen_cmd=(socat -d0 -0 "${listen_addrs[$i]}" "unix-connect:'$temp/sockets/$i'")
-            connect_cmd=(socat -d0 "unix-listen:'$temp/sockets/$i',fork" "${connect_addrs[$i]}")
+            listen_cmd=(socat -lf "$temp/sockets/log" -0 "${listen_addrs[$i]}" "unix-connect:'$temp/sockets/$i'")
+            connect_cmd=(socat -lf "$temp/sockets/log" "unix-listen:'$temp/sockets/$i',fork" "${connect_addrs[$i]}")
             case ${port_opts[$i]} in
                 p)
                     "${connect_cmd[@]}" &
