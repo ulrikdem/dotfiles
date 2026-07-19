@@ -534,8 +534,8 @@ end)
 
 -- Statusline {{{1
 
-defaults.statusline = " %{v:lua.statusline_git()}%<%{v:lua.statusline_path(0, v:false, v:true)}%( %m%)"
-    .. "%= %{v:lua.statusline_lsp_progress()}%{v:lua.statusline_diagnostics()}%c%V %l/%L "
+defaults.statusline = " %(%{v:lua.statusline_git()}  %)%{v:lua.statusline_path(0, v:false, v:true)}%( %m%) %<%(@%{v:lua.statusline_symbol()} %)"
+    .. "%=%{v:lua.statusline_lsp_progress()}%{v:lua.statusline_diagnostics()}%c%V %l/%L "
 vim.g.qf_disable_statusline = true -- Don't let quickfix ftplugin override statusline
 
 defaults.rulerformat = "%l/%L"
@@ -583,8 +583,13 @@ end
 
 function _G.statusline_git()
     local s = fn.FugitiveStatusline()
-    local match = s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git(:.-)%(.*%)%]$")
-    return match and match .. "  " or ""
+    return s:match("^%[Git%((.*)%)%]$") or s:match("^%[Git(:.-)%(.*%)%]$") or ""
+end
+
+function _G.statusline_symbol()
+    local symbols = symbols_at_cursor()
+    return vim.iter({{name = vim.tbl_get(symbols, 1, "containerName")}, unpack(symbols)})
+        :map(function(s) return s.name end):join("/")
 end
 
 function _G.statusline_diagnostics()
@@ -1480,35 +1485,55 @@ function lsp.util.locations_to_items(locations, position_encoding)
     return items
 end
 
+--- @class lsp.DocumentSymbol
+--- @field start? vim.Pos
+--- @field end_? vim.Pos
+
+--- @class lsp.SymbolInformation
+--- @field start? vim.Pos
+--- @field end_? vim.Pos
+
+--- @type table<integer, (lsp.DocumentSymbol[] | lsp.SymbolInformation[])?>
+_G.buf_symbols = _G.buf_symbols or {}
+
+function _G.symbols_at_cursor()
+    local cursor = vim.pos.cursor(0, nvim_win_get_cursor(0))
+    local symbols = buf_symbols[nvim_get_current_buf()]
+    local result = {} --- @type lsp.DocumentSymbol[] | lsp.SymbolInformation[]
+    while symbols do
+        -- This assumes symbols are sorted (ensured by the textDocument/documentSymbol handler) and
+        -- non-overlapping (which seems reasonable for lsp.DocumentSymbol hierarchies, but not
+        -- lsp.SymbolInformation lists, although all configured servers use the former). If symbols
+        -- are nested, the inner symbol is preferred where applicable, but the outer symbol is
+        -- missed when the cursor is after the end of the inner. For overlapping but non-nested
+        -- symbols, the last one is arbitrarily preferred in the overlapping range. This preference
+        -- is determined by the choice to sort by start, which gives the best order for the gO list
+        local i = vim.list.bisect(symbols, cursor, {
+            key = function(s) return s.start end,
+            bound = "upper",
+        }) - 1
+        if not (symbols[i] and cursor < symbols[i].end_) then
+            break
+        end
+        table.insert(result, symbols[i])
+        symbols = symbols[i].children
+    end
+    return result
+end
+
 map("n", "gO", function()
     local bufnr = nvim_get_current_buf()
-    local winid = nvim_get_current_win()
-    local cursor = nvim_win_get_cursor(0)
-    local line = nvim_buf_get_lines(0, cursor[1] - 1, cursor[1], true)[1]
-    lsp.buf_request_all(
-        bufnr,
-        "textDocument/documentSymbol",
-        {textDocument = lsp.util.make_text_document_params()},
-        function(results)
-            local items = {}
-            local cursor_index = nil
-            for client_id, result in pairs(results) do
-                if result.err then
-                    return vim.notify(tostring(result.err), vim.log.levels.ERROR)
-                end
-                cursor_index = quickfix.from_lsp_symbols(result.result, items, bufnr, {
-                    line = cursor[1] - 1,
-                    character = vim.str_utfindex(line, lsp.get_client_by_id(client_id).offset_encoding, cursor[2]),
-                }) or cursor_index
-            end
-            quickfix.set_list({
-                loclist_winid = winid,
-                title = "Symbols",
-                items = items,
-                idx = cursor_index,
-                context = {tree_foldlevel = 0},
-            })
-        end)
+    local symbols = buf_symbols[bufnr] or {}
+    local cursor_symbols = symbols_at_cursor()
+    local items = {}
+    local index = quickfix.from_lsp_symbols(symbols, items, bufnr, cursor_symbols[#cursor_symbols])
+    quickfix.set_list({
+        loclist_winid = 0,
+        title = "Symbols",
+        items = items,
+        idx = index,
+        context = {tree_foldlevel = 0},
+    })
 end)
 
 for name, params in pairs({
@@ -1520,7 +1545,7 @@ for name, params in pairs({
     nvim_create_user_command(name, function()
         local bufnr = nvim_get_current_buf()
         local winid = nvim_get_current_win()
-        vim.lsp.buf_request_all(bufnr, params[1], function(client)
+        lsp.buf_request_all(bufnr, params[1], function(client)
             return lsp.util.make_position_params(winid, client.offset_encoding)
         end, function(results)
             --- @class hierarchy_item: lsp.CallHierarchyItem
@@ -1649,8 +1674,8 @@ function _G.modify_lsp_response(config, method, modifier)
     config.response_modifiers[method] = modifier
 end
 
-_G.old_client_request = old_client_request or vim.lsp.client.request
-function vim.lsp.client.request(self, method, params, handler, bufnr)
+_G.old_client_request = old_client_request or lsp.client.request
+function lsp.client.request(self, method, params, handler, bufnr)
     local modifier = vim.tbl_get(self.config, "response_modifiers", method)
     if modifier and handler then
         local old_handler = handler
@@ -1690,6 +1715,37 @@ on("LspAttach", {}, function(args)
         })
     end
 
+    if client:supports_method("textDocument/documentSymbol") then
+        on("LspNotify", {buf = bufnr, group = augroup}, function(args)
+            if (args.data.method == "textDocument/didOpen" or args.data.method == "textDocument/didChange")
+                    and args.data.client_id == client.id then
+                client:request(
+                    "textDocument/documentSymbol",
+                    {textDocument = lsp.util.make_text_document_params()},
+                    function(err, symbols)
+                        if err then lsp.log.error(client.name, tostring(err)) end
+                        buf_symbols[bufnr] = symbols
+                        local stack = {symbols}
+                        while next(stack) do
+                            symbols = table.remove(stack) --- @type lsp.DocumentSymbol[] | lsp.SymbolInformation[]
+                            for _, symbol in ipairs(symbols) do
+                                local range = symbol.range or symbol.location.range
+                                -- This should use vim.pos.lsp() for correctness, but currently it can raise
+                                -- an index out of bounds error if the text has changed (fixed for nvim 0.13)
+                                symbol.start = vim.pos(bufnr, range.start.line, range.start.character)
+                                symbol.end_ = vim.pos(bufnr, range["end"].line, range["end"].character)
+                                table.insert(stack, symbol.children)
+                            end
+                            table.sort(symbols, function(a, b)
+                                return a.start < b.start or a.start == b.start and a.end_ < b.end_
+                            end)
+                        end
+                    end,
+                    bufnr)
+            end
+        end)
+    end
+
     if client:supports_method("textDocument/documentHighlight") then
         local timer = vim.uv.new_timer() --[[ @as uv.uv_timer_t ]]
         on({"CursorMoved", "ModeChanged", "BufLeave"}, {buf = bufnr, group = augroup}, function(args)
@@ -1716,6 +1772,9 @@ on("LspAttach", {}, function(args)
 
     on("LspDetach", {buf = bufnr, group = augroup}, function(args)
         if args.data.client_id ~= client.id then return end
+        if client:supports_method("textDocument/documentSymbol") then
+            buf_symbols[bufnr] = nil
+        end
         if client:supports_method("textDocument/documentHighlight") then
             lsp.util.buf_clear_references(bufnr)
         end

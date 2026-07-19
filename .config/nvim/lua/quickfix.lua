@@ -293,11 +293,11 @@ end
 --- @param symbols lsp.SymbolInformation[] | lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.CallHierarchyItem[] | lsp.TypeHierarchyItem[]
 --- @param items vim.quickfix.entry[]
 --- @param bufnr? integer
---- @param cursor? lsp.Position
+--- @param current? lsp.SymbolInformation | lsp.DocumentSymbol | lsp.WorkspaceSymbol | lsp.CallHierarchyItem | lsp.TypeHierarchyItem
 --- @return integer?
-function M.from_lsp_symbols(symbols, items, bufnr, cursor)
+function M.from_lsp_symbols(symbols, items, bufnr, current)
     local ancestors = {}
-    local cursor_index = nil
+    local current_index = nil
 
     --- @param symbols lsp.SymbolInformation[] | lsp.DocumentSymbol[] | lsp.WorkspaceSymbol[] | lsp.CallHierarchyItem[] | lsp.TypeHierarchyItem[]
     --- @param depth integer
@@ -319,12 +319,8 @@ function M.from_lsp_symbols(symbols, items, bufnr, cursor)
                     container_names = symbol.containerName and {symbol.containerName} or container_names,
                 },
             })
-            range = symbol.range or symbol.location.range
-            if cursor
-                and (cursor.line > range.start.line or cursor.line == range.start.line and cursor.character >= range.start.character)
-                and (cursor.line < range["end"].line or cursor.line == range["end"].line and cursor.character < range["end"].character)
-            then
-                cursor_index = #items
+            if symbol == current then
+                current_index = #items
             end
             if symbol.children and not ancestors[symbol] then
                 ancestors[symbol] = true
@@ -335,7 +331,7 @@ function M.from_lsp_symbols(symbols, items, bufnr, cursor)
     end
 
     inner(symbols, 0, {})
-    return cursor_index
+    return current_index
 end
 
 return M
