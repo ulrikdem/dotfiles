@@ -132,6 +132,40 @@ map("x", "<M-Right>", "]n", {remap = true})
 map("x", "<M-S-Left>", "[N", {remap = true})
 map("x", "<M-S-Right>", "]N", {remap = true})
 
+map({"n", "x"}, "<Leader>s", function()
+    vim.o.operatorfunc = "v:lua.swap_operator"
+    return "g@"
+end, {expr = true})
+map("n", "<Leader>ss", "<Leader>s_", {remap = true})
+function _G.swap_operator(type)
+    local start1 = vim.pos.cursor(0, nvim_buf_get_mark(0, "["))
+    local end1 = vim.pos.cursor(0, nvim_buf_get_mark(0, "]"))
+    end1 = vim.pos(0, end1.row, end1.col + 1)
+    if type == "line" then
+        start1 = vim.pos(0, start1.row, 0)
+        end1 = vim.pos(0, end1.row, #nvim_buf_get_lines(0, end1.row, end1.row + 1, true)[1])
+    end
+    local ns = nvim_create_namespace("swap_operator")
+    local extmark = nvim_buf_get_extmark_by_id(0, ns, 1, {details = true})
+    if not next(extmark) then
+        nvim_buf_set_extmark(0, ns, start1.row, start1.col,
+            {id = 1, end_row = end1.row, end_col = end1.col, hl_group = "Substitute"})
+        return
+    end
+    nvim_buf_del_extmark(0, ns, 1)
+    local start2 = vim.pos(0, extmark[1], extmark[2])
+    local end2 = vim.pos(0, extmark[3].end_row, extmark[3].end_col)
+    if start1 < end2 and start2 < end1 then
+        return vim.notify("ranges intersect", vim.log.levels.ERROR)
+    elseif start1 > start2 then
+        start1, end1, start2, end2 = start2, end2, start1, end1
+    end
+    local text1 = nvim_buf_get_text(0, start1.row, start1.col, end1.row, end1.col, {})
+    local text2 = nvim_buf_get_text(0, start2.row, start2.col, end2.row, end2.col, {})
+    nvim_buf_set_text(0, start2.row, start2.col, end2.row, end2.col, text1)
+    nvim_buf_set_text(0, start1.row, start1.col, end1.row, end1.col, text2)
+end
+
 map({"i", "s"}, "<C-l>", function() vim.snippet.jump(1) end)
 map({"i", "s"}, "<C-h>", function() vim.snippet.jump(-1) end)
 
