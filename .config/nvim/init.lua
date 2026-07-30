@@ -147,16 +147,13 @@ function _G.swap_operator(type)
     end
     local ns = nvim_create_namespace("swap_operator")
     local extmark = nvim_buf_get_extmark_by_id(0, ns, 1, {details = true})
-    if not next(extmark) then
+    nvim_buf_del_extmark(0, ns, 1)
+    local start2 = next(extmark) and vim.pos(0, extmark[1], extmark[2])
+    local end2 = next(extmark) and vim.pos(0, extmark[3].end_row, extmark[3].end_col)
+    if not (start2 and end2) or start1 < end2 and start2 < end1 then
         nvim_buf_set_extmark(0, ns, start1.row, start1.col,
             {id = 1, end_row = end1.row, end_col = end1.col, hl_group = "Substitute"})
         return
-    end
-    nvim_buf_del_extmark(0, ns, 1)
-    local start2 = vim.pos(0, extmark[1], extmark[2])
-    local end2 = vim.pos(0, extmark[3].end_row, extmark[3].end_col)
-    if start1 < end2 and start2 < end1 then
-        return vim.notify("ranges intersect", vim.log.levels.ERROR)
     elseif start1 > start2 then
         start1, end1, start2, end2 = start2, end2, start1, end1
     end
