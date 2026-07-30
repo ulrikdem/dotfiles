@@ -3,9 +3,10 @@ Config
     , fgColor = "gray50"
     , commands =
         [ Run DynNetwork
-            [ "-t", " <fn=1>󰇚</fn> <rx> <fn=1>󰕒</fn> <tx> <fc=gray33>KB/s</fc> <fc=gray17>│</fc>"
+            [ "-t", " <fn=1>󰕒</fn> <fn=2><fc=gray50,gray17><txvbar></fc></fn> <fn=1>󰇚</fn> <fn=2><fc=gray50,gray17><rxvbar></fc></fn> <fc=gray17>│</fc>"
+            , "-W", "36"
+            , "-H", "272182675"
             , "-L", "0"
-            , "-l", "gray33"
             ] 10
         , Run Wireless ""
             [ "-t", " <fn=1><qualitybar></fn> <fc=gray17>│</fc>"
@@ -27,7 +28,8 @@ Config
             [ "-t", " <fn=1></fn> <fn=2><fc=gray50,gray17><vbar></fc></fn>"
             ] 10
         , Run CpuFreq
-            [ "-t", " <max><fc=gray33>GHz</fc> <fc=gray17>│</fc>"
+            -- [ "-t", " <max><fc=gray33>GHz</fc> <fc=gray17>│</fc>"
+            [ "-t", " <max><fc=gray33>G</fc> <fc=gray17>│</fc>"
             , "-d", "1"
             ] 10
         , Run ComX "bash"
