@@ -31,7 +31,7 @@ iconQuery = composeOne
         , title $? " - nvim" -?> return "\xf36f" -- 
         , return $ Just "\xe795" -- 
         ]
-    , className =? "Evince" <||> className =? "Zathura" -?> return "\xf0219" -- 󰈙
+    , className =? "Evince" <||> className =? "org.pwmt.zathura" -?> return "\xf0219" -- 󰈙
     , className =? "firefox" -?> return "\xf0239" -- 󰈹
     , className =? "Gimp" -?> return "\xf338" -- 
     , className ^? "libreoffice" <||> className =? "Soffice" -?> return "\xf0214" -- 󰈔
