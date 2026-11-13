@@ -172,7 +172,7 @@ floatManageHook textHeight = composeAll
     [ appName =? "xmonad-scratchpad" --> ask >>= liftX . addTag "scratchpad" >> manageCustomFloat textHeight
     , appName =? "xmonad-custom-float" --> manageCustomFloat textHeight
     , placeHook $ fixed (0.5, 0.5)
-    , appName =? "xmonad-float" --> doFloat
+    , appName =? "xmonad-float" <||> className =? "gxmessage" --> doFloat
     ]
 
 manageCustomFloat textHeight = do
