@@ -140,7 +140,7 @@ map("n", "<Leader>ss", "<Leader>s_", {remap = true})
 function _G.swap_operator(type)
     local start1 = vim.pos.cursor(0, nvim_buf_get_mark(0, "["))
     local end1 = vim.pos.cursor(0, nvim_buf_get_mark(0, "]"))
-    end1 = vim.pos(0, end1.row, end1.col + 1)
+    end1.col = end1.col + 1
     if type == "line" then
         start1 = vim.pos(0, start1.row, 0)
         end1 = vim.pos(0, end1.row, #nvim_buf_get_lines(0, end1.row, end1.row + 1, true)[1])
