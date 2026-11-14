@@ -235,15 +235,17 @@ for sign, bracket in pairs({[-1] = "[", [1] = "]"}) do
     map("n", bracket .. "E", function()
         fn["repeat#set"](bracket .. "E")
         local current_line = nvim_get_current_line()
-        local lnum = nvim_win_get_cursor(0)[1]
-        while true do
+        local init_lnum = nvim_win_get_cursor(0)[1]
+        local lnum = init_lnum
+        repeat
             lnum = lnum + sign
             local line = nvim_buf_get_lines(0, lnum - 1, lnum, false)[1]
-            if not line or line == "" or vim.stricmp(current_line, line) ~= sign then
-                vim.cmd.move({lnum - (sign + 1) / 2, range = {nvim_win_get_cursor(0)[1]}})
-                return
-            end
-        end
+        until not line or line == "" or vim.stricmp(current_line, line) ~= sign
+        vim.cmd.move({lnum - (sign + 1) / 2, range = {init_lnum}})
+        local cursor = nvim_win_get_cursor(0)
+        nvim_win_set_cursor(0, {init_lnum, 0})
+        vim.cmd("normal! m'")
+        nvim_win_set_cursor(0, cursor)
     end)
 end
 
