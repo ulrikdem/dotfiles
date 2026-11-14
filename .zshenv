@@ -27,7 +27,7 @@ export CMAKE_EXPORT_COMPILE_COMMANDS=ON
 type ninja >/dev/null && export CMAKE_GENERATOR=Ninja
 
 [[ -f ~/.config/dconf/profile ]] && export DCONF_PROFILE=~/.config/dconf/profile
-export ADW_DISABLE_PORTAL=1
+export ADW_DISABLE_PORTAL=1 GDK_DEBUG=no-portals GTK_A11Y=none
 
 : ${__GLX_VENDOR_LIBRARY_NAME:=mesa} ${__EGL_VENDOR_LIBRARY_FILENAMES:=/usr/share/glvnd/egl_vendor.d/50_mesa.json} ${VK_LOADER_DRIVERS_DISABLE:=nvidia_icd.json}
 export __GLX_VENDOR_LIBRARY_NAME __EGL_VENDOR_LIBRARY_FILENAMES VK_LOADER_DRIVERS_DISABLE
